@@ -103,7 +103,7 @@ private:
 	//static ID3D12RootSignature* rootsignature;
 
 	//ヒープ領域
-	//static ID3D12DescriptorHeap* materialDescHeap;
+	static ID3D12DescriptorHeap* materialDescHeap;
 
 	//マテリアル
 	std::vector<Material>materials;
@@ -120,6 +120,10 @@ private:
 	static std::vector<unsigned short> indices;
 
 	static PMDHeader pmdheader;
+
+	static TexMetadata metadata;
+	static ScratchImage scratchImg;
+
 private:
 	//モデルのパスとテクスチャのパスから合成パスを得る
 //@param modelpath アプリケーションから見たpmdモデルのパス
@@ -162,9 +166,6 @@ private:
 
 	static ID3D12Resource* LoadTextureFromFile(string& texPath)
 	{
-		TexMetadata metadata = {};
-		ScratchImage scratchImg = {};
-
 		auto result = LoadFromWICFile(
 			GetWideStringFromString(texPath).c_str(),
 			DirectX::WIC_FLAGS_NONE, &metadata, scratchImg);
@@ -357,7 +358,8 @@ public:
 	ID3D12DescriptorHeap* DescHeap() { return descHeap.Get(); }
 	D3D12_VERTEX_BUFFER_VIEW VbView() { return vbView; }
 	D3D12_INDEX_BUFFER_VIEW IbView() { return ibView; }
+	std::vector<Material> Materials() { return materials;}
 
 public://メンバ変数
-	ComPtr<ID3D12Resource> PMDconstBuffB1; // 定数バッファ
+	ComPtr<ID3D12Resource> PMDconstBuffB0; // 定数バッファ
 };

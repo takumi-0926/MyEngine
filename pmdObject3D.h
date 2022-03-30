@@ -7,7 +7,7 @@
 
 #include "baseObject.h"
 
-class PMDmodel : BaseObject{
+class PMDobject : BaseObject{
 private: // エイリアス
 	// Microsoft::WRL::を省略
 	template <class T> using ComPtr = Microsoft::WRL::ComPtr<T>;
@@ -89,11 +89,11 @@ public:
 	/// モデル生成
 	/// </summary>
 	/// <returns></returns>
-	static PMDmodel* Create();
+	static PMDobject* Create();
 
 public:
 	//モデルセット
-	void SetModel(PMDmodel* model);
+	void SetModel(PMDobject* model);
 	//初期化
 	bool Initialize();
 	//更新

@@ -164,6 +164,7 @@
     <ClCompile Include="object3D.cpp" />
     <ClCompile Include="pipelineSet.cpp" />
     <ClCompile Include="PMDmodel.cpp" />
+    <ClCompile Include="pmdObject3D.cpp" />
     <ClCompile Include="sprite.cpp" />
   </ItemGroup>
   <ItemGroup>

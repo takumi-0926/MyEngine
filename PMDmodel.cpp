@@ -5,6 +5,7 @@
 #include<fstream>
 #include<sstream>
 #include<vector>
+#include "pmdObject3D.h"
 
 #pragma comment(lib, "d3dcompiler.lib")
 
@@ -12,39 +13,22 @@ using namespace DirectX;
 using namespace Microsoft::WRL;
 using namespace std;
 
-//ID3D12Device* PMDmodel::device = nullptr;
-//ID3D12GraphicsCommandList* PMDmodel::cmdList = nullptr;
-ComPtr<ID3D12DescriptorHeap> PMDmodel::descHeap;
-
+//静的メンバの実体
+ID3D12Device* PMDmodel::device = nullptr;
+//デスクリプタサイズ
 UINT PMDmodel::descriptorHandleIncrementSize;
+//コマンドリスト
+//ID3D12GraphicsCommandList* PMDmodel::cmdList = nullptr;
+//デスクリプタヒープ
+ComPtr<ID3D12DescriptorHeap> PMDmodel::descHeap;
+//PMDヘッダ
 PMDmodel::PMDHeader PMDmodel::pmdheader;
-//ID3D12DescriptorHeap* PMDmodel::materialDescHeap = nullptr;
 
-//ID3D12RootSignature* PMDmodel::rootsignature = nullptr;
-
-PMDmodel::PMDmodel()
+PMDmodel* PMDmodel::Create() 
 {
-}
-
-PMDmodel* PMDmodel::Create() {
 	PMDmodel* pModel = new PMDmodel();
-	if (pModel == nullptr) {
-		return nullptr;
-	}
-
-	//すけーるをセット
-	//float scale_val = 20;
-	//pModel->scale = { scale_val,scale_val ,scale_val };
-
-	// 初期化
-	if (!pModel->Initialize()) {
-		delete pModel;
-		assert(0);
-		return nullptr;
-	}
 
 	return pModel;
-
 }
 
 bool PMDmodel::StaticInitialize(ID3D12Device* device)
@@ -63,26 +47,77 @@ bool PMDmodel::StaticInitialize(ID3D12Device* device)
 	return true;
 }
 
-bool PMDmodel::InitializeDescriptorHeap()
+bool PMDmodel::Initialize()
 {
-	HRESULT result = S_FALSE;
+	// nullptrチェック
+	assert(device);
 
-	// デスクリプタヒープを生成	
-	D3D12_DESCRIPTOR_HEAP_DESC descheapDesc = {};
-	descheapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-	descheapDesc.NodeMask = 0;
-	descheapDesc.NumDescriptors = 2;
-	descheapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-	result = device->CreateDescriptorHeap(&descheapDesc, IID_PPV_ARGS(&descHeap));//生成
+	//HRESULT result;
+	//// 定数バッファの生成
+	//result = _dev->CreateCommittedResource(
+	//	&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD), 	// アップロード可能
+	//	D3D12_HEAP_FLAG_NONE,
+	//	&CD3DX12_RESOURCE_DESC::Buffer((sizeof(MatricesData) + 0xff) & ~0xff),
+	//	D3D12_RESOURCE_STATE_GENERIC_READ,
+	//	nullptr,
+	//	IID_PPV_ARGS(&PMDconstBuffB1));
+
+	//マテリアルバッファの作成
+	auto materiaBuffSize = sizeof(MaterialForHlsl);
+	materiaBuffSize = (materiaBuffSize + 0xff) & ~0xff;
+
+	HRESULT result;
+
+	result = device->CreateCommittedResource(
+		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+		D3D12_HEAP_FLAG_NONE,
+		&CD3DX12_RESOURCE_DESC::Buffer(materiaBuffSize * materialNum),//メモリがもったいない
+		D3D12_RESOURCE_STATE_GENERIC_READ,
+		nullptr,
+		IID_PPV_ARGS(&materialBuff));
 	if (FAILED(result)) {
 		assert(0);
-		return false;
 	}
 
-	// デスクリプタサイズを取得
-	descriptorHandleIncrementSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-
 	return true;
+}
+
+void PMDmodel::Update()
+{
+	//MatricesData* mapmatrix;
+	//HRESULT result;
+
+	//result = PMDconstBuffB1->Map(0, nullptr, (void**)&mapmatrix);//マップ
+
+	//mapmatrix->world = worldMat;
+	//mapmatrix->viewproj = viewMat * projMat;
+}
+
+void PMDmodel::Draw(ID3D12GraphicsCommandList* cmdList)
+{
+	// nullptrチェック
+	assert(device);
+	assert(cmdList);
+
+	//cmdList->SetGraphicsRootSignature(rootsignature);
+	cmdList->SetGraphicsRootConstantBufferView(0, PMDconstBuffB0->GetGPUVirtualAddress());//本来のやり方ではないよー
+	//_cmdList->SetDescriptorHeaps(1, &basicDescHeap);
+	//_cmdList->SetGraphicsRootDescriptorTable(0, basicDescHeap->GetGPUDescriptorHandleForHeapStart());
+
+	cmdList->SetDescriptorHeaps(1, &materialDescHeap);
+	auto materialH = materialDescHeap->GetGPUDescriptorHandleForHeapStart();
+	//unsigned int idxOffset = 0;
+	//auto cbvsrvIncSize = _dev->GetDescriptorHandleIncrementSize(
+	//	D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) * 4;
+	//for (auto& m : materials) {
+
+	//	cmdList->SetGraphicsRootDescriptorTable(1, materialH);
+	//	cmdList->DrawIndexedInstanced(m.indicesNum, 1, idxOffset, 0, 0);
+
+	//	//ヒープポインターとインデックスを次に進める
+	//	materialH.ptr += cbvsrvIncSize;
+	//	idxOffset += m.indicesNum;
+	//}
 }
 
 void PMDmodel::CreateModel(const std::string& strModelPath)
@@ -280,7 +315,7 @@ void PMDmodel::CreateModel(const std::string& strModelPath)
 
 	matDescHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 	result = device->CreateDescriptorHeap(
-		&matDescHeapDesc, IID_PPV_ARGS(&descHeap));
+		&matDescHeapDesc, IID_PPV_ARGS(&materialDescHeap));
 
 	D3D12_CONSTANT_BUFFER_VIEW_DESC matCBVDesc = {};
 	matCBVDesc.BufferLocation = materialBuff->GetGPUVirtualAddress();
@@ -294,58 +329,86 @@ void PMDmodel::CreateModel(const std::string& strModelPath)
 	srvDesc.Texture2D.MipLevels = 1;//ミップマップは使用しない
 
 	//先頭を記録
-	auto matDescHeapH = descHeap->GetCPUDescriptorHandleForHeapStart();
+	//auto cpuDescHandleSRV = materialDescHeap->GetCPUDescriptorHandleForHeapStart();
+	cpuDescHandleSRV = materialDescHeap->GetCPUDescriptorHandleForHeapStart();
+	gpuDescHandleSRV = materialDescHeap->GetGPUDescriptorHandleForHeapStart();
 
 	auto inc = device->GetDescriptorHandleIncrementSize(
 		D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	for (int i = 0; i < materialNum; ++i) {
 		//マテリアル用定数バッファビュー
-		device->CreateConstantBufferView(&matCBVDesc, matDescHeapH);
-		matDescHeapH.ptr += inc;
+		device->CreateConstantBufferView(&matCBVDesc, cpuDescHandleSRV);
+		cpuDescHandleSRV.ptr += inc;
 		matCBVDesc.BufferLocation += materiaBuffSize;
 
 		//シェーダーリソースビュー
 		if (textureResources[i] == nullptr) {
 			srvDesc.Format = CreateWhiteTexture()->GetDesc().Format;
 			device->CreateShaderResourceView(
-				CreateWhiteTexture(), &srvDesc, matDescHeapH);
+				CreateWhiteTexture(), &srvDesc, cpuDescHandleSRV);
 		}
 		else {
 			srvDesc.Format = textureResources[i]->GetDesc().Format;
 			device->CreateShaderResourceView(
-				textureResources[i], &srvDesc, matDescHeapH);
+				textureResources[i], &srvDesc, cpuDescHandleSRV);
 		}
-		matDescHeapH.ptr += inc;
+		cpuDescHandleSRV.ptr += inc;
 
 		//乗算スフィアマップ用ビュー
 		if (sphResources[i] == nullptr) {
 			srvDesc.Format = CreateWhiteTexture()->GetDesc().Format;
 			device->CreateShaderResourceView(
-				CreateWhiteTexture(), &srvDesc, matDescHeapH);
+				CreateWhiteTexture(), &srvDesc, cpuDescHandleSRV);
 		}
 		else {
 			srvDesc.Format = sphResources[i]->GetDesc().Format;
 			device->CreateShaderResourceView(
-				sphResources[i], &srvDesc, matDescHeapH);
+				sphResources[i], &srvDesc, cpuDescHandleSRV);
 		}
-		matDescHeapH.ptr += inc;
+		cpuDescHandleSRV.ptr += inc;
 
 		//加算スフィアマップ用ビュー
 		if (spaResources[i] == nullptr) {
 			srvDesc.Format = CreateBlackTexture()->GetDesc().Format;
 			device->CreateShaderResourceView(
-				CreateBlackTexture(), &srvDesc, matDescHeapH);
+				CreateBlackTexture(), &srvDesc, cpuDescHandleSRV);
 		}
 		else {
 			srvDesc.Format = spaResources[i]->GetDesc().Format;
 			device->CreateShaderResourceView(
-				spaResources[i], &srvDesc, matDescHeapH);
+				spaResources[i], &srvDesc, cpuDescHandleSRV);
 		}
-		matDescHeapH.ptr += inc;
+		cpuDescHandleSRV.ptr += inc;
 
 	}
 
 	fclose(fp);//ファイルを閉じる
+}
+
+bool PMDmodel::InitializeDescriptorHeap()
+{
+	HRESULT result = S_FALSE;
+
+	// デスクリプタヒープを生成	
+	D3D12_DESCRIPTOR_HEAP_DESC descheapDesc = {};
+	descheapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+	descheapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+	descheapDesc.NodeMask = 0;
+	descheapDesc.NumDescriptors = 2;
+	result = device->CreateDescriptorHeap(&descheapDesc, IID_PPV_ARGS(&descHeap));//生成
+	if (FAILED(result)) {
+		assert(0);
+		return false;
+	}
+
+	// デスクリプタサイズを取得
+	descriptorHandleIncrementSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+
+	return true;
+}
+
+PMDmodel::PMDmodel()
+{
 }
 
 //bool PMDmodel::InitializeGraphicsPipeline()
@@ -582,40 +645,6 @@ void PMDmodel::CreateModel(const std::string& strModelPath)
 //	return true;
 //}
 
-bool PMDmodel::Initialize()
-{
-	// nullptrチェック
-	assert(device);
-
-	//HRESULT result;
-	//// 定数バッファの生成
-	//result = _dev->CreateCommittedResource(
-	//	&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD), 	// アップロード可能
-	//	D3D12_HEAP_FLAG_NONE,
-	//	&CD3DX12_RESOURCE_DESC::Buffer((sizeof(MatricesData) + 0xff) & ~0xff),
-	//	D3D12_RESOURCE_STATE_GENERIC_READ,
-	//	nullptr,
-	//	IID_PPV_ARGS(&PMDconstBuffB1));
-
-	//マテリアルバッファの作成
-	auto materiaBuffSize = sizeof(MaterialForHlsl);
-	materiaBuffSize = (materiaBuffSize + 0xff) & ~0xff;
-
-	HRESULT result;
-
-	result = device->CreateCommittedResource(
-		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
-		D3D12_HEAP_FLAG_NONE,
-		&CD3DX12_RESOURCE_DESC::Buffer(materiaBuffSize * materialNum),//メモリがもったいない
-		D3D12_RESOURCE_STATE_GENERIC_READ,
-		nullptr,
-		IID_PPV_ARGS(&materialBuff));
-	if (FAILED(result)) {
-		assert(0);
-	}
-
-	return true;
-}
 
 //void PMDmodel::preDraw(ID3D12GraphicsCommandList* cmdList)
 //{
@@ -629,35 +658,6 @@ bool PMDmodel::Initialize()
 //	cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 //}
 
-void PMDmodel::Draw(ID3D12GraphicsCommandList* cmdList)
-{
-	// nullptrチェック
-	assert(device);
-	assert(cmdList);
-
-	//cmdList->IASetVertexBuffers(0, 1, &vbView);
-	//cmdList->IASetIndexBuffer(&ibView);
-
-	//cmdList->SetGraphicsRootSignature(rootsignature);
-	cmdList->SetGraphicsRootConstantBufferView(0, PMDconstBuffB1->GetGPUVirtualAddress());//本来のやり方ではないよー
-	//_cmdList->SetDescriptorHeaps(1, &basicDescHeap);
-	//_cmdList->SetGraphicsRootDescriptorTable(0, basicDescHeap->GetGPUDescriptorHandleForHeapStart());
-
-	//cmdList->SetDescriptorHeaps(1, &materialDescHeap);
-	//auto materialH = descHeap->GetGPUDescriptorHandleForHeapStart();
-	//unsigned int idxOffset = 0;
-	//auto cbvsrvIncSize = _dev->GetDescriptorHandleIncrementSize(
-	//	D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) * 4;
-	//for (auto& m : materials) {
-
-	//	cmdList->SetGraphicsRootDescriptorTable(1, materialH);
-	//	cmdList->DrawIndexedInstanced(m.indicesNum, 1, idxOffset, 0, 0);
-
-	//	//ヒープポインターとインデックスを次に進める
-	//	materialH.ptr += cbvsrvIncSize;
-	//	idxOffset += m.indicesNum;
-	//}
-}
 
 //void PMDmodel::postDraw()
 //{
@@ -665,14 +665,4 @@ void PMDmodel::Draw(ID3D12GraphicsCommandList* cmdList)
 //	PMDmodel::cmdList = nullptr;
 //}
 
-void PMDmodel::Update()
-{
-	//MatricesData* mapmatrix;
-	//HRESULT result;
-
-	//result = PMDconstBuffB1->Map(0, nullptr, (void**)&mapmatrix);//マップ
-
-	//mapmatrix->world = worldMat;
-	//mapmatrix->viewproj = viewMat * projMat;
-}
 

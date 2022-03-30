@@ -440,15 +440,6 @@ void Object3Ds::Update()
 	constMap->world = matWorld;
 	constMap->cameraPos = cameraPos;
 	constBuffB0->Unmap(0, nullptr);
-
-	////// 定数バッファへデータ転送(PMD)
-	////ConstBufferDataB0* pConstMap = nullptr;
-	////result = PMDconstBuffB0->Map(0, nullptr, (void**)&pConstMap);
-	////pConstMap->viewproj = matProjection;
-	////pConstMap->world = matWorld;
-	////pConstMap->cameraPos = cameraPos;
-	////PMDconstBuffB0->Unmap(0, nullptr);
-	////model->Update();
 }
 
 void Object3Ds::Draw()

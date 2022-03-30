@@ -125,10 +125,9 @@ public:
 	//	Object3Ds::camera = camera;
 	//}
 
-	//void SetPosition(XMFLOAT3 position) {
-	//	this->position = position;
-	//}
-
+	void SetPosition(XMFLOAT3 position) {
+		this->position = position;
+	}
 public:
 	////パイプライン生成
 	//PipelineSet CreatePipeline();

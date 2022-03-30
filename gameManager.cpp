@@ -1,4 +1,5 @@
 #include "gameManager.h"
+#include "baseObject.h"
 
 GameManager::GameManager()
 {
@@ -36,7 +37,7 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 
 	//カメラをセット
 	camera = new DebugCamera(Application::window_width, Application::window_height, input);
-	Object3Ds::SetCamera(camera);
+	BaseObject::SetCamera(camera);
 
 	model01 = Model::Create();
 	model01->CretaeFromObj("Block");
@@ -50,8 +51,8 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	obj01->Update();
 	obj01->scale = { 1,1,1 };
 
-	pModel = PMDmodel::Create();
-	pModel->CreateModel("Resources/Model/初音ミクmetal.pmd");
+	//pModel = PMDmodel::Create();
+	//pModel->CreateModel("Resources/Model/初音ミクmetal.pmd");
 
 	sprite01 = Sprite::Create(0, { 0.0f,0.0f,0.0f });
 	sprite02 = Sprite::Create(1, { 0.0f,0.0f,0.0f });
@@ -255,17 +256,17 @@ void GameManager::Draw()
 	//深度バッファクリア
 	dx12->ClearDepthBuffer();
 
-	PMDmodel::preDraw(cmdList);
+	//PMDmodel::PreDraw(cmdList);
 
-	pModel->Draw();
+	//pModel->Draw();
 
-	PMDmodel::postDraw();
+	//PMDmodel::postDraw();
 
-	Object3Ds::PreDraw(cmdList);
+	BaseObject::PreDraw(cmdList);
 
 	obj01->Draw();
 
-	Object3Ds::PostDraw();
+	BaseObject::PostDraw();
 
 	if (SceneNum == TITLE) {
 		Sprite::PreDraw(cmdList);
@@ -281,11 +282,11 @@ void GameManager::Draw()
 		//// 深度バッファクリア
 		//dx12->ClearDepthBuffer();
 
-		Object3Ds::PreDraw(cmdList);
+		BaseObject::PreDraw(cmdList);
 
 		obj01->Draw();
 
-		Object3Ds::PostDraw();
+		BaseObject::PostDraw();
 
 	}
 	else if (SceneNum == GAME) {
@@ -299,7 +300,7 @@ void GameManager::Draw()
 		dx12->ClearDepthBuffer();
 
 		//オブジェクトの描画
-		Object3Ds::PreDraw(cmdList);
+		BaseObject::PreDraw(cmdList);
 		obj01->Draw();
 
 		for (int i = 0; i < 24; i++) {
@@ -314,7 +315,7 @@ void GameManager::Draw()
 			}
 		}
 
-		Object3Ds::PostDraw();
+		BaseObject::PostDraw();
 	}
 	else if (SceneNum == END) {
 		Sprite::PreDraw(cmdList);
