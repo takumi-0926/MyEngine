@@ -39,26 +39,30 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	camera = new DebugCamera(Application::window_width, Application::window_height, input);
 	BaseObject::SetCamera(camera);
 
-	model01 = Model::Create();
-	model01->CretaeFromObj("Block");
-	model02 = Model::Create();
-	model02->CretaeFromObj("combere");
-	model03 = Model::Create();
-	model03->CretaeFromObj("untitled");
+	//model01 = Model::Create();
+	//model01->CretaeFromObj("Block");
+	//model02 = Model::Create();
+	//model02->CretaeFromObj("combere");
+	//model03 = Model::Create();
+	//model03->CretaeFromObj("untitled");
 
-	obj01 = Object3Ds::Create();
-	obj01->SetModel(model01);
-	obj01->Update();
-	obj01->scale = { 1,1,1 };
+	//obj01 = Object3Ds::Create();
+	//obj01->SetModel(model01);
+	//obj01->Update();
+	//obj01->scale = { 1,1,1 };
+	//obj01->SetPosition({0,0,0});
 
-	//pModel = PMDmodel::Create();
-	//pModel->CreateModel("Resources/Model/初音ミクmetal.pmd");
+	pModel = PMDmodel::Create();
+	pModel->CreateModel("Resources/Model/初音ミクmetal.pmd");
+
+	pmdObj = PMDobject::Create();
+	pmdObj->SetModel(pModel);
+	pmdObj->Update();
 
 	sprite01 = Sprite::Create(0, { 0.0f,0.0f,0.0f });
 	sprite02 = Sprite::Create(1, { 0.0f,0.0f,0.0f });
 	sprite03 = Sprite::Create(2, { 0.0f,0.0f,0.0f });
 
-	obj01->SetPosition({0,0,0});
 
 	camera->SetTarget({ 0,1,0 });
 	camera->SetDistance(3.0f);
@@ -75,7 +79,8 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 void GameManager::Update()
 {
 	camera->Update();
-	obj01->Update();
+	//obj01->Update();
+	pmdObj->Update();
 
 	if (input->Push(DIK_A)) {
 		obj01->position.x -= 0.01f;
@@ -208,7 +213,7 @@ void GameManager::Update()
 		//レイと平面の当たり判定
 		{
 			XMVECTOR interR;
-			float distance;
+			float distance = 0;
 			for (int i = 0; i < 25; i++)
 			{
 				for (int j = 0; j < 10; j++)
@@ -258,13 +263,14 @@ void GameManager::Draw()
 
 	//PMDmodel::PreDraw(cmdList);
 
-	//pModel->Draw();
 
 	//PMDmodel::postDraw();
 
 	BaseObject::PreDraw(cmdList);
 
-	obj01->Draw();
+	//obj01->Draw();
+
+	pmdObj->Draw();
 
 	BaseObject::PostDraw();
 

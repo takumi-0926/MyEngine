@@ -5,6 +5,7 @@
 #include <DirectXMath.h>
 #include <d3dx12.h>
 #include <string>
+#include "includes.h"
 
 class PMDmodel {
 private: // エイリアス
@@ -15,8 +16,8 @@ private: // エイリアス
 	using XMFLOAT3 = DirectX::XMFLOAT3;
 	using XMFLOAT4 = DirectX::XMFLOAT4;
 	using XMMATRIX = DirectX::XMMATRIX;
-	using TexMetadata = DirectX::TexMetadata;
-	using ScratchImage = DirectX::ScratchImage;
+	//using TexMetadata = DirectX::TexMetadata;
+	//using ScratchImage = DirectX::ScratchImage;
 
 	//std::省略
 	using string = std::string;
@@ -69,6 +70,7 @@ private:
 		MaterialForHlsl material;
 		AdditionalMaterial additional;
 	};
+	Material material;
 
 private:
 	// デバイス
@@ -103,16 +105,16 @@ private:
 	//static ID3D12RootSignature* rootsignature;
 
 	//ヒープ領域
-	static ID3D12DescriptorHeap* materialDescHeap;
+	static ComPtr<ID3D12DescriptorHeap> materialDescHeap;
 
 	//マテリアル
 	std::vector<Material>materials;
 	std::vector<PMDMaterial>pmdMaterials;
 	unsigned int materialNum;
 
-	std::vector<ID3D12Resource*> textureResources;
-	std::vector<ID3D12Resource*> sphResources;
-	std::vector<ID3D12Resource*> spaResources;
+	std::vector<ComPtr<ID3D12Resource>> textureResources;
+	std::vector<ComPtr<ID3D12Resource>> sphResources;
+	std::vector<ComPtr<ID3D12Resource>> spaResources;
 
 	// 頂点データ配列
 	static std::vector<unsigned char> vertices;
@@ -164,147 +166,11 @@ private:
 		return  wstr;
 	}
 
-	static ID3D12Resource* LoadTextureFromFile(string& texPath)
-	{
-		auto result = LoadFromWICFile(
-			GetWideStringFromString(texPath).c_str(),
-			DirectX::WIC_FLAGS_NONE, &metadata, scratchImg);
-		if (FAILED(result))return nullptr;
-		auto img = scratchImg.GetImage(0, 0, 0);
+	ComPtr<ID3D12Resource> LoadTextureFromFile(string& texPath);
 
-		//WriteSubResourceで転送するためのヒープ設定()
-		D3D12_HEAP_PROPERTIES texHeapProp = {};
-		texHeapProp.Type = D3D12_HEAP_TYPE_CUSTOM;
-		texHeapProp.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_WRITE_BACK;
-		texHeapProp.MemoryPoolPreference = D3D12_MEMORY_POOL_L0;
+	ComPtr<ID3D12Resource> CreateWhiteTexture();
 
-		texHeapProp.CreationNodeMask = 0;
-		texHeapProp.VisibleNodeMask = 0;
-
-		D3D12_RESOURCE_DESC texresDesc = {};
-		texresDesc.Format = metadata.format;
-		texresDesc.Width = metadata.width;
-		texresDesc.Height = metadata.height;
-		texresDesc.DepthOrArraySize = metadata.arraySize;
-		texresDesc.SampleDesc.Count = 1;
-		texresDesc.SampleDesc.Quality = 0;
-		texresDesc.MipLevels = metadata.mipLevels;
-		texresDesc.Dimension = static_cast<D3D12_RESOURCE_DIMENSION>(metadata.dimension);
-		texresDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;//
-		texresDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
-
-		//テクスチャバッファのリソース生成
-		ID3D12Resource* texbuff = nullptr;
-		result = device->CreateCommittedResource(
-			&texHeapProp,
-			D3D12_HEAP_FLAG_NONE,
-			&texresDesc,
-			D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
-			nullptr,
-			IID_PPV_ARGS(&texbuff));
-		if (FAILED(result))return nullptr;
-
-		result = texbuff->WriteToSubresource(
-			0, nullptr,
-			img->pixels,
-			img->rowPitch,
-			img->slicePitch);
-		if (FAILED(result))return nullptr;
-
-		return texbuff;
-	}
-
-	static ID3D12Resource* CreateWhiteTexture()
-	{
-		D3D12_HEAP_PROPERTIES texHeapProp = {};
-
-		texHeapProp.Type = D3D12_HEAP_TYPE_CUSTOM;
-		texHeapProp.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_WRITE_BACK;
-		texHeapProp.MemoryPoolPreference = D3D12_MEMORY_POOL_L0;
-		//texHeapProp.CreationNodeMask = 0;
-		texHeapProp.VisibleNodeMask = 0;
-
-		D3D12_RESOURCE_DESC resDesc = {};
-		resDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-		resDesc.Width = 4;
-		resDesc.Height = 4;
-		resDesc.DepthOrArraySize = 1;
-		resDesc.SampleDesc.Count = 1;
-		resDesc.SampleDesc.Quality = 0;
-		resDesc.MipLevels = 1;
-		resDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-		resDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-		resDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
-
-		ID3D12Resource* whiteBuff = nullptr;
-		auto result = device->CreateCommittedResource(
-			&texHeapProp,
-			D3D12_HEAP_FLAG_NONE,
-			&resDesc,
-			D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE,
-			nullptr,
-			IID_PPV_ARGS(&whiteBuff));
-		if (FAILED(result))return nullptr;
-
-		std::vector<unsigned char>data(4 * 4 * 4);
-		fill(data.begin(), data.end(), 0xff);//全部255で埋める
-
-		//データ転送
-		result = whiteBuff->WriteToSubresource(
-			0,
-			nullptr,
-			data.data(),
-			4 * 4,
-			data.size());
-
-		return  whiteBuff;
-	}
-
-	static ID3D12Resource* CreateBlackTexture()
-	{
-		D3D12_HEAP_PROPERTIES texHeapProp = {};
-
-		texHeapProp.Type = D3D12_HEAP_TYPE_CUSTOM;
-		texHeapProp.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_WRITE_BACK;
-		texHeapProp.MemoryPoolPreference = D3D12_MEMORY_POOL_L0;
-		//texHeapProp.CreationNodeMask = 0;
-		texHeapProp.VisibleNodeMask = 0;
-
-		D3D12_RESOURCE_DESC resDesc = {};
-		resDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-		resDesc.Width = 4;
-		resDesc.Height = 4;
-		resDesc.DepthOrArraySize = 1;
-		resDesc.SampleDesc.Count = 1;
-		resDesc.SampleDesc.Quality = 0;
-		resDesc.MipLevels = 1;
-		resDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-		resDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-		resDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
-
-		ID3D12Resource* blackBuff = nullptr;
-		auto result = device->CreateCommittedResource(
-			&texHeapProp,
-			D3D12_HEAP_FLAG_NONE,
-			&resDesc,
-			D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE,
-			nullptr,
-			IID_PPV_ARGS(&blackBuff));
-		if (FAILED(result))return nullptr;
-
-		std::vector<unsigned char>data(4 * 4 * 4);
-		fill(data.begin(), data.end(), 0x00);//全部255で埋める
-
-		//データ転送
-		result = blackBuff->WriteToSubresource(
-			0,
-			nullptr,
-			data.data(),
-			4 * 4,
-			data.size());
-
-		return  blackBuff;
-	}
+	ComPtr<ID3D12Resource> CreateBlackTexture();
 
 	//ファイル名から拡張子を取得する
 	//@param path 対象のパス文字列
@@ -322,7 +188,7 @@ private:
 		int idx = path.find(splitter);
 		std::pair<string, string>ret;
 		ret.first = path.substr(0, idx);
-		ret.second = path.substr(idx + 1, path.length() - idx - 1);
+		ret.second = path.substr((idx + 1), path.length() - idx - 1);
 
 		return ret;
 	}
@@ -355,7 +221,7 @@ public:
 
 	//アクセッサ
 	std::vector<unsigned short> Indices() { return indices; }
-	ID3D12DescriptorHeap* DescHeap() { return descHeap.Get(); }
+	ID3D12DescriptorHeap* DescHeap() { return materialDescHeap.Get(); }
 	D3D12_VERTEX_BUFFER_VIEW VbView() { return vbView; }
 	D3D12_INDEX_BUFFER_VIEW IbView() { return ibView; }
 	std::vector<Material> Materials() { return materials;}

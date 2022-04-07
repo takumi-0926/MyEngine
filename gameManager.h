@@ -7,6 +7,7 @@
 #include "DebugCamera.h"
 #include "Collision.h"
 #include "sprite.h"
+#include "pmdObject3D.h"
 #include "PMDmodel.h"
 
 using namespace std;
@@ -36,6 +37,7 @@ private://メンバ変数(ゲームシーン)
 	Sprite* sprite02 = nullptr;
 	Sprite* sprite03 = nullptr;
 	PMDmodel* pModel = nullptr;
+	PMDobject* pmdObj = nullptr;
 
 	vector<Object3Ds> block;
 	DebugCamera* camera = nullptr;

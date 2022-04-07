@@ -247,8 +247,10 @@ PMDobject* PMDobject::Create()
     return pmdObject;
 }
 
-void PMDobject::SetModel(PMDobject* model)
+void PMDobject::SetModel(PMDmodel* model)
 {
+	this->model = model;
+	model->Initialize();
 }
 
 bool PMDobject::Initialize()
@@ -264,13 +266,47 @@ bool PMDobject::Initialize()
 		&CD3DX12_RESOURCE_DESC::Buffer((sizeof(ConstBufferDataB0) + 0xff) & ~0xff),
 		D3D12_RESOURCE_STATE_GENERIC_READ,
 		nullptr,
-		IID_PPV_ARGS(&constBuffB0));
+		IID_PPV_ARGS(&PMDconstBuffB0));
 
     return true;
 }
 
 void PMDobject::Update()
 {
+	//HRESULT result;
+	//XMMATRIX matScale, matRot, matTrans;
+
+	//// スケール、回転、平行移動行列の計算
+	//matScale = XMMatrixScaling(scale.x, scale.y, scale.z);
+	//matRot = XMMatrixIdentity();
+	//matRot *= XMMatrixRotationZ(XMConvertToRadians(rotation.z));
+	//matRot *= XMMatrixRotationX(XMConvertToRadians(rotation.x));
+	//matRot *= XMMatrixRotationY(XMConvertToRadians(rotation.y));
+	//matTrans = XMMatrixTranslation(position.x, position.y, position.z);
+
+	//// ワールド行列の合成
+	//matWorld = XMMatrixIdentity(); // 変形をリセット
+	//matWorld *= matScale; // ワールド行列にスケーリングを反映
+	//matWorld *= matRot; // ワールド行列に回転を反映
+	//matWorld *= matTrans; // ワールド行列に平行移動を反映
+
+	//const XMMATRIX& matViewProjection = camera->GetViewProjectionMatrix();
+	//const XMFLOAT3& cameraPos = camera->GetEye();
+
+	//// 定数バッファへデータ転送(OBJ)
+	//ConstBufferDataB0* constMap = nullptr;
+	//result = PMDconstBuffB0->Map(0, nullptr, (void**)&constMap);
+	//if (FAILED(result)) {
+	//	assert(0);
+	//}
+
+	////constMap->mat = matWorld * matView * matProjection;	// 行列の合成
+	//constMap->viewproj = matViewProjection;
+	//constMap->world = matWorld;
+	//constMap->cameraPos = cameraPos;
+	//PMDconstBuffB0->Unmap(0, nullptr);
+
+	model->Update();
 }
 
 void PMDobject::Draw()
@@ -282,20 +318,22 @@ void PMDobject::Draw()
 	cmdList->IASetVertexBuffers(0, 1, &model->VbView());
 	cmdList->IASetIndexBuffer(&model->IbView());
 
+	// パイプラインステートの設定
+	cmdList->SetPipelineState(_pipelinestate.Get());
+
 	cmdList->SetGraphicsRootSignature(_rootsignature.Get());
 
-	//cmdList->SetDescriptorHeaps(1, &basicDescHeap);
-	//cmdList->SetGraphicsRootDescriptorTable(0, basicDescHeap->GetGPUDescriptorHandleForHeapStart());
-	cmdList->SetGraphicsRootConstantBufferView(0, constBuffB0->GetGPUVirtualAddress());//本来のやり方ではないよー
+	cmdList->SetGraphicsRootConstantBufferView(0, PMDconstBuffB0->GetGPUVirtualAddress());//本来のやり方ではないよー
 
-	//cmdList->SetDescriptorHeaps(1, &materialDescHeap);
+	model->Draw(PMDobject::cmdList);
+
 	auto materialH = model->DescHeap()->GetGPUDescriptorHandleForHeapStart();
 	unsigned int idxOffset = 0;
 	auto cbvsrvIncSize = device->GetDescriptorHandleIncrementSize(
 		D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) * 4;
 	for (auto& m : model->Materials()) {
 
-		cmdList->SetGraphicsRootDescriptorTable(1, materialH);
+		cmdList->SetGraphicsRootDescriptorTable(2, materialH);
 		cmdList->DrawIndexedInstanced(m.indicesNum, 1, idxOffset, 0, 0);
 
 		//ヒープポインターとインデックスを次に進める
