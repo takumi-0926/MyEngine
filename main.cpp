@@ -9,6 +9,8 @@
 #include "Model.h"
 #include "sprite.h"
 #include "PMDmodel.h"
+#include "pmdObject3D.h"
+#include "baseObject.h"
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
@@ -40,28 +42,43 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			return 1;
 		}
 	}
+
 	Model model;
-	//3Dモデルオブジェクト初期化
-	if (!model.StaticInitialize(dx12.GetDevice())) {
-		assert(0);
-		return 1;
+	Object3Ds obj3d;
+	{
+
+		//3Dモデルオブジェクト初期化
+		if (!model.StaticInitialize(dx12.GetDevice())) {
+			assert(0);
+			return 1;
+		}
+
+		if (!obj3d.StaticInitialize(dx12.GetDevice(), app.GetWindowSize())) {
+			assert(0);
+			return 1;
+		}
 	}
 
-	Object3Ds obj3d;
-	if (!obj3d.StaticInitialize(dx12.GetDevice(), app.GetWindowSize())) {
-		assert(0);
-		return 1;
-	}
-	//スプライト初期化
-	if (!Sprite::staticInitalize(dx12.GetDevice(), app.GetWindowSize())) {
-		assert(0);
-		return 1;
-	}
-	//PMDモデル初期化
 	PMDmodel pModel;
-	if (!pModel.StaticInitialize(dx12.GetDevice())) {
-		assert(0);
-		return 1;
+	PMDobject pmdObj;
+	{
+		//PMDモデル初期化
+		if (!pModel.StaticInitialize(dx12.GetDevice())) {
+			assert(0);
+			return 1;
+		}
+		if (!pmdObj.StaticInitialize(dx12.GetDevice(), app.GetWindowSize())) {
+			assert(0);
+			return 1;
+		}
+	}
+
+	{
+		//スプライト初期化
+		if (!Sprite::staticInitalize(dx12.GetDevice(), app.GetWindowSize())) {
+			assert(0);
+			return 1;
+		}
 	}
 	GameManager gameScene;
 	//ゲームシーン初期化

@@ -14,11 +14,11 @@ struct constBufferData {
 //バッファデータ数
 const int constantBufferNum = 128;
 
-class BaseObject : LoadHlsls{
+class BaseObject{
 protected:
 	//パイプライン / ルートシグネチャ
-	static ComPtr<ID3D12PipelineState>			_pipelinestate;
-	static ComPtr<ID3D12RootSignature>			_rootsignature;
+	//static ComPtr<ID3D12PipelineState>			_pipelinestate;
+	//static ComPtr<ID3D12RootSignature>			_rootsignature;
 
 	//シェーダ
 	ID3DBlob* _vsBlob = nullptr; //頂点シェーダ用

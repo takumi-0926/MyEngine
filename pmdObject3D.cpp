@@ -1,8 +1,19 @@
 #include "pmdObject3D.h"
 
+ComPtr<ID3D12RootSignature> PMDobject::_rootsignature;
+ComPtr<ID3D12PipelineState> PMDobject::_pipelinestate;
+
 bool PMDobject::StaticInitialize(ID3D12Device* device, SIZE ret)
 {
-    return false;
+	//assert(!PMDobject::device);
+
+	assert(device);
+
+	PMDobject::device = device;
+
+	InitializeGraphicsPipeline();
+
+    return true;
 }
 
 bool PMDobject::InitializeGraphicsPipeline()
@@ -137,7 +148,7 @@ bool PMDobject::InitializeGraphicsPipeline()
 	gpipeline.SampleDesc.Quality = 0;
 
 	//ルートシグネチャ
-	ID3D12RootSignature* rootsignature;
+	//ID3D12RootSignature* rootsignature;
 	D3D12_ROOT_SIGNATURE_DESC rootSignatureDesc = {};
 	rootSignatureDesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
@@ -197,7 +208,7 @@ bool PMDobject::InitializeGraphicsPipeline()
 	rootSignatureDesc.pStaticSamplers = &sampleDesc;
 	rootSignatureDesc.NumStaticSamplers = 1;
 
-	ID3DBlob* rootSigBlob = nullptr;
+	ComPtr<ID3DBlob> rootSigBlob;
 	result = D3D12SerializeRootSignature(
 		&rootSignatureDesc,
 		D3D_ROOT_SIGNATURE_VERSION_1_0,
@@ -211,16 +222,16 @@ bool PMDobject::InitializeGraphicsPipeline()
 		0,
 		rootSigBlob->GetBufferPointer(),
 		rootSigBlob->GetBufferSize(),
-		IID_PPV_ARGS(&rootsignature));
+		IID_PPV_ARGS(&_rootsignature));
 	if (FAILED(result)) {
 		return result;
 	}
 
-	rootSigBlob->Release();
-	gpipeline.pRootSignature = rootsignature;
+	//rootSigBlob->Release();
+	gpipeline.pRootSignature = _rootsignature.Get();
 
 	//グラフィックスパイプラインステートオブジェクトの生成
-	ID3D12PipelineState* _pipelinestate = nullptr;
+	//ID3D12PipelineState* _pipelinestate = nullptr;
 	result = device->CreateGraphicsPipelineState(&gpipeline, IID_PPV_ARGS(&_pipelinestate));
 	if (FAILED(result)) {
 		return result;

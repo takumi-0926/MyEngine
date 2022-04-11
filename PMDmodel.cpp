@@ -237,6 +237,7 @@ void PMDmodel::Update()
 	HRESULT result;
 
 	result = PMDconstBuffB0->Map(0, nullptr, (void**)&mapmatrix);//マップ
+	
 	if (FAILED(result)) {
 		assert(0);
 	}
@@ -281,7 +282,7 @@ void PMDmodel::Draw(ID3D12GraphicsCommandList* cmdList)
 void PMDmodel::CreateModel(const std::string& strModelPath)
 {
 	HRESULT result;
-	FILE* fp;
+	FILE* fp = nullptr;
 	char signature[3] = {};//シグネチャ
 	//string strModelPath = "Model/初音ミクmetal.pmd";
 	result = fopen_s(&fp, strModelPath.c_str(), "rb");//ファイルを開く

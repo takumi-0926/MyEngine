@@ -7,7 +7,7 @@
 
 #include "baseObject.h"
 
-class PMDobject : BaseObject{
+class PMDobject : public BaseObject{
 private: // エイリアス
 	// Microsoft::WRL::を省略
 	template <class T> using ComPtr = Microsoft::WRL::ComPtr<T>;
@@ -21,6 +21,12 @@ private: // エイリアス
 
 	//std::省略
 	using string = std::string;
+
+private:
+	//3Dオブジェクト用
+	static ComPtr<ID3D12RootSignature>			_rootsignature;
+	//static ComPtr<ID3DBlob>						_rootSigBlob;
+	static ComPtr<ID3D12PipelineState>			_pipelinestate;
 
 private:
 	//ヘッダー

@@ -89,6 +89,8 @@ private:
 	// テクスチャバッファ
 	ComPtr<ID3D12Resource> texbuff;
 
+	ComPtr<ID3D12Resource> materialBuff;
+
 	// シェーダリソースビューのハンドル(CPU)
 	CD3DX12_CPU_DESCRIPTOR_HANDLE cpuDescHandleSRV;
 	// シェーダリソースビューのハンドル(GPU)
@@ -99,7 +101,6 @@ private:
 	// インデックスバッファビュー
 	D3D12_INDEX_BUFFER_VIEW ibView;
 
-	ComPtr<ID3D12Resource> materialBuff;
 
 	//ルートシグネチャ
 	//static ID3D12RootSignature* rootsignature;

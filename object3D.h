@@ -42,55 +42,14 @@ struct  Vertex {
 //
 //const int constantBufferNum = 128;
 
-class Object3Ds : BaseObject
+class Object3Ds : public BaseObject
 {
-private:
-	//ID3DBlob* _vsBlob = nullptr; //頂点シェーダ用
-	//ID3DBlob* _psBlob = nullptr; //ピクセルシェーダ用
-	//ID3DBlob* _gsBlob = nullptr; //ジオメトリシェーダ用
-
-	//D3D12_GRAPHICS_PIPELINE_STATE_DESC gpipeline = {};
-
-	////3Dオブジェクト用
-	//static ComPtr<ID3D12RootSignature>			_rootsignature;
-	////static ComPtr<ID3DBlob>						_rootSigBlob;
-	//static ComPtr<ID3D12PipelineState>			_pipelinestate;
-
-	////PMDモデル用
-	//static ComPtr<ID3D12RootSignature>			p_rootsignature;
-	////static ComPtr<ID3DBlob>						_rootSigBlob;
-	//static ComPtr<ID3D12PipelineState>			p_pipelinestate;
-
-	//// ビュー行列
-	//static XMMATRIX matView;
-	//// 射影行列
-	//static XMMATRIX matProjection;
-	//// 視点座標
-	//static XMFLOAT3 eye;
-	//// 注視点座標
-	//static XMFLOAT3 target;
-	//// 上方向ベクトル
-	//static XMFLOAT3 up;
-
-	//// 定数バッファ用データ構造体B0
-	//struct ConstBufferDataB0
-	//{
-	//	//XMFLOAT4 color;	// 色 (RGBA)
-	//	//XMMATRIX mat;	// ３Ｄ変換行列
-	//	XMMATRIX viewproj;
-	//	XMMATRIX world;
-	//	XMFLOAT3 cameraPos;
-	//};
-
 private: // 静的メンバ変数
-	//// デバイス
-	//static ID3D12Device* device;
-	//// コマンドリスト
-	//static ID3D12GraphicsCommandList* cmdList;
-	////パイプライン
-	//static PipelineSet pipelineSet;
+	//3Dオブジェクト用
+	static ComPtr<ID3D12RootSignature>			_rootsignature;
+	//static ComPtr<ID3DBlob>						_rootSigBlob;
+	static ComPtr<ID3D12PipelineState>			_pipelinestate;
 
-	//static Camera* camera;
 public:
 	// 静的初期化
 	/// <param name="device">デバイス</param>
@@ -98,13 +57,6 @@ public:
 	/// <param name="window_height">画面高さ</param>
 	/// <returns>成否</returns>
 	static bool StaticInitialize(ID3D12Device* device, SIZE ret);
-
-	//// 描画前処理
-	///// <param name="cmdList">描画コマンドリスト</param>
-	//static void PreDraw(ID3D12GraphicsCommandList* cmdList);
-
-	//// 描画後処理
-	//static void PostDraw();
 
 	// 3Dオブジェクト生成
 	static Object3Ds* Create();
