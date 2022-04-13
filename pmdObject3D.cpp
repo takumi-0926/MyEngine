@@ -119,7 +119,7 @@ bool PMDobject::InitializeGraphicsPipeline()
 
 	//レンダターゲットの設定
 	gpipeline.NumRenderTargets = 1;//今は1つ
-	gpipeline.RTVFormats[0] = DXGI_FORMAT_B8G8R8A8_UNORM;//0～1に正規化されたRGBA
+	gpipeline.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;//0～1に正規化されたRGBA
 
 	//深度ステンシル
 	gpipeline.DepthStencilState.DepthEnable = true;//使う
@@ -284,38 +284,38 @@ bool PMDobject::Initialize()
 
 void PMDobject::Update()
 {
-	//HRESULT result;
-	//XMMATRIX matScale, matRot, matTrans;
+	HRESULT result;
+	XMMATRIX matScale, matRot, matTrans;
 
-	//// スケール、回転、平行移動行列の計算
-	//matScale = XMMatrixScaling(scale.x, scale.y, scale.z);
-	//matRot = XMMatrixIdentity();
-	//matRot *= XMMatrixRotationZ(XMConvertToRadians(rotation.z));
-	//matRot *= XMMatrixRotationX(XMConvertToRadians(rotation.x));
-	//matRot *= XMMatrixRotationY(XMConvertToRadians(rotation.y));
-	//matTrans = XMMatrixTranslation(position.x, position.y, position.z);
+	// スケール、回転、平行移動行列の計算
+	matScale = XMMatrixScaling(scale.x, scale.y, scale.z);
+	matRot = XMMatrixIdentity();
+	matRot *= XMMatrixRotationZ(XMConvertToRadians(rotation.z));
+	matRot *= XMMatrixRotationX(XMConvertToRadians(rotation.x));
+	matRot *= XMMatrixRotationY(XMConvertToRadians(rotation.y));
+	matTrans = XMMatrixTranslation(position.x, position.y, position.z);
 
-	//// ワールド行列の合成
-	//matWorld = XMMatrixIdentity(); // 変形をリセット
-	//matWorld *= matScale; // ワールド行列にスケーリングを反映
-	//matWorld *= matRot; // ワールド行列に回転を反映
-	//matWorld *= matTrans; // ワールド行列に平行移動を反映
+	// ワールド行列の合成
+	matWorld = XMMatrixIdentity(); // 変形をリセット
+	matWorld *= matScale; // ワールド行列にスケーリングを反映
+	matWorld *= matRot; // ワールド行列に回転を反映
+	matWorld *= matTrans; // ワールド行列に平行移動を反映
 
-	//const XMMATRIX& matViewProjection = camera->GetViewProjectionMatrix();
-	//const XMFLOAT3& cameraPos = camera->GetEye();
+	const XMMATRIX& matViewProjection = camera->GetViewProjectionMatrix();
+	const XMFLOAT3& cameraPos = camera->GetEye();
 
-	//// 定数バッファへデータ転送(OBJ)
-	//ConstBufferDataB0* constMap = nullptr;
-	//result = PMDconstBuffB0->Map(0, nullptr, (void**)&constMap);
-	//if (FAILED(result)) {
-	//	assert(0);
-	//}
+	// 定数バッファへデータ転送(OBJ)
+	ConstBufferDataB0* constMap = nullptr;
+	result = PMDconstBuffB0->Map(0, nullptr, (void**)&constMap);
+	if (FAILED(result)) {
+		assert(0);
+	}
 
-	////constMap->mat = matWorld * matView * matProjection;	// 行列の合成
-	//constMap->viewproj = matViewProjection;
-	//constMap->world = matWorld;
-	//constMap->cameraPos = cameraPos;
-	//PMDconstBuffB0->Unmap(0, nullptr);
+	//constMap->mat = matWorld * matView * matProjection;	// 行列の合成
+	constMap->viewproj = matViewProjection;
+	constMap->world = matWorld;
+	constMap->cameraPos = cameraPos;
+	PMDconstBuffB0->Unmap(0, nullptr);
 
 	model->Update();
 }
@@ -344,12 +344,11 @@ void PMDobject::Draw()
 		D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) * 4;
 	for (auto& m : model->Materials()) {
 
-		cmdList->SetGraphicsRootDescriptorTable(2, materialH);
+		cmdList->SetGraphicsRootDescriptorTable(1, materialH);
 		cmdList->DrawIndexedInstanced(m.indicesNum, 1, idxOffset, 0, 0);
 
 		//ヒープポインターとインデックスを次に進める
 		materialH.ptr += cbvsrvIncSize;
 		idxOffset += m.indicesNum;
 	}
-
 }

@@ -281,6 +281,26 @@ void PMDmodel::Draw(ID3D12GraphicsCommandList* cmdList)
 
 void PMDmodel::CreateModel(const std::string& strModelPath)
 {
+#pragma pack(1)//苦肉の策
+	//マテリアル構造体（途中で使わなくなる）
+	struct PMDMaterial {
+		XMFLOAT3 diffuse;//ディフューズ色
+		float alpha;	//ディフューズα
+		float specularStrength;//スペキュラの強さ（乗算値）
+		XMFLOAT3 specular;//スペキュラ色
+		XMFLOAT3 ambient;//アンビエント色
+		unsigned char toonIdx;//トゥーン番号
+		unsigned char edgeFlg;//マテリアルごとの輪郭線フラグ
+
+		//２バイトのパディングあり
+
+		uint32_t indicesNum;//このマテリアルが割り当てられる
+
+		char texFilePath[20];//テクスチャファイルパス+α
+
+	};//計７０バイトだが、２バイトのパディングがあるため７２バイトになる
+#pragma pack()
+
 	HRESULT result;
 	FILE* fp = nullptr;
 	char signature[3] = {};//シグネチャ
@@ -293,7 +313,7 @@ void PMDmodel::CreateModel(const std::string& strModelPath)
 	fread(signature, sizeof(signature), 1, fp);
 	fread(&pmdheader, sizeof(pmdheader), 1, fp);
 
-	unsigned int vertnum;//頂点数
+	uint32_t vertnum;//頂点数
 	fread(&vertnum, sizeof(vertnum), 1, fp);
 
 	constexpr size_t pmdvertex_size = 38;//頂点当たりのサイズ
@@ -344,7 +364,7 @@ void PMDmodel::CreateModel(const std::string& strModelPath)
 #pragma endregion
 
 	vector<unsigned short> indices;
-	unsigned int indicesnum;
+	uint32_t indicesnum;
 	fread(&indicesnum, sizeof(indicesnum), 1, fp);
 
 	indices.resize(indicesnum);
@@ -352,7 +372,7 @@ void PMDmodel::CreateModel(const std::string& strModelPath)
 
 #pragma region インデックスの実装
 	//ID3D12Resource* idxBuff = nullptr;
-	resdesc.Width = sizeof(indices);
+	//resdesc.Width = sizeof(indices);
 	result = device->CreateCommittedResource(
 		//&heapprop,
 		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
@@ -380,8 +400,11 @@ void PMDmodel::CreateModel(const std::string& strModelPath)
 	//マテリアルの読み込み
 	fread(&materialNum, sizeof(materialNum), 1, fp);
 
-	pmdMaterials.resize(materialNum);
+	std::vector<PMDMaterial>pmdMaterials(materialNum);
+
+	//pmdMaterials.resize(materialNum);
 	//vector<PMDMaterial>pmdMaterials(materialNum);
+	size_t sizeM = sizeof(PMDMaterial);
 	fread(pmdMaterials.data(), pmdMaterials.size() * sizeof(PMDMaterial), 1, fp);
 
 	//vector<ID3D12Resource*> textureResources(materialNum);

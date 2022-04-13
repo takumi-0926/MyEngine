@@ -53,12 +53,12 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	obj01->scale = { 1,1,1 };
 	obj01->SetPosition({0,0,0});
 
-	//pModel = PMDmodel::Create();
-	//pModel->CreateModel("Resources/Model/初音ミクmetal.pmd");
+	pModel = PMDmodel::Create();
+	pModel->CreateModel("Resources/Model/初音ミクmetal.pmd");
 
-	//pmdObj = PMDobject::Create();
-	//pmdObj->SetModel(pModel);
-	//pmdObj->Update();
+	pmdObj = PMDobject::Create();
+	pmdObj->SetModel(pModel);
+	pmdObj->Update();
 
 	sprite01 = Sprite::Create(0, { 0.0f,0.0f,0.0f });
 	sprite02 = Sprite::Create(1, { 0.0f,0.0f,0.0f });
@@ -82,7 +82,7 @@ void GameManager::Update()
 {
 	camera->Update();
 	obj01->Update();
-	//pmdObj->Update();
+	pmdObj->Update();
 
 	if (input->Push(DIK_A)) {
 		obj01->position.x -= 0.01f;
@@ -267,7 +267,7 @@ void GameManager::Draw()
 
 	obj01->Draw();
 
-	//pmdObj->Draw();
+	pmdObj->Draw();
 
 	BaseObject::PostDraw();
 

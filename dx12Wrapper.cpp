@@ -36,6 +36,13 @@ bool Wrapper::Init(HWND _hwnd, SIZE _ret) {
 #ifdef _DEBUG
 	//エラーチェック//
 	EnableDebugLayer();
+
+	ComPtr<ID3D12DeviceRemovedExtendedDataSettings> dredSettings;
+	if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&dredSettings)))); {
+		dredSettings->SetAutoBreadcrumbsEnablement(D3D12_DRED_ENABLEMENT_FORCED_ON);
+		dredSettings->SetPageFaultEnablement(D3D12_DRED_ENABLEMENT_FORCED_ON);
+	}
+
 #endif
 
 	//DirectX12関連初期化
@@ -183,6 +190,15 @@ HRESULT Wrapper::InitializeDevice() {
 		}
 	}
 
+#ifdef _DEBUG
+	ComPtr<ID3D12InfoQueue> infoQueue;
+	if (SUCCEEDED(_dev->QueryInterface(IID_PPV_ARGS(&infoQueue)))) {
+		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, true);
+		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, true);
+	}
+
+#endif // _DEBUG
+
 	return _result;
 }
 
@@ -195,7 +211,7 @@ HRESULT Wrapper::InitializeSwapChain(const HWND& _hwnd) {
 	DXGI_SWAP_CHAIN_DESC1 swapchainDesc = {};
 	swapchainDesc.Width = ret.cx;
 	swapchainDesc.Height = ret.cy;
-	swapchainDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+	swapchainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	swapchainDesc.Stereo = false;
 	swapchainDesc.SampleDesc.Count = 1;
 	swapchainDesc.SampleDesc.Quality = 0;
@@ -284,7 +300,7 @@ HRESULT Wrapper::InitializeDescHeap() {
 
 		_backBuffer[i]->SetName(L"buffer");
 
-		rtvDesc.Format = _backBuffer[i]->GetDesc().Format;
+		//rtvDesc.Format = _backBuffer[i]->GetDesc().Format;
 		//レンダターゲットビューの生成
 		_dev->CreateRenderTargetView(_backBuffer[i].Get(), &rtvDesc, handle);
 		//ポインターをずらす

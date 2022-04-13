@@ -65,11 +65,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	PMDobject pmdObj;
 	{
 		//PMDÉÇÉfÉãèâä˙âª
-		if (!pModel.StaticInitialize(dx12.GetDevice())) {
+		if (!PMDmodel::StaticInitialize(dx12.GetDevice())) {
 			assert(0);
 			return 1;
 		}
-		if (!pmdObj.StaticInitialize(dx12.GetDevice(), app.GetWindowSize())) {
+		if (!PMDobject::StaticInitialize(dx12.GetDevice(), app.GetWindowSize())) {
 			assert(0);
 			return 1;
 		}

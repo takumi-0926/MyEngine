@@ -31,8 +31,22 @@ public:
 
 	void LoadModelFromFile(const string& modelName);
 
-	void ParseNodeRecursive(FbxModel* model, FbxNode* fbxNode);
+	void ParseNodeRecursive(FbxModel* model, FbxNode* fbxNode, Node* parent = nullptr);
 
+	/// <summary>
+	/// メッシュ読み込み
+	/// </summary>
+	/// <param name="model"></param>
+	/// <param name="fbxNode"></param>
+	void ParseMesh(FbxModel* model, FbxNode* fbxNode);
+
+	void ParseMeshFaces(FbxModel* model, FbxMesh* fbxMesh);
+
+	void ParseMeshVertices(FbxModel* model, FbxMesh* fbxMesh);
+
+	void ParseMaterial(FbxModel* model, FbxNode* fbxNode);
+
+	void LoadTexture(FbxModel* model, const std::string& fullPath);
 private:
 	// privateなコンストラクタ（シングルトンパターン）
 	FbxLoader() = default;

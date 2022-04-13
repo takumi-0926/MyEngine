@@ -220,6 +220,8 @@ void Model::LoadMaterial(
 			LoadTexture(directoryPath, material.textureFileName);
 		}
 	}
+
+	int i = 0;
 }
 
 

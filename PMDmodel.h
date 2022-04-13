@@ -30,23 +30,24 @@ private:
 		char comment[256];
 	};
 
-	//マテリアル構造体（途中で使わなくなる）
-	struct PMDMaterial {
-		XMFLOAT3 diffuse;//ディフューズ色
-		float alpha;	//ディフューズα
-		float specularStrength;//スペキュラの強さ（乗算値）
-		XMFLOAT3 specular;//スペキュラ色
-		XMFLOAT3 ambient;//アンビエント色
-		unsigned char toonIdx;//トゥーン番号
-		unsigned char edgeFlg;//マテリアルごとの輪郭線フラグ
+	////マテリアル構造体（途中で使わなくなる）
+	//struct PMDMaterial {
+	//	XMFLOAT3 diffuse;//ディフューズ色
+	//	float alpha;	//ディフューズα
+	//	float specularStrength;//スペキュラの強さ（乗算値）
+	//	XMFLOAT3 specular;//スペキュラ色
+	//	XMFLOAT3 ambient;//アンビエント色
+	//	unsigned char toonIdx;//トゥーン番号
+	//	unsigned char edgeFlg;//マテリアルごとの輪郭線フラグ
 
-		//２バイトのパディングあり
+	//	//２バイトのパディングあり
+	//	//uint16_t pad;
 
-		unsigned int indicesNum;//このマテリアルが割り当てられる
+	//	uint32_t indicesNum;//このマテリアルが割り当てられる
 
-		char texFilePath[20];//テクスチャファイルパス+α
+	//	char texFilePath[20];//テクスチャファイルパス+α
 
-	};//計７０バイトだが、２バイトのパディングがあるため７２バイトになる
+	//};//計７０バイトだが、２バイトのパディングがあるため７２バイトになる
 
 	//シェーダに投げられるマテリアルデータ
 	struct MaterialForHlsl {
@@ -110,8 +111,8 @@ private:
 
 	//マテリアル
 	std::vector<Material>materials;
-	std::vector<PMDMaterial>pmdMaterials;
-	unsigned int materialNum;
+	//std::vector<PMDMaterial>pmdMaterials;
+	uint32_t materialNum;
 
 	std::vector<ComPtr<ID3D12Resource>> textureResources;
 	std::vector<ComPtr<ID3D12Resource>> sphResources;
