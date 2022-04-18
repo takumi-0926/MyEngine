@@ -9,6 +9,7 @@
 #include "sprite.h"
 #include "pmdObject3D.h"
 #include "PMDmodel.h"
+#include "moving.h"
 
 using namespace std;
 using namespace DirectX;
@@ -46,6 +47,18 @@ private://メンバ変数(ゲームシーン)
 	Triangle triangle[50] = {};
 	Sqhere sqhere[10] = {};
 	Ray ray;
+
+	//運動
+	Move move{
+		9.8f,	//重力
+		0.0f,	//Y方向
+		0.0f,	//X方向
+		20.0f,	//初速度
+		1.0f,	//加速度
+		0.5f,	//空気抵抗
+		0.0f,	//時間
+		0.0f	//速度
+	};
 
 	int SceneNum = TITLE;
 

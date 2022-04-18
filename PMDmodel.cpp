@@ -24,6 +24,10 @@ ComPtr<ID3D12DescriptorHeap> PMDmodel::descHeap;
 
 ComPtr<ID3D12DescriptorHeap> PMDmodel::materialDescHeap;
 
+std::vector<unsigned char> PMDmodel::vertices;
+
+std::vector<unsigned short> PMDmodel::indices;
+
 //PMDヘッダ
 PMDmodel::PMDHeader PMDmodel::pmdheader;
 
@@ -80,9 +84,8 @@ ComPtr<ID3D12Resource> PMDmodel::LoadTextureFromFile(string& texPath) {
 	if (FAILED(result))return nullptr;
 
 	return texbuff;
-
 }
-ComPtr<ID3D12Resource> PMDmodel::CreateWhiteTexture()
+ID3D12Resource* PMDmodel::CreateWhiteTexture()
 {
 	D3D12_HEAP_PROPERTIES texHeapProp = {};
 
@@ -104,7 +107,7 @@ ComPtr<ID3D12Resource> PMDmodel::CreateWhiteTexture()
 	resDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
 	resDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
 
-	ComPtr<ID3D12Resource> whiteBuff = nullptr;
+	ID3D12Resource* whiteBuff = nullptr;
 	auto result = device->CreateCommittedResource(
 		&texHeapProp,
 		D3D12_HEAP_FLAG_NONE,
@@ -125,9 +128,9 @@ ComPtr<ID3D12Resource> PMDmodel::CreateWhiteTexture()
 		4 * 4,
 		data.size());
 
-	return  whiteBuff;
+	return whiteBuff;
 }
-ComPtr<ID3D12Resource> PMDmodel::CreateBlackTexture()
+ID3D12Resource* PMDmodel::CreateBlackTexture()
 {
 	D3D12_HEAP_PROPERTIES texHeapProp = {};
 
@@ -149,7 +152,7 @@ ComPtr<ID3D12Resource> PMDmodel::CreateBlackTexture()
 	resDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
 	resDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
 
-	ComPtr<ID3D12Resource> blackBuff = nullptr;
+	ID3D12Resource* blackBuff = nullptr;
 	auto result = device->CreateCommittedResource(
 		&texHeapProp,
 		D3D12_HEAP_FLAG_NONE,
@@ -170,10 +173,10 @@ ComPtr<ID3D12Resource> PMDmodel::CreateBlackTexture()
 		4 * 4,
 		data.size());
 
-	return  blackBuff;
+	return blackBuff;
 }
 
-PMDmodel* PMDmodel::Create() 
+PMDmodel* PMDmodel::Create()
 {
 	PMDmodel* pModel = new PMDmodel();
 
@@ -223,7 +226,7 @@ bool PMDmodel::Initialize()
 		&CD3DX12_RESOURCE_DESC::Buffer(materiaBuffSize * materialNum),//メモリがもったいない
 		D3D12_RESOURCE_STATE_GENERIC_READ,
 		nullptr,
-		IID_PPV_ARGS(&PMDconstBuffB0));
+		IID_PPV_ARGS(&PMDconstBuffB1));
 	if (FAILED(result)) {
 		assert(0);
 	}
@@ -236,19 +239,19 @@ void PMDmodel::Update()
 	MaterialForHlsl* mapmatrix = nullptr;
 	HRESULT result;
 
-	result = PMDconstBuffB0->Map(0, nullptr, (void**)&mapmatrix);//マップ
-	
+	result = PMDconstBuffB1->Map(0, nullptr, (void**)&mapmatrix);//マップ
+	PMDconstBuffB1->SetName(L"PMDconstBuff");
 	if (FAILED(result)) {
 		assert(0);
 	}
 
 	//データ転送
-	mapmatrix->alpha = material.material.alpha;
+	//mapmatrix->alpha = material.material.alpha;
 	mapmatrix->ambient = material.material.ambient;
 	mapmatrix->diffuse = material.material.diffuse;
 	mapmatrix->specular = material.material.specular;
-	mapmatrix->specularStrength = material.material.specularStrength;
-	PMDconstBuffB0->Unmap(0, nullptr);
+	//mapmatrix->specularStrength = material.material.specularStrength;
+	PMDconstBuffB1->Unmap(0, nullptr);
 }
 
 void PMDmodel::Draw(ID3D12GraphicsCommandList* cmdList)
@@ -258,12 +261,12 @@ void PMDmodel::Draw(ID3D12GraphicsCommandList* cmdList)
 	assert(cmdList);
 
 	//cmdList->SetGraphicsRootSignature(rootsignature);
-	cmdList->SetGraphicsRootConstantBufferView(0, PMDconstBuffB0->GetGPUVirtualAddress());//本来のやり方ではないよー
+	//cmdList->SetGraphicsRootConstantBufferView(1, PMDconstBuffB1->GetGPUVirtualAddress());//本来のやり方ではないよー
 	//_cmdList->SetDescriptorHeaps(1, &basicDescHeap);
-	//_cmdList->SetGraphicsRootDescriptorTable(0, basicDescHeap->GetGPUDescriptorHandleForHeapStart());
+	//cmdList->SetGraphicsRootConstantBufferView(1, PMDconstBuffB1->GetGPUVirtualAddress());
 
-	ID3D12DescriptorHeap* mdh[] = { materialDescHeap.Get() };
-	cmdList->SetDescriptorHeaps(1, mdh);
+	//ID3D12DescriptorHeap* mdh[] = { materialDescHeap.Get() };
+	//cmdList->SetDescriptorHeaps(1, mdh);
 	//auto materialH = materialDescHeap->GetGPUDescriptorHandleForHeapStart();
 	//unsigned int idxOffset = 0;
 	//auto cbvsrvIncSize = _dev->GetDescriptorHandleIncrementSize(
@@ -317,7 +320,7 @@ void PMDmodel::CreateModel(const std::string& strModelPath)
 	fread(&vertnum, sizeof(vertnum), 1, fp);
 
 	constexpr size_t pmdvertex_size = 38;//頂点当たりのサイズ
-	vector<unsigned char>vertices(vertnum * pmdvertex_size);//バッファの確保
+	vertices.resize(vertnum * pmdvertex_size);//バッファの確保
 	fread(vertices.data(), vertices.size(), 1, fp);//読み込み
 
 #pragma region 頂点バッファ
@@ -363,7 +366,7 @@ void PMDmodel::CreateModel(const std::string& strModelPath)
 	vbView.StrideInBytes = pmdvertex_size;
 #pragma endregion
 
-	vector<unsigned short> indices;
+	//vector<unsigned short> indices;
 	uint32_t indicesnum;
 	fread(&indicesnum, sizeof(indicesnum), 1, fp);
 
@@ -371,8 +374,6 @@ void PMDmodel::CreateModel(const std::string& strModelPath)
 	fread(indices.data(), indices.size() * sizeof(indices[0]), 1, fp);
 
 #pragma region インデックスの実装
-	//ID3D12Resource* idxBuff = nullptr;
-	//resdesc.Width = sizeof(indices);
 	result = device->CreateCommittedResource(
 		//&heapprop,
 		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
@@ -518,14 +519,16 @@ void PMDmodel::CreateModel(const std::string& strModelPath)
 
 	//先頭を記録
 	//auto cpuDescHandleSRV = materialDescHeap->GetCPUDescriptorHandleForHeapStart();
-	cpuDescHandleSRV = materialDescHeap->GetCPUDescriptorHandleForHeapStart();
-	gpuDescHandleSRV = materialDescHeap->GetGPUDescriptorHandleForHeapStart();
+	//cpuDescHandleSRV = materialDescHeap->GetCPUDescriptorHandleForHeapStart();
+	//gpuDescHandleSRV = materialDescHeap->GetGPUDescriptorHandleForHeapStart();
+
+	auto matDescHeapH = materialDescHeap->GetCPUDescriptorHandleForHeapStart();
 
 	auto inc = device->GetDescriptorHandleIncrementSize(
 		D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	for (int i = 0; i < materialNum; ++i) {
 		//マテリアル用定数バッファビュー
-		device->CreateConstantBufferView(&matCBVDesc, cpuDescHandleSRV);
+		device->CreateConstantBufferView(&matCBVDesc, matDescHeapH);
 		cpuDescHandleSRV.ptr += inc;
 		matCBVDesc.BufferLocation += materiaBuffSize;
 
@@ -533,40 +536,40 @@ void PMDmodel::CreateModel(const std::string& strModelPath)
 		if (textureResources[i] == nullptr) {
 			srvDesc.Format = CreateWhiteTexture()->GetDesc().Format;
 			device->CreateShaderResourceView(
-				CreateWhiteTexture().Get(), &srvDesc, cpuDescHandleSRV);
+				CreateWhiteTexture(), &srvDesc, matDescHeapH);
 		}
 		else {
 			srvDesc.Format = textureResources[i]->GetDesc().Format;
 			device->CreateShaderResourceView(
-				textureResources[i].Get(), &srvDesc, cpuDescHandleSRV);
+				textureResources[i].Get(), &srvDesc, matDescHeapH);
 		}
-		cpuDescHandleSRV.ptr += inc;
+		matDescHeapH.ptr += inc;
 
 		//乗算スフィアマップ用ビュー
 		if (sphResources[i] == nullptr) {
 			srvDesc.Format = CreateWhiteTexture()->GetDesc().Format;
 			device->CreateShaderResourceView(
-				CreateWhiteTexture().Get(), &srvDesc, cpuDescHandleSRV);
+				CreateWhiteTexture(), &srvDesc, matDescHeapH);
 		}
 		else {
 			srvDesc.Format = sphResources[i]->GetDesc().Format;
 			device->CreateShaderResourceView(
-				sphResources[i].Get(), &srvDesc, cpuDescHandleSRV);
+				sphResources[i].Get(), &srvDesc, matDescHeapH);
 		}
-		cpuDescHandleSRV.ptr += inc;
+		matDescHeapH.ptr += inc;
 
 		//加算スフィアマップ用ビュー
 		if (spaResources[i] == nullptr) {
 			srvDesc.Format = CreateBlackTexture()->GetDesc().Format;
 			device->CreateShaderResourceView(
-				CreateBlackTexture().Get(), &srvDesc, cpuDescHandleSRV);
+				CreateBlackTexture(), &srvDesc, matDescHeapH);
 		}
 		else {
 			srvDesc.Format = spaResources[i]->GetDesc().Format;
 			device->CreateShaderResourceView(
-				spaResources[i].Get(), &srvDesc, cpuDescHandleSRV);
+				spaResources[i].Get(), &srvDesc, matDescHeapH);
 		}
-		cpuDescHandleSRV.ptr += inc;
+		matDescHeapH.ptr += inc;
 
 	}
 
@@ -591,7 +594,6 @@ bool PMDmodel::InitializeDescriptorHeap()
 
 	// デスクリプタサイズを取得
 	descriptorHandleIncrementSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-
 	return true;
 }
 

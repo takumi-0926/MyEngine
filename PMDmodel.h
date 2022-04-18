@@ -170,9 +170,9 @@ private:
 
 	ComPtr<ID3D12Resource> LoadTextureFromFile(string& texPath);
 
-	ComPtr<ID3D12Resource> CreateWhiteTexture();
+	ID3D12Resource* CreateWhiteTexture();
 
-	ComPtr<ID3D12Resource> CreateBlackTexture();
+	ID3D12Resource* CreateBlackTexture();
 
 	//ファイル名から拡張子を取得する
 	//@param path 対象のパス文字列
@@ -223,11 +223,12 @@ public:
 
 	//アクセッサ
 	std::vector<unsigned short> Indices() { return indices; }
-	ID3D12DescriptorHeap* DescHeap() { return materialDescHeap.Get(); }
+	ID3D12DescriptorHeap* MaterialDescHeap() { return materialDescHeap.Get(); }
+	ID3D12DescriptorHeap* DescHeap() { return descHeap.Get(); }
 	D3D12_VERTEX_BUFFER_VIEW VbView() { return vbView; }
 	D3D12_INDEX_BUFFER_VIEW IbView() { return ibView; }
 	std::vector<Material> Materials() { return materials;}
 
 public://メンバ変数
-	ComPtr<ID3D12Resource> PMDconstBuffB0; // 定数バッファ
+	ComPtr<ID3D12Resource> PMDconstBuffB1; // 定数バッファ
 };

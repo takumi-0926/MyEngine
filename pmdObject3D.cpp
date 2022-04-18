@@ -173,7 +173,7 @@ bool PMDobject::InitializeGraphicsPipeline()
 		= D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
 	//ルートパラメーター
-	D3D12_ROOT_PARAMETER rootparam[2] = {};
+	D3D12_ROOT_PARAMETER rootparam[3] = {};
 	//rootparam[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 	//rootparam[0].DescriptorTable.pDescriptorRanges = &descTblRange[0];
 	//rootparam[0].DescriptorTable.NumDescriptorRanges = 1;
@@ -189,6 +189,11 @@ bool PMDobject::InitializeGraphicsPipeline()
 	rootparam[1].DescriptorTable.pDescriptorRanges = &descTblRange[1];
 	rootparam[1].DescriptorTable.NumDescriptorRanges = 2;
 	rootparam[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;//全てのシェーダから見える
+
+	//rootparam[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	//rootparam[2].Descriptor.RegisterSpace = 0;
+	//rootparam[2].Descriptor.ShaderRegister = 1;
+	//rootparam[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
 	rootSignatureDesc.pParameters = rootparam;//ルートパラメーターの先頭アドレス
 	rootSignatureDesc.NumParameters = 2;//ルートパラメーター数
@@ -248,6 +253,10 @@ PMDobject* PMDobject::Create()
         return nullptr;
     }
 
+	//すけーるをセット
+	float scale_val = 20;
+	pmdObject->scale = { scale_val,scale_val ,scale_val };
+
     //初期化
     if (!pmdObject->Initialize()) {
         delete pmdObject;
@@ -304,7 +313,7 @@ void PMDobject::Update()
 	const XMMATRIX& matViewProjection = camera->GetViewProjectionMatrix();
 	const XMFLOAT3& cameraPos = camera->GetEye();
 
-	// 定数バッファへデータ転送(OBJ)
+	// 定数バッファへデータ転送(PMD)
 	ConstBufferDataB0* constMap = nullptr;
 	result = PMDconstBuffB0->Map(0, nullptr, (void**)&constMap);
 	if (FAILED(result)) {
@@ -316,8 +325,9 @@ void PMDobject::Update()
 	constMap->world = matWorld;
 	constMap->cameraPos = cameraPos;
 	PMDconstBuffB0->Unmap(0, nullptr);
+	PMDconstBuffB0->SetName(L"SSSSSS");
 
-	model->Update();
+	//model->Update();
 }
 
 void PMDobject::Draw()
@@ -326,21 +336,28 @@ void PMDobject::Draw()
 	assert(device);
 	assert(cmdList);
 
+	//頂点バッファ、インデックスバッファの設定
 	cmdList->IASetVertexBuffers(0, 1, &model->VbView());
 	cmdList->IASetIndexBuffer(&model->IbView());
 
 	// パイプラインステートの設定
 	cmdList->SetPipelineState(_pipelinestate.Get());
 
+	//ルートシグネチャーの設定
 	cmdList->SetGraphicsRootSignature(_rootsignature.Get());
 
+	//定数バッファビューの設定
 	cmdList->SetGraphicsRootConstantBufferView(0, PMDconstBuffB0->GetGPUVirtualAddress());//本来のやり方ではないよー
 
+	//モデル描画
 	model->Draw(PMDobject::cmdList);
 
-	auto materialH = model->DescHeap()->GetGPUDescriptorHandleForHeapStart();
+	ID3D12DescriptorHeap* mdh[] = { model->MaterialDescHeap()};
+	cmdList->SetDescriptorHeaps(_countof(mdh), mdh);
+
+	auto materialH = model->MaterialDescHeap()->GetGPUDescriptorHandleForHeapStart();
 	unsigned int idxOffset = 0;
-	auto cbvsrvIncSize = device->GetDescriptorHandleIncrementSize(
+ 	auto cbvsrvIncSize = device->GetDescriptorHandleIncrementSize(
 		D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) * 4;
 	for (auto& m : model->Materials()) {
 

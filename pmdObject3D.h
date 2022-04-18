@@ -7,7 +7,7 @@
 
 #include "baseObject.h"
 
-class PMDobject : public BaseObject{
+class PMDobject : public BaseObject {
 private: // エイリアス
 	// Microsoft::WRL::を省略
 	template <class T> using ComPtr = Microsoft::WRL::ComPtr<T>;
@@ -97,6 +97,9 @@ public:
 	/// <returns></returns>
 	static PMDobject* Create();
 
+	void SetPosition(XMFLOAT3 position) {
+		this->position = position;
+	}
 public:
 	//モデルセット
 	void SetModel(PMDmodel* model);
@@ -107,9 +110,10 @@ public:
 	//描画
 	void Draw();
 
-public:
+private:
 	ComPtr<ID3D12Resource> PMDconstBuffB0;
 
+public:
 	// 色
 	XMFLOAT4 color = { 1,1,1,1 };
 	// ローカルスケール
