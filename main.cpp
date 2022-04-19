@@ -11,7 +11,6 @@
 #include "PMDmodel.h"
 #include "pmdObject3D.h"
 #include "baseObject.h"
-#include "FbxLoader.h"
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
@@ -83,9 +82,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		}
 	}
 
-	//Fbx初期化
-	FbxLoader::GetInstance()->Initialize(dx12.GetDevice());
-
 	GameManager gameScene;
 	//ゲームシーン初期化
 	if (!gameScene.Initalize(&dx12, &audio, &input)) {
@@ -126,8 +122,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma region 後処理
 	//もうクラスは使わないので消去
 	app.Processing();
-
-	FbxLoader::GetInstance()->Finalize();
 
 #pragma endregion
 
