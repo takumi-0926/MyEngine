@@ -529,7 +529,7 @@ void PMDmodel::CreateModel(const std::string& strModelPath)
 	for (int i = 0; i < materialNum; ++i) {
 		//マテリアル用定数バッファビュー
 		device->CreateConstantBufferView(&matCBVDesc, matDescHeapH);
-		cpuDescHandleSRV.ptr += inc;
+		matDescHeapH.ptr += inc;
 		matCBVDesc.BufferLocation += materiaBuffSize;
 
 		//シェーダーリソースビュー
