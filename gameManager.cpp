@@ -86,17 +86,25 @@ void GameManager::Update()
 	pmdObj->Update();
 
 	if (input->Trigger(DIK_SPACE)) {
-		move.flag == true;
-		move.time = 0.0f; 
+		move.flag = true;
+		move.time = 0.0f;
+		move.v = 0.0f;
 	}
 
 	if (move.flag == true) {
-		move.v += move.gravity / 10.0f;
-		obj01->position.z += move.v;
-		//obj01->position.z += ((move.v * move.v - move.v0 * move.v0) / (-2.0f * move.gravity)) * move.time;
-		move.time += 0.02f;
+		move.v = move.gravity * move.time;
+		obj01->position.z += 5.0f;
+		obj01->position.y += move.v0 - move.v;
+		pmdObj->position.z += 5.0f;
+		pmdObj->position.y += move.v0 - move.v;
+
+		move.time += (1.0f /  60.0f);
 		if (move.time >= 1.0f) {
 			move.flag = false;
+			obj01->position.z = 0.0f;
+			obj01->position.y = 0.0f;
+			pmdObj->position.y = 0.0f;
+			pmdObj->position.z = 0.0f;
 		}
 	}
 
