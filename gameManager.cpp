@@ -85,7 +85,7 @@ void GameManager::Update()
 	obj01->Update();
 	pmdObj->Update();
 
-	if (input->Trigger(DIK_SPACE)) {
+	if (input->Trigger(DIK_SPACE) && move.flag != true) {
 		move.flag = true;
 		move.time = 0.0f;
 		move.v = 0.0f;
