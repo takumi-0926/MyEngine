@@ -16,6 +16,8 @@ private:
 public:
 	static const string baseDirectory;
 
+	static const string defaultTextureFileName;
+
 public:
 	/// <summary>
 	/// シングルトンインスタンスの取得
@@ -47,6 +49,9 @@ public:
 	void ParseMaterial(FbxModel* model, FbxNode* fbxNode);
 
 	void LoadTexture(FbxModel* model, const std::string& fullPath);
+
+	std::string ExtractFileName(const std::string& path);
+
 private:
 	// privateなコンストラクタ（シングルトンパターン）
 	FbxLoader() = default;
