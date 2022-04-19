@@ -1,6 +1,8 @@
 ﻿#include "FbxLoader.h"
 #include <cassert>
 
+int a = 0;
+
 using namespace DirectX;
 
 const std::string FbxLoader::baseDirectory = "Resources/";
