@@ -82,6 +82,14 @@ public://ƒƒ“ƒoŠÖ”
 	//XV
 	void Update();
 
+	void titleUpdate();
+	void gameUpdate();
+	void endUpdate();
+
 	//•`‰æ
 	void Draw();
+
+	void titleDraw();
+	void gameDraw();
+	void endDraw();
 };
