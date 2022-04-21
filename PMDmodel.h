@@ -211,9 +211,16 @@ public:
 
 	//static void postDraw();
 
-public:
 	//モデル読み込み
 	void CreateModel(const std::string& strModelPath);
+
+	//テクスチャ読み込み
+	void Loadtexture();
+
+	//マテリアル読み込み
+	void LoadMaterial();
+
+public:
 
 	bool Initialize();
 
@@ -227,7 +234,7 @@ public:
 	ID3D12DescriptorHeap* DescHeap() { return descHeap.Get(); }
 	D3D12_VERTEX_BUFFER_VIEW VbView() { return vbView; }
 	D3D12_INDEX_BUFFER_VIEW IbView() { return ibView; }
-	std::vector<Material> Materials() { return materials;}
+	std::vector<Material> Materials() { return materials; }
 
 public://メンバ変数
 	ComPtr<ID3D12Resource> PMDconstBuffB1; // 定数バッファ

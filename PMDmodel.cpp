@@ -468,11 +468,130 @@ void PMDmodel::CreateModel(const std::string& strModelPath)
 		materials[i].material.specularStrength = pmdMaterials[i].specularStrength;
 		materials[i].material.ambient = pmdMaterials[i].ambient;
 	}
+
+	LoadMaterial();
+
+	//マテリアルバッファの作成
+	//auto materiaBuffSize = sizeof(MaterialForHlsl);
+	//materiaBuffSize = (materiaBuffSize + 0xff) & ~0xff;
+
+	//ID3D12Resource* materialBuff = nullptr;
+	//result = device->CreateCommittedResource(
+	//	&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+	//	D3D12_HEAP_FLAG_NONE,
+	//	&CD3DX12_RESOURCE_DESC::Buffer(materiaBuffSize * materialNum),//メモリがもったいない
+	//	D3D12_RESOURCE_STATE_GENERIC_READ,
+	//	nullptr,
+	//	IID_PPV_ARGS(&materialBuff));
+	//if (FAILED(result)) {
+	//	assert(0);
+	//}
+
+	//マップマテリアルにコピー
+	//char* mapMaterial = nullptr;
+	//result = materialBuff->Map(0, nullptr, (void**)&mapMaterial);
+
+	//for (auto& m : materials) {
+	//	*((MaterialForHlsl*)mapMaterial) = m.material;//データコピー
+	//	mapMaterial += materiaBuffSize;//次のアライメント位置まで
+	//}
+	//materialBuff->Unmap(0, nullptr);
+
+	//D3D12_DESCRIPTOR_HEAP_DESC matDescHeapDesc = {};
+	//matDescHeapDesc.NumDescriptors = materialNum * 4;
+	//matDescHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+	//matDescHeapDesc.NodeMask = 0;
+
+	//matDescHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+	//result = device->CreateDescriptorHeap(
+	//	&matDescHeapDesc, IID_PPV_ARGS(&materialDescHeap));
+	//if (FAILED(result)) {
+	//	assert(0);
+	//}
+
+	//D3D12_CONSTANT_BUFFER_VIEW_DESC matCBVDesc = {};
+	//matCBVDesc.BufferLocation = materialBuff->GetGPUVirtualAddress();
+	//matCBVDesc.SizeInBytes = materiaBuffSize;
+
+	//通常テクスチャビュー作成
+	//D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+	//srvDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;//RGBA(正規化)
+	//srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;//
+	//srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;//2Dテクスチャ
+	//srvDesc.Texture2D.MipLevels = 1;//ミップマップは使用しない
+
+	//先頭を記録
+	//auto cpuDescHandleSRV = materialDescHeap->GetCPUDescriptorHandleForHeapStart();
+	//cpuDescHandleSRV = materialDescHeap->GetCPUDescriptorHandleForHeapStart();
+	//gpuDescHandleSRV = materialDescHeap->GetGPUDescriptorHandleForHeapStart();
+
+	//auto matDescHeapH = materialDescHeap->GetCPUDescriptorHandleForHeapStart();
+
+	//auto inc = device->GetDescriptorHandleIncrementSize(
+	//	D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	//for (int i = 0; i < materialNum; ++i) {
+	//	マテリアル用定数バッファビュー
+	//	device->CreateConstantBufferView(&matCBVDesc, matDescHeapH);
+	//	matDescHeapH.ptr += inc;
+	//	matCBVDesc.BufferLocation += materiaBuffSize;
+
+	//	シェーダーリソースビュー
+	//	if (textureResources[i] == nullptr) {
+	//		srvDesc.Format = CreateWhiteTexture()->GetDesc().Format;
+	//		device->CreateShaderResourceView(
+	//			CreateWhiteTexture(), &srvDesc, matDescHeapH);
+	//	}
+	//	else {
+	//		srvDesc.Format = textureResources[i]->GetDesc().Format;
+	//		device->CreateShaderResourceView(
+	//			textureResources[i].Get(), &srvDesc, matDescHeapH);
+	//	}
+	//	matDescHeapH.ptr += inc;
+
+	//	乗算スフィアマップ用ビュー
+	//	if (sphResources[i] == nullptr) {
+	//		srvDesc.Format = CreateWhiteTexture()->GetDesc().Format;
+	//		device->CreateShaderResourceView(
+	//			CreateWhiteTexture(), &srvDesc, matDescHeapH);
+	//	}
+	//	else {
+	//		srvDesc.Format = sphResources[i]->GetDesc().Format;
+	//		device->CreateShaderResourceView(
+	//			sphResources[i].Get(), &srvDesc, matDescHeapH);
+	//	}
+	//	matDescHeapH.ptr += inc;
+
+	//	加算スフィアマップ用ビュー
+	//	if (spaResources[i] == nullptr) {
+	//		srvDesc.Format = CreateBlackTexture()->GetDesc().Format;
+	//		device->CreateShaderResourceView(
+	//			CreateBlackTexture(), &srvDesc, matDescHeapH);
+	//	}
+	//	else {
+	//		srvDesc.Format = spaResources[i]->GetDesc().Format;
+	//		device->CreateShaderResourceView(
+	//			spaResources[i].Get(), &srvDesc, matDescHeapH);
+	//	}
+	//	matDescHeapH.ptr += inc;
+
+	//}
+
+	fclose(fp);//ファイルを閉じる
+}
+
+void PMDmodel::Loadtexture()
+{
+}
+
+void PMDmodel::LoadMaterial()
+{
 	//マテリアルバッファの作成
 	auto materiaBuffSize = sizeof(MaterialForHlsl);
 	materiaBuffSize = (materiaBuffSize + 0xff) & ~0xff;
 
+	HRESULT result;
 	ID3D12Resource* materialBuff = nullptr;
+
 	result = device->CreateCommittedResource(
 		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 		D3D12_HEAP_FLAG_NONE,
@@ -573,7 +692,6 @@ void PMDmodel::CreateModel(const std::string& strModelPath)
 
 	}
 
-	fclose(fp);//ファイルを閉じる
 }
 
 bool PMDmodel::InitializeDescriptorHeap()
@@ -834,25 +952,4 @@ PMDmodel::PMDmodel()
 //
 //	return true;
 //}
-
-
-//void PMDmodel::preDraw(ID3D12GraphicsCommandList* cmdList)
-//{
-//	// PreDrawとPostDrawがペアで呼ばれていなければエラー
-//	assert(PMDmodel::cmdList == nullptr);
-//
-//	// コマンドリストをセット
-//	PMDmodel::cmdList = cmdList;
-//
-//	// プリミティブ形状を設定
-//	cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-//}
-
-
-//void PMDmodel::postDraw()
-//{
-//	// コマンドリストを解除
-//	PMDmodel::cmdList = nullptr;
-//}
-
 
