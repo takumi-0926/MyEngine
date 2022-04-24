@@ -30,25 +30,6 @@ private:
 		char comment[256];
 	};
 
-	////マテリアル構造体（途中で使わなくなる）
-	//struct PMDMaterial {
-	//	XMFLOAT3 diffuse;//ディフューズ色
-	//	float alpha;	//ディフューズα
-	//	float specularStrength;//スペキュラの強さ（乗算値）
-	//	XMFLOAT3 specular;//スペキュラ色
-	//	XMFLOAT3 ambient;//アンビエント色
-	//	unsigned char toonIdx;//トゥーン番号
-	//	unsigned char edgeFlg;//マテリアルごとの輪郭線フラグ
-
-	//	//２バイトのパディングあり
-	//	//uint16_t pad;
-
-	//	uint32_t indicesNum;//このマテリアルが割り当てられる
-
-	//	char texFilePath[20];//テクスチャファイルパス+α
-
-	//};//計７０バイトだが、２バイトのパディングがあるため７２バイトになる
-
 	//シェーダに投げられるマテリアルデータ
 	struct MaterialForHlsl {
 		XMFLOAT3 diffuse;//ディフューズ色
@@ -218,7 +199,7 @@ public:
 	void Loadtexture();
 
 	//マテリアル読み込み
-	void LoadMaterial();
+	void LoadMaterial(const std::string& strModelPath);
 
 public:
 

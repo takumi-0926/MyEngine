@@ -327,7 +327,7 @@ void PMDobject::Update()
 	PMDconstBuffB0->Unmap(0, nullptr);
 	PMDconstBuffB0->SetName(L"SSSSSS");
 
-	model->Update();
+	//model->Update();
 }
 
 void PMDobject::Draw()
