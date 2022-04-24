@@ -43,6 +43,9 @@ private:
 
 public:
 	void CreateBuffers(ID3D12Device* device);
+
+	void Draw(ID3D12GraphicsCommandList* cmdList);
+
 public:
 	friend class FbxLoader;
 
@@ -65,8 +68,12 @@ public:
 	std::vector<VertexPosNormalUv> vertices;
 
 	std::vector<unsigned short> indices;
+
 private:
 	std::string name;
 
 	std::vector<Node> nodes;
+
+public:
+	const XMMATRIX& GetModelTransform() { return meshNode->globleTransForm; }
 };
