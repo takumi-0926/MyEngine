@@ -1,6 +1,7 @@
 #include "gameManager.h"
 #include "baseObject.h"
 #include "FbxLoader.h"
+#include "FbxObject3d.h"
 
 GameManager::GameManager()
 {
@@ -40,6 +41,11 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	camera = new DebugCamera(Application::window_width, Application::window_height, input);
 	BaseObject::SetCamera(camera);
 
+	FbxObject3d::SetDevice(dx12->GetDevice());
+	FbxObject3d::SetCamera(camera);
+	FbxObject3d::CreateGraphicsPipeline();
+
+	//基本オブジェクト--------------
 	model01 = Model::Create();
 	model01->CretaeFromObj("Block");
 	model02 = Model::Create();
@@ -53,6 +59,7 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	obj01->scale = { 1,1,1 };
 	obj01->SetPosition({ 0,0,0 });
 
+	//MMDオブジェクト----------------
 	pModel = PMDmodel::Create();
 	pModel->CreateModel("Resources/Model/初音ミクmetal.pmd");
 
@@ -62,14 +69,21 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	pmdObj->scale = { 0.1,0.1,0.1 };
 	pmdObj->SetPosition({ 0,0,-1 });
 
+	//FBXオブジェクト----------------
+	fbxModel1 = FbxLoader::GetInstance()->LoadModelFromFile("cube");
+	fbxObj1 = new FbxObject3d;
+	fbxObj1->Initialize();
+	fbxObj1->Setmodel(fbxModel1);
+
+	//スプライト---------------------
 	sprite01 = Sprite::Create(0, { 0.0f,0.0f,0.0f });
 	sprite02 = Sprite::Create(1, { 0.0f,0.0f,0.0f });
 	sprite03 = Sprite::Create(2, { 0.0f,0.0f,0.0f });
 
 	FbxLoader::GetInstance()->LoadModelFromFile("cube");
 
-	camera->SetTarget({ 0,1,0 });
-	camera->SetDistance(3.0f);
+	camera->SetTarget({ 0,20,0 });
+	camera->SetDistance(100.0f);
 
 	input->Update();
 	//audio->Load();
@@ -84,6 +98,7 @@ void GameManager::Update()
 	camera->Update();
 	obj01->Update();
 	pmdObj->Update();
+	fbxObj1->Update();
 
 	if (input->Trigger(DIK_SPACE) && move.flag != true) {
 		move.flag = true;
@@ -294,6 +309,8 @@ void GameManager::Draw()
 	pmdObj->Draw();
 
 	BaseObject::PostDraw();
+
+	fbxObj1->Draw(cmdList);
 
 	if (SceneNum == TITLE) {
 		Sprite::PreDraw(cmdList);

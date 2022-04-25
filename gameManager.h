@@ -10,6 +10,7 @@
 #include "pmdObject3D.h"
 #include "PMDmodel.h"
 #include "moving.h"
+#include "FbxObject3d.h"
 
 using namespace std;
 using namespace DirectX;
@@ -39,6 +40,8 @@ private://メンバ変数(ゲームシーン)
 	Sprite* sprite03 = nullptr;
 	PMDmodel* pModel = nullptr;
 	PMDobject* pmdObj = nullptr;
+	FbxModel* fbxModel1 = nullptr;
+	FbxObject3d* fbxObj1 = nullptr;
 
 	vector<Object3Ds> block;
 	DebugCamera* camera = nullptr;

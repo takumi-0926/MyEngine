@@ -28,7 +28,8 @@ void FbxModel::CreateBuffers(ID3D12Device* device)
 	vbview.StrideInBytes = sizeof(vertices[0]);
 
 	//インデックス-----------------------------------
-	UINT sizeIB = static_cast<UINT>(sizeof(unsigned short) * indices.size());
+	UINT sizeIB = 
+		static_cast<UINT>(sizeof(unsigned short) * indices.size());
 
 	result = device->CreateCommittedResource(
 		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
@@ -48,7 +49,7 @@ void FbxModel::CreateBuffers(ID3D12Device* device)
 
 	//インデックスビュー
 	ibview.BufferLocation =
-		vertBuff->GetGPUVirtualAddress();
+		indexBuff->GetGPUVirtualAddress();
 	ibview.Format = DXGI_FORMAT_R16_UINT;
 	ibview.SizeInBytes = sizeIB;
 
@@ -107,4 +108,21 @@ void FbxModel::CreateBuffers(ID3D12Device* device)
 		&srvDesc,
 		descHeapSRV->GetCPUDescriptorHandleForHeapStart()
 	);
+}
+
+void FbxModel::Draw(ID3D12GraphicsCommandList* cmdList)
+{
+	cmdList->IASetVertexBuffers(0, 1, &vbview);
+
+	cmdList->IASetIndexBuffer(&ibview);
+
+	ID3D12DescriptorHeap* ppheap[] = { descHeapSRV.Get() };
+	cmdList->SetDescriptorHeaps(_countof(ppheap), ppheap);
+
+	cmdList->SetGraphicsRootDescriptorTable(
+		1, descHeapSRV->GetGPUDescriptorHandleForHeapStart()
+	);
+
+	//描画
+	cmdList->DrawIndexedInstanced((UINT)indices.size(),1, 0, 0, 0);
 }

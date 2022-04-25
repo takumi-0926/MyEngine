@@ -2,16 +2,22 @@
 #include "gameManager.h"
 #include "application.h"
 #include "dx12Wrapper.h"
-#include "object3D.h"
 #include "audio.h"
 #include "input.h"
 #include "delete.h"
+#include "baseObject.h"
+
+#include "object3D.h"
 #include "Model.h"
+
 #include "sprite.h"
+
 #include "PMDmodel.h"
 #include "pmdObject3D.h"
-#include "baseObject.h"
+
 #include "FbxLoader.h"
+#include "FbxModel.h"
+#include "FbxObject3d.h"
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
@@ -74,6 +80,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			return 1;
 		}
 	}
+
+	//FbxModel fbxModel;
+	//FbxObject fbxObj;
 
 	{
 		//スプライト初期化
