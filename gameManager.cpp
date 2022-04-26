@@ -85,26 +85,57 @@ void GameManager::Update()
 	obj01->Update();
 	pmdObj->Update();
 
-	if (input->Trigger(DIK_SPACE) && move.flag != true) {
-		move.flag = true;
-		move.time = 0.0f;
-		move.v = 0.0f;
+	//•ú•¨ü‰^“®
+	{
+		if (input->Trigger(DIK_1) && move.flag != true) {
+			move.moveNum = PARABOLA;
+			move.flag = true;
+			move.time = 0.0f;
+			move.v = 0.0f;
+		}
+
+		if (move.flag == true && move.moveNum == PARABOLA) {
+			move.v = move.gravity * move.time;
+			obj01->position.z += 5.0f;
+			obj01->position.y += move.v0 - move.v;
+			pmdObj->position.z += 5.0f;
+			pmdObj->position.y += move.v0 - move.v;
+
+			move.time += (1.0f / 60.0f);
+			if (move.time >= 1.0f) {
+				move.flag = false;
+				move.moveNum = NONE;
+				obj01->position.z = 0.0f;
+				obj01->position.y = 0.0f;
+				pmdObj->position.y = 0.0f;
+				pmdObj->position.z = 0.0f;
+			}
+		}
 	}
 
-	if (move.flag == true) {
-		move.v = move.gravity * move.time;
-		obj01->position.z += 5.0f;
-		obj01->position.y += move.v0 - move.v;
-		pmdObj->position.z += 5.0f;
-		pmdObj->position.y += move.v0 - move.v;
+	//‹ó‹C’ïR
+	{
+		if (input->Trigger(DIK_2) && move.flag != true) {
+			move.moveNum = AIR;
+			move.flag = true;
+			move.time = 0.0f;
+			move.v = 0.0f;
+		}
 
-		move.time += (1.0f /  60.0f);
-		if (move.time >= 1.0f) {
-			move.flag = false;
-			obj01->position.z = 0.0f;
-			obj01->position.y = 0.0f;
-			pmdObj->position.y = 0.0f;
-			pmdObj->position.z = 0.0f;
+		if (move.flag == true && move.moveNum == PARABOLA) {
+			move.v = move.gravity * move.time;
+			obj01->position.y += move.v;
+			pmdObj->position.y += move.v;
+
+			move.time += (1.0f / 60.0f);
+			if (move.time >= 1.0f) {
+				move.flag = false;
+				move.moveNum = NONE;
+				obj01->position.z = 0.0f;
+				obj01->position.y = 0.0f;
+				pmdObj->position.y = 0.0f;
+				pmdObj->position.z = 0.0f;
+			}
 		}
 	}
 

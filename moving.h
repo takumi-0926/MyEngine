@@ -1,5 +1,11 @@
 #pragma once
 
+enum {
+	NONE,
+	PARABOLA,
+	AIR,
+};
+
 struct Move {
 	float gravity;		//重力
 	float vy;			//Y方向
@@ -10,5 +16,7 @@ struct Move {
 	float time;			//時間
 	float v;			//速度（計算結果）
 
+	float k;			//比例定数
 	bool flag;			//移動開始フラグ
+	int moveNum;		//運動の番号
 };
