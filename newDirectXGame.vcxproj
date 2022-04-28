@@ -170,6 +170,7 @@
     <ClCompile Include="pipelineSet.cpp" />
     <ClCompile Include="PMDmodel.cpp" />
     <ClCompile Include="pmdObject3D.cpp" />
+    <ClCompile Include="PMXLoader.cpp" />
     <ClCompile Include="sprite.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -195,6 +196,7 @@
     <ClInclude Include="pipelineSet.h" />
     <ClInclude Include="PMDmodel.h" />
     <ClInclude Include="pmdObject3D.h" />
+    <ClInclude Include="PMXLoader.h" />
     <ClInclude Include="sprite.h" />
     <ClInclude Include="spriteCommon.h" />
   </ItemGroup>

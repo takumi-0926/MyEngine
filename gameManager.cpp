@@ -61,7 +61,7 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 
 	//MMDオブジェクト----------------
 	pModel = PMDmodel::Create();
-	pModel->CreateModel("Resources/Model/初音ミクmetal.pmd");
+	pModel->CreateModel("Resources/獅白ぼたん/PMX/獅白ぼたん.pmd");
 
 	pmdObj = PMDobject::Create();
 	pmdObj->SetModel(pModel);
@@ -81,9 +81,9 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	sprite03 = Sprite::Create(2, { 0.0f,0.0f,0.0f });
 
 	FbxLoader::GetInstance()->LoadModelFromFile("cube");
-
-	camera->SetTarget({ 0,-1,0 });
-	camera->SetDistance(50.0f);
+	
+	camera->SetTarget({ 0,21,0 });
+	camera->SetDistance(3.0f);
 
 	input->Update();
 	//audio->Load();
