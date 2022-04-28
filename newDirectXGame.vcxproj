@@ -190,6 +190,7 @@
     <ClInclude Include="includes.h" />
     <ClInclude Include="input.h" />
     <ClInclude Include="Model.h" />
+    <ClInclude Include="moving.h" />
     <ClInclude Include="object3D.h" />
     <ClInclude Include="pipelineSet.h" />
     <ClInclude Include="PMDmodel.h" />

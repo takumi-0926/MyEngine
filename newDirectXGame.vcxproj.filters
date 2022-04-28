@@ -135,13 +135,16 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="FbxObject3d.h">
-      <Filter>ソース ファイル</Filter>
+      <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="FbxModel.h">
-      <Filter>ソース ファイル</Filter>
+      <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="FbxLoader.h">
-      <Filter>ソース ファイル</Filter>
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="moving.h">
+      <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

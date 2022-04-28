@@ -57,7 +57,7 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	obj01->SetModel(model01);
 	obj01->Update();
 	obj01->scale = { 1,1,1 };
-	obj01->SetPosition({ 0,0,0 });
+	obj01->SetPosition({ 0,20,0 });
 
 	//MMDオブジェクト----------------
 	pModel = PMDmodel::Create();
@@ -67,7 +67,7 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	pmdObj->SetModel(pModel);
 	pmdObj->Update();
 	pmdObj->scale = { 0.1,0.1,0.1 };
-	pmdObj->SetPosition({ 0,0,-1 });
+	pmdObj->SetPosition({ 0,20,-1 });
 
 	//FBXオブジェクト----------------
 	fbxModel1 = FbxLoader::GetInstance()->LoadModelFromFile("cube");
@@ -82,13 +82,14 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 
 	FbxLoader::GetInstance()->LoadModelFromFile("cube");
 
-	camera->SetTarget({ 0,20,0 });
-	camera->SetDistance(100.0f);
+	camera->SetTarget({ 0,-1,0 });
+	camera->SetDistance(50.0f);
 
 	input->Update();
 	//audio->Load();
 
 	SceneNum = 3;
+	move.flag = false;
 
 	return true;
 }
@@ -100,26 +101,64 @@ void GameManager::Update()
 	pmdObj->Update();
 	fbxObj1->Update();
 
-	if (input->Trigger(DIK_SPACE) && move.flag != true) {
+	if (input->Trigger(DIK_2)) {
+		move.accel = 0;
+	}
+
+	//放物線運動
+ 	if (input->Trigger(DIK_1)) {
+		if(move.flag != true)
+		move.moveNum = PARABOLA;
 		move.flag = true;
 		move.time = 0.0f;
 		move.v = 0.0f;
 	}
 
 	if (move.flag == true) {
-		move.v = move.gravity * move.time;
-		obj01->position.z += 5.0f;
-		obj01->position.y += move.v0 - move.v;
-		pmdObj->position.z += 5.0f;
-		pmdObj->position.y += move.v0 - move.v;
+		if (move.moveNum == PARABOLA) {
+			move.v = move.gravity * move.time;
+			obj01->position.z += 5.0f;
+			obj01->position.y += move.v0 - move.v;
+			pmdObj->position.z += 5.0f;
+			pmdObj->position.y += move.v0 - move.v;
 
-		move.time += (1.0f /  60.0f);
-		if (move.time >= 1.0f) {
-			move.flag = false;
-			obj01->position.z = 0.0f;
-			obj01->position.y = 0.0f;
-			pmdObj->position.y = 0.0f;
-			pmdObj->position.z = 0.0f;
+			move.time += (1.0f / 120.0f);
+			if (move.time >= 1.0f) {
+				move.flag = false;
+				move.moveNum = NONE;
+				obj01->position.z = 0.0f;
+				obj01->position.y = 0.0f;
+				pmdObj->position.y = 0.0f;
+				pmdObj->position.z = 0.0f;
+			}
+		}
+	}
+
+	//空気抵抗
+	{
+		if (input->Trigger(DIK_2) && move.flag != true){
+			move.moveNum = AIR; 
+			move.flag = true;
+			move.time = 0.0f;
+			move.v = 0.0f;
+		}
+
+		if (move.flag == true && move.moveNum == AIR) {
+			move.v = move.gravity * move.time;
+			obj01->position.y += move.vy - move.v + move.air_resister;
+			pmdObj->position.y += move.vy - move.v + move.air_resister;
+
+			if (move.time >= 0.3f) {
+				move.air_resister = move.k * move.v;
+			}
+			move.time += (1.0f / 60.0f);
+			if (move.time >= 2.0f) {
+				move.flag = false;
+				move.moveNum = NONE;
+				move.air_resister = 0.0f;
+				obj01->position.y = 20.0f;
+				pmdObj->position.y = 20.0f;
+			}
 		}
 	}
 
@@ -310,7 +349,7 @@ void GameManager::Draw()
 
 	BaseObject::PostDraw();
 
-	fbxObj1->Draw(cmdList);
+	//fbxObj1->Draw(cmdList);
 
 	if (SceneNum == TITLE) {
 		Sprite::PreDraw(cmdList);
