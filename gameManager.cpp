@@ -61,7 +61,8 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 
 	//MMDオブジェクト----------------
 	pModel = PMDmodel::Create();
-	pModel->CreateModel("Resources/獅白ぼたん/PMX/獅白ぼたん.pmd");
+	//pModel->CreateModel("Resources/獅白ぼたん/PMX/獅白ぼたん.pmd");
+	pModel->CreateModel("Resources/Model/初音ミクmetal.pmd");
 
 	pmdObj = PMDobject::Create();
 	pmdObj->SetModel(pModel);
@@ -81,7 +82,7 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	sprite03 = Sprite::Create(2, { 0.0f,0.0f,0.0f });
 
 	FbxLoader::GetInstance()->LoadModelFromFile("cube");
-	
+
 	camera->SetTarget({ 0,21,0 });
 	camera->SetDistance(3.0f);
 
@@ -101,37 +102,30 @@ void GameManager::Update()
 	pmdObj->Update();
 	fbxObj1->Update();
 
-	if (input->Trigger(DIK_2)) {
-		move.accel = 0;
-	}
-
 	//放物線運動
 	{
-		if (input->Trigger(DIK_1)) {
-			if (move.flag != true)
-				move.moveNum = PARABOLA;
+		if (input->Trigger(DIK_1) && move.flag != true) {
+			move.moveNum = PARABOLA;
 			move.flag = true;
 			move.time = 0.0f;
 			move.v = 0.0f;
 		}
 
-		if (move.flag == true) {
-			if (move.moveNum == PARABOLA) {
-				move.v = move.gravity * move.time;
-				obj01->position.z += 5.0f;
-				obj01->position.y += move.v0 - move.v;
-				pmdObj->position.z += 5.0f;
-				pmdObj->position.y += move.v0 - move.v;
+		if (move.flag == true && move.moveNum == PARABOLA) {
+			move.v = move.gravity * move.time;
+			obj01->position.z += 5.0f;
+			obj01->position.y += move.v0 - move.v;
+			pmdObj->position.z += 5.0f;
+			pmdObj->position.y += move.v0 - move.v;
 
-				move.time += (1.0f / 120.0f);
-				if (move.time >= 1.0f) {
-					move.flag = false;
-					move.moveNum = NONE;
-					obj01->position.z = 0.0f;
-					obj01->position.y = 0.0f;
-					pmdObj->position.y = 0.0f;
-					pmdObj->position.z = 0.0f;
-				}
+			move.time += (1.0f / 120.0f);
+			if (move.time >= 1.0f) {
+				move.flag = false;
+				move.moveNum = NONE;
+				obj01->position.z = 0.0f;
+				obj01->position.y = 20.0f;
+				pmdObj->position.y = 20.0f;
+				pmdObj->position.z = 0.0f;
 			}
 		}
 	}

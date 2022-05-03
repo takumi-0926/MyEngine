@@ -52,22 +52,22 @@ private:
 		MaterialForHlsl material;
 		AdditionalMaterial additional;
 	};
-	Material material;
 
 private:
 	// デバイス
 	static ID3D12Device* device;
 	// デスクリプタサイズ
 	static UINT descriptorHandleIncrementSize;
-	// コマンドリスト
-	//static ID3D12GraphicsCommandList* cmdList;
 	// デスクリプタヒープ
 	static ComPtr<ID3D12DescriptorHeap> descHeap;
 
-	// 頂点バッファ
+	// 頂点バッファ,ビュー
 	ComPtr<ID3D12Resource> vertBuff;
-	// インデックスバッファ
+	D3D12_VERTEX_BUFFER_VIEW vbView;
+	// インデックスバッファ,ビュー
 	ComPtr<ID3D12Resource> indexBuff;
+	D3D12_INDEX_BUFFER_VIEW ibView;
+
 	// テクスチャバッファ
 	ComPtr<ID3D12Resource> texbuff;
 
@@ -78,10 +78,6 @@ private:
 	// シェーダリソースビューのハンドル(GPU)
 	CD3DX12_GPU_DESCRIPTOR_HANDLE gpuDescHandleSRV;
 
-	// 頂点バッファビュー
-	D3D12_VERTEX_BUFFER_VIEW vbView;
-	// インデックスバッファビュー
-	D3D12_INDEX_BUFFER_VIEW ibView;
 
 
 	//ルートシグネチャ
@@ -185,12 +181,6 @@ public:
 	static bool StaticInitialize(ID3D12Device* device);
 	//ヒープ初期化
 	static bool InitializeDescriptorHeap();
-
-	//static bool InitializeGraphicsPipeline();
-
-	//static void preDraw(ID3D12GraphicsCommandList* cmdList);
-
-	//static void postDraw();
 
 	//モデル読み込み
 	void CreateModel(const std::string& strModelPath);

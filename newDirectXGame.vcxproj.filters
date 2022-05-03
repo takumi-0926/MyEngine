@@ -156,11 +156,14 @@
   <ItemGroup>
     <None Include="Resources\shaders\OBJShaderHeader.hlsli" />
     <None Include="Resources\shaders\Sprite.hlsli" />
+    <None Include="Resources\shaders\BasicShaderHeader.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\shaders\OBJPixelShader.hlsl" />
     <FxCompile Include="Resources\shaders\OBJVertexShader.hlsl" />
     <FxCompile Include="Resources\shaders\SpritePS.hlsl" />
     <FxCompile Include="Resources\shaders\SpriteVS.hlsl" />
+    <FxCompile Include="Resources\shaders\BasicPixelShader.hlsl" />
+    <FxCompile Include="Resources\shaders\BasicVertexShader.hlsl" />
   </ItemGroup>
 </Project>

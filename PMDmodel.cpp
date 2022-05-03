@@ -6,6 +6,7 @@
 #include<sstream>
 #include<vector>
 #include "pmdObject3D.h"
+#include <map>
 
 #pragma comment(lib, "d3dcompiler.lib")
 
@@ -551,6 +552,68 @@ void PMDmodel::CreateModel(const std::string& strModelPath)
 		matDescHeapH.ptr += inc;
 
 	}
+
+	//後で関数化----------------------------------------
+	//読み込み用ボーン構造体
+#pragma pack(1)
+	struct PMDBone {
+		char BoneName[20];
+		unsigned short parentNo;
+		unsigned short nextNo;
+		unsigned char type;
+		unsigned short ikBoneNo;
+		XMFLOAT3 pos;
+	};
+#pragma pack()
+
+	unsigned short boneNum = 0;
+	fread(&boneNum, sizeof(boneNum), 1, fp);
+
+	std::vector<PMDBone> pmdBones(boneNum);
+	fread(pmdBones.data(), sizeof(PMDBone), boneNum, fp);
+
+	std::vector<DirectX::XMMATRIX> boneMatrices;
+
+	//ボーンノード
+	struct BoneNode
+	{
+		int BoneIdx;					//ボーンインデックス
+		XMFLOAT3 startPos;				//ボーン基準点
+		XMFLOAT3 endPos;				//ボーン先端点
+		std::vector<BoneNode*> children;//子ノード
+	};
+
+	std::map<std::string, BoneNode>_boneNodeTable;
+
+	std::vector<std::string> boneNames(pmdBones.size());
+
+	for (int idx = 0; idx < pmdBones.size(); idx++)
+	{
+		auto& pb = pmdBones[idx];
+		boneNames[idx] = pb.BoneName;
+		auto& node = _boneNodeTable[pb.BoneName];
+		node.BoneIdx = idx;
+		node.startPos = pb.pos;
+	}
+
+	for (auto& pb : pmdBones)
+	{
+		if (pb.parentNo >= pmdBones.size()) {
+			continue;
+		}
+
+		auto parentName = boneNames[pb.parentNo];
+		_boneNodeTable[parentName].children.emplace_back(
+			&_boneNodeTable[pb.BoneName]);
+	}
+
+	boneMatrices.resize(pmdBones.size());
+
+	std::fill(
+		boneMatrices.begin(),
+		boneMatrices.end(),
+		XMMatrixIdentity()
+	);
 
 	fclose(fp);//ファイルを閉じる
 }

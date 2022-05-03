@@ -19,6 +19,9 @@ public:
 
 	Application();
 
+	///Applicationのシングルトンインスタンスを得る
+	static Application& Instance();
+
 	//初期化
 	bool Init();
 
@@ -28,8 +31,6 @@ public:
 	//後処理
 	void Processing();
 
-	///Applicationのシングルトンインスタンスを得る
-	static Application& Instance();
 
 	//ウィンドウサイズの取得
 	SIZE GetWindowSize()const;
