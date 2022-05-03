@@ -23,13 +23,6 @@ private: // エイリアス
 	using string = std::string;
 
 private:
-	//ヘッダー
-	struct PMDHeader {
-		float vertion;
-		char model_name[20];
-		char comment[256];
-	};
-
 	//シェーダに投げられるマテリアルデータ
 	struct MaterialForHlsl {
 		XMFLOAT3 diffuse;//ディフューズ色
@@ -52,6 +45,12 @@ private:
 		MaterialForHlsl material;
 		AdditionalMaterial additional;
 	};
+	Material material;
+
+	struct Transform {
+		void* operator new(size_t size);
+		XMMATRIX world;
+	};
 
 private:
 	// デバイス
@@ -61,6 +60,15 @@ private:
 	// デスクリプタヒープ
 	static ComPtr<ID3D12DescriptorHeap> descHeap;
 
+	//// シェーダリソースビューのハンドル(CPU)
+	//CD3DX12_CPU_DESCRIPTOR_HANDLE cpuDescHandleSRV;
+	//// シェーダリソースビューのハンドル(GPU)
+	//CD3DX12_GPU_DESCRIPTOR_HANDLE gpuDescHandleSRV;
+
+	// テクスチャバッファ
+	ComPtr<ID3D12Resource> texbuff;
+
+
 	// 頂点バッファ,ビュー
 	ComPtr<ID3D12Resource> vertBuff;
 	D3D12_VERTEX_BUFFER_VIEW vbView;
@@ -68,42 +76,21 @@ private:
 	ComPtr<ID3D12Resource> indexBuff;
 	D3D12_INDEX_BUFFER_VIEW ibView;
 
-	// テクスチャバッファ
-	ComPtr<ID3D12Resource> texbuff;
-
-	ComPtr<ID3D12Resource> materialBuff;
-
-	// シェーダリソースビューのハンドル(CPU)
-	CD3DX12_CPU_DESCRIPTOR_HANDLE cpuDescHandleSRV;
-	// シェーダリソースビューのハンドル(GPU)
-	CD3DX12_GPU_DESCRIPTOR_HANDLE gpuDescHandleSRV;
-
-
-
-	//ルートシグネチャ
-	//static ID3D12RootSignature* rootsignature;
+	//座標変換
+	ComPtr<ID3D12Resource> transformMat = nullptr;
+	ComPtr<ID3D12DescriptorHeap> transformHeap = nullptr;
 
 	//ヒープ領域
 	static ComPtr<ID3D12DescriptorHeap> materialDescHeap;
 
 	//マテリアル
-	std::vector<Material>materials;
-	//std::vector<PMDMaterial>pmdMaterials;
 	uint32_t materialNum;
-
+	std::vector<Material>materials;
+	ComPtr<ID3D12Resource> materialBuff;
 	std::vector<ComPtr<ID3D12Resource>> textureResources;
 	std::vector<ComPtr<ID3D12Resource>> sphResources;
 	std::vector<ComPtr<ID3D12Resource>> spaResources;
-
-	// 頂点データ配列
-	static std::vector<unsigned char> vertices;
-	// 頂点インデックス配列	//static unsigned short indices[planeCount * 3];
-	static std::vector<unsigned short> indices;
-
-	static PMDHeader pmdheader;
-
-	static TexMetadata metadata;
-	static ScratchImage scratchImg;
+	std::vector<ComPtr<ID3D12Resource>> toonResources;
 
 private:
 	//モデルのパスとテクスチャのパスから合成パスを得る
@@ -145,11 +132,6 @@ private:
 		return  wstr;
 	}
 
-	ComPtr<ID3D12Resource> LoadTextureFromFile(string& texPath);
-
-	ID3D12Resource* CreateWhiteTexture();
-
-	ID3D12Resource* CreateBlackTexture();
 
 	//ファイル名から拡張子を取得する
 	//@param path 対象のパス文字列
@@ -172,6 +154,11 @@ private:
 		return ret;
 	}
 
+	ComPtr<ID3D12Resource> LoadTextureFromFile(string& texPath);
+
+	ID3D12Resource* CreateWhiteTexture();
+	ID3D12Resource* CreateBlackTexture();
+
 public:
 	PMDmodel();
 
@@ -191,6 +178,7 @@ public:
 	//マテリアル読み込み
 	void LoadMaterial(const std::string& strModelPath);
 
+
 public:
 
 	bool Initialize();
@@ -200,7 +188,6 @@ public:
 	void Draw(ID3D12GraphicsCommandList* cmdList);
 
 	//アクセッサ
-	std::vector<unsigned short> Indices() { return indices; }
 	ID3D12DescriptorHeap* MaterialDescHeap() { return materialDescHeap.Get(); }
 	ID3D12DescriptorHeap* DescHeap() { return descHeap.Get(); }
 	D3D12_VERTEX_BUFFER_VIEW VbView() { return vbView; }

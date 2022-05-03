@@ -1,17 +1,15 @@
 #include "PMDmodel.h"
 #include <d3dcompiler.h>
 #include <DirectXTex.h>
-
 #include<fstream>
 #include<sstream>
 #include<vector>
-#include "pmdObject3D.h"
 #include <map>
-
+//#include "pmdObject3D.h"
 #pragma comment(lib, "d3dcompiler.lib")
 
-using namespace DirectX;
 using namespace Microsoft::WRL;
+using namespace DirectX;
 using namespace std;
 
 //静的メンバの実体
@@ -25,20 +23,11 @@ ComPtr<ID3D12DescriptorHeap> PMDmodel::descHeap;
 
 ComPtr<ID3D12DescriptorHeap> PMDmodel::materialDescHeap;
 
-std::vector<unsigned char> PMDmodel::vertices;
-
-std::vector<unsigned short> PMDmodel::indices;
-
-//PMDヘッダ
-PMDmodel::PMDHeader PMDmodel::pmdheader;
-
-TexMetadata PMDmodel::metadata;
-
-ScratchImage PMDmodel::scratchImg;
-
 ComPtr<ID3D12Resource> PMDmodel::LoadTextureFromFile(string& texPath) {
 
 	HRESULT result;
+	TexMetadata metadata = {};
+	ScratchImage scratchImg = {};
 
 	result = LoadFromWICFile(
 		GetWideStringFromString(texPath).c_str(),
@@ -264,6 +253,7 @@ void PMDmodel::Draw(ID3D12GraphicsCommandList* cmdList)
 
 void PMDmodel::CreateModel(const std::string& strModelPath)
 {
+	//*使用構造体*----------------------------------------
 #pragma pack(1)//苦肉の策
 	//マテリアル構造体（途中で使わなくなる）
 	struct PMDMaterial {
@@ -283,114 +273,103 @@ void PMDmodel::CreateModel(const std::string& strModelPath)
 
 	};//計７０バイトだが、２バイトのパディングがあるため７２バイトになる
 #pragma pack()
+	//ヘッダー
+	struct PMDHeader {
+		float vertion;
+		char model_name[20];
+		char comment[256];
+	};
 
+	//*ファイルオープン*----------------------------------
 	HRESULT result;
 	FILE* fp = nullptr;
+	PMDHeader pmdheader = {};
 	char signature[3] = {};//シグネチャ
 	//string strModelPath = "Model/初音ミクmetal.pmd";
 	result = fopen_s(&fp, strModelPath.c_str(), "rb");//ファイルを開く
-	if (FAILED(result)) {
-		assert(0);
-	}
+	if (FAILED(result)) { assert(0); }
 
 	fread(signature, sizeof(signature), 1, fp);
 	fread(&pmdheader, sizeof(pmdheader), 1, fp);
 
+	//*頂点関連*------------------------------------------
 	uint32_t vertnum;//頂点数
 	fread(&vertnum, sizeof(vertnum), 1, fp);
-
 	constexpr size_t pmdvertex_size = 38;//頂点当たりのサイズ
+	std::vector<unsigned char> vertices(vertnum * pmdvertex_size);// 頂点データ配列
 	vertices.resize(vertnum * pmdvertex_size);//バッファの確保
 	fread(vertices.data(), vertices.size(), 1, fp);//読み込み
 
-#pragma region 頂点バッファ
-//頂点バッファーの生成 : WriteSubResourceで転送するためのヒープ設定()
+	//頂点バッファーの生成
 	D3D12_HEAP_PROPERTIES heapprop = {};
-	heapprop.Type = D3D12_HEAP_TYPE_UPLOAD;
-	heapprop.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
-	heapprop.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+	heapprop = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
 
 	D3D12_RESOURCE_DESC resdesc = {};
-	resdesc.Format = DXGI_FORMAT_UNKNOWN;
-	resdesc.Width = sizeof(vertices);//
-	resdesc.Height = 1;//
-	resdesc.DepthOrArraySize = 1;
-	resdesc.SampleDesc.Count = 1;
-	resdesc.MipLevels = 1;
-	resdesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;//
-	resdesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;//
-	resdesc.Flags = D3D12_RESOURCE_FLAG_NONE;
+	resdesc = CD3DX12_RESOURCE_DESC::Buffer(
+		vertices.size() * sizeof(vertices[0]));
 
 	//頂点バッファのリソース生成
-	//ID3D12Resource* vertbuff = nullptr;
 	result = device->CreateCommittedResource(
-		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
-		D3D12_HEAP_FLAG_NONE,
-		&CD3DX12_RESOURCE_DESC::Buffer(vertices.size()),
-		D3D12_RESOURCE_STATE_GENERIC_READ,
-		nullptr,
-		IID_PPV_ARGS(vertBuff.ReleaseAndGetAddressOf()));
-	if (FAILED(result)) {
-		assert(0);
-	}
+		&heapprop, D3D12_HEAP_FLAG_NONE,
+		&resdesc, D3D12_RESOURCE_STATE_GENERIC_READ,
+		nullptr, IID_PPV_ARGS(vertBuff.ReleaseAndGetAddressOf()));
+	if (FAILED(result)) { assert(0); }
 
-	//頂点情報のコピー// 4/1
+	//頂点情報のコピー
 	unsigned char* vertMap = nullptr;
 	result = vertBuff->Map(0, nullptr, (void**)&vertMap);
 	std::copy(std::begin(vertices), std::end(vertices), vertMap);
 	vertBuff->Unmap(0, nullptr);//マップ解除
 
-	//D3D12_VERTEX_BUFFER_VIEW vbView = {};
 	vbView.BufferLocation = vertBuff->GetGPUVirtualAddress();
 	vbView.SizeInBytes = vertices.size();
 	vbView.StrideInBytes = pmdvertex_size;
-#pragma endregion
 
-	//vector<unsigned short> indices;
+	//*頂点インデックス関連*------------------------------
 	uint32_t indicesnum;
 	fread(&indicesnum, sizeof(indicesnum), 1, fp);
-
-	indices.resize(indicesnum);
+	std::vector<unsigned short> indices(indicesnum);// 頂点インデックス配列	
 	fread(indices.data(), indices.size() * sizeof(indices[0]), 1, fp);
 
-#pragma region インデックスの実装
+	resdesc = CD3DX12_RESOURCE_DESC::Buffer(
+		indices.size() * sizeof(indices[0]));
+
 	result = device->CreateCommittedResource(
-		//&heapprop,
-		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
-		D3D12_HEAP_FLAG_NONE,
-		//&resdesc,
-		&CD3DX12_RESOURCE_DESC::Buffer(indices.size() * sizeof(indices[0])),
-		D3D12_RESOURCE_STATE_GENERIC_READ,
-		nullptr,
-		IID_PPV_ARGS(&indexBuff));
-	if (FAILED(result)) {
-		assert(0);
-	}
+		&heapprop, D3D12_HEAP_FLAG_NONE,
+		&resdesc, D3D12_RESOURCE_STATE_GENERIC_READ,
+		nullptr, IID_PPV_ARGS(&indexBuff));
+	if (FAILED(result)) { assert(0); }
 
 	unsigned short* mappedIdx = nullptr;
 	indexBuff->Map(0, nullptr, (void**)&mappedIdx);
 	copy(begin(indices), end(indices), mappedIdx);
 	indexBuff->Unmap(0, nullptr);
 
-	//D3D12_INDEX_BUFFER_VIEW ibView = {};
 	ibView.BufferLocation = indexBuff->GetGPUVirtualAddress();
 	ibView.Format = DXGI_FORMAT_R16_UINT;
 	ibView.SizeInBytes = indices.size() * sizeof(indices[0]);
-#pragma endregion
 
+	//*マテリアル関連*------------------------------------
 	//マテリアルの読み込み
 	fread(&materialNum, sizeof(materialNum), 1, fp);
 
-	std::vector<PMDMaterial>pmdMaterials(materialNum);
-
-	//pmdMaterials.resize(materialNum);
-	//vector<PMDMaterial>pmdMaterials(materialNum);
-	size_t sizeM = sizeof(PMDMaterial);
-	fread(pmdMaterials.data(), pmdMaterials.size() * sizeof(PMDMaterial), 1, fp);
-
+	materials.resize(materialNum);
 	textureResources.resize(materialNum);
 	sphResources.resize(materialNum);
 	spaResources.resize(materialNum);
+
+	std::vector<PMDMaterial>pmdMaterials(materialNum);
+	fread(pmdMaterials.data(), pmdMaterials.size() * sizeof(PMDMaterial), 1, fp);
+	//コピー
+	for (int i = 0; i < pmdMaterials.size(); i++) {
+		materials[i].indicesNum = pmdMaterials[i].indicesNum;
+		materials[i].material.diffuse = pmdMaterials[i].diffuse;
+		materials[i].material.alpha = pmdMaterials[i].alpha;
+		materials[i].material.specular = pmdMaterials[i].specular;
+		materials[i].material.specularStrength = pmdMaterials[i].specularStrength;
+		materials[i].material.ambient = pmdMaterials[i].ambient;
+	}
+
 	for (int i = 0; i < pmdMaterials.size(); ++i) {
 		//if (strlen(pmdMaterials[i].texFilePath) == 0)
 		//{
@@ -434,25 +413,11 @@ void PMDmodel::CreateModel(const std::string& strModelPath)
 		}
 	}
 
-	//vector<Material>materials(pmdMaterials.size());
-	materials.resize(pmdMaterials.size());
-	//コピー
-	for (int i = 0; i < pmdMaterials.size(); i++) {
-		materials[i].indicesNum = pmdMaterials[i].indicesNum;
-		materials[i].material.diffuse = pmdMaterials[i].diffuse;
-		materials[i].material.alpha = pmdMaterials[i].alpha;
-		materials[i].material.specular = pmdMaterials[i].specular;
-		materials[i].material.specularStrength = pmdMaterials[i].specularStrength;
-		materials[i].material.ambient = pmdMaterials[i].ambient;
-	}
-
-	//LoadMaterial(strModelPath);
-
+	//**マテリアルデータ生成**----------------------------
 	//マテリアルバッファの作成
 	auto materiaBuffSize = sizeof(MaterialForHlsl);
 	materiaBuffSize = (materiaBuffSize + 0xff) & ~0xff;
 
-	ID3D12Resource* materialBuff = nullptr;
 	result = device->CreateCommittedResource(
 		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 		D3D12_HEAP_FLAG_NONE,
@@ -460,9 +425,7 @@ void PMDmodel::CreateModel(const std::string& strModelPath)
 		D3D12_RESOURCE_STATE_GENERIC_READ,
 		nullptr,
 		IID_PPV_ARGS(&materialBuff));
-	if (FAILED(result)) {
-		assert(0);
-	}
+	if (FAILED(result)) { assert(0); }
 
 	//マップマテリアルにコピー
 	char* mapMaterial = nullptr;
@@ -482,9 +445,7 @@ void PMDmodel::CreateModel(const std::string& strModelPath)
 	matDescHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 	result = device->CreateDescriptorHeap(
 		&matDescHeapDesc, IID_PPV_ARGS(&materialDescHeap));
-	if (FAILED(result)) {
-		assert(0);
-	}
+	if (FAILED(result)) { assert(0); }
 
 	D3D12_CONSTANT_BUFFER_VIEW_DESC matCBVDesc = {};
 	matCBVDesc.BufferLocation = materialBuff->GetGPUVirtualAddress();
@@ -498,9 +459,9 @@ void PMDmodel::CreateModel(const std::string& strModelPath)
 	srvDesc.Texture2D.MipLevels = 1;//ミップマップは使用しない
 
 	//先頭を記録
-	auto cpuDescHandleSRV = materialDescHeap->GetCPUDescriptorHandleForHeapStart();
-	cpuDescHandleSRV = materialDescHeap->GetCPUDescriptorHandleForHeapStart();
-	gpuDescHandleSRV = materialDescHeap->GetGPUDescriptorHandleForHeapStart();
+	//auto cpuDescHandleSRV = materialDescHeap->GetCPUDescriptorHandleForHeapStart();
+	//cpuDescHandleSRV = materialDescHeap->GetCPUDescriptorHandleForHeapStart();
+	//gpuDescHandleSRV = materialDescHeap->GetGPUDescriptorHandleForHeapStart();
 
 	auto matDescHeapH = materialDescHeap->GetCPUDescriptorHandleForHeapStart();
 
@@ -624,6 +585,41 @@ void PMDmodel::Loadtexture()
 
 void PMDmodel::LoadMaterial(const std::string& strModelPath)
 {
+	auto materiaBuffSize = sizeof(MaterialForHlsl);
+	materiaBuffSize = (materiaBuffSize + 0xff) & ~0xff;
+
+	//ID3D12Resource* materialBuff = nullptr;
+	auto result = device->CreateCommittedResource(
+		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+		D3D12_HEAP_FLAG_NONE,
+		&CD3DX12_RESOURCE_DESC::Buffer(materiaBuffSize * materialNum),//メモリがもったいない
+		D3D12_RESOURCE_STATE_GENERIC_READ,
+		nullptr,
+		IID_PPV_ARGS(&materialBuff));
+	if (FAILED(result)) { assert(0); }
+
+	//マップマテリアルにコピー
+	char* mapMaterial = nullptr;
+	result = materialBuff->Map(0, nullptr, (void**)&mapMaterial);
+
+	for (auto& m : materials) {
+		*((MaterialForHlsl*)mapMaterial) = m.material;//データコピー
+		mapMaterial += materiaBuffSize;//次のアライメント位置まで
+	}
+	materialBuff->Unmap(0, nullptr);
+
+	D3D12_DESCRIPTOR_HEAP_DESC matDescHeapDesc = {};
+	matDescHeapDesc.NumDescriptors = materialNum * 4;
+	matDescHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+	matDescHeapDesc.NodeMask = 0;
+
+	matDescHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+	result = device->CreateDescriptorHeap(
+		&matDescHeapDesc, IID_PPV_ARGS(&materialDescHeap));
+	if (FAILED(result)) {
+		assert(0);
+	}
+
 }
 
 bool PMDmodel::InitializeDescriptorHeap()
