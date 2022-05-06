@@ -27,7 +27,8 @@ private://メンバ変数(初期化)
 	Input* input;
 	Audio* audio;
 	Wrapper* dx12;
-
+	std::shared_ptr<PMDmodel> pmdModel;
+	std::shared_ptr<PMDobject> pmdObject;
 private://メンバ変数(ゲームシーン)
 	Model* model01 = nullptr;
 	Model* model02 = nullptr;

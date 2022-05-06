@@ -67,19 +67,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		}
 	}
 
-	PMDmodel pModel;
-	PMDobject pmdObj;
-	{
-		//PMDÉÇÉfÉãèâä˙âª
-		if (!PMDmodel::StaticInitialize(dx12.GetDevice())) {
-			assert(0);
-			return 1;
-		}
-		if (!PMDobject::StaticInitialize(dx12.GetDevice(), app.GetWindowSize())) {
-			assert(0);
-			return 1;
-		}
-	}
+	//PMDmodel pModel;
+	//PMDobject pmdObj;
+	//{
+	//	//PMDÉÇÉfÉãèâä˙âª
+	//	if (!PMDmodel::StaticInitialize(dx12.GetDevice())) {
+	//		assert(0);
+	//		return 1;
+	//	}
+	//	if (!PMDobject::StaticInitialize(dx12.GetDevice(), app.GetWindowSize())) {
+	//		assert(0);
+	//		return 1;
+	//	}
+	//}
 
 	//FbxModel fbxModel;
 	//FbxObject fbxObj;

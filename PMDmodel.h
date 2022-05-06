@@ -7,7 +7,9 @@
 #include <string>
 #include "includes.h"
 
+class PMDobject;
 class PMDmodel {
+	friend PMDobject;
 private: // エイリアス
 	// Microsoft::WRL::を省略
 	template <class T> using ComPtr = Microsoft::WRL::ComPtr<T>;
@@ -22,6 +24,7 @@ private: // エイリアス
 	//std::省略
 	using string = std::string;
 
+	PMDobject& _object;
 private:
 	//シェーダに投げられるマテリアルデータ
 	struct MaterialForHlsl {
@@ -60,28 +63,24 @@ private:
 	// デスクリプタヒープ
 	static ComPtr<ID3D12DescriptorHeap> descHeap;
 
-	//// シェーダリソースビューのハンドル(CPU)
-	//CD3DX12_CPU_DESCRIPTOR_HANDLE cpuDescHandleSRV;
-	//// シェーダリソースビューのハンドル(GPU)
-	//CD3DX12_GPU_DESCRIPTOR_HANDLE gpuDescHandleSRV;
-
 	// テクスチャバッファ
 	ComPtr<ID3D12Resource> texbuff;
 
 
 	// 頂点バッファ,ビュー
-	ComPtr<ID3D12Resource> vertBuff;
-	D3D12_VERTEX_BUFFER_VIEW vbView;
+	ComPtr<ID3D12Resource> vertBuff = nullptr;
+	D3D12_VERTEX_BUFFER_VIEW vbView = {};
 	// インデックスバッファ,ビュー
-	ComPtr<ID3D12Resource> indexBuff;
-	D3D12_INDEX_BUFFER_VIEW ibView;
+	ComPtr<ID3D12Resource> indexBuff = nullptr;
+	D3D12_INDEX_BUFFER_VIEW ibView = {};
 
 	//座標変換
+	Transform transform;
+	Transform* mappedTransform = nullptr;
+	ComPtr<ID3D12Resource> transformBuff = nullptr;
 	ComPtr<ID3D12Resource> transformMat = nullptr;
 	ComPtr<ID3D12DescriptorHeap> transformHeap = nullptr;
 
-	//ヒープ領域
-	static ComPtr<ID3D12DescriptorHeap> materialDescHeap;
 
 	//マテリアル
 	uint32_t materialNum;
@@ -92,75 +91,30 @@ private:
 	std::vector<ComPtr<ID3D12Resource>> spaResources;
 	std::vector<ComPtr<ID3D12Resource>> toonResources;
 
+	//ヒープ領域
+	static ComPtr<ID3D12DescriptorHeap> materialDescHeap;
+
+	std::vector<DirectX::XMMATRIX> boneMatrices;
+
 private:
-	//モデルのパスとテクスチャのパスから合成パスを得る
-//@param modelpath アプリケーションから見たpmdモデルのパス
-//@param texPath PMD モデルから見たテクスチャのパス
-//@return アプリケーションから見たテクスチャのパス
-	static string GetTexturePathFromModelAndTexPath(const string& modelPath, const char* texPath) {
-		int pathIndex1 = modelPath.rfind('/');
-		int pathIndex2 = modelPath.rfind('\\');
-
-		auto pathIndex = max(pathIndex1, pathIndex2);
-		auto folderPath = modelPath.substr(0, pathIndex + 1);
-		return folderPath + texPath;
-	}
-
-	//std::string{マルチバイト文字列}からstd::wstring{ワイド文字列}を得る
-	//@param str マルチバイト文字列
-	//@return 変換された文字列
-	static std::wstring GetWideStringFromString(const string& str)
-	{
-		//呼び出し1回目(文字列数を得る)
-		auto num1 = MultiByteToWideChar(
-			CP_ACP,
-			MB_PRECOMPOSED | MB_ERR_INVALID_CHARS,
-			str.c_str(),
-			-1, nullptr, 0);
-
-		std::wstring wstr;//stringのwchar_t版
-		wstr.resize(num1);//得られた文字列数でリサイズ
-
-		//呼び出し2回目(確保済みのwstrに変換文字列をコピー)
-		auto num2 = MultiByteToWideChar(
-			CP_ACP,
-			MB_PRECOMPOSED | MB_ERR_INVALID_CHARS,
-			str.c_str(),
-			-1, &wstr[0], num1);
-
-		assert(num1 == num2);//チェック
-		return  wstr;
-	}
-
-
-	//ファイル名から拡張子を取得する
-	//@param path 対象のパス文字列
-	//@return 拡張子
-	static string GetExtension(const string& path) {
-		int idx = path.rfind('.');
-		return path.substr(idx + 1, path.length() - idx - 1);
-	}
-
-	//テクスチャのパスをセパレーター文字で取得する
-	//@param path 対象のパス文字列
-	//@param splitter 区切り文字
-	//@return 分離前後の文字列ペア
-	static std::pair<string, string>SplitFileName(const string& path, const char splitter = '*') {
-		int idx = path.find(splitter);
-		std::pair<string, string>ret;
-		ret.first = path.substr(0, idx);
-		ret.second = path.substr((idx + 1), path.length() - idx - 1);
-
-		return ret;
-	}
 
 	ComPtr<ID3D12Resource> LoadTextureFromFile(string& texPath);
 
 	ID3D12Resource* CreateWhiteTexture();
 	ID3D12Resource* CreateBlackTexture();
 
+	HRESULT CreateMaterial();
+
+	//マテリアル及びテクスチャのビュー生成
+	HRESULT CreateMaterialAndTextureView();
+
+	HRESULT CreateTransform();
+
+	HRESULT LoadPMDFile(const char* path);
+
 public:
-	PMDmodel();
+	PMDmodel(ID3D12Device* device, const char* filepath,PMDobject& object);
+	~PMDmodel();
 
 	static PMDmodel* Create();
 
@@ -176,7 +130,7 @@ public:
 	void Loadtexture();
 
 	//マテリアル読み込み
-	void LoadMaterial(const std::string& strModelPath);
+	void LoadMaterial();
 
 
 public:

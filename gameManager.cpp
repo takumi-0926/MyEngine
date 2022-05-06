@@ -59,16 +59,19 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	obj01->scale = { 1,1,1 };
 	obj01->SetPosition({ 0,20,0 });
 
-	//MMDオブジェクト----------------
-	pModel = PMDmodel::Create();
-	//pModel->CreateModel("Resources/獅白ぼたん/PMX/獅白ぼたん.pmd");
-	pModel->CreateModel("Resources/Model/初音ミクmetal.pmd");
+	pmdModel.reset(new PMDmodel(dx12->GetDevice(),"Resources/Model/初音ミクmetal.pmd", *pmdObject));
+	pmdObject.reset(new PMDobject());
 
-	pmdObj = PMDobject::Create();
-	pmdObj->SetModel(pModel);
-	pmdObj->Update();
-	pmdObj->scale = { 0.1,0.1,0.1 };
-	pmdObj->SetPosition({ 0,20,-1 });
+	//MMDオブジェクト----------------
+	//pModel = PMDmodel::Create();
+	////pModel->CreateModel("Resources/獅白ぼたん/PMX/獅白ぼたん.pmd");
+	//pModel->CreateModel("Resources/Model/初音ミクmetal.pmd");
+
+	//pmdObj = PMDobject::Create();
+	//pmdObj->SetModel(pModel);
+	//pmdObj->Update();
+	//pmdObj->scale = { 0.1,0.1,0.1 };
+	//pmdObj->SetPosition({ 0,20,-1 });
 
 	//FBXオブジェクト----------------
 	fbxModel1 = FbxLoader::GetInstance()->LoadModelFromFile("cube");
@@ -99,7 +102,7 @@ void GameManager::Update()
 {
 	camera->Update();
 	obj01->Update();
-	pmdObj->Update();
+	//pmdObj->Update();
 	fbxObj1->Update();
 
 	//放物線運動
@@ -341,7 +344,8 @@ void GameManager::Draw()
 
 	obj01->Draw();
 
-	pmdObj->Draw();
+	//pmdObj->Draw();
+	pmdModel->Draw(cmdList);
 
 	BaseObject::PostDraw();
 
