@@ -7,9 +7,7 @@
 
 #include "baseObject.h"
 
-class PMDModel;
 class PMDobject : public BaseObject {
-	friend PMDModel;
 private: // エイリアス
 	// Microsoft::WRL::を省略
 	template <class T> using ComPtr = Microsoft::WRL::ComPtr<T>;
@@ -27,16 +25,59 @@ private: // エイリアス
 private:
 	//3Dオブジェクト用
 	static ComPtr<ID3D12RootSignature>			_rootsignature;
+	//static ComPtr<ID3DBlob>						_rootSigBlob;
 	static ComPtr<ID3D12PipelineState>			_pipelinestate;
 
-	HRESULT CreateGraphicsPipeline();
+private:
+	//ヘッダー
+	struct PMDHeader {
+		float vertion;
+		char model_name[20];
+		char comment[256];
+	};
 
-	HRESULT CreateRootSignature();
+	//マテリアル構造体（途中で使わなくなる）
+	struct PMDMaterial {
+		XMFLOAT3 diffuse;//ディフューズ色
+		float alpha;	//ディフューズα
+		float specularStrength;//スペキュラの強さ（乗算値）
+		XMFLOAT3 specular;//スペキュラ色
+		XMFLOAT3 ambient;//アンビエント色
+		unsigned char toonIdx;//トゥーン番号
+		unsigned char edgeFlg;//マテリアルごとの輪郭線フラグ
+
+		//２バイトのパディングあり
+
+		unsigned int indicesNum;//このマテリアルが割り当てられる
+
+		char texFilePath[20];//テクスチャファイルパス+α
+
+	};//計７０バイトだが、２バイトのパディングがあるため７２バイトになる
+
+	//シェーダに投げられるマテリアルデータ
+	struct MaterialForHlsl {
+		XMFLOAT3 diffuse;//ディフューズ色
+		float alpha;	//ディフューズα
+		XMFLOAT3 specular;//スペキュラ色
+		float specularStrength;//スペキュラの強さ（乗算値）
+		XMFLOAT3 ambient;//アンビエント色
+	};
+
+	//上記以外のマテリアルデータ
+	struct AdditionalMaterial {
+		string texpath;
+		int toonIdx;
+		bool edgeFlg;
+	};
+
+	//全体をまとめるデータ
+	struct Material {
+		unsigned int indicesNum;
+		MaterialForHlsl material;
+		AdditionalMaterial additional;
+	};
 
 public:
-	PMDobject();
-	~PMDobject();
-
 	// 静的初期化
 	/// <param name="device">デバイス</param>
 	/// <param name="window_width">画面幅</param>
@@ -71,7 +112,6 @@ public:
 
 private:
 	ComPtr<ID3D12Resource> PMDconstBuffB0;
-	ComPtr<ID3D12DescriptorHeap> _sceneDescHeap = nullptr;
 
 public:
 	// 色

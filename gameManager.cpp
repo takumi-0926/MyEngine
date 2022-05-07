@@ -349,7 +349,7 @@ void GameManager::Draw()
 
 	BaseObject::PostDraw();
 
-	//fbxObj1->Draw(cmdList);
+	fbxObj1->Draw(cmdList);
 
 	if (SceneNum == TITLE) {
 		Sprite::PreDraw(cmdList);
