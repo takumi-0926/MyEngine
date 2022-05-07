@@ -6,13 +6,18 @@ Texture2D<float4> spa : register(t2);
 
 //定数バッファ
 cbuffer cbuff0 : register(b0) {
-	matrix viewproj;
-	matrix world;
+	matrix viewproj;  //ビュープロジェクション
 	float3 cameraPos; // カメラ座標（ワールド座標）
 }
 
+//
+cbuffer Transform : register(b2) {
+	matrix world;
+	matrix bones[256];//ボーン行列
+}
+
 //マテリアル用
-cbuffer Material : register(b1) {
+cbuffer Material : register(b2) {
 	float4 diffuse;
 	float4 specular;
 	float3 ambient;

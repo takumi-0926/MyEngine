@@ -5,6 +5,7 @@ Output BasicVS(float4 pos : POSITION, float4 normal : NORMAL, float2 uv : TEXCOO
 	//output.svpos = mul(mat,pos);
 	//output.normal = normal;
 	//output.svpos = pos * float4(0.01,0.01,0.01,1);
+	//pos = mul(bones[boneno[0]], pos);
 	output.svpos = mul(mul(viewproj, world), pos);
 	normal.w = 0;
 	output.normal = mul(world, normalize(normal));
