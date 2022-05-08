@@ -6,40 +6,50 @@ ComPtr<ID3D12PipelineState> PMDobject::_pipelinestate;
 void PMDobject::Update()
 {
 	HRESULT result;
-	XMMATRIX matScale, matRot, matTrans;
+	//XMMATRIX matScale, matRot, matTrans;
 
-	// スケール、回転、平行移動行列の計算
-	matScale = XMMatrixScaling(scale.x, scale.y, scale.z);
-	matRot = XMMatrixIdentity();
-	matRot *= XMMatrixRotationZ(XMConvertToRadians(rotation.z));
-	matRot *= XMMatrixRotationX(XMConvertToRadians(rotation.x));
-	matRot *= XMMatrixRotationY(XMConvertToRadians(rotation.y));
-	matTrans = XMMatrixTranslation(position.x, position.y, position.z);
+	//// スケール、回転、平行移動行列の計算
+	//matScale = XMMatrixScaling(scale.x, scale.y, scale.z);
+	//matRot = XMMatrixIdentity();
+	//matRot *= XMMatrixRotationZ(XMConvertToRadians(rotation.z));
+	//matRot *= XMMatrixRotationX(XMConvertToRadians(rotation.x));
+	//matRot *= XMMatrixRotationY(XMConvertToRadians(rotation.y));
+	//matTrans = XMMatrixTranslation(position.x, position.y, position.z);
 
-	// ワールド行列の合成
-	matWorld = XMMatrixIdentity(); // 変形をリセット
-	matWorld *= matScale; // ワールド行列にスケーリングを反映
-	matWorld *= matRot; // ワールド行列に回転を反映
-	matWorld *= matTrans; // ワールド行列に平行移動を反映
+	//// ワールド行列の合成
+	//matWorld = XMMatrixIdentity(); // 変形をリセット
+	//matWorld *= matScale; // ワールド行列にスケーリングを反映
+	//matWorld *= matRot; // ワールド行列に回転を反映
+	//matWorld *= matTrans; // ワールド行列に平行移動を反映
+
+	//const XMMATRIX& matViewProjection = camera->GetViewProjectionMatrix();
+	//const XMFLOAT3& cameraPos = camera->GetEye();
+
+	//// 定数バッファへデータ転送(PMD)
+	//ConstBufferDataB0* constMap = nullptr;
+	//result = PMDconstBuffB0->Map(0, nullptr, (void**)&constMap);
+	//if (FAILED(result)) {
+	//	assert(0);
+	//}
+
+	////constMap->mat = matWorld * matView * matProjection;	// 行列の合成
+	//constMap->viewproj = matViewProjection;
+	//constMap->world = matWorld;
+	//constMap->cameraPos = cameraPos;
+	//PMDconstBuffB0->Unmap(0, nullptr);
+	//PMDconstBuffB0->SetName(L"SSSSSS");
+
+	//model->Update();
+	_mappedSceneData = nullptr;//マップ先を示すポインタ
+	result = _sceneConstBuff->Map(0, nullptr, (void**)&_mappedSceneData);//マップ
 
 	const XMMATRIX& matViewProjection = camera->GetViewProjectionMatrix();
 	const XMFLOAT3& cameraPos = camera->GetEye();
 
-	// 定数バッファへデータ転送(PMD)
-	ConstBufferDataB0* constMap = nullptr;
-	result = PMDconstBuffB0->Map(0, nullptr, (void**)&constMap);
-	if (FAILED(result)) {
-		assert(0);
-	}
+	_mappedSceneData->viewproj = matViewProjection;
+	_mappedSceneData->cameraPos = cameraPos;
 
-	//constMap->mat = matWorld * matView * matProjection;	// 行列の合成
-	constMap->viewproj = matViewProjection;
-	constMap->world = matWorld;
-	constMap->cameraPos = cameraPos;
-	PMDconstBuffB0->Unmap(0, nullptr);
-	PMDconstBuffB0->SetName(L"SSSSSS");
-
-	//model->Update();
+	_sceneConstBuff->Unmap(0, nullptr);
 }
 
 void PMDobject::Draw()
@@ -54,49 +64,13 @@ void PMDobject::Draw()
 	ID3D12DescriptorHeap* sceneheaps[] = { _sceneDescHeap.Get() };
 	cmdList->SetDescriptorHeaps(1, sceneheaps);
 	cmdList->SetGraphicsRootDescriptorTable(0, _sceneDescHeap->GetGPUDescriptorHandleForHeapStart());
-
-	//// nullptrチェック
-	//assert(device);
-	//assert(cmdList);
-
-	////頂点バッファ、インデックスバッファの設定
-	//cmdList->IASetVertexBuffers(0, 1, &model->VbView());
-	//cmdList->IASetIndexBuffer(&model->IbView());
-
-	//// パイプラインステートの設定
-	//cmdList->SetPipelineState(_pipelinestate.Get());
-
-	////ルートシグネチャーの設定
-	//cmdList->SetGraphicsRootSignature(_rootsignature.Get());
-
-	////定数バッファビューの設定
-	//cmdList->SetGraphicsRootConstantBufferView(0, PMDconstBuffB0->GetGPUVirtualAddress());//本来のやり方ではないよー
-
-	////モデル描画
-	//model->Draw(PMDobject::cmdList);
-
-	//ID3D12DescriptorHeap* mdh[] = { model->MaterialDescHeap()};
-	//cmdList->SetDescriptorHeaps(_countof(mdh), mdh);
-
-	//auto materialH = model->MaterialDescHeap()->GetGPUDescriptorHandleForHeapStart();
-	//unsigned int idxOffset = 0;
- //	auto cbvsrvIncSize = device->GetDescriptorHandleIncrementSize(
-	//	D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) * 4;
-	//for (auto& m : model->Materials()) {
-
-	//	cmdList->SetGraphicsRootDescriptorTable(1, materialH);
-	//	cmdList->DrawIndexedInstanced(m.indicesNum, 1, idxOffset, 0, 0);
-
-	//	//ヒープポインターとインデックスを次に進める
-	//	materialH.ptr += cbvsrvIncSize;
-	//	idxOffset += m.indicesNum;
-	//}
 }
 
 PMDobject::PMDobject()
 {
 	assert(SUCCEEDED(CreateRootSignaturePMD()));
 	assert(SUCCEEDED(CreateGraphicsPipelinePMD()));
+	assert(SUCCEEDED(CreateSceneView()));
 }
 
 PMDobject::~PMDobject()
@@ -256,6 +230,9 @@ HRESULT PMDobject::CreateRootSignaturePMD()
 
 	//ルートパラメータ
 	CD3DX12_ROOT_PARAMETER rootParams[3] = {};
+	rootParams[0].InitAsConstantBufferView(0, 0, D3D12_SHADER_VISIBILITY_ALL);
+	rootParams[1].InitAsConstantBufferView(1, 0, D3D12_SHADER_VISIBILITY_ALL);
+
 	rootParams[0].InitAsDescriptorTable(1, &descTblRanges[0]);//ビュープロジェクション変換
 	rootParams[1].InitAsDescriptorTable(1, &descTblRanges[1]);//ワールド・ボーン変換
 	rootParams[2].InitAsDescriptorTable(2, &descTblRanges[2]);//マテリアル周り
@@ -284,7 +261,6 @@ HRESULT PMDobject::CreateRootSignaturePMD()
 
 HRESULT PMDobject::CreateSceneView()
 {
-	DXGI_SWAP_CHAIN_DESC1 desc = {};
 	HRESULT result;
 
 	result = device->CreateCommittedResource(

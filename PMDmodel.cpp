@@ -226,24 +226,73 @@ ID3D12Resource* PMDmodel::CreateBlackTexture()
 	return blackBuff;
 }
 
+void* PMDmodel::Transform::operator new(size_t size)
+{
+	return _aligned_malloc(size, 16);
+}
+
+PMDmodel::PMDmodel(ID3D12Device* device, const char* filepath, PMDobject& object) :
+	_object(object)
+{
+	// 再初期化チェック
+	assert(!PMDmodel::device);
+
+	// nullptrチェック
+	assert(device);
+
+	PMDmodel::device = device;
+
+	transform.world = XMMatrixIdentity();
+	LoadPMDFile(filepath);
+	CreateTransform();
+	CreateMaterial();
+	CreateMaterialAndTextureView();
+}
+
+PMDmodel::~PMDmodel()
+{
+}
+
 void PMDmodel::Update()
 {
-	MaterialForHlsl* mapmatrix = nullptr;
+	//MaterialForHlsl* mapmatrix = nullptr;
+	//HRESULT result;
+
+	//result = PMDconstBuffB1->Map(0, nullptr, (void**)&mapmatrix);//マップ
+	//PMDconstBuffB1->SetName(L"PMDconstBuff");
+	//if (FAILED(result)) {
+	//	assert(0);
+	//}
+
+	////データ転送
+	////mapmatrix->alpha = material.material.alpha;
+	//mapmatrix->ambient = material.material.ambient;
+	//mapmatrix->diffuse = material.material.diffuse;
+	//mapmatrix->specular = material.material.specular;
+	////mapmatrix->specularStrength = material.material.specularStrength;
+	//PMDconstBuffB1->Unmap(0, nullptr);
+		// スケール、回転、平行移動行列の計算
+	XMMATRIX matScale, matRot, matTrans;
 	HRESULT result;
+	matScale = XMMatrixScaling(scale.x, scale.y, scale.z);
+	matRot = XMMatrixIdentity();
+	matRot *= XMMatrixRotationZ(XMConvertToRadians(rotation.z));
+	matRot *= XMMatrixRotationX(XMConvertToRadians(rotation.x));
+	matRot *= XMMatrixRotationY(XMConvertToRadians(rotation.y));
+	matTrans = XMMatrixTranslation(position.x, position.y, position.z);
 
-	result = PMDconstBuffB1->Map(0, nullptr, (void**)&mapmatrix);//マップ
-	PMDconstBuffB1->SetName(L"PMDconstBuff");
-	if (FAILED(result)) {
-		assert(0);
-	}
+	// ワールド行列の合成
+	matWorld = XMMatrixIdentity(); // 変形をリセット
+	matWorld *= matScale; // ワールド行列にスケーリングを反映
+	matWorld *= matRot; // ワールド行列に回転を反映
+	matWorld *= matTrans; // ワールド行列に平行移動を反映
 
-	//データ転送
-	//mapmatrix->alpha = material.material.alpha;
-	mapmatrix->ambient = material.material.ambient;
-	mapmatrix->diffuse = material.material.diffuse;
-	mapmatrix->specular = material.material.specular;
-	//mapmatrix->specularStrength = material.material.specularStrength;
-	PMDconstBuffB1->Unmap(0, nullptr);
+	transform.world = matWorld;
+	result = transformBuff->Map(0, nullptr, (void**)&mappedTransform);
+	if (FAILED(result)) { assert(0); }
+	*mappedTransform = transform;
+
+	transformBuff->Unmap(0, nullptr);
 }
 
 void PMDmodel::Draw(ID3D12GraphicsCommandList* cmdList)
@@ -276,33 +325,6 @@ void PMDmodel::Draw(ID3D12GraphicsCommandList* cmdList)
 		materialH.ptr += cbvsrvIncSize;
 		idxOffset += m.indicesNum;
 	}
-}
-
-PMDmodel::PMDmodel(ID3D12Device* device, const char* filepath, PMDobject& object) :
-	_object(object)
-{
-	// 再初期化チェック
-	assert(!PMDmodel::device);
-
-	// nullptrチェック
-	assert(device);
-
-	PMDmodel::device = device;
-
-	transform.world = XMMatrixIdentity();
-	LoadPMDFile(filepath);
-	CreateTransform();
-	CreateMaterial();
-	CreateMaterialAndTextureView();
-}
-
-PMDmodel::~PMDmodel()
-{
-}
-
-void* PMDmodel::Transform::operator new(size_t size)
-{
-	return _aligned_malloc(size, 16);
 }
 
 HRESULT PMDmodel::LoadPMDFile(const char* path)
@@ -497,6 +519,23 @@ HRESULT PMDmodel::CreateTransform()
 		IID_PPV_ARGS(&transformBuff));
 	if (FAILED(result)) { assert(0); }
 
+	XMMATRIX matScale, matRot, matTrans;
+
+	// スケール、回転、平行移動行列の計算
+	matScale = XMMatrixScaling(scale.x, scale.y, scale.z);
+	matRot = XMMatrixIdentity();
+	matRot *= XMMatrixRotationZ(XMConvertToRadians(rotation.z));
+	matRot *= XMMatrixRotationX(XMConvertToRadians(rotation.x));
+	matRot *= XMMatrixRotationY(XMConvertToRadians(rotation.y));
+	matTrans = XMMatrixTranslation(position.x, position.y, position.z);
+
+	// ワールド行列の合成
+	matWorld = XMMatrixIdentity(); // 変形をリセット
+	matWorld *= matScale; // ワールド行列にスケーリングを反映
+	matWorld *= matRot; // ワールド行列に回転を反映
+	matWorld *= matTrans; // ワールド行列に平行移動を反映
+
+	transform.world = matWorld;
 	result = transformBuff->Map(0, nullptr, (void**)&mappedTransform);
 	if (FAILED(result)) { assert(0); }
 	*mappedTransform = transform;

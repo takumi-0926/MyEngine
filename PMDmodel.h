@@ -127,6 +127,22 @@ public:
 	D3D12_INDEX_BUFFER_VIEW IbView() { return ibView; }
 	std::vector<Material> Materials() { return materials; }
 
+	void SetPosition(XMFLOAT3 position) {
+		this->position = position;
+	}
+
 public://メンバ変数
 	ComPtr<ID3D12Resource> PMDconstBuffB1; // 定数バッファ
+
+	// 色
+	XMFLOAT4 color = { 1,1,1,1 };
+	// ローカルスケール
+	XMFLOAT3 scale = { 1,1,1 };
+	// X,Y,Z軸回りのローカル回転角
+	XMFLOAT3 rotation = { 0,0,0 };
+	// ローカル座標
+	XMFLOAT3 position = { 0,0,0 };
+	// ローカルワールド変換行列
+	XMMATRIX matWorld;
+
 };

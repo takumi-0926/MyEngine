@@ -40,6 +40,9 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	//カメラをセット
 	camera = new DebugCamera(Application::window_width, Application::window_height, input);
 	BaseObject::SetCamera(camera);
+	camera->SetTarget({ 0,21,0 });
+	camera->SetDistance(3.0f);
+	camera->Update();
 
 	FbxObject3d::SetDevice(dx12->GetDevice());
 	FbxObject3d::SetCamera(camera);
@@ -61,6 +64,8 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 
 	pmdModel.reset(new PMDmodel(dx12->GetDevice(),"Resources/Model/初音ミクmetal.pmd", *pmdObject));
 	pmdObject.reset(new PMDobject());
+	pmdModel->scale = { 0.1,0.1,0.1 };
+	pmdModel->SetPosition({ 0,20,-1 });
 
 	//MMDオブジェクト----------------
 	//pModel = PMDmodel::Create();
@@ -70,8 +75,6 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	//pmdObj = PMDobject::Create();
 	//pmdObj->SetModel(pModel);
 	//pmdObj->Update();
-	//pmdObj->scale = { 0.1,0.1,0.1 };
-	//pmdObj->SetPosition({ 0,20,-1 });
 
 	//FBXオブジェクト----------------
 	fbxModel1 = FbxLoader::GetInstance()->LoadModelFromFile("cube");
@@ -86,9 +89,6 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 
 	FbxLoader::GetInstance()->LoadModelFromFile("cube");
 
-	camera->SetTarget({ 0,21,0 });
-	camera->SetDistance(3.0f);
-
 	input->Update();
 	//audio->Load();
 
@@ -102,8 +102,10 @@ void GameManager::Update()
 {
 	camera->Update();
 	obj01->Update();
-	//pmdObj->Update();
 	fbxObj1->Update();
+
+	pmdModel->Update();
+	pmdObject->Update();
 
 	//放物線運動
 	{
@@ -118,8 +120,8 @@ void GameManager::Update()
 			move.v = move.gravity * move.time;
 			obj01->position.z += 5.0f;
 			obj01->position.y += move.v0 - move.v;
-			pmdObj->position.z += 5.0f;
-			pmdObj->position.y += move.v0 - move.v;
+			pmdModel->position.z += 5.0f;
+			pmdModel->position.y += move.v0 - move.v;
 
 			move.time += (1.0f / 120.0f);
 			if (move.time >= 1.0f) {
@@ -127,8 +129,8 @@ void GameManager::Update()
 				move.moveNum = NONE;
 				obj01->position.z = 0.0f;
 				obj01->position.y = 20.0f;
-				pmdObj->position.y = 20.0f;
-				pmdObj->position.z = 0.0f;
+				pmdModel->position.y = 20.0f;
+				pmdModel->position.z = 0.0f;
 			}
 		}
 	}
@@ -145,7 +147,7 @@ void GameManager::Update()
 		if (move.flag == true && move.moveNum == AIR) {
 			move.v = move.gravity * move.time;
 			obj01->position.y += move.vy - move.v + move.air_resister;
-			pmdObj->position.y += move.vy - move.v + move.air_resister;
+			pmdModel->position.y += move.vy - move.v + move.air_resister;
 
 			if (move.time >= 0.3f) {
 				move.air_resister = move.k * move.v;
@@ -156,7 +158,7 @@ void GameManager::Update()
 				move.moveNum = NONE;
 				move.air_resister = 0.0f;
 				obj01->position.y = 20.0f;
-				pmdObj->position.y = 20.0f;
+				pmdModel->position.y = 20.0f;
 			}
 		}
 	}
