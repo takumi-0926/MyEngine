@@ -226,64 +226,6 @@ ID3D12Resource* PMDmodel::CreateBlackTexture()
 	return blackBuff;
 }
 
-//PMDmodel* PMDmodel::Create()
-//{
-	//PMDmodel* pModel = new PMDmodel();
-
-	//return pModel;
-//}
-
-bool PMDmodel::StaticInitialize(ID3D12Device* device)
-{
-	// 再初期化チェック
-	assert(!PMDmodel::device);
-
-	// nullptrチェック
-	assert(device);
-
-	PMDmodel::device = device;
-
-	// デスクリプタヒープの初期化
-	InitializeDescriptorHeap();
-
-	return true;
-}
-
-bool PMDmodel::Initialize()
-{
-	// nullptrチェック
-	assert(device);
-
-	//HRESULT result;
-	//// 定数バッファの生成
-	//result = _dev->CreateCommittedResource(
-	//	&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD), 	// アップロード可能
-	//	D3D12_HEAP_FLAG_NONE,
-	//	&CD3DX12_RESOURCE_DESC::Buffer((sizeof(MatricesData) + 0xff) & ~0xff),
-	//	D3D12_RESOURCE_STATE_GENERIC_READ,
-	//	nullptr,
-	//	IID_PPV_ARGS(&PMDconstBuffB1));
-
-	//マテリアルバッファの作成
-	auto materiaBuffSize = sizeof(MaterialForHlsl);
-	materiaBuffSize = (materiaBuffSize + 0xff) & ~0xff;
-
-	HRESULT result;
-
-	result = device->CreateCommittedResource(
-		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
-		D3D12_HEAP_FLAG_NONE,
-		&CD3DX12_RESOURCE_DESC::Buffer(materiaBuffSize * materialNum),//メモリがもったいない
-		D3D12_RESOURCE_STATE_GENERIC_READ,
-		nullptr,
-		IID_PPV_ARGS(&PMDconstBuffB1));
-	if (FAILED(result)) {
-		assert(0);
-	}
-
-	return true;
-}
-
 void PMDmodel::Update()
 {
 	MaterialForHlsl* mapmatrix = nullptr;
@@ -316,7 +258,7 @@ void PMDmodel::Draw(ID3D12GraphicsCommandList* cmdList)
 	ID3D12DescriptorHeap* transHeaps[] = { transformHeap.Get() };
 	cmdList->SetDescriptorHeaps(1, transHeaps);
 	auto transH = transformHeap->GetGPUDescriptorHandleForHeapStart();
-	//cmdList->SetGraphicsRootDescriptorTable(1, transH);
+	cmdList->SetGraphicsRootDescriptorTable(1, transH);
 
 	ID3D12DescriptorHeap* mdh[] = { materialDescHeap.Get() };
 	cmdList->SetDescriptorHeaps(1, mdh);
@@ -335,292 +277,6 @@ void PMDmodel::Draw(ID3D12GraphicsCommandList* cmdList)
 		idxOffset += m.indicesNum;
 	}
 }
-
-void PMDmodel::CreateModel(const std::string& strModelPath)
-{
-	//*使用構造体*----------------------------------------
-#pragma pack(1)//苦肉の策
-	//マテリアル構造体（途中で使わなくなる）
-	struct PMDMaterial {
-		XMFLOAT3 diffuse;//ディフューズ色
-		float alpha;	//ディフューズα
-		float specularStrength;//スペキュラの強さ（乗算値）
-		XMFLOAT3 specular;//スペキュラ色
-		XMFLOAT3 ambient;//アンビエント色
-		unsigned char toonIdx;//トゥーン番号
-		unsigned char edgeFlg;//マテリアルごとの輪郭線フラグ
-
-		//２バイトのパディングあり
-
-		uint32_t indicesNum;//このマテリアルが割り当てられる
-
-		char texFilePath[20];//テクスチャファイルパス+α
-
-	};//計７０バイトだが、２バイトのパディングがあるため７２バイトになる
-#pragma pack()
-	//ヘッダー
-	struct PMDHeader {
-		float vertion;
-		char model_name[20];
-		char comment[256];
-	};
-
-	//*ファイルオープン*----------------------------------
-	HRESULT result;
-	FILE* fp = nullptr;
-	PMDHeader pmdheader = {};
-	char signature[3] = {};//シグネチャ
-	//string strModelPath = "Model/初音ミクmetal.pmd";
-	result = fopen_s(&fp, strModelPath.c_str(), "rb");//ファイルを開く
-	if (FAILED(result)) { assert(0); }
-
-	fread(signature, sizeof(signature), 1, fp);
-	fread(&pmdheader, sizeof(pmdheader), 1, fp);
-
-	//*頂点関連*------------------------------------------
-	uint32_t vertnum;//頂点数
-	fread(&vertnum, sizeof(vertnum), 1, fp);
-	constexpr size_t pmdvertex_size = 38;//頂点当たりのサイズ
-	std::vector<unsigned char> vertices(vertnum * pmdvertex_size);// 頂点データ配列
-	vertices.resize(vertnum * pmdvertex_size);//バッファの確保
-	fread(vertices.data(), vertices.size(), 1, fp);//読み込み
-
-	//頂点バッファーの生成
-	D3D12_HEAP_PROPERTIES heapprop = {};
-	heapprop = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
-
-	D3D12_RESOURCE_DESC resdesc = {};
-	resdesc = CD3DX12_RESOURCE_DESC::Buffer(
-		vertices.size() * sizeof(vertices[0]));
-
-	//頂点バッファのリソース生成
-	result = device->CreateCommittedResource(
-		&heapprop, D3D12_HEAP_FLAG_NONE,
-		&resdesc, D3D12_RESOURCE_STATE_GENERIC_READ,
-		nullptr, IID_PPV_ARGS(vertBuff.ReleaseAndGetAddressOf()));
-	if (FAILED(result)) { assert(0); }
-
-	//頂点情報のコピー
-	unsigned char* vertMap = nullptr;
-	result = vertBuff->Map(0, nullptr, (void**)&vertMap);
-	std::copy(std::begin(vertices), std::end(vertices), vertMap);
-	vertBuff->Unmap(0, nullptr);//マップ解除
-
-	vbView.BufferLocation = vertBuff->GetGPUVirtualAddress();
-	vbView.SizeInBytes = vertices.size();
-	vbView.StrideInBytes = pmdvertex_size;
-
-	//*頂点インデックス関連*------------------------------
-	uint32_t indicesnum;
-	fread(&indicesnum, sizeof(indicesnum), 1, fp);
-	std::vector<unsigned short> indices(indicesnum);// 頂点インデックス配列	
-	fread(indices.data(), indices.size() * sizeof(indices[0]), 1, fp);
-
-	resdesc = CD3DX12_RESOURCE_DESC::Buffer(
-		indices.size() * sizeof(indices[0]));
-
-	result = device->CreateCommittedResource(
-		&heapprop, D3D12_HEAP_FLAG_NONE,
-		&resdesc, D3D12_RESOURCE_STATE_GENERIC_READ,
-		nullptr, IID_PPV_ARGS(&indexBuff));
-	if (FAILED(result)) { assert(0); }
-
-	unsigned short* mappedIdx = nullptr;
-	indexBuff->Map(0, nullptr, (void**)&mappedIdx);
-	copy(begin(indices), end(indices), mappedIdx);
-	indexBuff->Unmap(0, nullptr);
-
-	ibView.BufferLocation = indexBuff->GetGPUVirtualAddress();
-	ibView.Format = DXGI_FORMAT_R16_UINT;
-	ibView.SizeInBytes = indices.size() * sizeof(indices[0]);
-
-	//*マテリアル関連*------------------------------------
-	//マテリアルの読み込み
-	fread(&materialNum, sizeof(materialNum), 1, fp);
-
-	materials.resize(materialNum);
-	textureResources.resize(materialNum);
-	sphResources.resize(materialNum);
-	spaResources.resize(materialNum);
-
-	std::vector<PMDMaterial>pmdMaterials(materialNum);
-	fread(pmdMaterials.data(), pmdMaterials.size() * sizeof(PMDMaterial), 1, fp);
-	//コピー
-	for (int i = 0; i < pmdMaterials.size(); i++) {
-		materials[i].indicesNum = pmdMaterials[i].indicesNum;
-		materials[i].material.diffuse = pmdMaterials[i].diffuse;
-		materials[i].material.alpha = pmdMaterials[i].alpha;
-		materials[i].material.specular = pmdMaterials[i].specular;
-		materials[i].material.specularStrength = pmdMaterials[i].specularStrength;
-		materials[i].material.ambient = pmdMaterials[i].ambient;
-	}
-
-	for (int i = 0; i < pmdMaterials.size(); ++i) {
-		//if (strlen(pmdMaterials[i].texFilePath) == 0)
-		//{
-		//	textureResources[i] = nullptr;
-		//}
-		string texFileName = pmdMaterials[i].texFilePath;
-		string sphFileName = "";
-		if (count(texFileName.begin(), texFileName.end(), '*') > 0)
-		{
-			auto namepair = SplitFileName(texFileName);
-			if (GetExtension(namepair.first) == "sph" || GetExtension(namepair.first) == "spa")
-			{
-				texFileName = namepair.second;
-				//sphFileName = namepair.first;
-			}
-			else
-				texFileName = namepair.first;
-		}
-		else {
-			if (GetExtension(pmdMaterials[i].texFilePath) == "sph") {
-				sphFileName = pmdMaterials[i].texFilePath;
-				texFileName = "";
-			}
-			//else if (GetExtension(pmdMaterials[i].texFilePath) == "spa") {
-			//	spaFileName = pmdMaterials[i].texFilePath;
-			//	texFileName = "";
-			//}
-			else {
-				texFileName = pmdMaterials[i].texFilePath;
-			}
-		}
-
-		//モデルとテクスチャパスからアプリケーションからのテクスチャパスを得る
-		if (texFileName != "") {
-			auto texFilePath = GetTexturePathFromModelAndTexPath(strModelPath, texFileName.c_str());
-			textureResources[i] = LoadTextureFromFile(texFilePath);
-		}
-		if (sphFileName != "") {
-			auto sphFilePath = GetTexturePathFromModelAndTexPath(strModelPath, sphFileName.c_str());
-			sphResources[i] = LoadTextureFromFile(sphFilePath);
-		}
-	}
-
-	//**マテリアルデータ生成**----------------------------
-	//マテリアルバッファの作成
-
-	LoadMaterial();
-
-	result = CreateMaterialAndTextureView();
-	if (FAILED(result)) { assert(0); }
-
-	//後で関数化----------------------------------------
-	//読み込み用ボーン構造体
-#pragma pack(1)
-	struct PMDBone {
-		char BoneName[20];
-		unsigned short parentNo;
-		unsigned short nextNo;
-		unsigned char type;
-		unsigned short ikBoneNo;
-		XMFLOAT3 pos;
-	};
-#pragma pack()
-
-	unsigned short boneNum = 0;
-	fread(&boneNum, sizeof(boneNum), 1, fp);
-
-	std::vector<PMDBone> pmdBones(boneNum);
-	fread(pmdBones.data(), sizeof(PMDBone), boneNum, fp);
-
-	//ボーンノード
-	struct BoneNode
-	{
-		int BoneIdx;					//ボーンインデックス
-		XMFLOAT3 startPos;				//ボーン基準点
-		XMFLOAT3 endPos;				//ボーン先端点
-		std::vector<BoneNode*> children;//子ノード
-	};
-
-	std::map<std::string, BoneNode>_boneNodeTable;
-
-	std::vector<std::string> boneNames(pmdBones.size());
-
-	for (int idx = 0; idx < pmdBones.size(); idx++)
-	{
-		auto& pb = pmdBones[idx];
-		boneNames[idx] = pb.BoneName;
-		auto& node = _boneNodeTable[pb.BoneName];
-		node.BoneIdx = idx;
-		node.startPos = pb.pos;
-	}
-
-	for (auto& pb : pmdBones)
-	{
-		if (pb.parentNo >= pmdBones.size()) {
-			continue;
-		}
-
-		auto parentName = boneNames[pb.parentNo];
-		_boneNodeTable[parentName].children.emplace_back(
-			&_boneNodeTable[pb.BoneName]);
-	}
-
-	boneMatrices.resize(pmdBones.size());
-
-	std::fill(
-		boneMatrices.begin(),
-		boneMatrices.end(),
-		XMMatrixIdentity()
-	);
-
-	fclose(fp);//ファイルを閉じる
-}
-
-void PMDmodel::Loadtexture()
-{
-}
-
-void PMDmodel::LoadMaterial()
-{
-	auto materiaBuffSize = sizeof(MaterialForHlsl) * (1 + boneMatrices.size());
-	materiaBuffSize = (materiaBuffSize + 0xff) & ~0xff;
-
-	auto result = device->CreateCommittedResource(
-		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
-		D3D12_HEAP_FLAG_NONE,
-		&CD3DX12_RESOURCE_DESC::Buffer(materiaBuffSize * materialNum),//メモリがもったいない
-		D3D12_RESOURCE_STATE_GENERIC_READ,
-		nullptr,
-		IID_PPV_ARGS(&materialBuff));
-	if (FAILED(result)) { assert(0); }
-
-	//マップマテリアルにコピー
-	char* mapMaterial = nullptr;
-	result = materialBuff->Map(0, nullptr, (void**)&mapMaterial);
-	if (FAILED(result)) { assert(0); }
-
-	for (auto& m : materials) {
-		*((MaterialForHlsl*)mapMaterial) = m.material;//データコピー
-		mapMaterial += materiaBuffSize;//次のアライメント位置まで
-	}
-	materialBuff->Unmap(0, nullptr);
-}
-
-
-bool PMDmodel::InitializeDescriptorHeap()
-{
-	HRESULT result = S_FALSE;
-
-	// デスクリプタヒープを生成	
-	D3D12_DESCRIPTOR_HEAP_DESC descheapDesc = {};
-	descheapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-	descheapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-	descheapDesc.NodeMask = 0;
-	descheapDesc.NumDescriptors = 2;
-	result = device->CreateDescriptorHeap(&descheapDesc, IID_PPV_ARGS(&descHeap));//生成
-	if (FAILED(result)) {
-		assert(0);
-		return false;
-	}
-
-	// デスクリプタサイズを取得
-	descriptorHandleIncrementSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-	return true;
-}
-
 
 PMDmodel::PMDmodel(ID3D12Device* device, const char* filepath, PMDobject& object) :
 	_object(object)
@@ -678,6 +334,15 @@ HRESULT PMDmodel::LoadPMDFile(const char* path)
 		char comment[256];
 	};
 
+	struct PMDVertex {
+		XMFLOAT3 pos;
+		XMFLOAT3 normal;
+		XMFLOAT2 uv;
+		unsigned short boneNo[2];
+		unsigned char boneWeight;
+		unsigned char edgeFlg;
+	};
+
 	//*ファイルオープン*----------------------------------
 	HRESULT result;
 	FILE* fp = nullptr;
@@ -696,7 +361,7 @@ HRESULT PMDmodel::LoadPMDFile(const char* path)
 	//*頂点関連*------------------------------------------
 	uint32_t vertnum;//頂点数
 	fread(&vertnum, sizeof(vertnum), 1, fp);
-	constexpr size_t pmdvertex_size = 38;//頂点当たりのサイズ
+	constexpr unsigned int pmdvertex_size = sizeof(PMDVertex) - 2;//頂点当たりのサイズ
 	std::vector<unsigned char> vertices(vertnum * pmdvertex_size);// 頂点データ配列
 	vertices.resize(vertnum * pmdvertex_size);//バッファの確保
 	fread(vertices.data(), vertices.size(), 1, fp);//読み込み

@@ -11,7 +11,7 @@ cbuffer cbuff0 : register(b0) {
 }
 
 //
-cbuffer Transform : register(b2) {
+cbuffer Transform : register(b1) {
 	matrix world;
 	matrix bones[256];//ƒ{[ƒ“s—ñ
 }

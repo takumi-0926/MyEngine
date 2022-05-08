@@ -3,20 +3,107 @@
 ComPtr<ID3D12RootSignature> PMDobject::_rootsignature;
 ComPtr<ID3D12PipelineState> PMDobject::_pipelinestate;
 
-bool PMDobject::StaticInitialize(ID3D12Device* device, SIZE ret)
+void PMDobject::Update()
 {
-	//assert(!PMDobject::device);
+	HRESULT result;
+	XMMATRIX matScale, matRot, matTrans;
 
-	assert(device);
+	// スケール、回転、平行移動行列の計算
+	matScale = XMMatrixScaling(scale.x, scale.y, scale.z);
+	matRot = XMMatrixIdentity();
+	matRot *= XMMatrixRotationZ(XMConvertToRadians(rotation.z));
+	matRot *= XMMatrixRotationX(XMConvertToRadians(rotation.x));
+	matRot *= XMMatrixRotationY(XMConvertToRadians(rotation.y));
+	matTrans = XMMatrixTranslation(position.x, position.y, position.z);
 
-	PMDobject::device = device;
+	// ワールド行列の合成
+	matWorld = XMMatrixIdentity(); // 変形をリセット
+	matWorld *= matScale; // ワールド行列にスケーリングを反映
+	matWorld *= matRot; // ワールド行列に回転を反映
+	matWorld *= matTrans; // ワールド行列に平行移動を反映
 
-	InitializeGraphicsPipeline();
+	const XMMATRIX& matViewProjection = camera->GetViewProjectionMatrix();
+	const XMFLOAT3& cameraPos = camera->GetEye();
 
-    return true;
+	// 定数バッファへデータ転送(PMD)
+	ConstBufferDataB0* constMap = nullptr;
+	result = PMDconstBuffB0->Map(0, nullptr, (void**)&constMap);
+	if (FAILED(result)) {
+		assert(0);
+	}
+
+	//constMap->mat = matWorld * matView * matProjection;	// 行列の合成
+	constMap->viewproj = matViewProjection;
+	constMap->world = matWorld;
+	constMap->cameraPos = cameraPos;
+	PMDconstBuffB0->Unmap(0, nullptr);
+	PMDconstBuffB0->SetName(L"SSSSSS");
+
+	//model->Update();
 }
 
-bool PMDobject::InitializeGraphicsPipeline()
+void PMDobject::Draw()
+{
+	cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	// パイプラインステートの設定
+	cmdList->SetPipelineState(_pipelinestate.Get());
+	// ルートシグネチャの設定
+	cmdList->SetGraphicsRootSignature(_rootsignature.Get());
+
+	//現在のシーン(ビュープロジェクション)をセット
+	ID3D12DescriptorHeap* sceneheaps[] = { _sceneDescHeap.Get() };
+	cmdList->SetDescriptorHeaps(1, sceneheaps);
+	cmdList->SetGraphicsRootDescriptorTable(0, _sceneDescHeap->GetGPUDescriptorHandleForHeapStart());
+
+	//// nullptrチェック
+	//assert(device);
+	//assert(cmdList);
+
+	////頂点バッファ、インデックスバッファの設定
+	//cmdList->IASetVertexBuffers(0, 1, &model->VbView());
+	//cmdList->IASetIndexBuffer(&model->IbView());
+
+	//// パイプラインステートの設定
+	//cmdList->SetPipelineState(_pipelinestate.Get());
+
+	////ルートシグネチャーの設定
+	//cmdList->SetGraphicsRootSignature(_rootsignature.Get());
+
+	////定数バッファビューの設定
+	//cmdList->SetGraphicsRootConstantBufferView(0, PMDconstBuffB0->GetGPUVirtualAddress());//本来のやり方ではないよー
+
+	////モデル描画
+	//model->Draw(PMDobject::cmdList);
+
+	//ID3D12DescriptorHeap* mdh[] = { model->MaterialDescHeap()};
+	//cmdList->SetDescriptorHeaps(_countof(mdh), mdh);
+
+	//auto materialH = model->MaterialDescHeap()->GetGPUDescriptorHandleForHeapStart();
+	//unsigned int idxOffset = 0;
+ //	auto cbvsrvIncSize = device->GetDescriptorHandleIncrementSize(
+	//	D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) * 4;
+	//for (auto& m : model->Materials()) {
+
+	//	cmdList->SetGraphicsRootDescriptorTable(1, materialH);
+	//	cmdList->DrawIndexedInstanced(m.indicesNum, 1, idxOffset, 0, 0);
+
+	//	//ヒープポインターとインデックスを次に進める
+	//	materialH.ptr += cbvsrvIncSize;
+	//	idxOffset += m.indicesNum;
+	//}
+}
+
+PMDobject::PMDobject()
+{
+	assert(SUCCEEDED(CreateRootSignaturePMD()));
+	assert(SUCCEEDED(CreateGraphicsPipelinePMD()));
+}
+
+PMDobject::~PMDobject()
+{
+}
+
+HRESULT PMDobject::CreateGraphicsPipelinePMD()
 {
 	HRESULT result = S_FALSE;
 	ComPtr<ID3DBlob> vsBlob; // 頂点シェーダオブジェクト
@@ -147,225 +234,96 @@ bool PMDobject::InitializeGraphicsPipeline()
 	gpipeline.SampleDesc.Count = 1;
 	gpipeline.SampleDesc.Quality = 0;
 
-	//ルートシグネチャ
-	//ID3D12RootSignature* rootsignature;
-	D3D12_ROOT_SIGNATURE_DESC rootSignatureDesc = {};
-	rootSignatureDesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
-
-	//デスクリプタレンジ
-	D3D12_DESCRIPTOR_RANGE descTblRange[3] = {};
-	descTblRange[0].NumDescriptors = 1;//定数1つ目
-	descTblRange[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_CBV;//種別(定数)
-	descTblRange[0].BaseShaderRegister = 0;//０番スロットから
-	descTblRange[0].OffsetInDescriptorsFromTableStart
-		= D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-
-	descTblRange[1].NumDescriptors = 1;//定数2つ目
-	descTblRange[1].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_CBV;//種別(定数)
-	descTblRange[1].BaseShaderRegister = 1;//1番スロットから
-	descTblRange[1].OffsetInDescriptorsFromTableStart
-		= D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-
-	descTblRange[2].NumDescriptors = 3;//テクスチャ2つ
-	descTblRange[2].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;//種別(テクスチャ)
-	descTblRange[2].BaseShaderRegister = 0;//０番スロットから
-	descTblRange[2].OffsetInDescriptorsFromTableStart
-		= D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-
-	//ルートパラメーター
-	D3D12_ROOT_PARAMETER rootparam[3] = {};
-	//rootparam[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-	//rootparam[0].DescriptorTable.pDescriptorRanges = &descTblRange[0];
-	//rootparam[0].DescriptorTable.NumDescriptorRanges = 1;
-	//rootparam[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;//全てのシェーダから見える
-
-	//本来のやり方ではないよー
-	rootparam[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	rootparam[0].Descriptor.RegisterSpace = 0;
-	rootparam[0].Descriptor.ShaderRegister = 0;
-	rootparam[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;//全てのシェーダから見える
-
-	rootparam[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-	rootparam[1].DescriptorTable.pDescriptorRanges = &descTblRange[1];
-	rootparam[1].DescriptorTable.NumDescriptorRanges = 2;
-	rootparam[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;//全てのシェーダから見える
-
-	//rootparam[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	//rootparam[2].Descriptor.RegisterSpace = 0;
-	//rootparam[2].Descriptor.ShaderRegister = 1;
-	//rootparam[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-
-	rootSignatureDesc.pParameters = rootparam;//ルートパラメーターの先頭アドレス
-	rootSignatureDesc.NumParameters = 2;//ルートパラメーター数
-
-	//サンプラー
-	D3D12_STATIC_SAMPLER_DESC sampleDesc = {};
-	sampleDesc.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;//横方向の繰り返し
-	sampleDesc.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;//縦方向の繰り返し
-	sampleDesc.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;//奥行きの繰り返し
-	sampleDesc.BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK;//ボーダーは黒
-	sampleDesc.Filter = D3D12_FILTER_COMPARISON_MIN_MAG_MIP_POINT;//線形補間
-	sampleDesc.MaxLOD = D3D12_FLOAT32_MAX;//ミップマップ最大値
-	sampleDesc.MinLOD = 0.0f;//ミップマップ最小値
-	sampleDesc.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;//ピクセルシェーダから見える
-	sampleDesc.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;//リサンプリングしない
-
-	rootSignatureDesc.pStaticSamplers = &sampleDesc;
-	rootSignatureDesc.NumStaticSamplers = 1;
-
-	ComPtr<ID3DBlob> rootSigBlob;
-	result = D3D12SerializeRootSignature(
-		&rootSignatureDesc,
-		D3D_ROOT_SIGNATURE_VERSION_1_0,
-		&rootSigBlob,
-		&errorBlob);
-	if (FAILED(result)) {
-		return result;
-	}
-
-	result = device->CreateRootSignature(
-		0,
-		rootSigBlob->GetBufferPointer(),
-		rootSigBlob->GetBufferSize(),
-		IID_PPV_ARGS(&_rootsignature));
-	if (FAILED(result)) {
-		return result;
-	}
-
 	//rootSigBlob->Release();
 	gpipeline.pRootSignature = _rootsignature.Get();
 
 	//グラフィックスパイプラインステートオブジェクトの生成
 	//ID3D12PipelineState* _pipelinestate = nullptr;
 	result = device->CreateGraphicsPipelineState(&gpipeline, IID_PPV_ARGS(&_pipelinestate));
+	if (FAILED(result)) { return result; }
+
+	return S_OK;
+}
+
+HRESULT PMDobject::CreateRootSignaturePMD()
+{
+	//レンジ
+	CD3DX12_DESCRIPTOR_RANGE  descTblRanges[4] = {};//テクスチャと定数の２つ
+	descTblRanges[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0);//定数[b0](ビュープロジェクション用)
+	descTblRanges[1].Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 1);//定数[b1](ワールド、ボーン用)
+	descTblRanges[2].Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 2);//定数[b2](マテリアル用)
+	descTblRanges[3].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 3, 0);//テクスチャ４つ(基本とsphとspaとトゥーン)
+
+	//ルートパラメータ
+	CD3DX12_ROOT_PARAMETER rootParams[3] = {};
+	rootParams[0].InitAsDescriptorTable(1, &descTblRanges[0]);//ビュープロジェクション変換
+	rootParams[1].InitAsDescriptorTable(1, &descTblRanges[1]);//ワールド・ボーン変換
+	rootParams[2].InitAsDescriptorTable(2, &descTblRanges[2]);//マテリアル周り
+
+	CD3DX12_STATIC_SAMPLER_DESC samplerDescs[2] = {};
+	samplerDescs[0].Init(0);
+	samplerDescs[1].Init(1, D3D12_FILTER_ANISOTROPIC, D3D12_TEXTURE_ADDRESS_MODE_CLAMP, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
+
+	CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc = {};
+	rootSignatureDesc.Init(3, rootParams, 2, samplerDescs, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+
+	ComPtr<ID3DBlob> rootSigBlob = nullptr;
+	ComPtr<ID3DBlob> errorBlob = nullptr;
+	auto result = D3D12SerializeRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &rootSigBlob, &errorBlob);
 	if (FAILED(result)) {
+		assert(SUCCEEDED(result));
+		return result;
+	}
+	result = device->CreateRootSignature(0, rootSigBlob->GetBufferPointer(), rootSigBlob->GetBufferSize(), IID_PPV_ARGS(_rootsignature.ReleaseAndGetAddressOf()));
+	if (FAILED(result)) {
+		assert(SUCCEEDED(result));
+		return result;
+	}
+	return result;
+}
+
+HRESULT PMDobject::CreateSceneView()
+{
+	DXGI_SWAP_CHAIN_DESC1 desc = {};
+	HRESULT result;
+
+	result = device->CreateCommittedResource(
+		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+		D3D12_HEAP_FLAG_NONE,
+		&CD3DX12_RESOURCE_DESC::Buffer((sizeof(ConstBufferDataB0_1) + 0xff) & ~0xff),
+		D3D12_RESOURCE_STATE_GENERIC_READ,
+		nullptr,
+		IID_PPV_ARGS(_sceneConstBuff.ReleaseAndGetAddressOf())
+	);
+	if (FAILED(result)) {
+		assert(SUCCEEDED(result));
 		return result;
 	}
 
-    return true;
-}
-
-PMDobject* PMDobject::Create()
-{
-    //モデルのインスタンスを作成
-    PMDobject* pmdObject = new PMDobject();
-    if (pmdObject == nullptr) {
-        return nullptr;
-    }
-
-	//すけーるをセット
-	float scale_val = 20;
-	pmdObject->scale = { scale_val,scale_val ,scale_val };
-
-    //初期化
-    if (!pmdObject->Initialize()) {
-        delete pmdObject;
-        assert(0);
-        return nullptr;
-    }
-
-    return pmdObject;
-}
-
-void PMDobject::SetModel(PMDmodel* model)
-{
-	this->model = model;
-	model->Initialize();
-}
-
-bool PMDobject::Initialize()
-{
-	assert(device);
-
-	HRESULT result;
-
-	// 定数バッファの生成
-	result = device->CreateCommittedResource(
-		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD), 	// アップロード可能
-		D3D12_HEAP_FLAG_NONE,
-		&CD3DX12_RESOURCE_DESC::Buffer((sizeof(ConstBufferDataB0) + 0xff) & ~0xff),
-		D3D12_RESOURCE_STATE_GENERIC_READ,
-		nullptr,
-		IID_PPV_ARGS(&PMDconstBuffB0));
-
-    return true;
-}
-
-void PMDobject::Update()
-{
-	HRESULT result;
-	XMMATRIX matScale, matRot, matTrans;
-
-	// スケール、回転、平行移動行列の計算
-	matScale = XMMatrixScaling(scale.x, scale.y, scale.z);
-	matRot = XMMatrixIdentity();
-	matRot *= XMMatrixRotationZ(XMConvertToRadians(rotation.z));
-	matRot *= XMMatrixRotationX(XMConvertToRadians(rotation.x));
-	matRot *= XMMatrixRotationY(XMConvertToRadians(rotation.y));
-	matTrans = XMMatrixTranslation(position.x, position.y, position.z);
-
-	// ワールド行列の合成
-	matWorld = XMMatrixIdentity(); // 変形をリセット
-	matWorld *= matScale; // ワールド行列にスケーリングを反映
-	matWorld *= matRot; // ワールド行列に回転を反映
-	matWorld *= matTrans; // ワールド行列に平行移動を反映
+	_mappedSceneData = nullptr;//マップ先を示すポインタ
+	result = _sceneConstBuff->Map(0, nullptr, (void**)&_mappedSceneData);//マップ
 
 	const XMMATRIX& matViewProjection = camera->GetViewProjectionMatrix();
 	const XMFLOAT3& cameraPos = camera->GetEye();
 
-	// 定数バッファへデータ転送(PMD)
-	ConstBufferDataB0* constMap = nullptr;
-	result = PMDconstBuffB0->Map(0, nullptr, (void**)&constMap);
-	if (FAILED(result)) {
-		assert(0);
-	}
+	_mappedSceneData->viewproj = matViewProjection;
+	_mappedSceneData->cameraPos = cameraPos;
 
-	//constMap->mat = matWorld * matView * matProjection;	// 行列の合成
-	constMap->viewproj = matViewProjection;
-	constMap->world = matWorld;
-	constMap->cameraPos = cameraPos;
-	PMDconstBuffB0->Unmap(0, nullptr);
-	PMDconstBuffB0->SetName(L"SSSSSS");
+	D3D12_DESCRIPTOR_HEAP_DESC descHeapDesc = {};
+	descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;//シェーダから見えるように
+	descHeapDesc.NodeMask = 0;//マスクは0
+	descHeapDesc.NumDescriptors = 1;//
+	descHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;//デスクリプタヒープ種別
+	result = device->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(_sceneDescHeap.ReleaseAndGetAddressOf()));//生成
 
-	//model->Update();
-}
+	////デスクリプタの先頭ハンドルを取得しておく
+	auto heapHandle = _sceneDescHeap->GetCPUDescriptorHandleForHeapStart();
 
-void PMDobject::Draw()
-{
-	// nullptrチェック
-	assert(device);
-	assert(cmdList);
+	D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc = {};
+	cbvDesc.BufferLocation = _sceneConstBuff->GetGPUVirtualAddress();
+	cbvDesc.SizeInBytes = _sceneConstBuff->GetDesc().Width;
+	//定数バッファビューの作成
+	device->CreateConstantBufferView(&cbvDesc, heapHandle);
+	return result;
 
-	//頂点バッファ、インデックスバッファの設定
-	cmdList->IASetVertexBuffers(0, 1, &model->VbView());
-	cmdList->IASetIndexBuffer(&model->IbView());
-
-	// パイプラインステートの設定
-	cmdList->SetPipelineState(_pipelinestate.Get());
-
-	//ルートシグネチャーの設定
-	cmdList->SetGraphicsRootSignature(_rootsignature.Get());
-
-	//定数バッファビューの設定
-	cmdList->SetGraphicsRootConstantBufferView(0, PMDconstBuffB0->GetGPUVirtualAddress());//本来のやり方ではないよー
-
-	//モデル描画
-	model->Draw(PMDobject::cmdList);
-
-	ID3D12DescriptorHeap* mdh[] = { model->MaterialDescHeap()};
-	cmdList->SetDescriptorHeaps(_countof(mdh), mdh);
-
-	auto materialH = model->MaterialDescHeap()->GetGPUDescriptorHandleForHeapStart();
-	unsigned int idxOffset = 0;
- 	auto cbvsrvIncSize = device->GetDescriptorHandleIncrementSize(
-		D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) * 4;
-	for (auto& m : model->Materials()) {
-
-		cmdList->SetGraphicsRootDescriptorTable(1, materialH);
-		cmdList->DrawIndexedInstanced(m.indicesNum, 1, idxOffset, 0, 0);
-
-		//ヒープポインターとインデックスを次に進める
-		materialH.ptr += cbvsrvIncSize;
-		idxOffset += m.indicesNum;
-	}
 }

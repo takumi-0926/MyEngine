@@ -81,7 +81,6 @@ private:
 	ComPtr<ID3D12Resource> transformMat = nullptr;
 	ComPtr<ID3D12DescriptorHeap> transformHeap = nullptr;
 
-
 	//マテリアル
 	uint32_t materialNum;
 	std::vector<Material>materials;
@@ -111,32 +110,12 @@ private:
 	HRESULT CreateTransform();
 
 	HRESULT LoadPMDFile(const char* path);
-
+	
 public:
 	PMDmodel(ID3D12Device* device, const char* filepath,PMDobject& object);
 	~PMDmodel();
 
-	static PMDmodel* Create();
-
-	//静的初期化
-	static bool StaticInitialize(ID3D12Device* device);
-	//ヒープ初期化
-	static bool InitializeDescriptorHeap();
-
-	//モデル読み込み
-	void CreateModel(const std::string& strModelPath);
-
-	//テクスチャ読み込み
-	void Loadtexture();
-
-	//マテリアル読み込み
-	void LoadMaterial();
-
-
 public:
-
-	bool Initialize();
-
 	void Update();
 
 	void Draw(ID3D12GraphicsCommandList* cmdList);

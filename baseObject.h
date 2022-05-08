@@ -47,6 +47,15 @@ protected:
 		XMMATRIX world;
 		XMFLOAT3 cameraPos;
 	};
+	// 定数バッファ用データ構造体B0
+	struct ConstBufferDataB0_1
+	{
+		//XMFLOAT4 color;	// 色 (RGBA)
+		//XMMATRIX mat;	// ３Ｄ変換行列
+		XMMATRIX viewproj;
+		XMFLOAT3 cameraPos;
+	};
+
 
 protected: // 静的メンバ変数
 	// デバイス
