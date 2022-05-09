@@ -347,8 +347,8 @@ void GameManager::Draw()
 	obj01->Draw();
 
 	//pmdObj->Draw();
-	pmdObject->Draw();
-	pmdModel->Draw(cmdList);
+	//pmdObject->Draw();
+	//pmdModel->Draw(cmdList);
 
 	BaseObject::PostDraw();
 
