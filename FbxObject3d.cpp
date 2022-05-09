@@ -23,6 +23,15 @@ void FbxObject3d::Initialize()
 		nullptr,
 		IID_PPV_ARGS(&constBufferTransform)
 	);
+
+	result = device->CreateCommittedResource(
+		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+		D3D12_HEAP_FLAG_NONE,
+		&CD3DX12_RESOURCE_DESC::Buffer((sizeof(ConstBufferDetaTransform) + 0xff) & ~0xff),
+		D3D12_RESOURCE_STATE_GENERIC_READ,
+		nullptr,
+		IID_PPV_ARGS(&constBuffSkin)
+	);
 }
 
 void FbxObject3d::Update()
@@ -60,6 +69,24 @@ void FbxObject3d::Update()
 		constMap->cameraPos = cameraPos;
 		constBufferTransform->Unmap(0, nullptr);
 	}
+
+	std::vector<FbxModel::Bone>& bones = model->GetBones();
+
+	ConstBufferDataSkin* constMapSkin = nullptr;
+	result = constBuffSkin->Map(0, nullptr, (void**)&constMapSkin);
+	for (int i = 0; i < bones.size(); i++)
+	{
+		XMMATRIX matCurrentPose;
+
+		FbxAMatrix fbxCurrentPose =
+			bones[i].fbxCluster->GetLink()->EvaluateGlobalTransform(0);
+
+		FbxLoader::ConvertMatrixFormFbx(&matCurrentPose, fbxCurrentPose);
+
+		constMapSkin->bones[i] = bones[i].invInitialPose * matCurrentPose;
+	}
+
+	constBuffSkin->Unmap(0, nullptr);
 }
 
 void FbxObject3d::Draw(ID3D12GraphicsCommandList* cmdList)
@@ -150,6 +177,16 @@ void FbxObject3d::CreateGraphicsPipeline()
 		},
 		{ // uv座標(1行で書いたほうが見やすい)
 			"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0,
+			D3D12_APPEND_ALIGNED_ELEMENT,
+			D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0
+		},
+		{ // 法線ベクトル(1行で書いたほうが見やすい)
+			"BONEINDICES", 0, DXGI_FORMAT_R32G32B32A32_UINT, 0,
+			D3D12_APPEND_ALIGNED_ELEMENT,
+			D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0
+		},
+		{ // 法線ベクトル(1行で書いたほうが見やすい)
+			"BONEWEIGHTS", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0,
 			D3D12_APPEND_ALIGNED_ELEMENT,
 			D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0
 		},
