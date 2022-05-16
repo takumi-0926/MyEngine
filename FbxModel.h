@@ -8,6 +8,8 @@
 #include <d3d12.h>
 #include <d3dx12.h>
 
+#include <fbxsdk.h>
+
 struct Node {
 	std::string name;
 	DirectX::XMVECTOR scaling = { 1,1,1,0 };
@@ -41,6 +43,10 @@ private:
 
 	ComPtr<ID3D12DescriptorHeap> descHeapSRV;
 
+	FbxScene* fbxScene = nullptr;
+
+	~FbxModel();
+
 public:
 	void CreateBuffers(ID3D12Device* device);
 
@@ -49,10 +55,24 @@ public:
 public:
 	friend class FbxLoader;
 
-	struct VertexPosNormalUv {
+	static const int MAX_BONE_INDICES = 4;
+
+	struct VertexPosNormalUvSkin {
 		DirectX::XMFLOAT3 pos;
 		DirectX::XMFLOAT3 normal;
 		DirectX::XMFLOAT2 uv;
+		UINT boneIndex[MAX_BONE_INDICES];//ボーン番号
+		float boneWeight[MAX_BONE_INDICES];//ボーンの重み
+	};
+
+	//ボーン構造体
+	struct Bone {
+		string name;//名前
+		XMMATRIX invInitialPose;//初期姿勢の逆行列
+		FbxCluster* fbxCluster;//クラスター(FBX側のボーン情報)
+		Bone(const string& name) {//コンストラクタ
+			this->name = name;
+		}
 	};
 
 	DirectX::XMFLOAT3 ambient = { 1,1,1 };
@@ -65,15 +85,20 @@ public:
 
 	Node* meshNode = nullptr;
 
-	std::vector<VertexPosNormalUv> vertices;
+	std::vector<VertexPosNormalUvSkin> vertices;
 
 	std::vector<unsigned short> indices;
 
+	//ボーン配列
+	vector<Bone> bones;
 private:
 	std::string name;
 
 	std::vector<Node> nodes;
 
 public:
+	//ゲッター
 	const XMMATRIX& GetModelTransform() { return meshNode->globleTransForm; }
+	vector<Bone>& GetBones() { return bones; }
+	FbxScene* GetFbxScene() { return fbxScene; }
 };

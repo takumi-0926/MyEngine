@@ -26,6 +26,12 @@ public:
 		XMFLOAT3 cameraPos;
 	};
 
+	static const int MAX_BONES = 32;
+
+	struct ConstBufferDataSkin {
+		XMMATRIX bones[MAX_BONES];
+	};
+
 public:
 	void Initialize();
 
@@ -62,4 +68,6 @@ protected:
 	FbxModel* model = nullptr;
 
 	ComPtr<ID3D12Resource> constBufferTransform;
+
+	ComPtr<ID3D12Resource> constBuffSkin;
 };

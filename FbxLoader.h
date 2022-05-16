@@ -42,15 +42,25 @@ public:
 	/// <param name="fbxNode"></param>
 	void ParseMesh(FbxModel* model, FbxNode* fbxNode);
 
+	//面を構成するデータの読み取り
 	void ParseMeshFaces(FbxModel* model, FbxMesh* fbxMesh);
-
+	//頂点座標の読み取り
 	void ParseMeshVertices(FbxModel* model, FbxMesh* fbxMesh);
-
+	//マテリアルの読み取り
 	void ParseMaterial(FbxModel* model, FbxNode* fbxNode);
-
+	//テクスチャの読み取り
 	void LoadTexture(FbxModel* model, const std::string& fullPath);
+	//スキニング情報の読み取り
+	void ParseSkin(FbxModel* model, FbxMesh* fbxMesh);
 
 	std::string ExtractFileName(const std::string& path);
+
+	/// <summary>
+	/// FBX行列をXMMatrixに変換
+	/// </summary>
+	/// <param name="dst">書き込み先</param>
+	/// <param name="src">元となるFBX行列</param>
+	static void ConvertMatrixFormFbx(DirectX::XMMATRIX* dst, const FbxMatrix& src);
 
 private:
 	// privateなコンストラクタ（シングルトンパターン）
