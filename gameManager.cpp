@@ -64,8 +64,8 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 
 	pmdModel.reset(new PMDmodel(dx12->GetDevice(),"Resources/Model/初音ミクmetal.pmd", *pmdObject));
 	pmdObject.reset(new PMDobject());
-	pmdModel->scale = { 0.1,0.1,0.1 };
-	pmdModel->SetPosition({ 0,20,-1 });
+	pmdModel->scale = { 1,1,1 };
+	pmdModel->SetPosition({ 0,20,0 });
 
 	//MMDオブジェクト----------------
 	//pModel = PMDmodel::Create();
@@ -103,9 +103,9 @@ void GameManager::Update()
 	camera->Update();
 	obj01->Update();
 	fbxObj1->Update();
-
 	pmdModel->Update();
 	pmdObject->Update();
+
 
 	//放物線運動
 	{
@@ -347,8 +347,8 @@ void GameManager::Draw()
 	obj01->Draw();
 
 	//pmdObj->Draw();
-	//pmdObject->Draw();
-	//pmdModel->Draw(cmdList);
+	pmdObject->Draw();
+	pmdModel->Draw(cmdList);
 
 	BaseObject::PostDraw();
 

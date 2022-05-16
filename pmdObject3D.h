@@ -53,6 +53,7 @@ public:
 	//•`‰æ
 	void Draw();
 
+	ComPtr<ID3D12GraphicsCommandList> GetCmdList() { return cmdList; }
 private:
 	//ComPtr<ID3D12Resource> PMDconstBuffB0;
 

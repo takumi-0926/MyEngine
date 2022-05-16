@@ -54,7 +54,6 @@ void PMDobject::Update()
 
 void PMDobject::Draw()
 {
-	cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	// パイプラインステートの設定
 	cmdList->SetPipelineState(_pipelinestate.Get());
 	// ルートシグネチャの設定
@@ -301,5 +300,4 @@ HRESULT PMDobject::CreateSceneView()
 	//定数バッファビューの作成
 	device->CreateConstantBufferView(&cbvDesc, heapHandle);
 	return result;
-
 }

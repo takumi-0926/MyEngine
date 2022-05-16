@@ -173,7 +173,7 @@ HRESULT Wrapper::InitializeDevice() {
 		adpt->GetDesc(&adesc);//アダプターの説明オブジェクト取得
 		wstring strDesc = adesc.Description;
 		//探したいアダプターの名前を確認
-		if (strDesc.find(L"Microsoft") != string::npos) {
+		if (strDesc.find(L"NVIDIA") != string::npos) {
 			tmpAdapter = adpt;
 			break;
 		}
