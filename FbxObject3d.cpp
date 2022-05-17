@@ -1,4 +1,5 @@
 #include "FbxObject3d.h"
+#include "FbxLoader.h"
 
 #include <d3dcompiler.h>
 #pragma comment(lib,"d3dcompiler.lib")
@@ -14,6 +15,8 @@ ComPtr<ID3D12PipelineState> FbxObject3d::pipelinestate;
 void FbxObject3d::Initialize()
 {
 	HRESULT result;
+
+	frameTime.SetTime(0, 0, 0, 1, 0, FbxTime::EMode::eFrames60);
 
 	result = device->CreateCommittedResource(
 		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
@@ -79,7 +82,7 @@ void FbxObject3d::Update()
 		XMMATRIX matCurrentPose;
 
 		FbxAMatrix fbxCurrentPose =
-			bones[i].fbxCluster->GetLink()->EvaluateGlobalTransform(0);
+			bones[i].fbxCluster->GetLink()->EvaluateGlobalTransform(currentTime);
 
 		FbxLoader::ConvertMatrixFormFbx(&matCurrentPose, fbxCurrentPose);
 
@@ -87,6 +90,15 @@ void FbxObject3d::Update()
 	}
 
 	constBuffSkin->Unmap(0, nullptr);
+
+	if (isPlay)
+	{
+		currentTime += frameTime;
+		if (currentTime > endTime)
+		{
+			currentTime = startTime;
+		}
+	}
 }
 
 void FbxObject3d::Draw(ID3D12GraphicsCommandList* cmdList)
@@ -105,7 +117,30 @@ void FbxObject3d::Draw(ID3D12GraphicsCommandList* cmdList)
 		0, constBufferTransform->GetGPUVirtualAddress()
 	);
 
+	cmdList->SetGraphicsRootConstantBufferView(
+		2, constBuffSkin->GetGPUVirtualAddress()
+	);
+
 	model->Draw(cmdList);
+}
+
+void FbxObject3d::PlayAnimation()
+{
+	FbxScene* fbxScene = model->GetFbxScene();
+
+	FbxAnimStack* animstack = fbxScene->GetSrcObject<FbxAnimStack>(0);
+
+	const char* animStrckName = animstack->GetName();
+
+	FbxTakeInfo* takeInfo = fbxScene->GetTakeInfo(animStrckName);
+
+	startTime = takeInfo->mLocalTimeSpan.GetStart();
+
+	endTime = takeInfo->mLocalTimeSpan.GetStop();
+
+	currentTime = startTime;
+
+	isPlay = true;
 }
 
 void FbxObject3d::CreateGraphicsPipeline()
@@ -240,12 +275,13 @@ void FbxObject3d::CreateGraphicsPipeline()
 	descRangeSRV.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0); // t0 レジスタ
 
 	// ルートパラメータ
-	CD3DX12_ROOT_PARAMETER rootparams[2];
+	CD3DX12_ROOT_PARAMETER rootparams[3];
 	// CBV（座標変換行列用）
 	rootparams[0].InitAsConstantBufferView(0, 0, D3D12_SHADER_VISIBILITY_ALL);
 	// SRV（テクスチャ）
 	rootparams[1].InitAsDescriptorTable(1, &descRangeSRV, D3D12_SHADER_VISIBILITY_ALL);
-
+	//CBV（スキニング）
+	rootparams[2].InitAsConstantBufferView(3, 0, D3D12_SHADER_VISIBILITY_ALL);
 	// スタティックサンプラー
 	CD3DX12_STATIC_SAMPLER_DESC samplerDesc = CD3DX12_STATIC_SAMPLER_DESC(0);
 

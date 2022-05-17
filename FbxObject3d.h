@@ -41,6 +41,8 @@ public:
 
 	void Setmodel(FbxModel* model) { this->model = model; }
 
+	void PlayAnimation();
+
 public:
 	static void SetDevice(ID3D12Device* device) { FbxObject3d::device = device; }
 	static void SetCamera(Camera* camera) { FbxObject3d::camera = camera; }
@@ -66,6 +68,16 @@ protected:
 	XMMATRIX matWorld;
 
 	FbxModel* model = nullptr;
+
+	FbxTime frameTime;
+
+	FbxTime startTime;
+	
+	FbxTime endTime;
+
+	FbxTime currentTime;
+
+	bool isPlay = false;
 
 	ComPtr<ID3D12Resource> constBufferTransform;
 

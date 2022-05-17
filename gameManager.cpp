@@ -40,8 +40,8 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	//カメラをセット
 	camera = new DebugCamera(Application::window_width, Application::window_height, input);
 	BaseObject::SetCamera(camera);
-	camera->SetTarget({ 0,21,0 });
-	camera->SetDistance(3.0f);
+	camera->SetTarget({ 0,2,0 });
+	camera->SetDistance(8.0f);
 	camera->Update();
 
 	FbxObject3d::SetDevice(dx12->GetDevice());
@@ -77,7 +77,7 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	//pmdObj->Update();
 
 	//FBXオブジェクト----------------
-	fbxModel1 = FbxLoader::GetInstance()->LoadModelFromFile("cube");
+	fbxModel1 = FbxLoader::GetInstance()->LoadModelFromFile("boneTest");
 	fbxObj1 = new FbxObject3d;
 	fbxObj1->Initialize();
 	fbxObj1->Setmodel(fbxModel1);
@@ -87,13 +87,15 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	sprite02 = Sprite::Create(1, { 0.0f,0.0f,0.0f });
 	sprite03 = Sprite::Create(2, { 0.0f,0.0f,0.0f });
 
-	FbxLoader::GetInstance()->LoadModelFromFile("cube");
+	//FbxLoader::GetInstance()->LoadModelFromFile("boneTest");
 
 	input->Update();
 	//audio->Load();
 
 	SceneNum = 3;
 	move.flag = false;
+
+	fbxObj1->PlayAnimation();
 
 	return true;
 }
@@ -347,8 +349,8 @@ void GameManager::Draw()
 	obj01->Draw();
 
 	//pmdObj->Draw();
-	pmdObject->Draw();
-	pmdModel->Draw(cmdList);
+	//pmdObject->Draw();
+	//pmdModel->Draw(cmdList);
 
 	BaseObject::PostDraw();
 
