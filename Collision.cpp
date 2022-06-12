@@ -218,3 +218,24 @@ bool Coliision::CheckRay2Sqhere(const Ray& ray, const Sqhere& sqhere, float* dis
 
 	return true;
 }
+
+bool Coliision::CheckSqhere2Sqhere(const Sqhere& sqhere1, const Sqhere& sqhere2)
+{
+	float a
+		= (sqhere2.center.m128_f32[0] - sqhere1.center.m128_f32[0])
+		* (sqhere2.center.m128_f32[0] - sqhere1.center.m128_f32[0]);
+	float b 
+		= (sqhere2.center.m128_f32[1] - sqhere1.center.m128_f32[1])
+		* (sqhere2.center.m128_f32[1] - sqhere1.center.m128_f32[1]);
+	float c
+		= (sqhere2.center.m128_f32[2] - sqhere1.center.m128_f32[2])
+		* (sqhere2.center.m128_f32[2] - sqhere1.center.m128_f32[2]);
+	float d
+		= (sqhere1.radius + sqhere2.radius) 
+		* (sqhere1.radius + sqhere2.radius);
+
+	if (a + b + c <= d) {
+		return true;
+	}
+		return false;
+}

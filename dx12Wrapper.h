@@ -25,9 +25,10 @@ private:
 	ComPtr<ID3D12Fence>					_fence	  = nullptr;		//フェンス
 	UINT								_fenceval = 0;
 	//表示関連
-	ComPtr<ID3D12DescriptorHeap>		_rtvHeaps	   = nullptr;	//レンダヒープ
-	ComPtr<ID3D12DescriptorHeap>		_basicDescHeap = nullptr;	//シェーダーヒープ
 	vector<ComPtr<ID3D12Resource>>      _backBuffer;
+	ComPtr<ID3D12DescriptorHeap>		_rtvHeaps	   = nullptr;	//レンダヒープ
+	ComPtr<ID3D12DescriptorHeap>		_basicDescHeap = nullptr;	//汎用ヒープ
+	D3D12_CPU_DESCRIPTOR_HANDLE			heapHandle;
 	//深度バッファ
 	ComPtr<ID3D12DescriptorHeap>		_dsvHeap	 = nullptr;
 	ComPtr<ID3D12Resource>				_depthBuffer = nullptr;
@@ -52,6 +53,8 @@ public:
 
 	HRESULT InitializeCommand();
 
+	HRESULT InitializeRenderHeap();
+	
 	HRESULT InitializeDescHeap();
 	
 	HRESULT InitializeDepthBuff(SIZE ret);
@@ -70,4 +73,5 @@ public:
 	ID3D12Device* GetDevice() { return _dev.Get(); }
 	ComPtr<IDXGISwapChain4> SwapChain();
 	ComPtr<ID3D12GraphicsCommandList> CommandList();
+	ComPtr<ID3D12DescriptorHeap> GetDescHeap() { return _basicDescHeap.Get(); }
 };

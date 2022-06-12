@@ -15,9 +15,9 @@ using namespace std;
 //静的メンバの実体
 ID3D12Device* PMDmodel::device = nullptr;
 //デスクリプタサイズ
-UINT PMDmodel::descriptorHandleIncrementSize;
+//UINT PMDmodel::descriptorHandleIncrementSize;
 //デスクリプタヒープ
-ComPtr<ID3D12DescriptorHeap> PMDmodel::descHeap;
+//ComPtr<ID3D12DescriptorHeap> PMDmodel::descHeap;
 
 ComPtr<ID3D12DescriptorHeap> PMDmodel::materialDescHeap;
 
@@ -556,7 +556,7 @@ HRESULT PMDmodel::CreateTransform()
 	device->CreateConstantBufferView(
 		&cbvDesc,
 		transformHeap->GetCPUDescriptorHandleForHeapStart());
-
+	
 	return S_OK;
 }
 

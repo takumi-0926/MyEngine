@@ -57,8 +57,8 @@ void DebugCamera::Update()
 	if (dirty || viewDirty) {
 		// 追加回転分の回転行列を生成
 		XMMATRIX matRotNew = XMMatrixIdentity();
-		matRotNew *= XMMatrixRotationX(-angleX);
 		matRotNew *= XMMatrixRotationY(-angleY);
+		matRotNew *= XMMatrixRotationX(-angleX);
 		// 累積の回転行列を合成
 		// ※回転行列を累積していくと、誤差でスケーリングがかかる危険がある為
 		// クォータニオンを使用する方が望ましい

@@ -40,4 +40,9 @@ public:
 		const Sqhere& sqhere,
 		float* distance = nullptr,
 		XMVECTOR* inter = nullptr);
+
+	static bool CheckSqhere2Sqhere(
+		const Sqhere& sqhere1,
+		const Sqhere& sqhere2
+		);
 };

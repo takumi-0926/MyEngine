@@ -15,6 +15,9 @@ struct Move {
 	float time;			//時間
 	float v;			//速度（計算結果）
 	float k;			//比例定数
+	float m;			//質量
+	float p;			//運動量
+	float e;			//反発係数
 
 	bool flag;			//移動開始フラグ
 	int moveNum;		//運動番号

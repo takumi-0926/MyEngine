@@ -38,6 +38,8 @@ protected:
 	// 上方向ベクトル
 	static XMFLOAT3 up;
 
+	ComPtr<ID3D12DescriptorHeap>		_DescHeap = nullptr;	//汎用ヒープ
+
 	// 定数バッファ用データ構造体B0
 	struct ConstBufferDataB0
 	{

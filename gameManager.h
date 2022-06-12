@@ -34,7 +34,8 @@ private://メンバ変数(ゲームシーン)
 	Model* model02 = nullptr;
 	Model* model03 = nullptr;
 	Object3Ds* obj01 = nullptr;
-	Object3Ds* obj02[25] = {};
+	Object3Ds* obj02 = nullptr;
+	//Object3Ds* obj02[25] = {};
 	Object3Ds* obj03[10] = {};
 	Sprite* sprite01 = nullptr;
 	Sprite* sprite02 = nullptr;
@@ -53,18 +54,40 @@ private://メンバ変数(ゲームシーン)
 	Ray ray;
 
 	//運動
-	Move move{
+	Move move1{
 		9.8f,	//重力
 		0.0f,	//Y方向
 		0.0f,	//X方向
-		2.0f,	//初速度
-		1.0f,	//加速度
+		0.0f,	//初速度
+		0.01f,	//加速度
 		0.0f,	//空気抵抗
 		0.0f,	//時間
 		0.0f,	//速度
-		1.0f,
-		false,
-		0
+		1.0f,	//比例定数
+		7.0f,	//質量
+		move1.m * move1.v,	//運動量
+		0.8f,
+
+		false,	//移動開始フラグ
+		0		//運動番号
+	};
+
+	Move move2{
+	9.8f,	//重力
+	0.0f,	//Y方向
+	0.0f,	//X方向
+	2.0f,	//初速度
+	0.01f,	//加速度
+	0.0f,	//空気抵抗
+	0.0f,	//時間
+	0.0f,	//速度
+	1.0f,	//比例定数
+	5.0f,	//質量
+	move2.m * move2.v,	//運動量
+	0.8f,
+
+	false,	//移動開始フラグ
+	0		//運動番号
 	};
 
 	int SceneNum = TITLE;
@@ -76,6 +99,9 @@ private://メンバ変数(ゲームシーン)
 	bool shotFlag[10] = {};
 	bool cubeFlag[25] = {};
 
+
+	XMMATRIX rot = {};
+	float angle;
 public://メンバ関数
 	//コンストラクタ
 	GameManager();
@@ -84,7 +110,7 @@ public://メンバ関数
 	~GameManager();
 
 	//初期化
-	bool Initalize(Wrapper* dx12,Audio* audio,Input* input);
+	bool Initalize(Wrapper* dx12, Audio* audio, Input* input);
 
 	//更新
 	void Update();

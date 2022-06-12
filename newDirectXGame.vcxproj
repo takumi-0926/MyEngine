@@ -171,9 +171,11 @@
     <ClCompile Include="PMDmodel.cpp" />
     <ClCompile Include="pmdObject3D.cpp" />
     <ClCompile Include="PMXLoader.cpp" />
+    <ClCompile Include="PostEffect.cpp" />
     <ClCompile Include="sprite.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="2d\PostEffect.h" />
     <ClInclude Include="application.h" />
     <ClInclude Include="audio.h" />
     <ClInclude Include="baseObject.h" />

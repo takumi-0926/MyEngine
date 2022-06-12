@@ -2,14 +2,17 @@
 #include <DirectXMath.h>
 #include "includes.h"
 
+#include "dx12Wrapper.h"
 #include "pipelineSet.h"
 #include "PMDModel.h"
 
 #include "baseObject.h"
 
+class Wrapper;
 class PMDmodel;
 class PMDobject : public BaseObject {
 	friend PMDmodel;
+	friend Wrapper;
 private: // エイリアス
 	// Microsoft::WRL::を省略
 	template <class T> using ComPtr = Microsoft::WRL::ComPtr<T>;
@@ -39,6 +42,8 @@ private: // エイリアス
 	HRESULT CreateRootSignaturePMD();
 
 	HRESULT CreateSceneView();
+
+	HRESULT CreateDescHeap();
 
 public:
 	PMDobject();

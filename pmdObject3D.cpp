@@ -70,6 +70,7 @@ PMDobject::PMDobject()
 	assert(SUCCEEDED(CreateRootSignaturePMD()));
 	assert(SUCCEEDED(CreateGraphicsPipelinePMD()));
 	assert(SUCCEEDED(CreateSceneView()));
+	assert(SUCCEEDED(CreateDescHeap()));
 }
 
 PMDobject::~PMDobject()
@@ -299,5 +300,53 @@ HRESULT PMDobject::CreateSceneView()
 	cbvDesc.SizeInBytes = _sceneConstBuff->GetDesc().Width;
 	//定数バッファビューの作成
 	device->CreateConstantBufferView(&cbvDesc, heapHandle);
+	return result;
+}
+
+HRESULT PMDobject::CreateDescHeap() {
+	//ディスクリプタヒープ生成(汎用)
+	D3D12_DESCRIPTOR_HEAP_DESC heapDesc = {};
+	heapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;//どんなビューを作るのか()
+	heapDesc.NodeMask = 0;
+	heapDesc.NumDescriptors = 1024;//全体のヒープ領域数
+	heapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;//特に指定なし
+
+	DXGI_SWAP_CHAIN_DESC swcDesc = {};
+	auto result = device->CreateDescriptorHeap(&heapDesc, IID_PPV_ARGS(_DescHeap.ReleaseAndGetAddressOf()));
+	if (FAILED(result)) {
+		assert(0);
+		return result;
+	}	
+	//result = _swapchain->GetDesc(&swcDesc);
+	//if (FAILED(result)) {
+	//	assert(0);
+	//	return result;
+	//}
+
+	//先頭アドレスの設定
+	//heapHandle = _basicDescHeap->GetCPUDescriptorHandleForHeapStart();
+	//_backBuffer.resize(swcDesc.BufferCount);
+
+	////SRGBレンダターゲットビュー設定
+	//D3D12_RENDER_TARGET_VIEW_DESC rtvDesc = {};
+	//rtvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+	//rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
+
+	//for (int i = 0; i < swcDesc.BufferCount; ++i) {
+	//	result = _swapchain->GetBuffer(i, IID_PPV_ARGS(&_backBuffer[i]));
+	//	if (FAILED(result)) {
+	//		assert(0);
+	//		return result;
+	//	}
+
+	//	_backBuffer[i]->SetName(L"buffer");
+
+	//	//rtvDesc.Format = _backBuffer[i]->GetDesc().Format;
+	//	//レンダターゲットビューの生成
+	//	_dev->CreateRenderTargetView(_backBuffer[i].Get(), &rtvDesc, handle);
+	//	//ポインターをずらす
+	//	handle.ptr += _dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+	//}
+
 	return result;
 }
