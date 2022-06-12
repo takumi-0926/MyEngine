@@ -3,6 +3,7 @@
 class PostEffect :
     public Sprite
 {
+public:
     /// <summary>
     /// コンストラクタ
     /// </summary>

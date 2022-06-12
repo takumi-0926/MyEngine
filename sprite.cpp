@@ -21,7 +21,7 @@ XMMATRIX SpriteCommon::matProjection;
 SpriteCommon Sprite::spritecommon;
 PipelineSet Sprite::pipelineset;
 
-Sprite::Sprite(UINT texNumber, XMFLOAT3 position, XMFLOAT2 size, XMFLOAT4 color, XMFLOAT2 anchorpoint, bool isFlipX, bool isFlipY)
+Sprite::Sprite(UINT texNumber, XMFLOAT2 position, XMFLOAT2 size, XMFLOAT4 color, XMFLOAT2 anchorpoint, bool isFlipX, bool isFlipY)
 {
 	this->position = position;
 	this->size = size;
@@ -221,7 +221,7 @@ bool Sprite::staticInitalize(ID3D12Device* _dev, SIZE ret)
 	descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;//シェーダから見えるように
 	descHeapDesc.NumDescriptors = spritecommon.spriteSRVCount;
 	result = device->CreateDescriptorHeap(
-		&descHeapDesc, 
+		&descHeapDesc,
 		IID_PPV_ARGS(&spritecommon._descHeap));//生成
 	if (FAILED(result)) {
 		assert(0);
@@ -522,7 +522,7 @@ void Sprite::PostDraw()
 	Sprite::cmdList = nullptr;
 }
 
-Sprite* Sprite::Create(UINT texNumber, XMFLOAT3 position, XMFLOAT4 color, XMFLOAT2 anchorpoint, bool isFlipX, bool isFlipY)
+Sprite* Sprite::Create(UINT texNumber, XMFLOAT2 position, XMFLOAT4 color, XMFLOAT2 anchorpoint, bool isFlipX, bool isFlipY)
 {
 	// 仮サイズ
 	XMFLOAT2 size = { 100.0f, 100.0f };
@@ -647,7 +647,7 @@ void Sprite::Update()
 
 	matWorld *= XMMatrixRotationZ(XMConvertToRadians(rotation));
 
-	matWorld *= XMMatrixTranslation(position.x, position.y, position.z);
+	matWorld *= XMMatrixTranslation(position.x, position.y, 0);
 
 	ConstBufferData* constMap = nullptr;
 

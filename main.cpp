@@ -11,6 +11,7 @@
 #include "Model.h"
 
 #include "sprite.h"
+#include "2d/PostEffect.h"
 
 #include "PMDmodel.h"
 #include "pmdObject3D.h"
@@ -25,7 +26,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Wrapper dx12;
 	Audio audio;
 	Input input;
-
+	PostEffect *postEffect = nullptr;
 
 	//Šî–{‰Šú‰»
 	{
@@ -90,6 +91,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			assert(0);
 			return 1;
 		}
+
+		Sprite::loadTexture(100, L"Resoureces/white1x1.png");
+		postEffect = new PostEffect();
+		postEffect->Initalize();
 	}
 
 	//Fbx‰Šú‰»
@@ -123,6 +128,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		dx12.PreRun();
 
+		postEffect->Draw(dx12.CommandList().Get());
+
 		gameScene.Draw();
 
 		dx12.PostRun();
@@ -137,6 +144,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	app.Processing();
 
 	FbxLoader::GetInstance()->Finalize();
+
+	delete postEffect;
 
 #pragma endregion
 

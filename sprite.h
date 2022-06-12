@@ -39,14 +39,14 @@ public://静的メンバ関数
 
 	static Sprite* Create(
 		UINT texNumber,
-		XMFLOAT3 position, 
+		XMFLOAT2 position, 
 		XMFLOAT4 color = { 1,1,1,1 }, 
 		XMFLOAT2 anchorpoint = { 0.0f,0.0f }, 
 		bool isFlipX = false, bool isFlipY = false);
 
 	Sprite(
 		UINT texNumber,
-		XMFLOAT3 position,
+		XMFLOAT2 position,
 		XMFLOAT2 size,
 		XMFLOAT4 color,
 		XMFLOAT2 anchorpoint,
@@ -58,7 +58,7 @@ private://メンバ関数
 	/// </summary>
 	void TransVertex();
 
-private:
+protected:
 	//デバイス
 	static ID3D12Device* device;
 	//コマンドリスト
@@ -70,7 +70,7 @@ private:
 
 	static PipelineSet pipelineset;
 
-private:
+protected:
 	//頂点ばっふぁ、定数ばっふぁ
 	ComPtr<ID3D12Resource> _vertbuff = nullptr;
 	ComPtr<ID3D12Resource> constBuff = nullptr;
@@ -80,7 +80,7 @@ private:
 	//回転角
 	float rotation = 0.0f;
 	//座標
-	XMFLOAT3 position = { 0,0,0 };
+	XMFLOAT2 position = { 0,0};
 	//ワールド行列
 	XMMATRIX matWorld;
 
@@ -130,15 +130,14 @@ public:
 	/// 
 	/// </summary>
 	/// <param name="pos"></param>
-	void SetPos(XMFLOAT3 pos) {
+	void SetPos(XMFLOAT2 pos) {
 		this->position = pos;
 		TransVertex();
 	}
 
-	void MovePos(XMFLOAT3 pos) {
+	void MovePos(XMFLOAT2 pos) {
 		this->position.x += pos.x;
 		this->position.y += pos.y;
-		this->position.z += pos.z;
 		TransVertex();
 	}
 	/// <summary>

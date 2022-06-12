@@ -89,9 +89,9 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	fbxObj1->Setmodel(fbxModel1);
 
 	//スプライト---------------------
-	sprite01 = Sprite::Create(0, { 0.0f,0.0f,0.0f });
-	sprite02 = Sprite::Create(1, { 0.0f,0.0f,0.0f });
-	sprite03 = Sprite::Create(2, { 0.0f,0.0f,0.0f });
+	sprite01 = Sprite::Create(0, { 0.0f,0.0f });
+	sprite02 = Sprite::Create(1, { 0.0f,0.0f });
+	sprite03 = Sprite::Create(2, { 0.0f,0.0f });
 
 	//FbxLoader::GetInstance()->LoadModelFromFile("boneTest");
 
