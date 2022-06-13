@@ -92,9 +92,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			return 1;
 		}
 
-		Sprite::loadTexture(100, L"Resoureces/white1x1.png");
+		Sprite::loadTexture(100, L"Resources/white1x1.png");
 		postEffect = new PostEffect();
-		postEffect->Initalize();
+		postEffect->Initialize();
 	}
 
 	//Fbx‰Šú‰»
@@ -128,9 +128,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		dx12.PreRun();
 
-		postEffect->Draw(dx12.CommandList().Get());
-
 		gameScene.Draw();
+		postEffect->Draw(dx12.CommandList().Get());
 
 		dx12.PostRun();
 

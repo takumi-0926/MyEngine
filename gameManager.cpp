@@ -443,8 +443,8 @@ void GameManager::Draw()
 	obj02->Draw();
 
 	//pmdObj->Draw();
-	pmdObject->Draw();
-	pmdModel->Draw(cmdList);
+	//pmdObject->Draw();
+	//pmdModel->Draw(cmdList);
 
 	BaseObject::PostDraw();
 
