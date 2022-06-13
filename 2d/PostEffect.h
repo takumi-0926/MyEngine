@@ -10,6 +10,17 @@ private:
     //SRV用デスクリプタヒープ
     ComPtr<ID3D12DescriptorHeap> descHeapSRV;
 
+    //テクスチャバッファ
+    ComPtr<ID3D12Resource> depthBuff;
+
+    //RTV用デスクリプタヒープ
+    ComPtr<ID3D12DescriptorHeap> descHeapRTV;
+
+    //DSV用デスクリプタヒープ
+    ComPtr<ID3D12DescriptorHeap> descHeapDSV;
+
+    static const float clearColor[4];
+
 public:
     /// <summary>
     /// コンストラクタ
@@ -26,5 +37,17 @@ public:
     /// </summary>
     /// <param name="cmdList"></param>
     void Draw(ID3D12GraphicsCommandList* cmdList);
+
+    /// <summary>
+    /// シーン前
+    /// </summary>
+    /// <param name="cmdList"></param>
+    void PreDrawScene(ID3D12GraphicsCommandList* cmdList);
+
+    /// <summary>
+    /// シーン後
+    /// </summary>
+    /// <param name="cmdList"></param>
+    void PostDrawScene(ID3D12GraphicsCommandList* cmdList);
 };
 

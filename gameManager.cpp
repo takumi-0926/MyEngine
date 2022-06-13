@@ -428,14 +428,14 @@ void GameManager::Draw()
 	// コマンドリストの取得
 	ID3D12GraphicsCommandList* cmdList = dx12->CommandList().Get();
 
-	Sprite::PreDraw(cmdList);
+	//Sprite::PreDraw(cmdList);
 
-	sprite02->Draw();
+	//sprite02->Draw();
 
-	Sprite::PostDraw();
+	//Sprite::PostDraw();
 
-	//深度バッファクリア
-	dx12->ClearDepthBuffer();
+	////深度バッファクリア
+	//dx12->ClearDepthBuffer();
 
 	BaseObject::PreDraw(cmdList);
 

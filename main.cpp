@@ -126,9 +126,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		gameScene.Update();
 
+
+		postEffect->PreDrawScene(dx12.CommandList().Get());
+		gameScene.Draw();
+		postEffect->PostDrawScene(dx12.CommandList().Get());
+
 		dx12.PreRun();
 
-		gameScene.Draw();
 		postEffect->Draw(dx12.CommandList().Get());
 
 		dx12.PostRun();
