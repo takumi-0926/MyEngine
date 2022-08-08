@@ -1,24 +1,30 @@
 
-#include "gameManager.h"
-#include "application.h"
-#include "dx12Wrapper.h"
-#include "audio.h"
-#include "input.h"
+#include "Application/gameManager.h"
+#include "Application/application.h"
+#include "Application/dx12Wrapper.h"
+#include "Audio/audio.h"
+#include "Input/input.h"
 #include "delete.h"
-#include "baseObject.h"
+#include "object/baseObject.h"
 
-#include "object3D.h"
-#include "Model.h"
+#include "object/object3D.h"
+#include "object/object2d.h"
+#include "object/Model.h"
 
-#include "sprite.h"
+#include "Sprite/sprite.h"
 #include "2d/PostEffect.h"
 
-#include "PMDmodel.h"
-#include "pmdObject3D.h"
+#include "PMD/PMDmodel.h"
+#include "PMD/pmdObject3D.h"
+#include "PMD/PMXLoader.h"
 
-#include "FbxLoader.h"
-#include "FbxModel.h"
-#include "FbxObject3d.h"
+#include "FBX/FbxLoader.h"
+#include "FBX/FbxModel.h"
+#include "FBX/FbxObject3d.h"
+
+#include "..\Camera\DebugCamera.h"
+
+#include "..\light\Light.h"
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
@@ -35,11 +41,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			assert(0);
 			return 1;
 		}
-		//DirectX初期化
-		if (!dx12.Init(app._hwnd(), app.GetWindowSize())) {
-			assert(0);
-			return 1;
-		}
 		//音声初期化
 		if (!audio.Initalize()) {
 			assert(0);
@@ -50,40 +51,34 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			assert(0);
 			return 1;
 		}
-	}
-
-	Model model;
-	Object3Ds obj3d;
-	{
-
-		//3Dモデルオブジェクト初期化
-		if (!model.StaticInitialize(dx12.GetDevice())) {
+		//DirectX初期化
+		if (!dx12.Init(app._hwnd(), app.GetWindowSize())) {
 			assert(0);
 			return 1;
 		}
+		//imgui
+		//if (ImGui::CreateContext() == nullptr) {
+		//	assert(0);
+		//	return false;
+		//}
+		//bool blnResult = ImGui_ImplWin32_Init(app._hwnd());
+		//blnResult = ImGui_ImplDX12_Init(
+		//	dx12.GetDevice(),
+		//	3,
+		//	DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
+		//	dx12.GetHeapImgui().Get(),
+		//	dx12.GetHeapImgui()->GetCPUDescriptorHandleForHeapStart(),
+		//	dx12.GetHeapImgui()->GetGPUDescriptorHandleForHeapStart());
+	}
 
+	Object3Ds obj3d;
+	{
 		if (!obj3d.StaticInitialize(dx12.GetDevice(), app.GetWindowSize())) {
 			assert(0);
 			return 1;
 		}
+		object2d::StaticInitialize(dx12.GetDevice());
 	}
-
-	//PMDmodel pModel;
-	//PMDobject pmdObj;
-	//{
-	//	//PMDモデル初期化
-	//	if (!PMDmodel::StaticInitialize(dx12.GetDevice())) {
-	//		assert(0);
-	//		return 1;
-	//	}
-	//	if (!PMDobject::StaticInitialize(dx12.GetDevice(), app.GetWindowSize())) {
-	//		assert(0);
-	//		return 1;
-	//	}
-	//}
-
-	//FbxModel fbxModel;
-	//FbxObject fbxObj;
 
 	{
 		//スプライト初期化
@@ -92,13 +87,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			return 1;
 		}
 
-		Sprite::loadTexture(100, L"Resources/white1x1.png");
-		postEffect = new PostEffect();
-		postEffect->Initialize();
+		//Sprite::loadTexture(100, L"Resources/white1x1.png");
+		//postEffect = new PostEffect();
+		//postEffect->Initialize();
 	}
 
 	//Fbx初期化
 	FbxLoader::GetInstance()->Initialize(dx12.GetDevice());
+
+	Light::StaticInitalize(dx12.GetDevice());
 
 	GameManager gameScene;
 	//ゲームシーン初期化
@@ -122,19 +119,30 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			break;
 		}
 
+		////ImGui
+		//ImGui_ImplDX12_NewFrame();
+		//ImGui_ImplWin32_NewFrame();
+		//ImGui::NewFrame();
+
 		input.Update();
 
 		gameScene.Update();
 
-
-		postEffect->PreDrawScene(dx12.CommandList().Get());
-		gameScene.Draw();
-		postEffect->PostDrawScene(dx12.CommandList().Get());
+		//postEffect->PreDrawScene(dx12.CommandList().Get());
+		//postEffect->PostDrawScene(dx12.CommandList().Get());
 
 		dx12.PreRun();
 
-		postEffect->Draw(dx12.CommandList().Get());
+		gameScene.Draw();
 
+		//postEffect->Draw(dx12.CommandList().Get());
+
+		//ImGui::Render();
+		//dx12.CommandList()->SetDescriptorHeaps(
+		//	1,
+		//	dx12.GetHeapImgui().GetAddressOf());
+		//ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), dx12.CommandList().Get());
+		
 		dx12.PostRun();
 
 		if (input.Push(DIK_ESCAPE)) {

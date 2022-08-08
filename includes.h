@@ -3,6 +3,7 @@
 #include <wrl.h>
 #include <vector>
 #include <string>
+#include <map>
 #include <d3d12.h>
 #include "d3dx12.h"
 #include <dinput.h>

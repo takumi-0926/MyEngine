@@ -1,5 +1,5 @@
 #pragma once
-#include "../sprite.h"
+#include "..\Sprite\sprite.h"
 class PostEffect :
     public Sprite
 {
@@ -19,6 +19,13 @@ private:
     //DSV用デスクリプタヒープ
     ComPtr<ID3D12DescriptorHeap> descHeapDSV;
 
+    //パイプライン
+    ComPtr<ID3D12PipelineState> pipelineState;
+
+    //ルートシグネチャ
+    ComPtr<ID3D12RootSignature> rootSignature;
+
+    //クリアカラー
     static const float clearColor[4];
 
 public:
@@ -49,5 +56,10 @@ public:
     /// </summary>
     /// <param name="cmdList"></param>
     void PostDrawScene(ID3D12GraphicsCommandList* cmdList);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    void CreateGraphicsPipeline();
 };
 
