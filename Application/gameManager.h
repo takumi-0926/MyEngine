@@ -23,6 +23,8 @@
 
 #include "..\stage.h"
 
+#include "..\Vector3.h"
+
 using namespace std;
 using namespace DirectX;
 using namespace Microsoft::WRL;
@@ -268,5 +270,19 @@ public://ÉÅÉìÉoä÷êî
 		//pos.z -= Xv.m128_f32[2];
 
 		return pos;
+	}
+
+	XMMATRIX LookAtRotation(XMFLOAT3 forward, XMFLOAT3 upward) {
+		Vector3 z = Vector3(forward.x, forward.y, forward.z);
+		Vector3 up = Vector3(upward.x, upward.y, upward.z);
+		Vector3 x = z.cross(up);
+		Vector3 y = x.cross(z);
+		XMMATRIX rot =
+			XMMATRIX(
+				{ x.x, x.y, x.z ,0 },
+				{ y.x, y.y, y.z ,0 },
+				{ z.x, z.y, z.z ,0 },
+				{   0,   0,   0 ,1 });
+		return rot;
 	}
 };

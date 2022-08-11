@@ -302,6 +302,7 @@
     <ClInclude Include="stage.h" />
     <ClInclude Include="testObj.h" />
     <ClInclude Include="Vector2.h" />
+    <ClInclude Include="Vector3.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="2d\PostEffect.cpp" />
@@ -336,6 +337,7 @@
     <ClCompile Include="Sprite\sprite.cpp" />
     <ClCompile Include="stage.cpp" />
     <ClCompile Include="testObj.cpp" />
+    <ClCompile Include="Vector3.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -260,13 +260,13 @@ PMDmodel::~PMDmodel()
 void PMDmodel::Update()
 {
 	// スケール、回転、平行移動行列の計算
-	XMMATRIX matScale, matRot, matTrans;
+	XMMATRIX matScale, matTrans;
 	HRESULT result;
 	matScale = XMMatrixScaling(scale.x, scale.y, scale.z);
-	matRot = XMMatrixIdentity();
-	matRot *= XMMatrixRotationZ(XMConvertToRadians(rotation.z));
-	matRot *= XMMatrixRotationX(XMConvertToRadians(rotation.x));
-	matRot *= XMMatrixRotationY(XMConvertToRadians(rotation.y));
+	//matRot = XMMatrixIdentity();
+	//matRot *= XMMatrixRotationZ(XMConvertToRadians(rotation.z));
+	//matRot *= XMMatrixRotationX(XMConvertToRadians(rotation.x));
+	//matRot *= XMMatrixRotationY(XMConvertToRadians(rotation.y));
 	matTrans = XMMatrixTranslation(position.x, position.y, position.z);
 
 	// ワールド行列の合成

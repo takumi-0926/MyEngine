@@ -57,7 +57,7 @@ void Enemy::moveUpdate(XMFLOAT3 pPos, Object3Ds* bPos[],XMFLOAT3 gPos)
 
 		int objectNo = 0;
 		float distance = 1000;
-		for (int i = 0; i < 3; i++)
+		for (int i = 0; i < 2; i++)
 		{
 			float dis = objectDistance(position, bPos[i]->position);
 			if (distance >= dis) {
@@ -68,13 +68,13 @@ void Enemy::moveUpdate(XMFLOAT3 pPos, Object3Ds* bPos[],XMFLOAT3 gPos)
 
 		if (pct <= 1.0f) {
 			position = moveObject(position, bPos[objectNo]->position, pct);
-			pct += step;
+			pct += this->step;
 		}
 	}
 	if (mode == 2) {
 		if (pct <= 1.0f) {
 			position = moveObject(position, pPos, pct);
-			pct += step;
+			pct += this->step;
 		}
 	}
 	if (mode == 3) {

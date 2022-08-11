@@ -25,7 +25,6 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	this->audio = audio;
 
 	//this->audio->Load();
-
 	if (!Sprite::loadTexture(0, L"Resources/Title.png")) {
 		assert(0);
 		return false;
@@ -56,7 +55,7 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	mainCamera = new Camera(Application::window_width, Application::window_height);
 	camera->SetTarget({ 0,0,0 });
 	camera->SetDistance(20.0f);
-	Wrapper::SetCamera(camera);
+	Wrapper::SetCamera(mainCamera);
 	dx12->SceneUpdate();
 	camera->Update();
 
@@ -79,13 +78,6 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	obj01->scale = { 1,1,1 };
 	obj01->SetPosition({ -10,20,0 });
 
-	//obj02 = Object3Ds::Create();
-	//obj02->SetModel(model02);
-	//obj02->Update();
-	//obj02->scale = { 2,2,2 };
-	//obj02->rotation.y = 90;
-	//obj02->SetPosition({ 0,-30,0 });
-
 	stage = Stage::Create();
 	stage->SetModel(model02);
 	stage->Update();
@@ -99,26 +91,21 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	obj03->scale = { 50,50,50 };
 	obj03->SetPosition({ 0,0,150 });
 
-	for (int i = 0; i < 3; i++)
+	for (int i = 0; i < 2; i++)
 	{
-		float rX = rand() % 200 - 100;
-		float rZ = rand() % 200 - 100;
 		obj04[i] = Object3Ds::Create();
 		obj04[i]->SetModel(model03);
 		obj04[i]->Update();
 		obj04[i]->scale = { 10,10,10 };
-		obj04[i]->SetPosition({ rX,40,rZ });
 	}
-	obj04[0]->SetPosition({ 100,0,100 });
-	obj04[1]->SetPosition({ -100,0,100 });
-	obj04[2]->SetPosition({ 100,0,-100 });
-
+	obj04[0]->SetPosition({ 0,0,0 });
+	obj04[1]->SetPosition({ 50,0,0 });
 
 	//MMDオブジェクト----------------
 	pmdObject.reset(new PMDobject(dx12));
 	pmdModel.reset(new PMDmodel(dx12, "Resources/Model/初音ミクmetal.pmd", *pmdObject));
 	pmdModel->scale = { 1,1,1 };
-	pmdModel->SetPosition({ 0,0,0 });
+	pmdModel->SetPosition({ 0,10,0 });
 
 	//PMXModelData pmxData{};
 	//LoadPmx(pmxData,L"Resources\\獅白ぼたん\\獅白ぼたん.pmx");
@@ -142,6 +129,7 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	sprite05 = Sprite::Create(4, { 0.0f,0.0f });
 	sprite06 = Sprite::Create(5, { 500.0f,0.0f });
 
+	//ヒットボックス-----------------
 	HitBox::CreatePipeline(dx12);
 	HitBox::CreateTransform();
 	HitBox::CreateHitBox(pmdModel->GetBonePos("頭先"), model01);
@@ -151,6 +139,11 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	HitBox::CreateHitBox(pmdModel->GetBonePos("左ひじ"), model01);
 	HitBox::CreateHitBox(pmdModel->GetBonePos("右ひざ"), model01);
 	HitBox::CreateHitBox(pmdModel->GetBonePos("左ひざ"), model01);
+
+	triangle[0].p0 = XMVectorSet(obj03->position.x - 100.0, obj03->position.y, obj03->position.z, 1);
+	triangle[0].p1 = XMVectorSet(obj03->position.x - 100.0, obj03->position.y + 120.0, obj03->position.z, 1);
+	triangle[0].p2 = XMVectorSet(obj03->position.x + 100.0, obj03->position.y, obj03->position.z, 1);
+	triangle[0].normal = XMVectorSet(0.0f, 0.0f, 1.0f, 0);
 
 	//テストプレイ
 	for (int i = 0; i < NUM_OBJ; i++) {
@@ -166,10 +159,7 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	input->Update();
 	//audio->Load();
 
-	//_test = ShaderTest::Create();
-	//_test->SetModel(model05);
-
-	SceneNum = 3;
+	SceneNum = TITLE;
 	move1.flag = false;
 	move2.flag = false;
 
@@ -182,6 +172,9 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 
 void GameManager::Update()
 {
+	if (input->Trigger(DIK_M)) {
+		pmdModel->playAnimation();
+	}
 	//imgui
 	//static bool blnChk = false;
 	//static int radio = 0;
@@ -217,73 +210,6 @@ void GameManager::Update()
 	//		isCamera = false;
 	//	}
 	//}
-
-	if (input->Trigger(DIK_M)) {
-		pmdModel->playAnimation();
-	}
-	//エネミーの生成
-	//if (blnChk == true) {
-	//	Enemy* ene = Enemy::Create();
-	//	int r = rand() % 10;
-	//	if (r % 2 == 1) {
-	//		ene->SetModel(model03);
-	//		ene->mode = 1;
-	//	}
-	//	else if (r % 2 != 1) {
-	//		ene->SetModel(model05);
-	//		ene->mode = 2;
-	//	}
-	//	if (r == 5 || r == 6) {
-	//		ene->SetModel(model06);
-	//		ene->mode = 3;
-	//	}
-	//	ene->scale = { 10,10,10 };
-	//	ene->step = eneSpeed / 10000;
-	//	ene->alive = true;
-	//	_enemy.push_back(ene);
-
-	//	Sqhere _sqhere;
-	//	_sqhere.radius = 5.0f;
-	//	_sqhere.center = XMVectorSet(ene->position.x, ene->position.y, ene->position.z, 1);
-	//	sqhere.push_back(_sqhere);
-
-	//	blnChk = false;
-	//}
-	//エネミー関係の制御
-	for (int i = 0; i < _enemy.size(); i++) {
-		_enemy[i]->moveUpdate(pmdModel->position, obj04, obj03->position);
-		_enemy[i]->rotation.y += 1.0f;
-		sqhere[i].center = XMVectorSet(_enemy[i]->position.x, _enemy[i]->position.y, _enemy[i]->position.z, 1);
-		if (_enemy[i]->alive == true) { continue; }
-		_enemy.erase(_enemy.begin());
-		sqhere.erase(sqhere.begin());
-
-	}
-
-	//当たり判定（プレイヤー / 敵 / 最終関門）
-	for (int i = 0; i < sqhere.size(); i++) {
-		for (int j = 0; j < HitBox::_hit.size(); j++) {
-			bool Hhit = Coliision::CheckSqhere2Sqhere(sqhere[i], HitBox::_hit[j]);
-			XMVECTOR inter;
-			bool Ghit = Coliision::CheckSqhere2Triangle(sqhere[i], triangle[0], &inter);
-
-			if (Ghit == true && reception <= 0) {
-				Hhit = false;
-				gateHP -= 1;
-				reception = 600;
-			}
-			if (Hhit == true) {
-				_enemy[i]->alive = false;
-			}
-			if (gateHP <= 0) { SceneNum = END; }
-			reception--;
-		}
-	}
-
-	triangle[0].p0 = XMVectorSet(obj03->position.x - 100.0, obj03->position.y, obj03->position.z, 1);
-	triangle[0].p1 = XMVectorSet(obj03->position.x - 100.0, obj03->position.y + 120.0, obj03->position.z, 1);
-	triangle[0].p2 = XMVectorSet(obj03->position.x + 100.0, obj03->position.y, obj03->position.z, 1);
-	triangle[0].normal = XMVectorSet(0.0f, 0.0f, 1.0f, 0);
 
 	//MT4
 	{
@@ -455,25 +381,25 @@ void GameManager::Update()
 				easing.FadeReset();
 			}
 		}
+		// 物体追加?
+//if (input->Trigger(DIK_UP))
+//{
+//	if (_idx_obj < NUM_OBJ)
+//	{
+//		_idx_obj++;
+//		test[_idx_obj]->stat = 1;
+//		test[_idx_obj]->vel.clear(0);
+//		test[_idx_obj]->pos = test[_idx_obj - 1]->pos;
+//		// 自分の親objを１つ上のobjに
+//		test[_idx_obj]->link0 = test[_idx_obj - 1];
+//		// １つ上にobjの子objを自分に
+//		test[_idx_obj - 1]->link1 = test[_idx_obj];
+
+//		line[_idx_obj - 1]->CreateLine(test[_idx_obj]->position.x, test[_idx_obj]->position.y, test[_idx_obj - 1]->position.x, test[_idx_obj - 1]->position.y);
+//	}
+//}
+
 	}
-
-	// 物体追加?
-	//if (input->Trigger(DIK_UP))
-	//{
-	//	if (_idx_obj < NUM_OBJ)
-	//	{
-	//		_idx_obj++;
-	//		test[_idx_obj]->stat = 1;
-	//		test[_idx_obj]->vel.clear(0);
-	//		test[_idx_obj]->pos = test[_idx_obj - 1]->pos;
-	//		// 自分の親objを１つ上のobjに
-	//		test[_idx_obj]->link0 = test[_idx_obj - 1];
-	//		// １つ上にobjの子objを自分に
-	//		test[_idx_obj - 1]->link1 = test[_idx_obj];
-
-	//		line[_idx_obj - 1]->CreateLine(test[_idx_obj]->position.x, test[_idx_obj]->position.y, test[_idx_obj - 1]->position.x, test[_idx_obj - 1]->position.y);
-	//	}
-	//}
 
 	//ライト
 	{
@@ -486,198 +412,12 @@ void GameManager::Update()
 
 		light->SetLightDir(lightDir);
 	}
-	//移動
-	{
-		pmdModel->oldVmdNumber = pmdModel->vmdNumber;
-		if (directInput->leftStickX() < 0.0f || directInput->leftStickX() > 0.0f || directInput->leftStickY() < 0.0f || directInput->leftStickY() > 0.0f) {
-			pmdModel->vmdNumber = vmdData::WALK;
-			if (directInput->getTriggerZ() != 0) {
-				speed = 2.0f;
-			}
-			else { speed = 1.0f; }
-			if (input->Push(DIK_A) || directInput->leftStickX() < 0.0f) {
-				pmdModel->position = MoveLeft(pmdModel->position);
-				pmdModel->rotation.y = angleHorizonal + (90 * directInput->getLeftX() / 1);
-				for (int i = 0; i < HitBox::GetHit().size(); i++) { HitBox::GetHit()[i]->position = MoveLeft(HitBox::GetHit()[i]->position); }
-			}
-			if (input->Push(DIK_D) || directInput->leftStickX() > 0.0f) {
-				pmdModel->position = MoveRight(pmdModel->position);
-				pmdModel->rotation.y = angleHorizonal - (90 * directInput->getLeftX() / 1);
-				for (int i = 0; i < HitBox::GetHit().size(); i++) { HitBox::GetHit()[i]->position = MoveRight(HitBox::GetHit()[i]->position); }
-			}
-			if (input->Push(DIK_W) || directInput->leftStickY() < 0.0f) {
-				pmdModel->position = MoveBefore(pmdModel->position);
-				pmdModel->rotation.y = angleHorizonal - (90 * directInput->getLeftY() / 1);
-				for (int i = 0; i < HitBox::GetHit().size(); i++) { HitBox::GetHit()[i]->position = MoveBefore(HitBox::GetHit()[i]->position); }
-			}
-			if (input->Push(DIK_S) || directInput->leftStickY() > 0.0f) {
-				pmdModel->position = MoveAfter(pmdModel->position);
-				pmdModel->rotation.y = angleHorizonal + (90 * directInput->getLeftY() / 1);
-				for (int i = 0; i < HitBox::GetHit().size(); i++) { HitBox::GetHit()[i]->position = MoveAfter(HitBox::GetHit()[i]->position); }
-			}
-			float a = directInput->getLeftX();
-			float b = directInput->getLeftY();
-			if (a + b > 0) {
-				pmdModel->rotation.y = angleHorizonal + 180 * sin(a + b);
-			}
-			else {
-				pmdModel->rotation.y = angleHorizonal + 180 * sin(a + b);
-			}
-		}
-		else {
-			pmdModel->vmdNumber = vmdData::WAIT;
-		}
-
-		if (input->Push(DIK_RIGHT)) {
-			//audio->Play(0);
-			obj01->rotation.x += 1.0f;
-			test[0]->position.x += 1.0f;
-		}
-		if (input->Push(DIK_UP)) {
-			obj01->rotation.y += 1.0f;
-		}
-
-		if (input->Push(DIK_2)) {
-			test[0]->position.x += 1.0f;
-		}
-		if (input->Push(DIK_1)) {
-			test[0]->position.x -= 1.0f;
-		}
-		if (input->Push(DIK_3)) {
-			test[0]->position.y -= 1.0f;
-		}
-		if (input->Push(DIK_4)) {
-			test[0]->position.y += 1.0f;
-		}
-
-	}
-
-	//カメラワーク(プレイヤー)
-	float angleH = 100.0f;
-	float angleV = 40.0f;
-	if (directInput->rightStickX() >= 0.5f || directInput->rightStickX() <= -0.5f) {
-		angleHorizonal +=
-			XMConvertToRadians(angleH * directInput->getRightX());
-	}
-	if (directInput->rightStickY() >= 0.5f || directInput->rightStickY() <= -0.5f) {
-		angleVertical +=
-			XMConvertToRadians(angleV * directInput->getRightY());
-		//制限角度
-		if (angleVertical >= 20) {
-			angleVertical = 20;
-		}
-		//制限角度
-		if (angleVertical <= -20) {
-			angleVertical = -20;
-		}
-	}
-	if (input->Push(DIK_RIGHT) || input->Push(DIK_LEFT) || input->Push(DIK_UP) || input->Push(DIK_DOWN)) {
-		//右
-		if (input->Push(DIK_RIGHT)) {
-			angleHorizonal +=
-				XMConvertToRadians(angleH * directInput->getRightX());
-		}
-		//左
-		if (input->Push(DIK_LEFT)) {
-			angleHorizonal -=
-				XMConvertToRadians(angleH);
-		}
-		//上
-		if (input->Push(DIK_UP)) {
-			angleVertical -=
-				XMConvertToRadians(angleV);
-			//制限角度
-			if (angleVertical <= -20) {
-				angleVertical = -20;
-			}
-		}
-		//下
-		if (input->Push(DIK_DOWN)) {
-			angleVertical +=
-				XMConvertToRadians(angleV);
-			//制限角度
-			if (angleVertical >= 20) {
-				angleVertical = 20;
-			}
-		}
-	}
-
-	//カメラワーク(追従)
-	{
-		//カメラとプレイヤーの距離を決定
-		const float distanceFromPlayerToCamera = 30.0f;
-
-		//static float CAME_HEIGHT = 10.0f;
-		//カメラの高さ
-		const float cameraHeight = 30.0f;
-
-		//カメラの正面ベクトルを決定
-		vv0 = { 0.0f,0.0f,1.0f,0.0f };
-
-		//縦軸の回転
-		rotM = XMMatrixRotationX(XMConvertToRadians(angleVertical));
-		vv0 = XMVector3TransformNormal(vv0, rotM);
-
-		//横軸の回転
-		rotM = XMMatrixRotationY(XMConvertToRadians(angleHorizonal));
-		vv0 = XMVector3TransformNormal(vv0, rotM);
-
-		//
-		XMFLOAT3 direction = { vv0.m128_f32[0],vv0.m128_f32[1],vv0.m128_f32[2] };
-
-		//カメラ位置を決定
-		XMFLOAT3 _eye;
-		_eye.x = pmdModel->position.x + direction.x * distanceFromPlayerToCamera;
-		_eye.y = pmdModel->position.y + direction.y * distanceFromPlayerToCamera;
-		_eye.z = pmdModel->position.z + direction.z * distanceFromPlayerToCamera;
-		_eye.y += cameraHeight;
-		//camera->SetEye(_eye);
-		mainCamera->SetEye(_eye);
-
-		//カメラ注視点を決定
-		XMFLOAT3 _target;
-		_target.x = pmdModel->position.x - direction.x * distanceFromPlayerToCamera;
-		_target.y = pmdModel->position.y - direction.y * distanceFromPlayerToCamera;
-		_target.z = pmdModel->position.z - direction.z * distanceFromPlayerToCamera;
-		_target.y += cameraHeight / 3;
-		//camera->SetTarget(_target);
-		mainCamera->SetTarget(_target);
-
-		//回転
-		//pmdModel->rotation.y = angleHorizonal;
-
-		//camera->Update();
-		mainCamera->Update();
-	}
-
-	obj01->position = pmdModel->position;
-	//更新処理()
-	{
-		dx12->SceneUpdate();
-		camera->Update();
-		obj01->Update();
-		stage->Update();
-		//obj02->Update();
-		obj03->Update();
-		fbxObj1->Update();
-		pmdModel->Update();
-		sprite06->Update();
-		for (int i = 0; i < 3; i++) {
-			obj04[i]->Update();
-		}
-		for (int i = 0; i < NUM_OBJ; i++) {
-			test[i]->Update();
-		}
-
-		HitBox::mainUpdate(pmdModel->GetBoneMat(),pmdModel->rotation);
-		light->Update();
-	}
 
 	//タイトル
 	if (SceneNum == TITLE) {
 
 		if (resetFlag == false) {
-			Initalize(dx12, audio, input);
+			//Initalize(dx12, audio, input);
 			resetFlag = true;
 		}
 		if (input->Trigger(DIK_SPACE)) {
@@ -708,112 +448,252 @@ void GameManager::Update()
 	}
 	//ゲーム
 	else if (SceneNum == GAME) {
+		//エネミーの生成
+		{
+			static float popTime = 0;
+			if (popTime >= 5.0f) {
+				Enemy* ene = Enemy::Create();
+				int r = rand() % 10;
+				if (r % 2 == 1) {
+					ene->SetModel(model03);
+					ene->mode = 1;
+				}
+				else if (r % 2 != 1) {
+					ene->SetModel(model05);
+					ene->mode = 2;
+				}
+				if (r == 5 || r == 6) {
+					ene->SetModel(model06);
+					ene->mode = 3;
+				}
+				ene->scale = { 10,10,10 };
+				ene->step = 0.00005;
+				ene->alive = true;
+				_enemy.push_back(ene);
 
-		//camera->Update();
-		//sprite01->Update();
-		//obj01->Update();
+				Sqhere _sqhere;
+				_sqhere.radius = 5.0f;
+				_sqhere.center = XMVectorSet(ene->position.x, ene->position.y, ene->position.z, 1);
+				sqhere.push_back(_sqhere);
 
-		//for (int i = 0; i < 25; i++)
-		//{
-		//	obj02[i]->Update();
-		//}
+				popTime = 0;
+			}
+			else {
+				popTime += 1.0f / 60.0f;
+			}
+		}
+		//エネミー関係の制御
+		for (int i = 0; i < _enemy.size(); i++) {
+			_enemy[i]->moveUpdate(pmdModel->position, obj04, obj03->position);
+			_enemy[i]->rotation.y += 1.0f;
+			sqhere[i].center = XMVectorSet(_enemy[i]->position.x, _enemy[i]->position.y, _enemy[i]->position.z, 1);
+			if (_enemy[i]->alive == true) { continue; }
+			_enemy.erase(_enemy.begin());
+			sqhere.erase(sqhere.begin());
 
-		//for (int i = 0; i < 10; i++)
-		//{
-		//	if (shotFlag[i] == false) {
-		//		obj03[i]->position = obj01->position;
-		//		obj03[i]->position.x = obj01->position.x + 0.34f;
-		//	}
-		//	else if (shotFlag[i] == true) {
-		//		obj03[i]->position.z += 0.1f;
-		//	}
+		}
+		//当たり判定（プレイヤー / 敵 / 最終関門）
+		for (int i = 0; i < sqhere.size(); i++) {
+			for (int j = 0; j < HitBox::_hit.size(); j++) {
+				bool Hhit = Coliision::CheckSqhere2Sqhere(sqhere[i], HitBox::_hit[j]);
+				XMVECTOR inter;
+				bool Ghit = Coliision::CheckSqhere2Triangle(sqhere[i], triangle[0], &inter);
 
-		//	sqhere[i].center =
-		//		XMVectorSet(
-		//			obj03[i]->position.x,
-		//			obj03[i]->position.y,
-		//			obj03[i]->position.z, 1);
+				if (Ghit == true && reception <= 0) {
+					Hhit = false;
+					gateHP -= 1;
+					reception = 600;
+				}
+				if (Hhit == true) {
+					_enemy[i]->alive = false;
+				}
+				if (gateHP <= 0) { SceneNum = END; }
+				reception--;
+			}
+		}
+		//当たり判定(プレイヤー/ステージ)仮
+		if (pmdModel->position.y < stage->position.y + 40) {
+			pmdModel->position.y = stage->position.y + 40;
+		}
+		//移動
+		{
+			pmdModel->oldVmdNumber = pmdModel->vmdNumber;
+			if (directInput->leftStickX() < 0.0f || directInput->leftStickX() > 0.0f || directInput->leftStickY() < 0.0f || directInput->leftStickY() > 0.0f) {
+				pmdModel->vmdNumber = vmdData::WALK;
+				if (directInput->getTriggerZ() != 0) {
+					speed = 2.0f;
+				}
+				else { speed = 1.0f; }
+				if (input->Push(DIK_A) || directInput->leftStickX() < 0.0f) {
+					pmdModel->position = MoveLeft(pmdModel->position);
+					for (int i = 0; i < HitBox::GetHit().size(); i++) { HitBox::GetHit()[i]->position = MoveLeft(HitBox::GetHit()[i]->position); }
+				}
+				if (input->Push(DIK_D) || directInput->leftStickX() > 0.0f) {
+					pmdModel->position = MoveRight(pmdModel->position);
+					for (int i = 0; i < HitBox::GetHit().size(); i++) { HitBox::GetHit()[i]->position = MoveRight(HitBox::GetHit()[i]->position); }
+				}
+				if (input->Push(DIK_W) || directInput->leftStickY() < 0.0f) {
+					pmdModel->position = MoveBefore(pmdModel->position);
+					for (int i = 0; i < HitBox::GetHit().size(); i++) { HitBox::GetHit()[i]->position = MoveBefore(HitBox::GetHit()[i]->position); }
+				}
+				if (input->Push(DIK_S) || directInput->leftStickY() > 0.0f) {
+					pmdModel->position = MoveAfter(pmdModel->position);
+					for (int i = 0; i < HitBox::GetHit().size(); i++) { HitBox::GetHit()[i]->position = MoveAfter(HitBox::GetHit()[i]->position); }
+				}
+				XMVECTOR v = { (directInput->getLeftX()),0.0f,-(directInput->getLeftY()),0.0f};
+				XMMATRIX matRot = XMMatrixIdentity();
+				//角度回転
+				matRot = XMMatrixRotationY(XMConvertToRadians(angleHorizonal));
+				v = XMVector3TransformNormal(v, matRot);
+				XMFLOAT3 _v(v.m128_f32[0], v.m128_f32[1], v.m128_f32[2]);
+				pmdModel->SetMatRot(LookAtRotation( _v, XMFLOAT3(0, 1, 0)));
+			}
+			else {
+				pmdModel->vmdNumber = vmdData::WAIT;
+			}
 
-		//	obj03[i]->Update();
-		//}
+			if (input->Push(DIK_RIGHT)) {
+				//audio->Play(0);
+				obj01->rotation.x += 1.0f;
+				test[0]->position.x += 1.0f;
+			}
+			if (input->Push(DIK_UP)) {
+				obj01->rotation.y += 1.0f;
+			}
 
-		//for (int i = 0; i < 25; i++) {
-		//	triangle[i].p0 = XMVectorSet(
-		//		obj02[i]->position.x - 0.41f,
-		//		obj02[i]->position.y - 0.41f,
-		//		obj02[i]->position.z, 1);
-		//	triangle[i].p1 = XMVectorSet(
-		//		obj02[i]->position.x + 0.41f,
-		//		obj02[i]->position.y - 0.41f,
-		//		obj02[i]->position.z, 1);
-		//	triangle[i].p2 = XMVectorSet(
-		//		obj02[i]->position.x - 0.41f,
-		//		obj02[i]->position.y + 0.41f,
-		//		obj02[i]->position.z, 1);
-		//	triangle[i].normal = XMVectorSet(0.0f, 0.0f, -1.0f, 0);
-		//}
+			if (input->Push(DIK_2)) {
+				test[0]->position.x += 1.0f;
+			}
+			if (input->Push(DIK_1)) {
+				test[0]->position.x -= 1.0f;
+			}
+			if (input->Push(DIK_3)) {
+				test[0]->position.y -= 1.0f;
+			}
+			if (input->Push(DIK_4)) {
+				test[0]->position.y += 1.0f;
+			}
 
-		//if (input->Push(DIK_A)) {
-		//	obj01->position.x -= 0.01f;
-		//}
-		//if (input->Push(DIK_D)) {
-		//	obj01->position.x += 0.01f;
-		//}
-		//if (input->Push(DIK_W)) {
-		//	obj01->position.y += 0.01f;
-		//}
-		//if (input->Push(DIK_S)) {
-		//	obj01->position.y -= 0.01f;
-		//}
+		}
+		//カメラワーク(プレイヤー)
+		float angleH = 100.0f;
+		float angleV = 40.0f;
+		if (directInput->rightStickX() >= 0.5f || directInput->rightStickX() <= -0.5f) {
+			angleHorizonal +=
+				XMConvertToRadians(angleH * directInput->getRightX());
+		}
+		if (directInput->rightStickY() >= 0.5f || directInput->rightStickY() <= -0.5f) {
+			angleVertical +=
+				XMConvertToRadians(angleV * directInput->getRightY());
+			//制限角度
+			if (angleVertical >= 20) {
+				angleVertical = 20;
+			}
+			//制限角度
+			if (angleVertical <= -20) {
+				angleVertical = -20;
+			}
+		}
+		if (input->Push(DIK_RIGHT) || input->Push(DIK_LEFT) || input->Push(DIK_UP) || input->Push(DIK_DOWN)) {
+			//右
+			if (input->Push(DIK_RIGHT)) {
+				angleHorizonal +=
+					XMConvertToRadians(angleH * directInput->getRightX());
+			}
+			//左
+			if (input->Push(DIK_LEFT)) {
+				angleHorizonal -=
+					XMConvertToRadians(angleH);
+			}
+			//上
+			if (input->Push(DIK_UP)) {
+				angleVertical -=
+					XMConvertToRadians(angleV);
+				//制限角度
+				if (angleVertical <= -20) {
+					angleVertical = -20;
+				}
+			}
+			//下
+			if (input->Push(DIK_DOWN)) {
+				angleVertical +=
+					XMConvertToRadians(angleV);
+				//制限角度
+				if (angleVertical >= 20) {
+					angleVertical = 20;
+				}
+			}
+		}
+		//カメラワーク(追従)
+		{
+			//カメラとプレイヤーの距離を決定
+			const float distanceFromPlayerToCamera = 40.0f;
 
-		//if (input->Trigger(DIK_SPACE)) {
-		//	for (int i = 0; i < 10; i++)
-		//	{
-		//		if (shotFlag[i] == false) {
-		//			shotFlag[i] = true;
-		//			break;
-		//		}
-		//	}
-		//}
+			//カメラの高さ
+			const float cameraHeight = 30.0f;
 
-		//ray.start = XMVectorSet(input->GetPos().x / 1000.0f, input->GetPos().y / 1000.0f, 0, 1);
-		//if (ray.start.m128_f32[0] != 0) {
-		//	ray.start.m128_f32[0] = input->GetPos().x;
-		//}
-		////レイと平面の当たり判定
-		//{
-		//	XMVECTOR interR;
-		//	float distance = 0;
-		//	for (int i = 0; i < 25; i++)
-		//	{
-		//		for (int j = 0; j < 10; j++)
-		//		{
+			//カメラの正面ベクトルを決定
+			vv0 = { 0.0f,0.0f,1.0f,0.0f };
 
-		//			bool hit = Coliision::CheckSqhere2Triangle(
-		//				sqhere[j], triangle[i], &interR);
+			//縦軸の回転
+			rotM = XMMatrixRotationX(XMConvertToRadians(angleVertical));
+			vv0 = XMVector3TransformNormal(vv0, rotM);
 
-		//			if (hit) {
-		//				if (cubeFlag[i] == false) {
-		//					count -= 1;
-		//				}
-		//				shotFlag[j] = false;
-		//				cubeFlag[i] = true;
-		//			}
-		//		}
-		//	}
-		//}
+			//横軸の回転
+			rotM = XMMatrixRotationY(XMConvertToRadians(angleHorizonal));
+			vv0 = XMVector3TransformNormal(vv0, rotM);
 
-		//if (count <= 0) {
-		//	SceneNum = END;
-		//}
+			//
+			XMFLOAT3 direction = { vv0.m128_f32[0],vv0.m128_f32[1],vv0.m128_f32[2] };
+
+			//カメラ位置を決定
+			XMFLOAT3 _eye;
+			_eye.x = pmdModel->position.x + direction.x * distanceFromPlayerToCamera;
+			_eye.y = pmdModel->position.y + direction.y * distanceFromPlayerToCamera;
+			_eye.z = pmdModel->position.z + direction.z * distanceFromPlayerToCamera;
+			_eye.y += cameraHeight;
+			mainCamera->SetEye(_eye);
+
+			//カメラ注視点を決定
+			XMFLOAT3 _target;
+			_target.x = pmdModel->position.x - direction.x * distanceFromPlayerToCamera;
+			_target.y = pmdModel->position.y - direction.y * distanceFromPlayerToCamera;
+			_target.z = pmdModel->position.z - direction.z * distanceFromPlayerToCamera;
+			_target.y += cameraHeight / 3;
+			mainCamera->SetTarget(_target);
+
+			mainCamera->Update();
+		}
+		//更新処理(ゲーム)
+		{
+			static float gravity = 0.098f;
+			static float v = 0.0f;
+			v += gravity;
+			pmdModel->position.y -= gravity;
+		}
+		//更新処理(固有)
+		{
+			dx12->SceneUpdate();
+			camera->Update();
+			obj01->Update();
+			stage->Update();
+			obj03->Update();
+			fbxObj1->Update();
+			pmdModel->Update();
+			sprite06->Update();
+			for (int i = 0; i < 2; i++) {
+				obj04[i]->Update();
+			}
+			for (int i = 0; i < NUM_OBJ; i++) {
+				test[i]->Update();
+			}
+
+			HitBox::mainUpdate(pmdModel->GetBoneMat(), pmdModel->rotation);
+			light->Update();
+		}
 	}
 	//エンド
 	else if (SceneNum == END) {
-		//if (input->Trigger(DIK_SPACE)) {
-		//	sprite03->Update();
-		//	SceneNum = TITLE;
-		//	resetFlag = false;
-		//}
 	}
 }
 
@@ -821,38 +701,6 @@ void GameManager::Draw()
 {
 	// コマンドリストの取得
 	ID3D12GraphicsCommandList* cmdList = dx12->CommandList().Get();
-
-	Sprite::PreDraw(cmdList);
-
-	//sprite02->Draw();
-	//sprite01->Draw();
-
-	Sprite::PostDraw();
-
-	//深度バッファクリア
-	dx12->ClearDepthBuffer();
-
-	BaseObject::PreDraw(cmdList);
-	obj01->Draw();
-	//obj02->Draw();
-	stage->Draw();
-	obj03->Draw();
-	for (int i = 0; i < 3; i++) {
-		obj04[i]->Draw();
-	}
-	for (int i = 0; i < _enemy.size(); i++) {
-		_enemy[i]->Draw();
-	}
-	HitBox::mainDraw();
-	pmdObject->Draw();
-	dx12->SceneDraw();
-	pmdModel->Draw(cmdList);
-
-	for (int i = 0; i < NUM_OBJ; i++) {
-		test[i]->Draw();
-	}
-
-	BaseObject::PostDraw();
 
 	//fbxObj1->Draw(cmdList);
 
@@ -862,46 +710,42 @@ void GameManager::Draw()
 		sprite01->Draw();
 
 		Sprite::PostDraw();
-		//Sprite::PreDraw(cmdList);
-
-		//sprite02->Draw();
-
-		//Sprite::PostDraw();
-		//// 深度バッファクリア
-		//dx12->ClearDepthBuffer();
 
 		BaseObject::PreDraw(cmdList);
 
 		obj01->Draw();
 
 		BaseObject::PostDraw();
-
 	}
 	else if (SceneNum == GAME) {
-
-		//Sprite::PreDraw(cmdList);
+		Sprite::PreDraw(cmdList);
 
 		//sprite02->Draw();
+		//sprite01->Draw();
 
-		//Sprite::PostDraw();
-		// 深度バッファクリア
+		Sprite::PostDraw();
+
+		//深度バッファクリア
 		dx12->ClearDepthBuffer();
 
-		//オブジェクトの描画
 		BaseObject::PreDraw(cmdList);
 		obj01->Draw();
+		stage->Draw();
+		obj03->Draw();
+		for (int i = 0; i < 2; i++) {
+			obj04[i]->Draw();
+		}
+		for (int i = 0; i < _enemy.size(); i++) {
+			_enemy[i]->Draw();
+		}
+		HitBox::mainDraw();
+		pmdObject->Draw();
+		dx12->SceneDraw();
+		pmdModel->Draw(cmdList);
 
-		//for (int i = 0; i < 24; i++) {
-		//	if (cubeFlag[i] == false) {
-		//		obj02[i]->Draw();
-		//	}
-		//}
-
-		//for (int i = 0; i < 10; i++) {
-		//	if (shotFlag[i] == true) {
-		//		obj03[i]->Draw();
-		//	}
-		//}
+		for (int i = 0; i < NUM_OBJ; i++) {
+			test[i]->Draw();
+		}
 
 		BaseObject::PostDraw();
 	}

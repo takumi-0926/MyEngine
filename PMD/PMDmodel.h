@@ -236,6 +236,11 @@ public:
 	XMFLOAT3 GetPosition() {
 		return position;
 	}
+
+	void SetMatRot(XMMATRIX rot) {
+		this->matRot = rot;
+	}
+
 public://メンバ変数
 	ComPtr<ID3D12Resource> PMDconstBuffB1; // 定数バッファ
 
@@ -249,6 +254,8 @@ public://メンバ変数
 	XMFLOAT3 position = { 0,0,0 };
 	// ローカルワールド変換行列
 	XMMATRIX matWorld;
+
+	XMMATRIX matRot = XMMatrixIdentity();;
 
 	bool animation = false;
 	//選択中のモーションデータ
