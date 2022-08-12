@@ -93,13 +93,13 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 
 	for (int i = 0; i < 2; i++)
 	{
-		obj04[i] = Object3Ds::Create();
-		obj04[i]->SetModel(model03);
-		obj04[i]->Update();
-		obj04[i]->scale = { 10,10,10 };
+		wall[i] = StageObject::Create();
+		wall[i]->SetModel(model03);
+		wall[i]->Update();
+		wall[i]->scale = { 10,10,10 };
 	}
-	obj04[0]->SetPosition({ 0,0,0 });
-	obj04[1]->SetPosition({ 50,0,0 });
+	wall[0]->SetPosition({ 0,0,0 });
+	wall[1]->SetPosition({ 50,0,0 });
 
 	//MMDオブジェクト----------------
 	pmdObject.reset(new PMDobject(dx12));
@@ -129,6 +129,12 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	sprite05 = Sprite::Create(4, { 0.0f,0.0f });
 	sprite06 = Sprite::Create(5, { 500.0f,0.0f });
 
+	for (int i = 0; i < ENEM_HP; i++) {
+		static float xpos = 10.0f;
+		hp[i] = Sprite::Create(3, { xpos * i,0.0f });
+		hp[i]->Update();
+	}
+
 	//ヒットボックス-----------------
 	HitBox::CreatePipeline(dx12);
 	HitBox::CreateTransform();
@@ -157,7 +163,7 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	test[0]->position.y = pmdModel->position.y + 50;
 	test[0]->pos.y = test[0]->position.y;
 	input->Update();
-	//audio->Load();
+	audio->Load();
 
 	SceneNum = TITLE;
 	move1.flag = false;
@@ -484,13 +490,12 @@ void GameManager::Update()
 		}
 		//エネミー関係の制御
 		for (int i = 0; i < _enemy.size(); i++) {
-			_enemy[i]->moveUpdate(pmdModel->position, obj04, obj03->position);
+			_enemy[i]->moveUpdate(pmdModel->position, wall, obj03->position);
 			_enemy[i]->rotation.y += 1.0f;
 			sqhere[i].center = XMVectorSet(_enemy[i]->position.x, _enemy[i]->position.y, _enemy[i]->position.z, 1);
 			if (_enemy[i]->alive == true) { continue; }
 			_enemy.erase(_enemy.begin());
 			sqhere.erase(sqhere.begin());
-
 		}
 		//当たり判定（プレイヤー / 敵 / 最終関門）
 		for (int i = 0; i < sqhere.size(); i++) {
@@ -505,6 +510,9 @@ void GameManager::Update()
 					reception = 600;
 				}
 				if (Hhit == true) {
+					_enemy[i]->status.HP -= 1;
+					//体力がなくなっていれば
+					if (_enemy[i]->status.HP >= 0) { continue; }
 					_enemy[i]->alive = false;
 				}
 				if (gateHP <= 0) { SceneNum = END; }
@@ -540,13 +548,13 @@ void GameManager::Update()
 					pmdModel->position = MoveAfter(pmdModel->position);
 					for (int i = 0; i < HitBox::GetHit().size(); i++) { HitBox::GetHit()[i]->position = MoveAfter(HitBox::GetHit()[i]->position); }
 				}
-				XMVECTOR v = { (directInput->getLeftX()),0.0f,-(directInput->getLeftY()),0.0f};
+				XMVECTOR v = { (directInput->getLeftX()),0.0f,-(directInput->getLeftY()),0.0f };
 				XMMATRIX matRot = XMMatrixIdentity();
 				//角度回転
 				matRot = XMMatrixRotationY(XMConvertToRadians(angleHorizonal));
 				v = XMVector3TransformNormal(v, matRot);
 				XMFLOAT3 _v(v.m128_f32[0], v.m128_f32[1], v.m128_f32[2]);
-				pmdModel->SetMatRot(LookAtRotation( _v, XMFLOAT3(0, 1, 0)));
+				pmdModel->SetMatRot(LookAtRotation(_v, XMFLOAT3(0, 1, 0)));
 			}
 			else {
 				pmdModel->vmdNumber = vmdData::WAIT;
@@ -682,7 +690,7 @@ void GameManager::Update()
 			pmdModel->Update();
 			sprite06->Update();
 			for (int i = 0; i < 2; i++) {
-				obj04[i]->Update();
+				wall[i]->Update();
 			}
 			for (int i = 0; i < NUM_OBJ; i++) {
 				test[i]->Update();
@@ -733,7 +741,7 @@ void GameManager::Draw()
 		stage->Draw();
 		obj03->Draw();
 		for (int i = 0; i < 2; i++) {
-			obj04[i]->Draw();
+			wall[i]->Draw();
 		}
 		for (int i = 0; i < _enemy.size(); i++) {
 			_enemy[i]->Draw();
@@ -748,6 +756,14 @@ void GameManager::Draw()
 		}
 
 		BaseObject::PostDraw();
+
+		Sprite::PreDraw(cmdList);
+
+		for (int i = 0; i < ENEM_HP; i++) {
+			hp[i]->Draw();
+		}
+
+		Sprite::PostDraw();
 	}
 	else if (SceneNum == END) {
 		// コマンドリストの取得

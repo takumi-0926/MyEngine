@@ -20,6 +20,13 @@ XMFLOAT3 Enemy::moveObject(XMFLOAT3 pos1, XMFLOAT3 pos2, float pct)
 
 Enemy::Enemy()
 {
+	status = {
+			 610,//デフォルトHP
+			  1,//デフォルト攻撃力
+			  1,//デフォルト防御力
+			  1,//デフォルト速度
+		{1,1,1},//デフォルト大きさ
+	};
 	alive = false;
 	step = 0.00005f;
 	pct = 0.0f;
@@ -51,7 +58,7 @@ void Enemy::Update() {
 	Object3Ds::Update();
 }
 
-void Enemy::moveUpdate(XMFLOAT3 pPos, Object3Ds* bPos[],XMFLOAT3 gPos)
+void Enemy::moveUpdate(XMFLOAT3 pPos, StageObject* bPos[], XMFLOAT3 gPos)
 {
 	if (mode == 1) {
 

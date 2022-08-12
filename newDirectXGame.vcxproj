@@ -300,6 +300,7 @@
     <ClInclude Include="Sprite\sprite.h" />
     <ClInclude Include="Sprite\spriteCommon.h" />
     <ClInclude Include="stage.h" />
+    <ClInclude Include="stageObject.h" />
     <ClInclude Include="testObj.h" />
     <ClInclude Include="Vector2.h" />
     <ClInclude Include="Vector3.h" />
@@ -336,6 +337,7 @@
     <ClCompile Include="shaderTest.cpp" />
     <ClCompile Include="Sprite\sprite.cpp" />
     <ClCompile Include="stage.cpp" />
+    <ClCompile Include="stageObject.cpp" />
     <ClCompile Include="testObj.cpp" />
     <ClCompile Include="Vector3.cpp" />
   </ItemGroup>

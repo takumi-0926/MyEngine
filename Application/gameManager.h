@@ -22,6 +22,7 @@
 #include "..\shaderTest.h"
 
 #include "..\stage.h"
+#include "..\stageObject.h"
 
 #include "..\Vector3.h"
 
@@ -30,6 +31,7 @@ using namespace DirectX;
 using namespace Microsoft::WRL;
 
 #define	ENEM_NUM	1000
+#define ENEM_HP 100
 
 enum {
 	TITLE,
@@ -48,6 +50,9 @@ private://メンバ変数(ゲームシーン)
 	vector<Enemy*> _enemy;
 	vector<Sqhere> sqhere;
 	Stage* stage;
+	StageObject* wall[6] = {};
+	Sprite* hp[ENEM_HP] = {};
+
 
 	Model* model01 = nullptr;
 	Model* model02 = nullptr;
@@ -104,7 +109,6 @@ private://メンバ変数(ゲームシーン)
 		false,	//移動開始フラグ
 		0		//運動番号
 	};
-
 	Move move2{
 	9.8f,	//重力
 	0.0f,	//Y方向

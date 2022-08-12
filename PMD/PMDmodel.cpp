@@ -275,12 +275,6 @@ void PMDmodel::Update()
 	matWorld *= matRot; // ワールド行列に回転を反映
 	matWorld *= matTrans; // ワールド行列に平行移動を反映
 
-	//transform.world = matWorld;
-	//result = transformBuff->Map(0, nullptr, (void**)&mappedTransform);
-	//if (FAILED(result)) { assert(0); }
-	//*mappedTransform = transform;
-
-	//transform.world = matWorld;
 	result = transformBuff->Map(0, nullptr, (void**)&_mappedMatrices);
 	if (FAILED(result)) { assert(0); }
 	_mappedMatrices[0] = matWorld;

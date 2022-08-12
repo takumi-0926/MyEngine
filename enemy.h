@@ -1,10 +1,13 @@
 #pragma once
 #include "..\object\object3D.h"
 #include "..\PMD\PMDmodel.h"
+#include "..\stageObject.h"
 
 class PMDmodel;
+class StageObject;
 class Enemy : public Object3Ds {
-	struct status {
+	struct Status {
+		int HP;
 		float attack;	//攻撃力
 		float defense;	//防御力
 		float speed;
@@ -12,6 +15,7 @@ class Enemy : public Object3Ds {
 	};
 
 public:
+	Status status;
 	bool alive;	//生存判定
 
 	float step = 0.00005f;	//進行
@@ -26,7 +30,7 @@ public:
 	Enemy();		//コンストラクタ
 	static Enemy* Create();//インスタンス生成
 	void Update() override;
-	void moveUpdate(XMFLOAT3 pPos, Object3Ds* bPos[], XMFLOAT3 gPos);
+	void moveUpdate(XMFLOAT3 pPos, StageObject *bPos[], XMFLOAT3 gPos);
 	void Draw() override;
 
 };
