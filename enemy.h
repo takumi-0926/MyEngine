@@ -16,11 +16,13 @@ class Enemy : public Object3Ds {
 
 public:
 	Status status;
-	bool alive;	//生存判定
+	bool alive = false;	//生存判定
+	bool move = true;  //移動フラグ
+	bool attack = false;//攻撃フラグ
 
 	float step = 0.00005f;	//進行
 	float pct = 0.0f;		//経過
-
+	float attackTime = 0.0f;
 	int mode = 0;
 private:
 	float objectDistance(XMFLOAT3 pos1, XMFLOAT3 pos2);				//建物との直線距離を計算

@@ -892,9 +892,7 @@ void PMDmodel::MotionUpdate()
 			auto t = static_cast<float>(frameNo - rit->frameNo)
 				/ static_cast<float>(it->frameNo - rit->frameNo);
 
-			if (a == true) {
-				t = GetYFromXOn(t, it->p1, it->p2, 12);
-			}
+			t = GetYFromXOn(t, it->p1, it->p2, 12);
 
 			rotation = XMMatrixRotationQuaternion(
 				XMQuaternionSlerp(rit->quaternion, it->quaternion, t));//‹…–ÊüŒ`•âŠÔ

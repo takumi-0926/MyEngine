@@ -60,37 +60,70 @@ void Enemy::Update() {
 
 void Enemy::moveUpdate(XMFLOAT3 pPos, StageObject* bPos[], XMFLOAT3 gPos)
 {
-	if (mode == 1) {
+	static int d = 7;
 
-		int objectNo = 0;
-		float distance = 1000;
-		for (int i = 0; i < 2; i++)
-		{
-			float dis = objectDistance(position, bPos[i]->position);
-			if (distance >= dis) {
-				distance = dis;
-				objectNo = i;
+	//移動処理
+	if (this->move == true) {
+		//パターン1
+		if (this->mode == 1) {
+			int objectNo = 0;
+			float distance = 1000;
+			for (int i = 0; i < 2; i++)
+			{
+				float dis = objectDistance(this->position, bPos[i]->position);
+				if (distance >= dis) {
+					distance = dis;
+					objectNo = i;
+				}
+			}
+
+			if (this->pct <= 1.0f) {
+				this->position = moveObject(this->position, bPos[objectNo]->position, this->pct);
+				this->pct += this->step;
+			}
+
+			//移動から攻撃へ
+			if (objectDistance(this->position, bPos[objectNo]->position) <= d) {
+				this->attack = true;
+				this->move = false;
 			}
 		}
+		//パターン2
+		if (this->mode == 2) {
+			if (this->pct <= 1.0f) {
+				this->position = moveObject(this->position, pPos, this->pct);
+				this->pct += this->step;
+			}
 
-		if (pct <= 1.0f) {
-			position = moveObject(position, bPos[objectNo]->position, pct);
-			pct += this->step;
+			//移動から攻撃へ
+			if (objectDistance(this->position, pPos) <= d) {
+				this->attack = true;
+				this->move = false;
+			}
 		}
-	}
-	if (mode == 2) {
-		if (pct <= 1.0f) {
-			position = moveObject(position, pPos, pct);
-			pct += this->step;
-		}
-	}
-	if (mode == 3) {
-		if (pct <= 1.0f) {
-			position = moveObject(position, gPos, pct);
-			pct += step;
+		//パターン3
+		if (this->mode == 3) {
+			if (this->pct <= 1.0f) {
+				this->position = moveObject(this->position, gPos, this->pct);
+				this->pct += this->step;
+			}
+
+			//移動から攻撃へ
+			if (objectDistance(this->position, gPos) <= d) {
+				this->attack = true;
+				this->move = false;
+			}
 		}
 	}
 
+	if (attack == true) {
+		if (this->attackTime >= 5.0f) {
+			this->attackTime = 0.0f;
+			this->move = true;
+			this->attack = false;
+		}
+		this->attackTime += 1.0f / 60.0f;
+	}
 	Object3Ds::Update();
 	//Update();
 }
