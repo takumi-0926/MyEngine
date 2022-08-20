@@ -26,12 +26,15 @@
 
 #include "..\Vector3.h"
 
+
+#include "..\SceneEffectManager.h"
+
 using namespace std;
 using namespace DirectX;
 using namespace Microsoft::WRL;
 
 #define	ENEM_NUM	1000
-#define ENEM_HP 100
+#define P_HP 100
 
 enum {
 	TITLE,
@@ -51,8 +54,7 @@ private://メンバ変数(ゲームシーン)
 	vector<Sqhere> sqhere;
 	Stage* stage;
 	StageObject* wall[6] = {};
-	Sprite* hp[ENEM_HP] = {};
-
+	Sprite* hp[P_HP] = {};
 
 	Model* model01 = nullptr;
 	Model* model02 = nullptr;
@@ -155,9 +157,12 @@ private://メンバ変数(ゲームシーン)
 	int	_idx_obj = 0;
 
 	int gateHP = 10;
+	int playerHp = P_HP;
 	int reception = 600;
 
 	float speed = 0.0;
+
+	float a;//角度保存用
 
 public://メンバ関数
 	//コンストラクタ
@@ -277,16 +282,34 @@ public://メンバ関数
 	}
 
 	XMMATRIX LookAtRotation(XMFLOAT3 forward, XMFLOAT3 upward) {
-		Vector3 z = Vector3(forward.x, forward.y, forward.z);
-		Vector3 up = Vector3(upward.x, upward.y, upward.z);
-		Vector3 x = z.cross(up);
-		Vector3 y = x.cross(z);
-		XMMATRIX rot =
-			XMMATRIX(
-				{ x.x, x.y, x.z ,0 },
-				{ y.x, y.y, y.z ,0 },
-				{ z.x, z.y, z.z ,0 },
-				{   0,   0,   0 ,1 });
+		Vector3 z = Vector3(forward.x, forward.y, forward.z);//進行方向ベクトル（前方向）
+		Vector3 up = Vector3(upward.x, upward.y, upward.z);  //上方向
+		XMMATRIX rot;//回転行列
+		XMVECTOR q;		//回転クォータニオン
+		Vector3 _z = { 0.0f,0.0f,1.0f };//Z方向単位ベクトル
+
+		XMMATRIX matRot = XMMatrixIdentity();
+
+		//カメラに合わせるための回転行列
+		matRot = XMMatrixRotationY(XMConvertToRadians(angleHorizonal));
+
+		//回転角度計算
+		a = _z.dot(z);
+		if (a >= 1.0f) { a = 1.0f; }
+		if (a <= -1.0f) { a = -1.0f; }
+		float angle = acos(a);
+		if (_z.x < 0) { angle = -angle; }
+		if (z.x < 0) { angle = -angle; }
+
+		//単位クォータニオン化
+		q.m128_f32[0] = q.m128_f32[1] = q.m128_f32[2] = 0.0f;
+		q.m128_f32[3] = 1.0f;
+
+		//任意軸回転
+		XMVECTOR _up = { up.x,up.y,up.z };
+		q = XMQuaternionRotationAxis(_up, angle);
+		rot = XMMatrixRotationQuaternion(q);
+
 		return rot;
 	}
 };

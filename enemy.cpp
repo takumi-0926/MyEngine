@@ -9,6 +9,16 @@ float Enemy::objectDistance(XMFLOAT3 pos1, XMFLOAT3 pos2)
 	return distance;
 }
 
+XMVECTOR Enemy::objectVector(XMFLOAT3 pos1, XMFLOAT3 pos2)
+{
+	XMVECTOR distance;
+	float x = pos1.x - pos2.x;
+	float z = pos1.z - pos2.z;
+	distance = { x,0,z,0 };
+	return distance;
+
+}
+
 XMFLOAT3 Enemy::moveObject(XMFLOAT3 pos1, XMFLOAT3 pos2, float pct)
 {
 	XMFLOAT3 pos;
@@ -16,6 +26,12 @@ XMFLOAT3 Enemy::moveObject(XMFLOAT3 pos1, XMFLOAT3 pos2, float pct)
 	pos.z = pos1.z + ((pos2.z - pos1.z) * pct);
 	pos.y = pos1.y;
 	return pos;
+}
+
+void Enemy::moveReset()
+{
+	this->step = 0.00005f;	//進行
+	this->pct = 0.0f;		//経過
 }
 
 Enemy::Enemy()
@@ -61,12 +77,12 @@ void Enemy::Update() {
 void Enemy::moveUpdate(XMFLOAT3 pPos, StageObject* bPos[], XMFLOAT3 gPos)
 {
 	static int d = 7;
+	int objectNo = 0;
 
 	//移動処理
 	if (this->move == true) {
 		//パターン1
 		if (this->mode == 1) {
-			int objectNo = 0;
 			float distance = 1000;
 			for (int i = 0; i < 2; i++)
 			{
@@ -86,6 +102,7 @@ void Enemy::moveUpdate(XMFLOAT3 pPos, StageObject* bPos[], XMFLOAT3 gPos)
 			if (objectDistance(this->position, bPos[objectNo]->position) <= d) {
 				this->attack = true;
 				this->move = false;
+				this->attackOnMove = false;
 			}
 		}
 		//パターン2
@@ -112,18 +129,119 @@ void Enemy::moveUpdate(XMFLOAT3 pPos, StageObject* bPos[], XMFLOAT3 gPos)
 			if (objectDistance(this->position, gPos) <= d) {
 				this->attack = true;
 				this->move = false;
+				this->attackOnMove = false;
 			}
 		}
 	}
 
-	if (attack == true) {
-		if (this->attackTime >= 5.0f) {
-			this->attackTime = 0.0f;
-			this->move = true;
-			this->attack = false;
+	//攻撃処理
+	if (this->attack == true) {
+		if (this->mode == 1) {
+			//攻撃時の情報取得
+			if (this->startAttack == false) {
+				moveReset();
+				this->vectol = objectVector(bPos[objectNo]->position, this->position);
+				this->attackPos = this->position;
+				this->startAttack = true;
+			}
+
+			if (this->attackTime >= 3.0f) {
+				if (this->attackHit == true) {
+					this->position.x += this->vectol.m128_f32[0] / 50;
+					this->position.y += this->vectol.m128_f32[1] / 50;
+					this->position.z += this->vectol.m128_f32[2] / 50;
+					this->attackOnMove = true;
+				}
+				else {
+					this->position = moveObject(this->position, this->attackPos, this->pct);
+					this->pct += this->step;
+				}
+			}
+
+			//移動処理移行時の初期化
+			if (this->position.x == this->attackPos.x && this->attackOnMove == true) {
+				if (this->position.y == this->attackPos.y) {
+					if (this->position.z == this->attackPos.z) {
+						moveReset();
+						this->attackTime = 0.0f;
+						this->move = true;
+						this->attack = false;
+						this->startAttack = false;
+						this->attackHit = true;
+					};
+				};
+			}
+
+			this->attackTime += 1.0f / 60.0f;
 		}
-		this->attackTime += 1.0f / 60.0f;
+		if (this->mode == 2) {
+			//攻撃時の情報取得
+			if (this->startAttack == false) {
+				this->vectol = objectVector(pPos, this->position);
+				this->attackPos = this->position;
+				this->startAttack = true;
+			}
+
+			//攻撃開始（突進）
+			if (this->attackTime >= 3.0f) {
+				this->position.x += vectol.m128_f32[0] / 50;
+				this->position.y += vectol.m128_f32[1] / 50;
+				this->position.z += vectol.m128_f32[2] / 50;
+			}
+
+			//移動処理移行時の初期化
+			if (this->attackTime >= 5.0f) {
+				moveReset();
+				this->attackTime = 0.0f;
+				this->move = true;
+				this->attack = false;
+				this->startAttack = false;
+				this->attackHit = true;
+			}
+
+			this->attackTime += 1.0f / 60.0f;
+		}
+		if (this->mode == 3) {
+			//攻撃時の情報取得
+			if (this->startAttack == false) {
+				moveReset();
+				this->vectol = objectVector(gPos, this->position);
+				this->attackPos = this->position;
+				this->startAttack = true;
+			}
+
+			//攻撃開始（突進）
+			if (this->attackTime >= 3.0f) {
+				if (this->attackHit == true) {
+					this->position.x += this->vectol.m128_f32[0] / 50;
+					this->position.y += this->vectol.m128_f32[1] / 50;
+					this->position.z += this->vectol.m128_f32[2] / 50;
+					this->attackOnMove = true;
+				}
+				else {
+					this->position = moveObject(this->position, this->attackPos, this->pct);
+					this->pct += this->step;
+				}
+			}
+
+			//移動処理移行時の初期化
+			if (this->position.x == this->attackPos.x && this->attackOnMove == true) {
+				if (this->position.y == this->attackPos.y) {
+					if (this->position.z == this->attackPos.z) {
+						moveReset();
+						this->attackTime = 0.0f;
+						this->move = true;
+						this->attack = false;
+						this->startAttack = false;
+						this->attackHit = true;
+					};
+				};
+			}
+
+			this->attackTime += 1.0f / 60.0f;
+		}
 	}
+
 	Object3Ds::Update();
 	//Update();
 }

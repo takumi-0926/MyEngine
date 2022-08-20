@@ -19,15 +19,23 @@ public:
 	bool alive = false;	//生存判定
 	bool move = true;  //移動フラグ
 	bool attack = false;//攻撃フラグ
+	bool startAttack = false;
+	bool attackHit = true;
+	bool attackOnMove = false;
 
 	float step = 0.00005f;	//進行
 	float pct = 0.0f;		//経過
 	float attackTime = 0.0f;
 	int mode = 0;
-private:
-	float objectDistance(XMFLOAT3 pos1, XMFLOAT3 pos2);				//建物との直線距離を計算
-	XMFLOAT3 moveObject(XMFLOAT3 pos1, XMFLOAT3 pos2, float pct);	//指定の建物へ移動
 
+	XMVECTOR vectol;
+	XMFLOAT3 attackPos;
+
+private:
+	float	 objectDistance(XMFLOAT3 pos1, XMFLOAT3 pos2);				//建物との直線距離を計算
+	XMVECTOR objectVector(XMFLOAT3 pos1, XMFLOAT3 pos2);				//建物間のベクトルを計算
+	XMFLOAT3 moveObject(XMFLOAT3 pos1, XMFLOAT3 pos2, float pct);	//指定の建物へ移動
+	void moveReset();
 public:
 	Enemy();		//コンストラクタ
 	static Enemy* Create();//インスタンス生成

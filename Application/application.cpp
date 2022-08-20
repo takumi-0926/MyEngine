@@ -16,7 +16,7 @@ LRESULT Application::WindowProcedure(HWND hwnd, UINT msg, WPARAM wparam, LPARAM 
 		return 0;
 	}
 
-	//ImGui_ImplWin32_WndProcHandler(hwnd, msg, wparam, lparam);
+	ImGui_ImplWin32_WndProcHandler(hwnd, msg, wparam, lparam);
 	return DefWindowProc(hwnd, msg, wparam, lparam);
 }
 

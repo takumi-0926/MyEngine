@@ -129,7 +129,7 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	sprite05 = Sprite::Create(4, { 0.0f,0.0f });
 	sprite06 = Sprite::Create(5, { 500.0f,0.0f });
 
-	for (int i = 0; i < ENEM_HP; i++) {
+	for (int i = 0; i < P_HP; i++) {
 		static float xpos = 10.0f;
 		hp[i] = Sprite::Create(3, { xpos * i,0.0f });
 		hp[i]->Update();
@@ -182,40 +182,40 @@ void GameManager::Update()
 		pmdModel->playAnimation();
 	}
 	//imgui
-	//static bool blnChk = false;
-	//static int radio = 0;
-	//static float eneSpeed = 0.0f;
-	//{
-	//	ImGui::Begin("Rendering Test Menu");
-	//	ImGui::SetWindowSize(ImVec2(400, 500), ImGuiCond_::ImGuiCond_FirstUseEver);
-	//	imguiのUIコントロール
-	//	ImGui::Checkbox("EnemyPop", &blnChk);
-	//	ImGui::Checkbox("test", &pmdModel->a);
-	//	ImGui::RadioButton("Debug Camera", &radio, 0);
-	//	ImGui::SameLine();
-	//	ImGui::RadioButton("Game Camera", &radio, 1);
-	//	ImGui::SameLine();
-	//	ImGui::RadioButton("Radio 3", &radio, 2);
-	//	int nSlider = 0;
-	//	ImGui::SliderFloat("Enemy Speed", &eneSpeed, 0.05f, 1.0f);
-	//	static float fSlider = 0.0f;
-	//	ImGui::SliderFloat("Float Slider", &fSlider, 0.0f, 100.0f);
-	//	static float col3[3] = {};
-	//	ImGui::ColorPicker3("ColorPicker3", col3, ImGuiColorEditFlags_::ImGuiColorEditFlags_InputRGB);
-	//	static float col4[4] = {};
-	//	ImGui::ColorPicker4("ColorPicker4", col4, ImGuiColorEditFlags_::ImGuiColorEditFlags_PickerHueWheel | ImGuiColorEditFlags_::ImGuiColorEditFlags_AlphaBar);
-	//	ImGui::End();
-	//	カメラ切り替え
-	//	static bool isCamera = false;
-	//	if (radio == 0 && isCamera == false) {
-	//		Wrapper::SetCamera(camera);
-	//		isCamera = true;
-	//	}
-	//	else if (radio == 1 && isCamera == true) {
-	//		Wrapper::SetCamera(mainCamera);
-	//		isCamera = false;
-	//	}
-	//}
+	static bool blnChk = false;
+	static int radio = 0;
+	static float eneSpeed = 0.0f;
+	{
+		ImGui::Begin("Rendering Test Menu");
+		ImGui::SetWindowSize(ImVec2(400, 500), ImGuiCond_::ImGuiCond_FirstUseEver);
+		//imguiのUIコントロール
+		ImGui::Text("test %.2f", a);
+		ImGui::Checkbox("EnemyPop", &blnChk);
+		ImGui::Checkbox("test", &pmdModel->a);
+		ImGui::RadioButton("Debug Camera", &radio, 0);
+		ImGui::SameLine();
+		ImGui::RadioButton("Game Camera", &radio, 1);
+		ImGui::SameLine();
+		ImGui::RadioButton("Radio 3", &radio, 2);
+		int nSlider = 0;
+		ImGui::SliderFloat("Enemy Speed", &eneSpeed, 0.05f, 1.0f);
+		static float col3[3] = {};
+		ImGui::ColorPicker3("ColorPicker3", col3, ImGuiColorEditFlags_::ImGuiColorEditFlags_InputRGB);
+		static float col4[4] = {};
+		ImGui::ColorPicker4("ColorPicker4", col4, ImGuiColorEditFlags_::ImGuiColorEditFlags_PickerHueWheel | ImGuiColorEditFlags_::ImGuiColorEditFlags_AlphaBar);
+		ImGui::End();
+
+		//カメラ切り替え
+		static bool isCamera = false;
+		if (radio == 0 && isCamera == false) {
+			Wrapper::SetCamera(camera);
+			isCamera = true;
+		}
+		else if (radio == 1 && isCamera == true) {
+			Wrapper::SetCamera(mainCamera);
+			isCamera = false;
+		}
+	}
 
 	//MT4
 	{
@@ -457,7 +457,7 @@ void GameManager::Update()
 		//エネミーの生成
 		{
 			static float popTime = 0;
-			if (popTime >= 5.0f) {
+			if (popTime >= 10.0f) {
 				Enemy* ene = Enemy::Create();
 				int r = rand() % 10;
 				if (r % 2 == 1) {
@@ -504,18 +504,27 @@ void GameManager::Update()
 				XMVECTOR inter;
 				bool Ghit = Coliision::CheckSqhere2Triangle(sqhere[i], triangle[0], &inter);
 
-				if (Ghit == true && reception <= 0) {
+				//ゲート攻撃
+				if (Ghit == true && reception <= 0 && _enemy[i]->attackHit == true) {
+					if (_enemy[i]->mode != 3) { continue; }
 					Hhit = false;
+					_enemy[i]->attackHit = false;
 					gateHP -= 1;
 					reception = 600;
 				}
-				if (Hhit == true) {
+
+				//エネミーダメージ
+				if (Hhit == true && _enemy[i]->attackHit == true) {
+					if (_enemy[i]->mode != 2) { continue; }
+					_enemy[i]->attackHit = false;
 					_enemy[i]->status.HP -= 1;
+					playerHp -= 10;
 					//体力がなくなっていれば
 					if (_enemy[i]->status.HP >= 0) { continue; }
 					_enemy[i]->alive = false;
 				}
-				if (gateHP <= 0) { SceneNum = END; }
+				//ゲームオーバー条件				
+				if (gateHP <= 0 || playerHp <= 0) { SceneNum = END; }
 				reception--;
 			}
 		}
@@ -554,7 +563,17 @@ void GameManager::Update()
 				matRot = XMMatrixRotationY(XMConvertToRadians(angleHorizonal));
 				v = XMVector3TransformNormal(v, matRot);
 				XMFLOAT3 _v(v.m128_f32[0], v.m128_f32[1], v.m128_f32[2]);
-				pmdModel->SetMatRot(LookAtRotation(_v, XMFLOAT3(0, 1, 0)));
+				pmdModel->SetMatRot(LookAtRotation(_v, XMFLOAT3(0.0f, 1.0f, 0.0f)));
+
+				//XMVECTOR q;
+				//XMVECTOR normal;
+				//XMVECTOR YAxis = { 0,1,0 };
+				//normal = XMVector3Cross(v, YAxis);
+				//normal = XMVector3Normalize(normal);
+				//q.m128_f32[0] = q.m128_f32[1] = q.m128_f32[2] = 0.0f;
+				//q.m128_f32[3] = 1.0f;
+				//q = XMQuaternionRotationAxis(YAxis, angleHorizonal);
+				//pmdModel->SetMatRot(XMMatrixRotationQuaternion(q));
 			}
 			else {
 				pmdModel->vmdNumber = vmdData::WAIT;
@@ -703,6 +722,9 @@ void GameManager::Update()
 	//エンド
 	else if (SceneNum == END) {
 	}
+
+	//SceneEffectManager::Update();
+
 }
 
 void GameManager::Draw()
@@ -759,7 +781,7 @@ void GameManager::Draw()
 
 		Sprite::PreDraw(cmdList);
 
-		for (int i = 0; i < ENEM_HP; i++) {
+		for (int i = 0; i < playerHp; i++) {
 			hp[i]->Draw();
 		}
 

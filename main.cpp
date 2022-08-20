@@ -57,18 +57,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			return 1;
 		}
 		//imgui
-		//if (ImGui::CreateContext() == nullptr) {
-		//	assert(0);
-		//	return false;
-		//}
-		//bool blnResult = ImGui_ImplWin32_Init(app._hwnd());
-		//blnResult = ImGui_ImplDX12_Init(
-		//	dx12.GetDevice(),
-		//	3,
-		//	DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
-		//	dx12.GetHeapImgui().Get(),
-		//	dx12.GetHeapImgui()->GetCPUDescriptorHandleForHeapStart(),
-		//	dx12.GetHeapImgui()->GetGPUDescriptorHandleForHeapStart());
+		if (ImGui::CreateContext() == nullptr) {
+			assert(0);
+			return false;
+		}
+		bool blnResult = ImGui_ImplWin32_Init(app._hwnd());
+		blnResult = ImGui_ImplDX12_Init(
+			dx12.GetDevice(),
+			3,
+			DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
+			dx12.GetHeapImgui().Get(),
+			dx12.GetHeapImgui()->GetCPUDescriptorHandleForHeapStart(),
+			dx12.GetHeapImgui()->GetGPUDescriptorHandleForHeapStart());
 	}
 
 	Object3Ds obj3d;
@@ -119,10 +119,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			break;
 		}
 
-		////ImGui
-		//ImGui_ImplDX12_NewFrame();
-		//ImGui_ImplWin32_NewFrame();
-		//ImGui::NewFrame();
+		//ImGui
+		ImGui_ImplDX12_NewFrame();
+		ImGui_ImplWin32_NewFrame();
+		ImGui::NewFrame();
 
 		input.Update();
 
@@ -137,11 +137,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		//postEffect->Draw(dx12.CommandList().Get());
 
-		//ImGui::Render();
-		//dx12.CommandList()->SetDescriptorHeaps(
-		//	1,
-		//	dx12.GetHeapImgui().GetAddressOf());
-		//ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), dx12.CommandList().Get());
+		ImGui::Render();
+		dx12.CommandList()->SetDescriptorHeaps(
+			1,
+			dx12.GetHeapImgui().GetAddressOf());
+		ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), dx12.CommandList().Get());
 		
 		dx12.PostRun();
 

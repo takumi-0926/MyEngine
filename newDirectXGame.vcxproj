@@ -280,6 +280,14 @@
     <ClInclude Include="FBX\FbxModel.h" />
     <ClInclude Include="FBX\FbxObject3d.h" />
     <ClInclude Include="hitBox.h" />
+    <ClInclude Include="imgui\imconfig.h" />
+    <ClInclude Include="imgui\imgui.h" />
+    <ClInclude Include="imgui\imgui_impl_dx12.h" />
+    <ClInclude Include="imgui\imgui_impl_win32.h" />
+    <ClInclude Include="imgui\imgui_internal.h" />
+    <ClInclude Include="imgui\imstb_rectpack.h" />
+    <ClInclude Include="imgui\imstb_textedit.h" />
+    <ClInclude Include="imgui\imstb_truetype.h" />
     <ClInclude Include="includes.h" />
     <ClInclude Include="Input\dx12input.h" />
     <ClInclude Include="Input\input.h" />
@@ -296,6 +304,8 @@
     <ClInclude Include="PMD\PMDmodel.h" />
     <ClInclude Include="PMD\pmdObject3D.h" />
     <ClInclude Include="PMD\PMXLoader.h" />
+    <ClInclude Include="SceneEffect.h" />
+    <ClInclude Include="SceneEffectManager.h" />
     <ClInclude Include="shaderTest.h" />
     <ClInclude Include="Sprite\sprite.h" />
     <ClInclude Include="Sprite\spriteCommon.h" />
@@ -321,6 +331,13 @@
     <ClCompile Include="FBX\FbxModel.cpp" />
     <ClCompile Include="FBX\FbxObject3d.cpp" />
     <ClCompile Include="hitBox.cpp" />
+    <ClCompile Include="imgui\imgui.cpp" />
+    <ClCompile Include="imgui\imgui_demo.cpp" />
+    <ClCompile Include="imgui\imgui_draw.cpp" />
+    <ClCompile Include="imgui\imgui_impl_dx12.cpp" />
+    <ClCompile Include="imgui\imgui_impl_win32.cpp" />
+    <ClCompile Include="imgui\imgui_tables.cpp" />
+    <ClCompile Include="imgui\imgui_widgets.cpp" />
     <ClCompile Include="Input\input.cpp" />
     <ClCompile Include="light\Light.cpp" />
     <ClCompile Include="main.cpp" />
@@ -334,6 +351,7 @@
     <ClCompile Include="PMD\PMDmodel.cpp" />
     <ClCompile Include="PMD\pmdObject3D.cpp" />
     <ClCompile Include="PMD\PMXLoader.cpp" />
+    <ClCompile Include="SceneEffectManager.cpp" />
     <ClCompile Include="shaderTest.cpp" />
     <ClCompile Include="Sprite\sprite.cpp" />
     <ClCompile Include="stage.cpp" />
