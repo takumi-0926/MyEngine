@@ -147,15 +147,20 @@ void Enemy::moveUpdate(XMFLOAT3 pPos, StageObject* bPos[], XMFLOAT3 gPos)
 
 			if (this->attackTime >= 3.0f) {
 				if (this->attackHit == true) {
-					this->position.x += this->vectol.m128_f32[0] / 50;
-					this->position.y += this->vectol.m128_f32[1] / 50;
-					this->position.z += this->vectol.m128_f32[2] / 50;
+					this->position.x += this->vectol.m128_f32[0] / 25;
+					this->position.y += this->vectol.m128_f32[1] / 25;
+					this->position.z += this->vectol.m128_f32[2] / 25;
 					this->attackOnMove = true;
 				}
 				else {
 					this->position = moveObject(this->position, this->attackPos, this->pct);
 					this->pct += this->step;
 				}
+			}
+			else if (this->attackTime >= 1.0f) {
+				this->position.x -= this->vectol.m128_f32[0] / 100;
+				this->position.y -= this->vectol.m128_f32[1] / 100;
+				this->position.z -= this->vectol.m128_f32[2] / 100;
 			}
 
 			//移動処理移行時の初期化
@@ -184,9 +189,14 @@ void Enemy::moveUpdate(XMFLOAT3 pPos, StageObject* bPos[], XMFLOAT3 gPos)
 
 			//攻撃開始（突進）
 			if (this->attackTime >= 3.0f) {
-				this->position.x += vectol.m128_f32[0] / 50;
-				this->position.y += vectol.m128_f32[1] / 50;
-				this->position.z += vectol.m128_f32[2] / 50;
+				this->position.x += vectol.m128_f32[0] / 25;
+				this->position.y += vectol.m128_f32[1] / 25;
+				this->position.z += vectol.m128_f32[2] / 25;
+			}
+			else if (this->attackTime >= 1.0f) {
+				this->position.x -= this->vectol.m128_f32[0] / 100;
+				this->position.y -= this->vectol.m128_f32[1] / 100;
+				this->position.z -= this->vectol.m128_f32[2] / 100;
 			}
 
 			//移動処理移行時の初期化
@@ -213,15 +223,20 @@ void Enemy::moveUpdate(XMFLOAT3 pPos, StageObject* bPos[], XMFLOAT3 gPos)
 			//攻撃開始（突進）
 			if (this->attackTime >= 3.0f) {
 				if (this->attackHit == true) {
-					this->position.x += this->vectol.m128_f32[0] / 50;
-					this->position.y += this->vectol.m128_f32[1] / 50;
-					this->position.z += this->vectol.m128_f32[2] / 50;
+					this->position.x += this->vectol.m128_f32[0] / 25;
+					this->position.y += this->vectol.m128_f32[1] / 25;
+					this->position.z += this->vectol.m128_f32[2] / 25;
 					this->attackOnMove = true;
 				}
 				else {
 					this->position = moveObject(this->position, this->attackPos, this->pct);
 					this->pct += this->step;
 				}
+			}
+			else if (this->attackTime >= 1.0f) {
+				this->position.x -= this->vectol.m128_f32[0] / 100;
+				this->position.y -= this->vectol.m128_f32[1] / 100;
+				this->position.z -= this->vectol.m128_f32[2] / 100;
 			}
 
 			//移動処理移行時の初期化

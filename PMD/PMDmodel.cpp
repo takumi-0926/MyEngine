@@ -249,6 +249,7 @@ PMDmodel::PMDmodel(Wrapper* _dx12, const char* filepath, PMDobject& object) :
 	CreateTransform();
 	LoadVMDFile(vmdData::WAIT, "Resources/vmd/marieru_stand.vmd");
 	LoadVMDFile(vmdData::WALK, "Resources/vmd/Rick®‘–‚èƒ‚[ƒVƒ‡ƒ“02.vmd");
+	LoadVMDFile(vmdData::ATTACK, "Resources/vmd/test.vmd");
 	CreateMaterial();
 	CreateMaterialAndTextureView();
 }

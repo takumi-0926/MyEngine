@@ -130,8 +130,9 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	sprite06 = Sprite::Create(5, { 500.0f,0.0f });
 
 	for (int i = 0; i < P_HP; i++) {
-		static float xpos = 10.0f;
-		hp[i] = Sprite::Create(3, { xpos * i,0.0f });
+		static float xpos = 5.0f;
+		hp[i] = Sprite::Create(3, { xpos * i,10.0f });
+		hp[i]->SetSize(XMFLOAT2(20, 15));
 		hp[i]->Update();
 	}
 
@@ -574,6 +575,9 @@ void GameManager::Update()
 				//q.m128_f32[3] = 1.0f;
 				//q = XMQuaternionRotationAxis(YAxis, angleHorizonal);
 				//pmdModel->SetMatRot(XMMatrixRotationQuaternion(q));
+			}
+			else if (directInput->IsButtonUp(directInput->Button01) || input->Push(DIK_X)) {
+				pmdModel->vmdNumber = vmdData::ATTACK;
 			}
 			else {
 				pmdModel->vmdNumber = vmdData::WAIT;
