@@ -75,7 +75,7 @@ void HitBox::Update(std::vector<DirectX::XMMATRIX> _boneMatrices, XMFLOAT3 rot)
 	constMap->cameraPos = cameraPos;
 
 	for (int i = 0; i < boneMatrices.size(); i++) {
-		constMap->bones[i] = boneMatrices[i];
+		constMap->bones[i] = _boneMatrices[i];
 	}
 
 	constBuffB0->Unmap(0, nullptr);
@@ -87,17 +87,17 @@ void HitBox::Update(std::vector<DirectX::XMMATRIX> _boneMatrices, XMFLOAT3 rot)
 
 void HitBox::Draw()
 {
-	Object3Ds::Draw();
-	//// パイプラインステートの設定
-	//cmdList->SetPipelineState(LoadHlsls::pipeline.at(ShaderNo::HIT)._pipelinestate.Get());
-	//// ルートシグネチャの設定
-	//cmdList->SetGraphicsRootSignature(LoadHlsls::pipeline.at(ShaderNo::HIT)._rootsignature.Get());
+	//Object3Ds::Draw();
+	// パイプラインステートの設定
+	cmdList->SetPipelineState(LoadHlsls::pipeline.at(ShaderNo::HIT)._pipelinestate.Get());
+	// ルートシグネチャの設定
+	cmdList->SetGraphicsRootSignature(LoadHlsls::pipeline.at(ShaderNo::HIT)._rootsignature.Get());
 
-	//// 定数バッファビューをセット
-	//cmdList->SetGraphicsRootConstantBufferView(0, constBuffB0->GetGPUVirtualAddress());
+	// 定数バッファビューをセット
+	cmdList->SetGraphicsRootConstantBufferView(0, constBuffB0->GetGPUVirtualAddress());
 
-	//// モデル描画
-	//model->Draw(cmdList);
+	// モデル描画
+	model->Draw(cmdList);
 }
 
 void HitBox::mainDraw()

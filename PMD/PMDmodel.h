@@ -6,6 +6,7 @@
 #include <d3dx12.h>
 #include <string>
 #include<vector>
+#include <array>
 #include <unordered_map>
 #include "..\includes.h"
 #include "..\Camera\Camera.h"
@@ -89,7 +90,9 @@ private:
 #pragma pack()
 
 	struct BoneNode {
-		int boneIdx;
+		uint32_t boneIdx;
+		uint32_t boneType;
+		uint32_t ikParentBone;
 		XMFLOAT3 startPos;
 		XMFLOAT3 endPos;
 		std::vector<BoneNode*> children;
@@ -98,9 +101,19 @@ private:
 	struct Motion {
 		unsigned int frameNo;
 		XMVECTOR quaternion;
+		//XMFLOAT3 offset;
 		XMFLOAT2 p1, p2;
-		Motion(unsigned int fno, XMVECTOR& q, const XMFLOAT2& ip1, const XMFLOAT2& ip2) :
-			frameNo(fno), quaternion(q), p1(ip1), p2(ip2) {
+		Motion(
+			unsigned int fno, 
+			XMVECTOR& q, 
+			//XMFLOAT3& ofst,
+			XMFLOAT2& ip1, 
+			const XMFLOAT2& ip2) :
+			frameNo(fno), 
+			quaternion(q), 
+			//offset(ofst),
+			p1(ip1), 
+			p2(ip2) {
 		}
 	};
 
@@ -154,6 +167,23 @@ private:
 	std::map<std::string, BoneNode> _boneNodeTable;
 	XMMATRIX* _mappedMatrices = nullptr;
 	std::unordered_map<string, std::vector<Motion>> _motionData;
+
+	//IKボーン
+	struct PMDIK {
+		uint16_t boneIdx;
+		uint16_t targetidx;
+		uint16_t iterations;
+		float limit;
+		std::vector<uint16_t> nodeIdx;
+	};
+
+	std::vector<string> _boneNameArray;
+	std::vector<BoneNode*> _boneNodeAddressArray;
+
+	std::vector<XMVECTOR> positions;
+	std::array<float,2> _edgeLens;
+	std::vector<uint32_t> _kneeIdxes;
+
 	DWORD _startTime;
 
 private:
@@ -183,6 +213,18 @@ private:
 	void MotionUpdate();
 
 	float GetYFromXOn(float x, const XMFLOAT2& a, const XMFLOAT2& b, uint8_t n);
+
+
+	XMMATRIX LookAtMatrix(const XMVECTOR& lookAt, XMFLOAT3& up, XMFLOAT3& right);
+	XMMATRIX LookAtMatrix(const XMVECTOR& origin ,const XMVECTOR& lookAt, XMFLOAT3& up, XMFLOAT3& right);
+	//CCDIKによりボーン方向を解決
+	void SolveCCOIK(const PMDIK& ik);
+	//余弦定理IK
+	void SolveConsineIK(const PMDIK& ik);
+	//LookAt行列
+	void SolveLookAt(const PMDIK& ik);
+	//場合分け
+	void IKSolve();
 
 public:
 	PMDmodel(Wrapper* _dx12, const char* filepath, PMDobject& object);

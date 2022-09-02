@@ -271,6 +271,7 @@
     <ClInclude Include="Camera\DebugCamera.h" />
     <ClInclude Include="Collision\Collision.h" />
     <ClInclude Include="Collision\CollisionPrimitive.h" />
+    <ClInclude Include="DefCannon.h" />
     <ClInclude Include="delete.h" />
     <ClInclude Include="DirectInput.h" />
     <ClInclude Include="Easing.h" />
@@ -292,6 +293,7 @@
     <ClInclude Include="Input\dx12input.h" />
     <ClInclude Include="Input\input.h" />
     <ClInclude Include="light\Light.h" />
+    <ClInclude Include="Matrix4.h" />
     <ClInclude Include="moving.h" />
     <ClInclude Include="object\baseObject.h" />
     <ClInclude Include="object\Material.h" />
@@ -304,6 +306,7 @@
     <ClInclude Include="PMD\PMDmodel.h" />
     <ClInclude Include="PMD\pmdObject3D.h" />
     <ClInclude Include="PMD\PMXLoader.h" />
+    <ClInclude Include="Quaternion.h" />
     <ClInclude Include="SceneEffect.h" />
     <ClInclude Include="SceneEffectManager.h" />
     <ClInclude Include="shaderTest.h" />
@@ -325,6 +328,7 @@
     <ClCompile Include="Camera\DebugCamera.cpp" />
     <ClCompile Include="Collision\Collision.cpp" />
     <ClCompile Include="Collision\CollisionPrimitive.cpp" />
+    <ClCompile Include="DefCannon.cpp" />
     <ClCompile Include="DirectInput.cpp" />
     <ClCompile Include="enemy.cpp" />
     <ClCompile Include="FBX\FbxLoader.cpp" />
@@ -341,6 +345,7 @@
     <ClCompile Include="Input\input.cpp" />
     <ClCompile Include="light\Light.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Matrix4.cpp" />
     <ClCompile Include="object\Material.cpp" />
     <ClCompile Include="object\Mesh.cpp" />
     <ClCompile Include="object\Model.cpp" />
@@ -351,6 +356,7 @@
     <ClCompile Include="PMD\PMDmodel.cpp" />
     <ClCompile Include="PMD\pmdObject3D.cpp" />
     <ClCompile Include="PMD\PMXLoader.cpp" />
+    <ClCompile Include="Quaternion.cpp" />
     <ClCompile Include="SceneEffectManager.cpp" />
     <ClCompile Include="shaderTest.cpp" />
     <ClCompile Include="Sprite\sprite.cpp" />

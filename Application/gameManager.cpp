@@ -190,7 +190,7 @@ void GameManager::Update()
 		ImGui::Begin("Rendering Test Menu");
 		ImGui::SetWindowSize(ImVec2(400, 500), ImGuiCond_::ImGuiCond_FirstUseEver);
 		//imguiのUIコントロール
-		ImGui::Text("test %.2f", a);
+		ImGui::Text("test %.2f ,%.2f ,%.2f ,%.2f", a, b, c, d);
 		ImGui::Checkbox("EnemyPop", &blnChk);
 		ImGui::Checkbox("test", &pmdModel->a);
 		ImGui::RadioButton("Debug Camera", &radio, 0);
@@ -427,7 +427,7 @@ void GameManager::Update()
 			//Initalize(dx12, audio, input);
 			resetFlag = true;
 		}
-		if (input->Trigger(DIK_SPACE)) {
+		if (input->Trigger(DIK_SPACE) || directInput->IsButtonUp(directInput->DownButton)) {
 			SceneNum = GAME;
 			sprite01->Update();
 		}
@@ -518,6 +518,7 @@ void GameManager::Update()
 				if (Hhit == true && _enemy[i]->attackHit == true) {
 					if (_enemy[i]->mode != 2) { continue; }
 					_enemy[i]->attackHit = false;
+					_enemy[i]->damage = true;
 					_enemy[i]->status.HP -= 1;
 					playerHp -= 10;
 					//体力がなくなっていれば
@@ -532,6 +533,16 @@ void GameManager::Update()
 		//当たり判定(プレイヤー/ステージ)仮
 		if (pmdModel->position.y < stage->position.y + 40) {
 			pmdModel->position.y = stage->position.y + 40;
+		}
+		//エネミー同士の当たり判定
+		for (int i = 0; i < sqhere.size(); i++) {
+			for (int j = 0; j < sqhere.size(); j++) {
+				if (i == j) { continue; }
+				bool Hhit = Coliision::CheckSqhere2Sqhere(sqhere[i], sqhere[j]);
+				if (Hhit == true) {
+					_enemy[i]->position = _enemy[i]->oldPos;
+				}
+			}
 		}
 		//移動
 		{
@@ -766,11 +777,23 @@ void GameManager::Draw()
 		obj01->Draw();
 		stage->Draw();
 		obj03->Draw();
+
 		for (int i = 0; i < 2; i++) {
 			wall[i]->Draw();
 		}
+
 		for (int i = 0; i < _enemy.size(); i++) {
+			if (_enemy[i]->damage == true){
+				_enemy[i]->damegeCount += 1.0f / 60.0f;
+				if (_enemy[i]->damegeCount >= 0.5f) {
+					_enemy[i]->damage = false;
+					_enemy[i]->damegeCount = 0;
+				}
+				continue;
+			}
+
 			_enemy[i]->Draw();
+
 		}
 		HitBox::mainDraw();
 		pmdObject->Draw();

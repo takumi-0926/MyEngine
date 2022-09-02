@@ -8,7 +8,6 @@ float Enemy::objectDistance(XMFLOAT3 pos1, XMFLOAT3 pos2)
 	distance = std::sqrt(x * 2 + z * 2);
 	return distance;
 }
-
 XMVECTOR Enemy::objectVector(XMFLOAT3 pos1, XMFLOAT3 pos2)
 {
 	XMVECTOR distance;
@@ -18,7 +17,6 @@ XMVECTOR Enemy::objectVector(XMFLOAT3 pos1, XMFLOAT3 pos2)
 	return distance;
 
 }
-
 XMFLOAT3 Enemy::moveObject(XMFLOAT3 pos1, XMFLOAT3 pos2, float pct)
 {
 	XMFLOAT3 pos;
@@ -26,12 +24,6 @@ XMFLOAT3 Enemy::moveObject(XMFLOAT3 pos1, XMFLOAT3 pos2, float pct)
 	pos.z = pos1.z + ((pos2.z - pos1.z) * pct);
 	pos.y = pos1.y;
 	return pos;
-}
-
-void Enemy::moveReset()
-{
-	this->step = 0.00005f;	//進行
-	this->pct = 0.0f;		//経過
 }
 
 Enemy::Enemy()
@@ -48,7 +40,6 @@ Enemy::Enemy()
 	pct = 0.0f;
 	mode = 0;
 }
-
 Enemy* Enemy::Create()
 {
 	// 3Dオブジェクトのインスタンスを生成
@@ -69,15 +60,20 @@ Enemy* Enemy::Create()
 
 	return object3d;
 }
-
 void Enemy::Update() {
 	Object3Ds::Update();
+}
+void Enemy::Draw()
+{
+	Object3Ds::Draw();
 }
 
 void Enemy::moveUpdate(XMFLOAT3 pPos, StageObject* bPos[], XMFLOAT3 gPos)
 {
 	static int d = 7;
 	int objectNo = 0;
+
+	this->oldPos = this->position;
 
 	//移動処理
 	if (this->move == true) {
@@ -120,7 +116,7 @@ void Enemy::moveUpdate(XMFLOAT3 pPos, StageObject* bPos[], XMFLOAT3 gPos)
 		}
 		//パターン3
 		if (this->mode == 3) {
-			if (this->pct <= 1.0f) {
+			if (this->pct <= 0.1f) {
 				this->position = moveObject(this->position, gPos, this->pct);
 				this->pct += this->step;
 			}
@@ -260,8 +256,9 @@ void Enemy::moveUpdate(XMFLOAT3 pPos, StageObject* bPos[], XMFLOAT3 gPos)
 	Object3Ds::Update();
 	//Update();
 }
-
-void Enemy::Draw()
+void Enemy::moveReset()
 {
-	Object3Ds::Draw();
+	this->step = 0.00005f;	//進行
+	this->pct = 0.0f;		//経過
 }
+

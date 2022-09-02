@@ -23,9 +23,10 @@
 
 #include "..\stage.h"
 #include "..\stageObject.h"
+#include "..\DefCannon.h"
 
 #include "..\Vector3.h"
-
+#include "..\Quaternion.h"
 
 #include "..\SceneEffectManager.h"
 
@@ -163,6 +164,9 @@ private://メンバ変数(ゲームシーン)
 	float speed = 0.0;
 
 	float a;//角度保存用
+	float b;//角度保存用
+	float c;//角度保存用
+	float d;//角度保存用
 
 public://メンバ関数
 	//コンストラクタ
@@ -285,30 +289,35 @@ public://メンバ関数
 		Vector3 z = Vector3(forward.x, forward.y, forward.z);//進行方向ベクトル（前方向）
 		Vector3 up = Vector3(upward.x, upward.y, upward.z);  //上方向
 		XMMATRIX rot;//回転行列
-		XMVECTOR q;		//回転クォータニオン
+		Quaternion q = quaternion(0,0,0,1);//回転クォータニオン
 		Vector3 _z = { 0.0f,0.0f,1.0f };//Z方向単位ベクトル
-
+		Vector3 cross;
 		XMMATRIX matRot = XMMatrixIdentity();
 
 		//カメラに合わせるための回転行列
 		matRot = XMMatrixRotationY(XMConvertToRadians(angleHorizonal));
 
-		//回転角度計算
-		a = _z.dot(z);
-		if (a >= 1.0f) { a = 1.0f; }
-		if (a <= -1.0f) { a = -1.0f; }
-		float angle = acos(a);
-		if (_z.x < 0) { angle = -angle; }
-		if (z.x < 0) { angle = -angle; }
+		cross = z.cross(_z);
+
+		q.x = cross.x;
+		q.y = cross.y;
+		q.z = cross.z;
+
+		q.w = sqrt(
+			( z.length() *  z.length())
+		   *(_z.length() * _z.length())) + z.dot(_z);
 
 		//単位クォータニオン化
-		q.m128_f32[0] = q.m128_f32[1] = q.m128_f32[2] = 0.0f;
-		q.m128_f32[3] = 1.0f;
+		q = normalize(q);
+		q = conjugate(q);
+		a = q.x;
+		b = q.y;
+		c = q.z;
+		d = q.w;
 
 		//任意軸回転
-		XMVECTOR _up = { up.x,up.y,up.z };
-		q = XMQuaternionRotationAxis(_up, angle);
-		rot = XMMatrixRotationQuaternion(q);
+		XMVECTOR rq = { q.x,q.y,q.z,q.w };
+		rot = XMMatrixRotationQuaternion(rq);
 
 		return rot;
 	}

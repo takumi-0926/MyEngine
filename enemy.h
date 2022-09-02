@@ -22,18 +22,22 @@ public:
 	bool startAttack = false;
 	bool attackHit = true;
 	bool attackOnMove = false;
+	bool damage = false;
 
 	float step = 0.00005f;	//進行
 	float pct = 0.0f;		//経過
 	float attackTime = 0.0f;
 	int mode = 0;
 
+	float damegeCount = 0.0f;
+
 	XMVECTOR vectol;
 	XMFLOAT3 attackPos;
-
+	XMFLOAT3 oldPos;
 private:
 	float	 objectDistance(XMFLOAT3 pos1, XMFLOAT3 pos2);				//建物との直線距離を計算
 	XMVECTOR objectVector(XMFLOAT3 pos1, XMFLOAT3 pos2);				//建物間のベクトルを計算
+	XMVECTOR normalize(XMVECTOR vec);
 	XMFLOAT3 moveObject(XMFLOAT3 pos1, XMFLOAT3 pos2, float pct);	//指定の建物へ移動
 	void moveReset();
 public:
