@@ -2,9 +2,11 @@
 #include "..\object\object3D.h"
 #include "..\PMD\PMDmodel.h"
 #include "..\stageObject.h"
+#include "..\DefCannon.h"
 
 class PMDmodel;
 class StageObject;
+class DefCannon;
 class Enemy : public Object3Ds {
 	struct Status {
 		int HP;
@@ -44,7 +46,7 @@ public:
 	Enemy();		//コンストラクタ
 	static Enemy* Create();//インスタンス生成
 	void Update() override;
-	void moveUpdate(XMFLOAT3 pPos, StageObject *bPos[], XMFLOAT3 gPos);
+	void moveUpdate(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos);
 	void Draw() override;
 
 };

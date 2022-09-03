@@ -17,6 +17,10 @@ XMVECTOR Enemy::objectVector(XMFLOAT3 pos1, XMFLOAT3 pos2)
 	return distance;
 
 }
+XMVECTOR Enemy::normalize(XMVECTOR vec)
+{
+	return XMVECTOR();
+}
 XMFLOAT3 Enemy::moveObject(XMFLOAT3 pos1, XMFLOAT3 pos2, float pct)
 {
 	XMFLOAT3 pos;
@@ -68,7 +72,7 @@ void Enemy::Draw()
 	Object3Ds::Draw();
 }
 
-void Enemy::moveUpdate(XMFLOAT3 pPos, StageObject* bPos[], XMFLOAT3 gPos)
+void Enemy::moveUpdate(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 {
 	static int d = 7;
 	int objectNo = 0;

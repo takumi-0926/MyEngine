@@ -91,15 +91,19 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	obj03->scale = { 50,50,50 };
 	obj03->SetPosition({ 0,0,150 });
 
-	for (int i = 0; i < 2; i++)
+	for (int i = 0; i < 6; i++)
 	{
-		wall[i] = StageObject::Create();
-		wall[i]->SetModel(model03);
-		wall[i]->Update();
-		wall[i]->scale = { 10,10,10 };
+		cannon[i] = DefCannon::Create(model01);
+		cannon[i]->SetModel(model03);
+		cannon[i]->Update();
+		cannon[i]->scale = { 10,10,10 };
 	}
-	wall[0]->SetPosition({ 0,0,0 });
-	wall[1]->SetPosition({ 50,0,0 });
+	cannon[0]->SetPosition({ -50,0,  0 });
+	cannon[1]->SetPosition({  50,0,  0 });
+	cannon[2]->SetPosition({  50,0, 50 });
+	cannon[3]->SetPosition({ -50,0, 50 });
+	cannon[4]->SetPosition({  50,0,100 });
+	cannon[5]->SetPosition({ -50,0,100 });
 
 	//MMDオブジェクト----------------
 	pmdObject.reset(new PMDobject(dx12));
@@ -491,7 +495,7 @@ void GameManager::Update()
 		}
 		//エネミー関係の制御
 		for (int i = 0; i < _enemy.size(); i++) {
-			_enemy[i]->moveUpdate(pmdModel->position, wall, obj03->position);
+			_enemy[i]->moveUpdate(pmdModel->position, cannon, obj03->position);
 			_enemy[i]->rotation.y += 1.0f;
 			sqhere[i].center = XMVectorSet(_enemy[i]->position.x, _enemy[i]->position.y, _enemy[i]->position.z, 1);
 			if (_enemy[i]->alive == true) { continue; }
@@ -723,8 +727,9 @@ void GameManager::Update()
 			fbxObj1->Update();
 			pmdModel->Update();
 			sprite06->Update();
-			for (int i = 0; i < 2; i++) {
-				wall[i]->Update();
+			for (int i = 0; i < 6; i++) {
+				cannon[i]->moveUpdate(_enemy);
+				cannon[i]->Update();
 			}
 			for (int i = 0; i < NUM_OBJ; i++) {
 				test[i]->Update();
@@ -778,8 +783,8 @@ void GameManager::Draw()
 		stage->Draw();
 		obj03->Draw();
 
-		for (int i = 0; i < 2; i++) {
-			wall[i]->Draw();
+		for (int i = 0; i < 6; i++) {
+			cannon[i]->Draw();
 		}
 
 		for (int i = 0; i < _enemy.size(); i++) {

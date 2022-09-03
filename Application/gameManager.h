@@ -55,6 +55,7 @@ private://メンバ変数(ゲームシーン)
 	vector<Sqhere> sqhere;
 	Stage* stage;
 	StageObject* wall[6] = {};
+	DefCannon* cannon[6] = {};
 	Sprite* hp[P_HP] = {};
 
 	Model* model01 = nullptr;

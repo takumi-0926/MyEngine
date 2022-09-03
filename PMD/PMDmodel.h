@@ -101,17 +101,17 @@ private:
 	struct Motion {
 		unsigned int frameNo;
 		XMVECTOR quaternion;
-		//XMFLOAT3 offset;
+		XMFLOAT3 offset;
 		XMFLOAT2 p1, p2;
 		Motion(
 			unsigned int fno, 
 			XMVECTOR& q, 
-			//XMFLOAT3& ofst,
+			XMFLOAT3& ofst,
 			XMFLOAT2& ip1, 
 			const XMFLOAT2& ip2) :
 			frameNo(fno), 
 			quaternion(q), 
-			//offset(ofst),
+			offset(ofst),
 			p1(ip1), 
 			p2(ip2) {
 		}
@@ -176,13 +176,23 @@ private:
 		float limit;
 		std::vector<uint16_t> nodeIdx;
 	};
+	std::vector<PMDIK> _ikData;
 
 	std::vector<string> _boneNameArray;
 	std::vector<BoneNode*> _boneNodeAddressArray;
 
-	std::vector<XMVECTOR> positions;
-	std::array<float,2> _edgeLens;
+	//std::vector<XMVECTOR> positions;
+	//std::array<float,2> _edgeLens;
 	std::vector<uint32_t> _kneeIdxes;
+
+	struct VMDIKEnable {
+		//キーフレームがあるフレーム番号
+		uint32_t freamNo;
+
+		//名前のオン/オフフラグのマップ
+		std::unordered_map<std::string, bool> ikEnableTable;
+	};
+	std::vector<VMDIKEnable> _ikEnableData;
 
 	DWORD _startTime;
 
@@ -214,9 +224,6 @@ private:
 
 	float GetYFromXOn(float x, const XMFLOAT2& a, const XMFLOAT2& b, uint8_t n);
 
-
-	XMMATRIX LookAtMatrix(const XMVECTOR& lookAt, XMFLOAT3& up, XMFLOAT3& right);
-	XMMATRIX LookAtMatrix(const XMVECTOR& origin ,const XMVECTOR& lookAt, XMFLOAT3& up, XMFLOAT3& right);
 	//CCDIKによりボーン方向を解決
 	void SolveCCOIK(const PMDIK& ik);
 	//余弦定理IK
@@ -224,7 +231,7 @@ private:
 	//LookAt行列
 	void SolveLookAt(const PMDIK& ik);
 	//場合分け
-	void IKSolve();
+	void IKSolve(int frameNo);
 
 public:
 	PMDmodel(Wrapper* _dx12, const char* filepath, PMDobject& object);

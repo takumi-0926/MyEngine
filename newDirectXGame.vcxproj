@@ -267,6 +267,7 @@
     <ClInclude Include="Application\dx12Wrapper.h" />
     <ClInclude Include="Application\gameManager.h" />
     <ClInclude Include="Audio\audio.h" />
+    <ClInclude Include="bullet.h" />
     <ClInclude Include="Camera\Camera.h" />
     <ClInclude Include="Camera\DebugCamera.h" />
     <ClInclude Include="Collision\Collision.h" />
@@ -324,6 +325,7 @@
     <ClCompile Include="Application\dx12Wrapper.cpp" />
     <ClCompile Include="Application\gameManager.cpp" />
     <ClCompile Include="Audio\audio.cpp" />
+    <ClCompile Include="bullet.cpp" />
     <ClCompile Include="Camera\Camera.cpp" />
     <ClCompile Include="Camera\DebugCamera.cpp" />
     <ClCompile Include="Collision\Collision.cpp" />
