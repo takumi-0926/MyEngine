@@ -11,7 +11,7 @@ DefCannon* DefCannon::Create(Model* model)
 		return nullptr;
 	}
 
-	object3d->position.y = -40;
+	object3d->position.y = 0;
 
 	// ‰Šú‰»
 	if (!object3d->Initialize()) {

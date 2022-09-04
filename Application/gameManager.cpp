@@ -37,18 +37,6 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 		assert(0);
 		return false;
 	}
-	if (!Sprite::loadTexture(3, L"Resources/circle_white.png")) {
-		assert(0);
-		return false;
-	}
-	if (!Sprite::loadTexture(4, L"Resources/circle_red.png")) {
-		assert(0);
-		return false;
-	}
-	if (!Sprite::loadTexture(5, L"Resources/line_white.png")) {
-		assert(0);
-		return false;
-	}
 
 	//カメラをセット
 	camera = new DebugCamera(Application::window_width, Application::window_height, input);
@@ -99,12 +87,12 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 		cannon[i]->Update();
 		cannon[i]->scale = { 10,10,10 };
 	}
-	cannon[0]->SetPosition({ -50,0,  0 });
-	cannon[1]->SetPosition({  50,0,  0 });
-	cannon[2]->SetPosition({  50,0, 50 });
-	cannon[3]->SetPosition({ -50,0, 50 });
-	cannon[4]->SetPosition({  50,0,100 });
-	cannon[5]->SetPosition({ -50,0,100 });
+	cannon[0]->SetPosition({ -50,15,  0 });
+	cannon[1]->SetPosition({ 50,15,  0 });
+	cannon[2]->SetPosition({ 50,15, 50 });
+	cannon[3]->SetPosition({ -50,15, 50 });
+	cannon[4]->SetPosition({ 50,15,100 });
+	cannon[5]->SetPosition({ -50,15,100 });
 
 	//MMDオブジェクト----------------
 	pmdObject.reset(new PMDobject(dx12));
@@ -432,31 +420,10 @@ void GameManager::Update()
 			//Initalize(dx12, audio, input);
 			resetFlag = true;
 		}
-		if (input->Trigger(DIK_SPACE) || directInput->IsButtonUp(directInput->DownButton)) {
+		if (input->Trigger(DIK_SPACE) || directInput->IsButtonUp(DirectInput::ButtonKind::Button02)) {
 			SceneNum = GAME;
 			sprite01->Update();
 		}
-		if (input->Push(DIK_A)) {
-			obj01->position.x -= 0.01f;
-		}
-		if (input->Push(DIK_D)) {
-			obj01->position.x += 0.01f;
-		}
-		if (input->Push(DIK_W)) {
-			obj01->position.z += 0.01f;
-		}
-		if (input->Push(DIK_S)) {
-			obj01->position.z -= 0.01f;
-		}
-
-		if (input->Push(DIK_RIGHT)) {
-			obj01->rotation.x += 1.0f;
-		}
-		if (input->Push(DIK_UP)) {
-			obj01->rotation.y += 1.0f;
-		}
-		obj01->Update();
-
 	}
 	//ゲーム
 	else if (SceneNum == GAME) {
@@ -523,12 +490,12 @@ void GameManager::Update()
 				if (Hhit == true && _enemy[i]->attackHit == true) {
 					if (_enemy[i]->mode != 2) { continue; }
 					_enemy[i]->attackHit = false;
-					_enemy[i]->damage = true;
-					_enemy[i]->status.HP -= 1;
+					//_enemy[i]->damage = true;
+					//_enemy[i]->status.HP -= 100;
 					playerHp -= 10;
 					//体力がなくなっていれば
-					if (_enemy[i]->status.HP >= 0) { continue; }
-					_enemy[i]->alive = false;
+					//if (_enemy[i]->status.HP >= 0) { continue; }
+					//_enemy[i]->alive = false;
 				}
 				//ゲームオーバー条件				
 				if (gateHP <= 0 || playerHp <= 0) { SceneNum = END; }
@@ -558,18 +525,22 @@ void GameManager::Update()
 					speed = 2.0f;
 				}
 				else { speed = 1.0f; }
+				//左移動
 				if (input->Push(DIK_A) || directInput->leftStickX() < 0.0f) {
 					pmdModel->position = MoveLeft(pmdModel->position);
 					for (int i = 0; i < HitBox::GetHit().size(); i++) { HitBox::GetHit()[i]->position = MoveLeft(HitBox::GetHit()[i]->position); }
 				}
+				//右移動
 				if (input->Push(DIK_D) || directInput->leftStickX() > 0.0f) {
 					pmdModel->position = MoveRight(pmdModel->position);
 					for (int i = 0; i < HitBox::GetHit().size(); i++) { HitBox::GetHit()[i]->position = MoveRight(HitBox::GetHit()[i]->position); }
 				}
+				//下移動
 				if (input->Push(DIK_W) || directInput->leftStickY() < 0.0f) {
 					pmdModel->position = MoveBefore(pmdModel->position);
 					for (int i = 0; i < HitBox::GetHit().size(); i++) { HitBox::GetHit()[i]->position = MoveBefore(HitBox::GetHit()[i]->position); }
 				}
+				//上移動
 				if (input->Push(DIK_S) || directInput->leftStickY() > 0.0f) {
 					pmdModel->position = MoveAfter(pmdModel->position);
 					for (int i = 0; i < HitBox::GetHit().size(); i++) { HitBox::GetHit()[i]->position = MoveAfter(HitBox::GetHit()[i]->position); }
@@ -592,8 +563,15 @@ void GameManager::Update()
 				//q = XMQuaternionRotationAxis(YAxis, angleHorizonal);
 				//pmdModel->SetMatRot(XMMatrixRotationQuaternion(q));
 			}
-			else if (directInput->IsButtonUp(directInput->Button01) || input->Push(DIK_X)) {
+			else if (directInput->IsButtonPush(DirectInput::ButtonKind::Button01) || input->Push(DIK_X)) {
 				pmdModel->vmdNumber = vmdData::ATTACK;
+				_enemy[0]->damage = true;
+				_enemy[0]->status.HP -= 100;
+				//体力がなくなっていれば
+				if (_enemy[0]->status.HP <= 0) {
+					_enemy[0]->alive = false;
+				}
+
 			}
 			else {
 				pmdModel->vmdNumber = vmdData::WAIT;
@@ -741,6 +719,10 @@ void GameManager::Update()
 	}
 	//エンド
 	else if (SceneNum == END) {
+		if (input->Trigger(DIK_SPACE) || directInput->IsButtonUp(directInput->DownButton)) {
+			SceneNum = TITLE;
+			sprite01->Update();
+		}
 	}
 
 	//SceneEffectManager::Update();
@@ -760,12 +742,6 @@ void GameManager::Draw()
 		sprite01->Draw();
 
 		Sprite::PostDraw();
-
-		BaseObject::PreDraw(cmdList);
-
-		obj01->Draw();
-
-		BaseObject::PostDraw();
 	}
 	else if (SceneNum == GAME) {
 		Sprite::PreDraw(cmdList);
@@ -779,7 +755,7 @@ void GameManager::Draw()
 		dx12->ClearDepthBuffer();
 
 		BaseObject::PreDraw(cmdList);
-		obj01->Draw();
+		//obj01->Draw();
 		stage->Draw();
 		obj03->Draw();
 
@@ -788,9 +764,9 @@ void GameManager::Draw()
 		}
 
 		for (int i = 0; i < _enemy.size(); i++) {
-			if (_enemy[i]->damage == true){
+			if (_enemy[i]->damage == true) {
 				_enemy[i]->damegeCount += 1.0f / 60.0f;
-				if (_enemy[i]->damegeCount >= 0.5f) {
+				if (_enemy[i]->damegeCount >= 0.1f) {
 					_enemy[i]->damage = false;
 					_enemy[i]->damegeCount = 0;
 				}
@@ -800,7 +776,7 @@ void GameManager::Draw()
 			_enemy[i]->Draw();
 
 		}
-		HitBox::mainDraw();
+		//HitBox::mainDraw();
 		pmdObject->Draw();
 		dx12->SceneDraw();
 		pmdModel->Draw(cmdList);

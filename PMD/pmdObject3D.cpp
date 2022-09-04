@@ -180,7 +180,7 @@ HRESULT PMDobject::CreateGraphicsPipelinePMD()
 
 	//グラフィックスパイプラインステートオブジェクトの生成
 	//ID3D12PipelineState* _pipelinestate = nullptr;
-	result = device->CreateGraphicsPipelineState(&gpipeline, IID_PPV_ARGS(&_pipelinestate));
+	result = device->CreateGraphicsPipelineState(&gpipeline, IID_PPV_ARGS(_pipelinestate.ReleaseAndGetAddressOf()));
 	if (FAILED(result)) { return result; }
 
 	return S_OK;
