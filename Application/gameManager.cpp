@@ -95,6 +95,7 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	{
 		cannon[i] = DefCannon::Create(model01);
 		cannon[i]->SetModel(model03);
+		cannon[i]->BulletInit();
 		cannon[i]->Update();
 		cannon[i]->scale = { 10,10,10 };
 	}
@@ -157,16 +158,16 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	triangle[0].normal = XMVectorSet(0.0f, 0.0f, 1.0f, 0);
 
 	//ƒeƒXƒgƒvƒŒƒC
-	for (int i = 0; i < NUM_OBJ; i++) {
-		test[i] = Obj::Create();
-		test[i]->SetModel(model01);
+	//for (int i = 0; i < NUM_OBJ; i++) {
+	//	test[i] = Obj::Create();
+	//	test[i]->SetModel(model01);
 
-		line[i] = object2d::Create();
-	}
-	test[0]->stat = 2;	//Å‰‚Ì‚PŒÂ–Ú‚ÍÃŽ~
-	test[0]->position = pmdModel->position;
-	test[0]->position.y = pmdModel->position.y + 50;
-	test[0]->pos.y = test[0]->position.y;
+	//	line[i] = object2d::Create();
+	//}
+	//test[0]->stat = 2;	//Å‰‚Ì‚PŒÂ–Ú‚ÍÃŽ~
+	//test[0]->position = pmdModel->position;
+	//test[0]->position.y = pmdModel->position.y + 50;
+	//test[0]->pos.y = test[0]->position.y;
 	input->Update();
 	audio->Load();
 
@@ -601,7 +602,6 @@ void GameManager::Update()
 			if (input->Push(DIK_RIGHT)) {
 				//audio->Play(0);
 				obj01->rotation.x += 1.0f;
-				test[0]->position.x += 1.0f;
 			}
 			if (input->Push(DIK_UP)) {
 				obj01->rotation.y += 1.0f;
@@ -728,12 +728,12 @@ void GameManager::Update()
 			pmdModel->Update();
 			sprite06->Update();
 			for (int i = 0; i < 6; i++) {
-				cannon[i]->moveUpdate(_enemy);
 				cannon[i]->Update();
+				cannon[i]->moveUpdate(_enemy);
 			}
-			for (int i = 0; i < NUM_OBJ; i++) {
-				test[i]->Update();
-			}
+			//for (int i = 0; i < NUM_OBJ; i++) {
+			//	test[i]->Update();
+			//}
 
 			HitBox::mainUpdate(pmdModel->GetBoneMat(), pmdModel->rotation);
 			light->Update();
@@ -805,9 +805,9 @@ void GameManager::Draw()
 		dx12->SceneDraw();
 		pmdModel->Draw(cmdList);
 
-		for (int i = 0; i < NUM_OBJ; i++) {
-			test[i]->Draw();
-		}
+		//for (int i = 0; i < NUM_OBJ; i++) {
+		//	test[i]->Draw();
+		//}
 
 		BaseObject::PostDraw();
 

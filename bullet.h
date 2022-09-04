@@ -4,6 +4,7 @@
 class Bullet : public Object3Ds{
 	struct Status {
 		XMVECTOR vec;
+		bool vecSet;
 		XMFLOAT3 basePos;
 		float speed;
 		bool isAlive;
