@@ -32,7 +32,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Wrapper dx12;
 	Audio audio;
 	Input input;
-	PostEffect *postEffect = nullptr;
+	//PostEffect *postEffect = nullptr;
 
 	//Šî–{‰Šú‰»
 	{
@@ -156,7 +156,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	FbxLoader::GetInstance()->Finalize();
 
-	delete postEffect;
+	//delete postEffect;
 
 #pragma endregion
 

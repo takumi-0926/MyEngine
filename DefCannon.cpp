@@ -3,7 +3,7 @@
 DefCannon::DefCannon()
 {
 }
-DefCannon* DefCannon::Create(Model* model)
+DefCannon* DefCannon::Create()
 {
 	// 3Dオブジェクトのインスタンスを生成
 	DefCannon* object3d = new DefCannon();
@@ -22,13 +22,13 @@ DefCannon* DefCannon::Create(Model* model)
 
 	return object3d;
 }
-void DefCannon::BulletInit()
+void DefCannon::BulletCreate(Model* _model)
 {
 	for (int i = 0; i < 10; i++)
 	{
 		Bullet* _bullet;
 		_bullet = _bullet->Create();
-		_bullet->SetModel(model);
+		_bullet->SetModel(_model);
 		_bullet->scale = { 1,1,1 };
 		_bullet->status.isAlive = false;
 		_bullet->status.speed = 1.0f;
@@ -43,6 +43,7 @@ void DefCannon::Update() {
 	for (int i = 0; i < bullet.size(); i++) {
 		if (bullet[i]->status.isAlive == false) {
 			bullet[i]->status.basePos = position;
+			bullet[i]->status.basePos.y = position.y + 30.0f;
 		}
 
 		if (count >= bullet[i]->attackCount) {
@@ -135,7 +136,7 @@ void DefCannon::moveUpdate(std::vector<Enemy*> ePos)
 		if (bullet[i]->status.isAlive == false) { continue; }
 		//目標が定まっている
 		if (bullet[i]->status.vecSet != false) { continue; }
-		bullet[i]->status.vec = objectVector(ePos[No]->position, position);
+		bullet[i]->status.vec = objectVector(ePos[No]->position, bullet[i]->status.basePos);
 		bullet[i]->status.vec = XMVector3Normalize(bullet[i]->status.vec);
 		bullet[i]->status.vecSet = true;
 	}

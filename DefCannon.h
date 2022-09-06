@@ -16,12 +16,14 @@ class DefCannon : public Object3Ds{
 
 public:
 	DefCannon();
-	static DefCannon* Create(Model* model);
-	void BulletInit();
+	static DefCannon* Create();
+	void BulletCreate(Model* _model);
 	void Update()override;
 	void Draw()override;
 
 	void moveUpdate(std::vector<Enemy*> ePos);
 
 public:
+	bool isAlive = true;
+	int HP = 2;
 };

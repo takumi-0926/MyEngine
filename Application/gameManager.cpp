@@ -37,6 +37,18 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 		assert(0);
 		return false;
 	}
+	if (!Sprite::loadTexture(3, L"Resources/HpBer.png")) {
+		assert(0);
+		return false;
+	}
+	if (!Sprite::loadTexture(4, L"Resources/Hp.png")) {
+		assert(0);
+		return false;
+	}
+	if (!Sprite::loadTexture(5, L"Resources/Damege.png")) {
+		assert(0);
+		return false;
+	}
 
 	//カメラをセット
 	camera = new DebugCamera(Application::window_width, Application::window_height, input);
@@ -55,17 +67,12 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	//基本オブジェクト--------------
 	model01 = Model::CreateFromOBJ("Block");
 	model02 = Model::CreateFromOBJ("ground");
-	model03 = Model::CreateFromOBJ("togetoge");
+	model03 = Model::CreateFromOBJ("Cannon");
 	model04 = Model::CreateFromOBJ("Gate");
 	model05 = Model::CreateFromOBJ("sqhere");
 	model06 = Model::CreateFromOBJ("maru");
 
-	obj01 = Object3Ds::Create();
-	obj01->SetModel(model01);
-	obj01->Update();
-	obj01->scale = { 1,1,1 };
-	obj01->SetPosition({ -10,20,0 });
-
+	//全体ステージ
 	stage = Stage::Create();
 	stage->SetModel(model02);
 	stage->Update();
@@ -73,17 +80,19 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	stage->rotation.y = 90;
 	stage->SetPosition({ 0,-30,0 });
 
+	//ゲート（最終関門）
 	obj03 = Object3Ds::Create();
 	obj03->SetModel(model04);
 	obj03->Update();
 	obj03->scale = { 50,50,50 };
 	obj03->SetPosition({ 0,0,150 });
 
+	//防衛砲台
 	for (int i = 0; i < 6; i++)
 	{
-		cannon[i] = DefCannon::Create(model01);
+		cannon[i] = DefCannon::Create();
 		cannon[i]->SetModel(model03);
-		cannon[i]->BulletInit();
+		cannon[i]->BulletCreate(model06);
 		cannon[i]->Update();
 		cannon[i]->scale = { 10,10,10 };
 	}
@@ -100,62 +109,33 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	pmdModel->scale = { 1,1,1 };
 	pmdModel->SetPosition({ 0,10,0 });
 
-	//PMXModelData pmxData{};
-	//LoadPmx(pmxData,L"Resources\\獅白ぼたん\\獅白ぼたん.pmx");
-
-	//FBXオブジェクト----------------
-	FbxObject3d::SetDevice(dx12->GetDevice());
-	FbxObject3d::SetCamera(mainCamera);
-	FbxObject3d::CreateGraphicsPipeline();
-
-	fbxModel1 = FbxLoader::GetInstance()->LoadModelFromFile("boneTest");
-	fbxObj1 = new FbxObject3d;
-	fbxObj1->Initialize();
-	fbxObj1->Setmodel(fbxModel1);
-	fbxObj1->SetPosition({ -10,29,0 });
-
 	//スプライト---------------------
 	sprite01 = Sprite::Create(0, { 0.0f,0.0f });
 	sprite02 = Sprite::Create(1, { 0.0f,0.0f });
 	sprite03 = Sprite::Create(2, { 0.0f,0.0f });
 	sprite04 = Sprite::Create(3, { 0.0f,0.0f });
-	sprite05 = Sprite::Create(4, { 0.0f,0.0f });
-	sprite06 = Sprite::Create(5, { 500.0f,0.0f });
 
 	for (int i = 0; i < P_HP; i++) {
-		static float xpos = 5.0f;
-		hp[i] = Sprite::Create(3, { xpos * i,10.0f });
-		hp[i]->SetSize(XMFLOAT2(20, 15));
+		static float xpos = 4.0f;
+		hp[i] = Sprite::Create(4, { xpos * i + 36.0f,32.0f });
+		hp[i]->SetSize(XMFLOAT2(30, 30));
 		hp[i]->Update();
 	}
+
+	Damege = Sprite::Create(5, { 0,0 });
+	Damege->Update();
 
 	//ヒットボックス-----------------
 	HitBox::CreatePipeline(dx12);
 	HitBox::CreateTransform();
 	HitBox::CreateHitBox(pmdModel->GetBonePos("頭先"), model01);
-	HitBox::CreateHitBox(pmdModel->GetBonePos("右肩"), model01);
-	HitBox::CreateHitBox(pmdModel->GetBonePos("左肩"), model01);
-	HitBox::CreateHitBox(pmdModel->GetBonePos("右ひじ"), model01);
-	HitBox::CreateHitBox(pmdModel->GetBonePos("左ひじ"), model01);
-	HitBox::CreateHitBox(pmdModel->GetBonePos("右ひざ"), model01);
-	HitBox::CreateHitBox(pmdModel->GetBonePos("左ひざ"), model01);
-
+	HitBox::hitBox[0]->scale = XMFLOAT3(5, 10, 5);
 	triangle[0].p0 = XMVectorSet(obj03->position.x - 100.0, obj03->position.y, obj03->position.z, 1);
 	triangle[0].p1 = XMVectorSet(obj03->position.x - 100.0, obj03->position.y + 120.0, obj03->position.z, 1);
 	triangle[0].p2 = XMVectorSet(obj03->position.x + 100.0, obj03->position.y, obj03->position.z, 1);
 	triangle[0].normal = XMVectorSet(0.0f, 0.0f, 1.0f, 0);
 
-	//テストプレイ
-	//for (int i = 0; i < NUM_OBJ; i++) {
-	//	test[i] = Obj::Create();
-	//	test[i]->SetModel(model01);
-
-	//	line[i] = object2d::Create();
-	//}
-	//test[0]->stat = 2;	//最初の１個目は静止
-	//test[0]->position = pmdModel->position;
-	//test[0]->position.y = pmdModel->position.y + 50;
-	//test[0]->pos.y = test[0]->position.y;
+	//入力及び音声
 	input->Update();
 	audio->Load();
 
@@ -163,7 +143,6 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	move1.flag = false;
 	move2.flag = false;
 
-	fbxObj1->PlayAnimation();
 	pmdModel->playAnimation();
 	pmdModel->animation = true;
 
@@ -186,9 +165,9 @@ void GameManager::Update()
 		ImGui::Text("test %.2f ,%.2f ,%.2f ,%.2f", a, b, c, d);
 		ImGui::Checkbox("EnemyPop", &blnChk);
 		ImGui::Checkbox("test", &pmdModel->a);
-		ImGui::RadioButton("Debug Camera", &radio, 0);
+		ImGui::RadioButton("Game Camera", &radio, 0);
 		ImGui::SameLine();
-		ImGui::RadioButton("Game Camera", &radio, 1);
+		ImGui::RadioButton("Debug Camera", &radio, 1);
 		ImGui::SameLine();
 		ImGui::RadioButton("Radio 3", &radio, 2);
 		int nSlider = 0;
@@ -202,209 +181,18 @@ void GameManager::Update()
 		//カメラ切り替え
 		static bool isCamera = false;
 		if (radio == 0 && isCamera == false) {
-			Wrapper::SetCamera(camera);
+			Wrapper::SetCamera(mainCamera);
 			isCamera = true;
 		}
 		else if (radio == 1 && isCamera == true) {
-			Wrapper::SetCamera(mainCamera);
+			Wrapper::SetCamera(camera);
 			isCamera = false;
 		}
 	}
 
-	//MT4
-	{
-		//放物線運動
-		{
-			if (input->Trigger(DIK_1) && move1.flag != true) {
-				move1.moveNum = PARABOLA;
-				move1.flag = true;
-				move1.time = 0.0f;
-				move1.v = 0.0f;
-			}
-
-			if (move1.flag == true && move1.moveNum == PARABOLA) {
-				move1.v = move1.gravity * move1.time;
-				obj01->position.z += 5.0f;
-				obj01->position.y += move1.v0 - move1.v;
-				pmdModel->position.z += 5.0f;
-				pmdModel->position.y += move1.v0 - move1.v;
-
-				move1.time += (1.0f / 120.0f);
-				if (move1.time >= 1.0f) {
-					move1.flag = false;
-					move1.moveNum = NONE;
-					obj01->position.z = 0.0f;
-					obj01->position.y = 20.0f;
-					pmdModel->position.y = 20.0f;
-					pmdModel->position.z = 0.0f;
-				}
-			}
-		}
-
-		//空気抵抗
-		{
-			if (input->Trigger(DIK_2) && move1.flag != true) {
-				move1.moveNum = AIR;
-				move1.flag = true;
-				move1.time = 0.0f;
-				move1.v = 0.0f;
-			}
-
-			if (move1.flag == true && move1.moveNum == AIR) {
-				move1.v = move1.gravity * move1.time;
-				obj01->position.y += move1.vy - move1.v + move1.air_resister;
-				pmdModel->position.y += move1.vy - move1.v + move1.air_resister;
-
-				if (move1.time >= 0.3f) {
-					move1.air_resister = move1.k * move1.v;
-				}
-				move1.time += (1.0f / 60.0f);
-				if (move1.time >= 2.0f) {
-					move1.flag = false;
-					move1.moveNum = NONE;
-					move1.air_resister = 0.0f;
-					obj01->position.y = 20.0f;
-					pmdModel->position.y = 20.0f;
-				}
-			}
-		}
-
-		//衝突（運動量保存則）
-		{
-			//if (input->Trigger(DIK_3)) {
-			//	sqhere[0].center = XMVECTOR{ obj01->position.x,obj01->position.y,obj01->position.z ,1 };
-			//	sqhere[1].center = XMVECTOR{ obj02->position.x,obj02->position.y,obj02->position.z ,1 };
-
-			//	//円と円
-			//	bool hit = Coliision::CheckSqhere2Sqhere(sqhere[0], sqhere[1]);
-
-			//	//運動量計算
-			//	move1.p = move1.m * move1.vx;
-			//	move2.p = move2.m * move2.vx;
-
-			//	if (hit) {
-			//		move1.flag = false;
-			//		move2.flag = true;
-			//		move1.vx = 0;
-			//	}
-
-			//	if (move1.flag == true) {
-			//		move1.vx += move1.accel;
-			//	}
-			//	if (move2.flag == true) {
-			//		move2.vx = (move1.p / move2.m);
-			//		move2.flag = false;
-			//	}
-			//	obj02->position.x += move2.vx;
-			//	obj01->position.x += move1.vx;
-			//}
-			////リセット
-			//if (input->Trigger(DIK_R)) {
-			//	move1.flag = true;
-			//	move2.flag = false;
-			//	move1.vx = 0;
-			//	move2.vx = 0;
-			//	obj01->position.x = -10;
-			//	obj02->position.x = 10;
-			//}
-		}
-
-		//跳ね返り
-		{
-			if (input->Trigger(DIK_4))
-			{
-				obj01->position.y = 30;
-				obj01->position.x = -10;
-				move1.v = 0;
-				move1.v0 = 0;
-				move1.time = 0;
-				move1.flag = true;
-			}
-
-			if (move1.flag == true) {
-				move1.v = move1.v0 + (move1.gravity * move1.time);
-				obj01->position.y += -move1.v;
-				obj01->position.x += 0.2f;
-				move1.time += 1 / 120.0f;
-
-				if (obj01->position.y <= 10) {
-					move1.v0 = -(move1.v * move1.e);
-					move1.time = 0;
-				}
-			}
-		}
-
-		//円運動
-		{
-			if (input->Push(DIK_5)) {
-
-
-				if (true) {
-
-					angle += 2.0f;
-					XMVECTOR hf = { 1,0,0,0 };
-					rot = XMMatrixRotationZ(XMConvertToRadians(angle));
-					hf = XMVector3TransformNormal(hf, rot);
-
-					XMFLOAT3 direction = { hf.m128_f32[0],hf.m128_f32[1],hf.m128_f32[2] };
-					obj01->position.x += direction.x;
-					obj01->position.y += direction.y;
-					obj01->position.z += direction.z;
-				}
-			}
-		}
-
-		//衝突
-		if (sprite06->Pos().x - 256 <= sprite04->Pos().x &&
-			sprite06->Pos().y <= sprite04->Pos().y + 256 &&
-			sprite06->Pos().x >= sprite04->Pos().x - 256 &&
-			sprite06->Pos().y >= sprite04->Pos().y) {
-			colFlag = true;
-		}
-		else {
-			colFlag = false;
-		}
-
-		if (input->Trigger(DIK_RETURN)) {
-			easing.fadeFlag = true;
-		}
-		if (easing.fadeFlag == true) {
-			easing.addTime2 += 1.0f / 60.0f;
-			easing.timeRate2 = easing.addTime2 / easing.maxTime;
-			if (easing.addTime2 / easing.maxTime >= 1.0f) { easing.timeRate2 = 1.0f; }
-			XMFLOAT3 pos = obj01->position;
-			pos.x = easing.easeIn(easing.end, easing.end2, easing.timeRate2);
-			obj01->position = pos;
-			//遷移終了
-			if (pos.x == easing.end2) {
-				easing.fadeFlag = false;
-				easing.FadeReset();
-			}
-		}
-		// 物体追加?
-//if (input->Trigger(DIK_UP))
-//{
-//	if (_idx_obj < NUM_OBJ)
-//	{
-//		_idx_obj++;
-//		test[_idx_obj]->stat = 1;
-//		test[_idx_obj]->vel.clear(0);
-//		test[_idx_obj]->pos = test[_idx_obj - 1]->pos;
-//		// 自分の親objを１つ上のobjに
-//		test[_idx_obj]->link0 = test[_idx_obj - 1];
-//		// １つ上にobjの子objを自分に
-//		test[_idx_obj - 1]->link1 = test[_idx_obj];
-
-//		line[_idx_obj - 1]->CreateLine(test[_idx_obj]->position.x, test[_idx_obj]->position.y, test[_idx_obj - 1]->position.x, test[_idx_obj - 1]->position.y);
-//	}
-//}
-
-	}
-
 	//ライト
+	static XMVECTOR lightDir = { 0,1,5,0 };
 	{
-		static XMVECTOR lightDir = { 0,1,5,0 };
-
 		if (input->Push(DIK_T)) { lightDir.m128_f32[1] += 1.0f; }
 		if (input->Push(DIK_G)) { lightDir.m128_f32[1] -= 1.0f; }
 		if (input->Push(DIK_H)) { lightDir.m128_f32[0] += 1.0f; }
@@ -420,7 +208,7 @@ void GameManager::Update()
 			//Initalize(dx12, audio, input);
 			resetFlag = true;
 		}
-		if (input->Trigger(DIK_SPACE) || directInput->IsButtonUp(DirectInput::ButtonKind::Button02)) {
+		if (input->Trigger(DIK_SPACE) || directInput->IsButtonPush(DirectInput::ButtonKind::Button03)) {
 			SceneNum = GAME;
 			sprite01->Update();
 		}
@@ -434,14 +222,10 @@ void GameManager::Update()
 				Enemy* ene = Enemy::Create();
 				int r = rand() % 10;
 				if (r % 2 == 1) {
-					ene->SetModel(model03);
-					ene->mode = 1;
-				}
-				else if (r % 2 != 1) {
 					ene->SetModel(model05);
 					ene->mode = 2;
 				}
-				if (r == 5 || r == 6) {
+				else if (r % 2 != 1) {
 					ene->SetModel(model06);
 					ene->mode = 3;
 				}
@@ -486,16 +270,13 @@ void GameManager::Update()
 					reception = 600;
 				}
 
-				//エネミーダメージ
+				//エネミーからのダメージ
 				if (Hhit == true && _enemy[i]->attackHit == true) {
 					if (_enemy[i]->mode != 2) { continue; }
 					_enemy[i]->attackHit = false;
-					//_enemy[i]->damage = true;
-					//_enemy[i]->status.HP -= 100;
+					enemyToPlayerDamege = true;
+					DamegeAlpha = 1.0f;
 					playerHp -= 10;
-					//体力がなくなっていれば
-					//if (_enemy[i]->status.HP >= 0) { continue; }
-					//_enemy[i]->alive = false;
 				}
 				//ゲームオーバー条件				
 				if (gateHP <= 0 || playerHp <= 0) { SceneNum = END; }
@@ -507,20 +288,31 @@ void GameManager::Update()
 			pmdModel->position.y = stage->position.y + 40;
 		}
 		//エネミー同士の当たり判定
-		for (int i = 0; i < sqhere.size(); i++) {
-			for (int j = 0; j < sqhere.size(); j++) {
-				if (i == j) { continue; }
-				bool Hhit = Coliision::CheckSqhere2Sqhere(sqhere[i], sqhere[j]);
-				if (Hhit == true) {
-					_enemy[i]->position = _enemy[i]->oldPos;
-				}
-			}
-		}
+		//for (int i = 0; i < sqhere.size(); i++) {
+		//	for (int j = 0; j < sqhere.size(); j++) {
+		//		if (i == j) { continue; }
+		//		bool Hhit = Coliision::CheckSqhere2Sqhere(sqhere[i], sqhere[j]);
+		//		if (Hhit == true) {
+		//			_enemy[i]->position = _enemy[i]->oldPos;
+		//		}
+		//	}
+		//}
+
 		//移動
 		{
-			pmdModel->oldVmdNumber = pmdModel->vmdNumber;
+			//移動ベクトル
+			XMVECTOR v = { (directInput->getLeftX()),0.0f,-(directInput->getLeftY()),0.0f };
+			HitBox::hitBox[0]->position = XMFLOAT3(
+				pmdModel->position.x,
+				pmdModel->position.y + 10.0f,
+				pmdModel->position.z);
+
+			if (pmdModel->oldVmdNumber != vmdData::ATTACK) { pmdModel->oldVmdNumber = pmdModel->vmdNumber; }
 			if (directInput->leftStickX() < 0.0f || directInput->leftStickX() > 0.0f || directInput->leftStickY() < 0.0f || directInput->leftStickY() > 0.0f) {
 				pmdModel->vmdNumber = vmdData::WALK;
+				HitBox::hitBox[0]->scale = XMFLOAT3(5, 10, 5);
+				HitBox::_hit[0].radius = 5;
+
 				if (directInput->getTriggerZ() != 0) {
 					speed = 2.0f;
 				}
@@ -545,59 +337,35 @@ void GameManager::Update()
 					pmdModel->position = MoveAfter(pmdModel->position);
 					for (int i = 0; i < HitBox::GetHit().size(); i++) { HitBox::GetHit()[i]->position = MoveAfter(HitBox::GetHit()[i]->position); }
 				}
-				XMVECTOR v = { (directInput->getLeftX()),0.0f,-(directInput->getLeftY()),0.0f };
 				XMMATRIX matRot = XMMatrixIdentity();
 				//角度回転
 				matRot = XMMatrixRotationY(XMConvertToRadians(angleHorizonal));
 				v = XMVector3TransformNormal(v, matRot);
 				XMFLOAT3 _v(v.m128_f32[0], v.m128_f32[1], v.m128_f32[2]);
 				pmdModel->SetMatRot(LookAtRotation(_v, XMFLOAT3(0.0f, 1.0f, 0.0f)));
-
-				//XMVECTOR q;
-				//XMVECTOR normal;
-				//XMVECTOR YAxis = { 0,1,0 };
-				//normal = XMVector3Cross(v, YAxis);
-				//normal = XMVector3Normalize(normal);
-				//q.m128_f32[0] = q.m128_f32[1] = q.m128_f32[2] = 0.0f;
-				//q.m128_f32[3] = 1.0f;
-				//q = XMQuaternionRotationAxis(YAxis, angleHorizonal);
-				//pmdModel->SetMatRot(XMMatrixRotationQuaternion(q));
 			}
 			else if (directInput->IsButtonPush(DirectInput::ButtonKind::Button01) || input->Push(DIK_X)) {
 				pmdModel->vmdNumber = vmdData::ATTACK;
-				_enemy[0]->damage = true;
-				_enemy[0]->status.HP -= 100;
-				//体力がなくなっていれば
-				if (_enemy[0]->status.HP <= 0) {
-					_enemy[0]->alive = false;
-				}
+				HitBox::hitBox[0]->scale = XMFLOAT3(10, 10, 10);
+				HitBox::_hit[0].radius = 10;
+				for (int i = 0; i < sqhere.size(); i++)
+				{
+					bool Hhit = Coliision::CheckSqhere2Sqhere(sqhere[i], HitBox::_hit[0]);
 
+					if (Hhit != true) { continue; }
+					_enemy[i]->damage = true;
+					_enemy[i]->status.HP -= 1;
+					//体力がなくなっていれば
+					if (_enemy[i]->status.HP <= 0) {
+						_enemy[i]->alive = false;
+					}
+				}
 			}
 			else {
 				pmdModel->vmdNumber = vmdData::WAIT;
+				HitBox::hitBox[0]->scale = XMFLOAT3(5, 10, 5);
+				HitBox::_hit[0].radius = 5;
 			}
-
-			if (input->Push(DIK_RIGHT)) {
-				//audio->Play(0);
-				obj01->rotation.x += 1.0f;
-			}
-			if (input->Push(DIK_UP)) {
-				obj01->rotation.y += 1.0f;
-			}
-
-			if (input->Push(DIK_2)) {
-				test[0]->position.x += 1.0f;
-			}
-			if (input->Push(DIK_1)) {
-				test[0]->position.x -= 1.0f;
-			}
-			if (input->Push(DIK_3)) {
-				test[0]->position.y -= 1.0f;
-			}
-			if (input->Push(DIK_4)) {
-				test[0]->position.y += 1.0f;
-			}
-
 		}
 		//カメラワーク(プレイヤー)
 		float angleH = 100.0f;
@@ -694,39 +462,46 @@ void GameManager::Update()
 			static float v = 0.0f;
 			v += gravity;
 			pmdModel->position.y -= gravity;
+
+			static float count = 0.0f;
+			if (enemyToPlayerDamege == true) {
+				count += 1.0f / 60.0f;
+				if (count >= 1.5f) {
+					DamegeAlpha -= 1.0f / 120.0f;
+					Damege->SetAlpha(DamegeAlpha);
+					if (DamegeAlpha <= 0) {
+						enemyToPlayerDamege = false;
+						count = 0;
+					}
+				}
+			}
 		}
 		//更新処理(固有)
 		{
 			dx12->SceneUpdate();
 			camera->Update();
-			obj01->Update();
 			stage->Update();
 			obj03->Update();
-			fbxObj1->Update();
 			pmdModel->Update();
-			sprite06->Update();
 			for (int i = 0; i < 6; i++) {
 				cannon[i]->Update();
 				cannon[i]->moveUpdate(_enemy);
 			}
-			//for (int i = 0; i < NUM_OBJ; i++) {
-			//	test[i]->Update();
-			//}
-
 			HitBox::mainUpdate(pmdModel->GetBoneMat(), pmdModel->rotation);
 			light->Update();
+
+			Damege->Update();
 		}
+
 	}
 	//エンド
 	else if (SceneNum == END) {
-		if (input->Trigger(DIK_SPACE) || directInput->IsButtonUp(directInput->DownButton)) {
+		//エンド→タイトル遷移
+		if (input->Trigger(DIK_SPACE) || directInput->IsButtonPush(DirectInput::ButtonKind::Button01)) {
 			SceneNum = TITLE;
 			sprite01->Update();
 		}
 	}
-
-	//SceneEffectManager::Update();
-
 }
 
 void GameManager::Draw()
@@ -734,35 +509,24 @@ void GameManager::Draw()
 	// コマンドリストの取得
 	ID3D12GraphicsCommandList* cmdList = dx12->CommandList().Get();
 
-	//fbxObj1->Draw(cmdList);
-
 	if (SceneNum == TITLE) {
 		Sprite::PreDraw(cmdList);
-
 		sprite01->Draw();
-
 		Sprite::PostDraw();
 	}
 	else if (SceneNum == GAME) {
 		Sprite::PreDraw(cmdList);
-
-		//sprite02->Draw();
-		//sprite01->Draw();
-
 		Sprite::PostDraw();
 
 		//深度バッファクリア
 		dx12->ClearDepthBuffer();
 
 		BaseObject::PreDraw(cmdList);
-		//obj01->Draw();
 		stage->Draw();
 		obj03->Draw();
-
 		for (int i = 0; i < 6; i++) {
 			cannon[i]->Draw();
 		}
-
 		for (int i = 0; i < _enemy.size(); i++) {
 			if (_enemy[i]->damage == true) {
 				_enemy[i]->damegeCount += 1.0f / 60.0f;
@@ -776,33 +540,27 @@ void GameManager::Draw()
 			_enemy[i]->Draw();
 
 		}
-		//HitBox::mainDraw();
 		pmdObject->Draw();
 		dx12->SceneDraw();
 		pmdModel->Draw(cmdList);
 
-		//for (int i = 0; i < NUM_OBJ; i++) {
-		//	test[i]->Draw();
-		//}
-
 		BaseObject::PostDraw();
 
 		Sprite::PreDraw(cmdList);
-
 		for (int i = 0; i < playerHp; i++) {
 			hp[i]->Draw();
+		}
+
+		sprite04->Draw();
+		if (enemyToPlayerDamege == true) {
+			Damege->Draw();
 		}
 
 		Sprite::PostDraw();
 	}
 	else if (SceneNum == END) {
-		// コマンドリストの取得
-		ID3D12GraphicsCommandList* cmdList = dx12->CommandList().Get();
-
 		Sprite::PreDraw(cmdList);
-
 		sprite02->Draw();
-
 		Sprite::PostDraw();
 	}
 }

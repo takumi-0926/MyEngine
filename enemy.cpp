@@ -33,7 +33,7 @@ XMFLOAT3 Enemy::moveObject(XMFLOAT3 pos1, XMFLOAT3 pos2, float pct)
 Enemy::Enemy()
 {
 	status = {
-			 610,//デフォルトHP
+			  1,//デフォルトHP
 			  1,//デフォルト攻撃力
 			  1,//デフォルト防御力
 			  1,//デフォルト速度
@@ -83,11 +83,13 @@ void Enemy::moveUpdate(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 	if (this->move == true) {
 		//パターン1
 		if (this->mode == 1) {
-			float distance = 1000;
-			for (int i = 0; i < 2; i++)
+			float distance = 1000;//距離保存用
+			for (int i = 0; i < 6; i++)
 			{
+				//距離を測定して攻撃対象を決定
 				float dis = objectDistance(this->position, bPos[i]->position);
 				if (distance >= dis) {
+					if (bPos[i]->isAlive != true) { continue; }
 					distance = dis;
 					objectNo = i;
 				}
@@ -96,6 +98,15 @@ void Enemy::moveUpdate(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 			if (this->pct <= 1.0f) {
 				this->position = moveObject(this->position, bPos[objectNo]->position, this->pct);
 				this->pct += this->step;
+			}
+
+			//攻撃対象がなくなった場合
+			for (int i = 0; i < 6; i++)
+			{
+				static int Num = 0;
+				if (bPos[i]->isAlive == false) { Num++; }
+				//行動パターンを変化
+				if (Num == 6) { this->mode = 3; }
 			}
 
 			//移動から攻撃へ

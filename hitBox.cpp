@@ -89,9 +89,9 @@ void HitBox::Draw()
 {
 	//Object3Ds::Draw();
 	// パイプラインステートの設定
-	cmdList->SetPipelineState(LoadHlsls::pipeline.at(ShaderNo::HIT)._pipelinestate.Get());
+	cmdList->SetPipelineState(LoadHlsls::pipeline.at(ShaderNo::OBJ)._pipelinestate.Get());
 	// ルートシグネチャの設定
-	cmdList->SetGraphicsRootSignature(LoadHlsls::pipeline.at(ShaderNo::HIT)._rootsignature.Get());
+	cmdList->SetGraphicsRootSignature(LoadHlsls::pipeline.at(ShaderNo::OBJ)._rootsignature.Get());
 
 	// 定数バッファビューをセット
 	cmdList->SetGraphicsRootConstantBufferView(0, constBuffB0->GetGPUVirtualAddress());

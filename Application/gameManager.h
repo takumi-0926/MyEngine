@@ -57,6 +57,8 @@ private://メンバ変数(ゲームシーン)
 	StageObject* wall[6] = {};
 	DefCannon* cannon[6] = {};
 	Sprite* hp[P_HP] = {};
+	Sprite* Damege = nullptr;
+	HitBox* HitBox = {};
 
 	Model* model01 = nullptr;
 	Model* model02 = nullptr;
@@ -67,14 +69,12 @@ private://メンバ変数(ゲームシーン)
 	Object3Ds* obj01 = nullptr;
 	Object3Ds* obj02 = nullptr;
 	Object3Ds* obj03 = nullptr;
-	//Object3Ds* obj02[25] = {};
 	Object3Ds* obj04[10] = {};
 	Sprite* sprite01 = nullptr;
 	Sprite* sprite02 = nullptr;
 	Sprite* sprite03 = nullptr;
 	Sprite* sprite04 = nullptr;
 	Sprite* sprite05 = nullptr;
-	Sprite* sprite06 = nullptr;
 	PMDmodel* pModel = nullptr;
 	PMDobject* pmdObj = nullptr;
 	FbxModel* fbxModel1 = nullptr;
@@ -90,7 +90,6 @@ private://メンバ変数(ゲームシーン)
 	Triangle triangle[50] = {};
 	Ray ray;
 
-	HitBox* HitBox[13] = {};
 	object2d* line[10] = {};
 
 	Triangle triangle02[2] = {};
@@ -168,6 +167,11 @@ private://メンバ変数(ゲームシーン)
 	float b;//角度保存用
 	float c;//角度保存用
 	float d;//角度保存用
+
+	bool isDamege = false;
+
+	bool enemyToPlayerDamege = false;
+	float DamegeAlpha = 1.0f;
 
 public://メンバ関数
 	//コンストラクタ

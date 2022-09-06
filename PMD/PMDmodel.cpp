@@ -388,6 +388,16 @@ HRESULT PMDmodel::LoadPMDFile(const char* path)
 		char comment[256];
 	};
 
+#pragma pack(1)//苦肉の策
+	struct PMDVertexFile {
+		XMFLOAT3 pos;
+		XMFLOAT3 normal;
+		XMFLOAT2 uv;
+		unsigned short boneNo[2];
+		unsigned char boneWeight;
+		unsigned char edgeFlg;
+	};
+#pragma pack()
 	struct PMDVertex {
 		XMFLOAT3 pos;
 		XMFLOAT3 normal;
@@ -415,10 +425,22 @@ HRESULT PMDmodel::LoadPMDFile(const char* path)
 	//*頂点関連*------------------------------------------
 	uint32_t vertnum;//頂点数
 	fread(&vertnum, sizeof(vertnum), 1, fp);
-	constexpr unsigned int pmdvertex_size = sizeof(PMDVertex) - 2;//頂点当たりのサイズ
-	std::vector<unsigned char> vertices(vertnum * pmdvertex_size);// 頂点データ配列
-	vertices.resize(vertnum * pmdvertex_size);//バッファの確保
+	constexpr unsigned int pmdvertex_size = sizeof(PMDVertex);//頂点当たりのサイズ
+	constexpr unsigned int pmdvertexFile_size = sizeof(PMDVertexFile);//頂点当たりのサイズ
+	std::vector<unsigned char> vertices(vertnum * pmdvertexFile_size);// 頂点データ配列
+	vertices.resize(vertnum * pmdvertexFile_size);//バッファの確保
 	fread(vertices.data(), vertices.size(), 1, fp);//読み込み
+
+	std::vector<PMDVertex> t_vertices;
+
+	for (int i = 0; i < vertnum; ++i)
+	{
+		PMDVertexFile p =
+			reinterpret_cast<PMDVertexFile*>(vertices.data())[i];
+		PMDVertex vert;
+		vert.pos = p.pos;
+		t_vertices.push_back(vert);
+	}
 
 	//頂点バッファーの生成
 	D3D12_HEAP_PROPERTIES heapprop = {};
@@ -443,7 +465,28 @@ HRESULT PMDmodel::LoadPMDFile(const char* path)
 
 	vbView.BufferLocation = vertBuff->GetGPUVirtualAddress();
 	vbView.SizeInBytes = vertices.size();
-	vbView.StrideInBytes = pmdvertex_size;
+	vbView.StrideInBytes = pmdvertexFile_size;
+
+	//D3D12_RESOURCE_DESC resdesc = {};
+	//resdesc = CD3DX12_RESOURCE_DESC::Buffer(
+	//	t_vertices.size() * sizeof(t_vertices[0]));
+
+	////頂点バッファのリソース生成
+	//result = device->CreateCommittedResource(
+	//	&heapprop, D3D12_HEAP_FLAG_NONE,
+	//	&resdesc, D3D12_RESOURCE_STATE_GENERIC_READ,
+	//	nullptr, IID_PPV_ARGS(vertBuff.ReleaseAndGetAddressOf()));
+	//if (FAILED(result)) { assert(0); }
+
+	////頂点情報のコピー
+	//PMDVertex* vertMap = nullptr;
+	//result = vertBuff->Map(0, nullptr, (void**)&vertMap);
+	//std::copy(std::begin(t_vertices), std::end(t_vertices), vertMap);
+	//vertBuff->Unmap(0, nullptr);//マップ解除
+
+	//vbView.BufferLocation = vertBuff->GetGPUVirtualAddress();
+	//vbView.SizeInBytes = t_vertices.size();
+	//vbView.StrideInBytes = pmdvertex_size;
 
 	//*頂点インデックス関連*------------------------------
 	uint32_t indicesnum;
@@ -975,11 +1018,22 @@ void PMDmodel::recursiveMatrixMultiply(BoneNode* node, const XMMATRIX& mat)
 void PMDmodel::MotionUpdate()
 {
 	vmdMotion data = motion.at(vmdNumber);
+	//攻撃中は変更を受け付けない
+	if (oldVmdNumber == vmdData::ATTACK) {
+		oldVmdNumber = vmdData::ATTACK;
+		vmdNumber = vmdData::ATTACK;
+		data = motion.at(vmdData::ATTACK);
+	}
+
 	auto elapsedTime = timeGetTime() - _startTime;
 
 	unsigned int frameNo = 30 * (elapsedTime / 1000.0f);
 
 	if (frameNo > data.duration) {
+		if (oldVmdNumber == vmdData::ATTACK) { 
+			oldVmdNumber = vmdData::WAIT;
+			vmdNumber = vmdData::WAIT;
+		}
 		_startTime = timeGetTime();
 		frameNo = 0;
 	}

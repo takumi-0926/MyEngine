@@ -108,6 +108,7 @@ protected:
 	//”ñ•\Ž¦
 	bool isInvisible = false;
 
+	float alpha = 1.0f;
 
 public:
 
@@ -146,6 +147,10 @@ public:
 	void SetAnchorPoint(XMFLOAT2 anchorpoint) {
 		this->anchorpoint = anchorpoint;
 		TransVertex();
+	}
+	
+	void SetAlpha(float alpha) {
+		this->alpha = alpha;
 	}
 
 	XMFLOAT2 Pos() { return position; }

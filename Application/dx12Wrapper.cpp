@@ -48,7 +48,7 @@ Wrapper::~Wrapper()
 }
 
 bool Wrapper::Init(HWND _hwnd, SIZE _ret) {
-#ifdef _DEBUG
+//#ifdef _DEBUG
 	//エラーチェック//
 	EnableDebugLayer();
 
@@ -58,7 +58,7 @@ bool Wrapper::Init(HWND _hwnd, SIZE _ret) {
 		dredSettings->SetPageFaultEnablement(D3D12_DRED_ENABLEMENT_FORCED_ON);
 	}
 
-#endif
+//#endif
 	InitalizeCamera(_ret.cx, _ret.cy);
 
 	//DirectX12関連初期化

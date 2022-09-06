@@ -23,14 +23,13 @@ class HitBox : public Object3Ds {
 		XMFLOAT3 cameraPos;
 	};
 
-	static std::vector<HitBox*> hitBox;
-
 	XMMATRIX* _mappedMatrices = nullptr;
 	ComPtr<ID3D12Resource> transformBuff = nullptr;
 	std::vector<DirectX::XMMATRIX> boneMatrices;
 
 
 public:
+	static std::vector<HitBox*> hitBox;
 	static std::vector<Sqhere> _hit;
 
 	static HRESULT CreateTransform();
@@ -44,7 +43,9 @@ public:
 	static void mainUpdate(std::vector<DirectX::XMMATRIX> _boneMatrices, XMFLOAT3 rot);
 
 	static void CreateHitBox(XMFLOAT3 pos, Model* model);
+
 	static void CreatePipeline(Wrapper* _dx12);
 
+	static std::vector<HitBox*>* GetHitBox() { return &hitBox; }
 	static std::vector<HitBox*> GetHit() { return hitBox; }
 };
