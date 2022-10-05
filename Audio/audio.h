@@ -40,10 +40,11 @@ struct FormatChunk
 };
 
 class Audio {
-private:
+	// Microsoft::WRL::を省略
+	template <class T> using ComPtr = Microsoft::WRL::ComPtr<T>;
+private://メンバ変数
 	ComPtr<IXAudio2> xAudio2;
 	IXAudio2MasteringVoice* masterVoice;
-
 	SoundData soundData[4];
 
 	//音声データのロード

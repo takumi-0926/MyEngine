@@ -74,7 +74,9 @@ private:
 	{
 		//XMFLOAT4 color;	// 色 (RGBA)
 		//XMMATRIX mat;	// ３Ｄ変換行列
-		XMMATRIX viewproj;
+		XMMATRIX view;
+		XMMATRIX proj;
+		XMMATRIX shadow;
 		XMFLOAT3 cameraPos;
 	};
 
@@ -262,7 +264,6 @@ public:
 	XMMATRIX GetWorldMat() {
 		// スケール、回転、平行移動行列の計算
 		XMMATRIX matScale, matRot, matTrans;
-		HRESULT result;
 		matScale = XMMatrixScaling(this->scale.x, this->scale.y, this->scale.z);
 		matRot = XMMatrixIdentity();
 		matRot *= XMMatrixRotationZ(XMConvertToRadians(this->rotation.z));

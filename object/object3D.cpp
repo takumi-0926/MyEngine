@@ -9,7 +9,11 @@ ID3D12GraphicsCommandList* Object3Ds::cmdList;
 
 Wrapper* Object3Ds::dx12 = nullptr;
 
-bool Object3Ds::StaticInitialize(ID3D12Device* _device, SIZE _ret)
+Object3Ds::~Object3Ds()
+{
+}
+
+bool Object3Ds::StaticInitialize(ID3D12Device* _device)
 {
 	// 再初期化チェック
 	assert(!Object3Ds::device);
@@ -36,10 +40,6 @@ Object3Ds* Object3Ds::Create()
 	if (object3d == nullptr) {
 		return nullptr;
 	}
-
-	//すけーるをセット
-	float scale_val = 20;
-	object3d->scale = { scale_val,scale_val ,scale_val };
 
 	// 初期化
 	if (!object3d->Initialize()) {
@@ -83,30 +83,28 @@ void Object3Ds::Update()
 
 	// スケール、回転、平行移動行列の計算
 	matScale = XMMatrixScaling(scale.x, scale.y, scale.z);
-	matRot = XMMatrixIdentity();
-	matRot *= XMMatrixRotationZ(XMConvertToRadians(rotation.z));
-	matRot *= XMMatrixRotationX(XMConvertToRadians(rotation.x));
-	matRot *= XMMatrixRotationY(XMConvertToRadians(rotation.y));
+	matRot   = XMMatrixIdentity();
+	matRot  *= XMMatrixRotationZ(XMConvertToRadians(rotation.z));
+	matRot  *= XMMatrixRotationX(XMConvertToRadians(rotation.x));
+	matRot  *= XMMatrixRotationY(XMConvertToRadians(rotation.y));
 	matTrans = XMMatrixTranslation(position.x, position.y, position.z);
 
 	// ワールド行列の合成
-	matWorld = XMMatrixIdentity(); // 変形をリセット
-	matWorld *= matScale; // ワールド行列にスケーリングを反映
-	matWorld *= matRot; // ワールド行列に回転を反映
-	matWorld *= matTrans; // ワールド行列に平行移動を反映
+	matWorld  = XMMatrixIdentity();// 変形をリセット
+	matWorld *= matScale;// ワールド行列に	スケーリングを反映
+	matWorld *=	  matRot;// ワールド行列に			回転を反映
+	matWorld *= matTrans;// ワールド行列に		平行移動を反映
 
-	const XMMATRIX& matViewProjection = dx12->Camera()->GetViewProjectionMatrix();
-	const XMFLOAT3& cameraPos = dx12->Camera()->GetEye();
+	const XMMATRIX&		  matView	= dx12->Camera()->GetViewMatrix();
+	const XMMATRIX& matProjection   = dx12->Camera()->GetProjectionMatrix();
+	const XMMATRIX& matViewProjection	= dx12->Camera()->GetViewProjectionMatrix();
+	const XMFLOAT3&		cameraPos	= dx12->Camera()->GetEye();
 
 	// 定数バッファへデータ転送(OBJ)
 	ConstBufferDataB0* constMap = nullptr;
 	result = constBuffB0->Map(0, nullptr, (void**)&constMap);
-	if (FAILED(result)) {
-		assert(0);
-	}
-
-	//constMap->mat = matWorld * matView * matProjection;	// 行列の合成
-	constMap->viewproj = matViewProjection;
+	if (FAILED(result)) {assert(0);}
+	constMap->viewproj  = matViewProjection;
 	constMap->world = matWorld;
 	constMap->cameraPos = cameraPos;
 	constBuffB0->Unmap(0, nullptr);
@@ -123,10 +121,6 @@ void Object3Ds::Draw()
 		return;
 	}
 
-	//// パイプラインステートの設定
-	//cmdList->SetPipelineState(_pipelinestate.Get());
-	//// ルートシグネチャの設定
-	//cmdList->SetGraphicsRootSignature(_rootsignature.Get());
 	// パイプラインステートの設定
 	cmdList->SetPipelineState(LoadHlsls::pipeline.at(ShaderNo::OBJ)._pipelinestate.Get());
 	// ルートシグネチャの設定

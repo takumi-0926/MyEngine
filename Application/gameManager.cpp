@@ -51,13 +51,13 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	}
 
 	//カメラをセット
-	camera = new DebugCamera(Application::window_width, Application::window_height, input);
+	camera	   = new DebugCamera(Application::window_width, Application::window_height, input);
 	mainCamera = new Camera(Application::window_width, Application::window_height);
-	camera->SetTarget({ 0,0,0 });
+	camera->SetTarget({ 0,20,0 });
 	camera->SetDistance(20.0f);
+	camera->Update();
 	Wrapper::SetCamera(mainCamera);
 	dx12->SceneUpdate();
-	camera->Update();
 
 	//ライトセット
 	light = light->Create();

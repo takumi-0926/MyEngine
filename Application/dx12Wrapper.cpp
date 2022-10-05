@@ -48,8 +48,8 @@ Wrapper::~Wrapper()
 }
 
 bool Wrapper::Init(HWND _hwnd, SIZE _ret) {
-//#ifdef _DEBUG
-	//エラーチェック//
+	//#ifdef _DEBUG
+		//エラーチェック//
 	EnableDebugLayer();
 
 	ComPtr<ID3D12DeviceRemovedExtendedDataSettings> dredSettings;
@@ -58,7 +58,7 @@ bool Wrapper::Init(HWND _hwnd, SIZE _ret) {
 		dredSettings->SetPageFaultEnablement(D3D12_DRED_ENABLEMENT_FORCED_ON);
 	}
 
-//#endif
+	//#endif
 	InitalizeCamera(_ret.cx, _ret.cy);
 
 	//DirectX12関連初期化
@@ -95,7 +95,7 @@ bool Wrapper::Init(HWND _hwnd, SIZE _ret) {
 		return false;
 	}
 	_heapForImgui = CreateDescriptorHeapForImgui();
-	if (_heapForImgui == nullptr){
+	if (_heapForImgui == nullptr) {
 		assert(0);
 		return false;
 	}
@@ -475,8 +475,14 @@ HRESULT Wrapper::CreateSceneView()
 	const XMMATRIX& matViewProjection = matView * matProjection;
 	const XMFLOAT3& cameraPos = eye;
 
+	const XMFLOAT4 planeVec(0, 1, 0, 0);
+	const XMFLOAT3 lightVec(1, -1, 1);
+
 	_mappedSceneData->viewproj = matViewProjection;
-	_mappedSceneData->cameraPos = cameraPos;
+	_mappedSceneData->shadow = XMMatrixShadow(
+		XMLoadFloat4(&planeVec),
+		-XMLoadFloat3(&lightVec));
+		_mappedSceneData->cameraPos = cameraPos;
 
 	D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc = {};
 	cbvDesc.BufferLocation = _sceneConstBuff->GetGPUVirtualAddress();

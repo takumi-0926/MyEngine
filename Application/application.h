@@ -1,40 +1,47 @@
 #pragma once
 #include <Windows.h>
-#include "dx12Wrapper.h"
 
 class Application {
-private:
-	WNDCLASSEX windowClass;
-	HWND hwnd;
+private://メンバ変数
+	WNDCLASSEX windowClass{};
+	HWND hwnd = nullptr;
 
-	//ウィンドウ生成
-	void CreateWindows(HWND& hwnd, WNDCLASSEX& windowClass);
-public://静的メンバ関数
-	static LRESULT WindowProcedure(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
+public://静的メンバ変数
 
 	//ウィンドウ定数
 	static const int window_width = 1280;// 横幅
 	static const int window_height = 720;// 縦幅
+	static const wchar_t crassName[];    // クラスネーム
 public:
 
+	//コンストラクタ
 	Application();
+
 
 	///Applicationのシングルトンインスタンスを得る
 	static Application& Instance();
 
-	//初期化
-	bool Init();
+	static LRESULT WindowProcedure(HWND _hwnd, UINT _msg, WPARAM _wparam, LPARAM _lparam);
 
-	//ループ
-	void Run();
+	//ウィンドウ生成
+	void CreateWindows();
 
-	//後処理
+	/// <summary>
+	/// メッセージ
+	/// </summary>
+	/// <returns>終了判定</returns>
+	bool processMessage();
+
+	//終了時処理
 	void Processing();
 
-
-	//ウィンドウサイズの取得
-	SIZE GetWindowSize()const;
-
-	HWND _hwnd();
-	WNDCLASSEX _windowClass();
+	//ゲッター
+	SIZE GetWindowSize()const {
+		SIZE winSize;
+		winSize.cx = window_width;
+		winSize.cy = window_height;
+		return winSize;
+	};
+	HWND _hwnd() { return hwnd; }
+	HINSTANCE classInstance() { return windowClass.hInstance; };
 };

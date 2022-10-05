@@ -41,10 +41,10 @@ PMDobject::~PMDobject()
 
 HRESULT PMDobject::CreateGraphicsPipelinePMD()
 {
-	////パイプライン生成
-	//LoadHlsls::LoadHlsl_VS(ShaderNo::PMD, L"Resources/shaders/BasicVertexShader.hlsl", "BasicVS", "vs_5_0");
-	//LoadHlsls::LoadHlsl_PS(ShaderNo::PMD, L"Resources/shaders/BasicPixelShader.hlsl", "BasicPS", "ps_5_0");
-	//LoadHlsls::createPipeline(device, ShaderNo::PMD);
+	//パイプライン生成
+	LoadHlsls::LoadHlsl_VS(ShaderNo::PMD, L"Resources/shaders/BasicVertexShader.hlsl", "BasicVS", "vs_5_0");
+	LoadHlsls::LoadHlsl_PS(ShaderNo::PMD, L"Resources/shaders/BasicPixelShader.hlsl", "BasicPS", "ps_5_0");
+	LoadHlsls::createPipeline(device, ShaderNo::PMD);
 
 	HRESULT result = S_FALSE;
 	ComPtr<ID3DBlob> vsBlob; // 頂点シェーダオブジェクト
@@ -225,47 +225,3 @@ HRESULT PMDobject::CreateRootSignaturePMD()
 	}
 	return result;
 }
-
-//HRESULT PMDobject::CreateSceneView()
-//{
-//	HRESULT result;
-//
-//	result = device->CreateCommittedResource(
-//		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
-//		D3D12_HEAP_FLAG_NONE,
-//		&CD3DX12_RESOURCE_DESC::Buffer((sizeof(ConstBufferDataB0_1) + 0xff) & ~0xff),
-//		D3D12_RESOURCE_STATE_GENERIC_READ,
-//		nullptr,
-//		IID_PPV_ARGS(_sceneConstBuff.ReleaseAndGetAddressOf())
-//	);
-//	if (FAILED(result)) {
-//		assert(SUCCEEDED(result));
-//		return result;
-//	}
-//
-//	_mappedSceneData = nullptr;//マップ先を示すポインタ
-//	result = _sceneConstBuff->Map(0, nullptr, (void**)&_mappedSceneData);//マップ
-//
-//	const XMMATRIX& matViewProjection = dx12->Camera()->GetViewProjectionMatrix();
-//	const XMFLOAT3& cameraPos = dx12->Camera()->GetEye();
-//
-//	_mappedSceneData->viewproj = matViewProjection;
-//	_mappedSceneData->cameraPos = cameraPos;
-//
-//	D3D12_DESCRIPTOR_HEAP_DESC descHeapDesc = {};
-//	descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;//シェーダから見えるように
-//	descHeapDesc.NodeMask = 0;//マスクは0
-//	descHeapDesc.NumDescriptors = 1;//
-//	descHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;//デスクリプタヒープ種別
-//	result = device->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(_sceneDescHeap.ReleaseAndGetAddressOf()));//生成
-//
-//	////デスクリプタの先頭ハンドルを取得しておく
-//	auto heapHandle = _sceneDescHeap->GetCPUDescriptorHandleForHeapStart();
-//
-//	D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc = {};
-//	cbvDesc.BufferLocation = _sceneConstBuff->GetGPUVirtualAddress();
-//	cbvDesc.SizeInBytes = _sceneConstBuff->GetDesc().Width;
-//	//定数バッファビューの作成
-//	device->CreateConstantBufferView(&cbvDesc, heapHandle);
-//	return result;
-//}

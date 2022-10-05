@@ -6,11 +6,11 @@ bool Input::Initalize(Application* App)
 	this->App = App;
 
 	directInput->InputInit(
-		App->_windowClass().hInstance,
+		App->classInstance(),
 		App->_hwnd());//////////////////////////
 
 	//DirectInputのインスタンスを作成
-	auto result = DirectInput8Create(App->_windowClass().hInstance, DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&dinput, nullptr);
+	auto result = DirectInput8Create(App->classInstance(), DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&dinput, nullptr);
 
 	//キーボードデバイスを作成
 	///GUID_Joystick,GUID_SysMouseで別のデバイスも使える

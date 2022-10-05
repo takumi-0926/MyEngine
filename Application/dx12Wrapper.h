@@ -24,6 +24,7 @@ private:
 		//XMFLOAT4 color;	// F (RGBA)
 		//XMMATRIX mat;	// ‚R‚c•ÏŠ·s—ñ
 		XMMATRIX viewproj;
+		XMMATRIX shadow;
 		XMFLOAT3 cameraPos;
 	};
 
@@ -158,8 +159,14 @@ public:
 
 		const XMMATRIX& matViewProjection = camera->GetViewProjectionMatrix();
 		const XMFLOAT3& cameraPos = camera->GetEye();
+		const XMFLOAT4 planeVec(0, 1, 0, 0);
+		const XMFLOAT3 lightVec(1, -1, 1);
 
 		_mappedSceneData->viewproj = matViewProjection;
+		_mappedSceneData->shadow = XMMatrixShadow(
+			XMLoadFloat4(&planeVec),
+			-XMLoadFloat3(&lightVec));
+
 		_mappedSceneData->cameraPos = cameraPos;
 
 		_sceneConstBuff->Unmap(0, nullptr);

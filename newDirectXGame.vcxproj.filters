@@ -37,6 +37,9 @@
     <Filter Include="ソース ファイル\SceneEffect">
       <UniqueIdentifier>{02476233-ff3d-4801-a4fa-3899102d7021}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ソース ファイル\Collision">
+      <UniqueIdentifier>{619ad274-5b74-4e91-86cf-ce3fc9176968}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\shaders\2dObjPS.hlsl">
@@ -145,9 +148,6 @@
     <ClInclude Include="stage.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="testObj.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="Vector2.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -170,12 +170,6 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Camera\DebugCamera.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Collision\Collision.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Collision\CollisionPrimitive.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="FBX\FbxLoader.h">
@@ -212,15 +206,6 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="object\object3D.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="PMD\PMDmodel.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="PMD\pmdObject3D.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="PMD\PMXLoader.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Sprite\sprite.h">
@@ -277,6 +262,30 @@
     <ClInclude Include="bullet.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Collision\Collision.h">
+      <Filter>ソース ファイル\Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="Collision\CollisionPrimitive.h">
+      <Filter>ソース ファイル\Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="Collision\CollisionType.h">
+      <Filter>ソース ファイル\Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="Collision\BaseCollision.h">
+      <Filter>ソース ファイル\Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="Collision\CollisionInfo.h">
+      <Filter>ソース ファイル\Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="PMD\PMXLoader.h">
+      <Filter>ソース ファイル\MMD</Filter>
+    </ClInclude>
+    <ClInclude Include="PMD\pmdObject3D.h">
+      <Filter>ソース ファイル\MMD</Filter>
+    </ClInclude>
+    <ClInclude Include="PMD\PMDmodel.h">
+      <Filter>ソース ファイル\MMD</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="enemy.cpp">
@@ -297,19 +306,10 @@
     <ClCompile Include="stage.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="testObj.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="2d\PostEffect.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Application\gameManager.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Collision\Collision.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Collision\CollisionPrimitive.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="light\Light.cpp">
@@ -416,6 +416,12 @@
     </ClCompile>
     <ClCompile Include="bullet.cpp">
       <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Collision\Collision.cpp">
+      <Filter>ソース ファイル\Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="Collision\CollisionPrimitive.cpp">
+      <Filter>ソース ファイル\Collision</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

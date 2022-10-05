@@ -3,29 +3,34 @@
 
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND, UINT, WPARAM, LPARAM);
 
+const wchar_t Application::crassName[] = L"MyGameEngine";
+
 Application::Application()
 {
 }
 
 //ウィンドウプロシージャ(描かないといけない)
-LRESULT Application::WindowProcedure(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
+LRESULT Application::WindowProcedure(HWND _hwnd, UINT _msg, WPARAM _wparam, LPARAM _lparam) {
 	//ウィンドウが破棄されたら呼ばれる
-	if (msg == WM_DESTROY) {
+	if (_msg == WM_DESTROY) {
 		//OSに対して「このアプリはもう終わる」と伝える
 		PostQuitMessage(0);
 		return 0;
 	}
 
-	ImGui_ImplWin32_WndProcHandler(hwnd, msg, wparam, lparam);
-	return DefWindowProc(hwnd, msg, wparam, lparam);
+	if (ImGui_ImplWin32_WndProcHandler(_hwnd, _msg, _wparam, _lparam)) {
+		return 1;
+	}
+
+	return DefWindowProc(_hwnd, _msg, _wparam, _lparam);
 }
 
 //ウィンドウ生成
-void Application::CreateWindows(HWND& hwnd, WNDCLASSEX& windowClass) {
+void Application::CreateWindows() {
 	//ウィンドウクラスの生成、登録
 	windowClass.cbSize = sizeof(WNDCLASSEX);
 	windowClass.lpfnWndProc = (WNDPROC)WindowProcedure;
-	windowClass.lpszClassName = L"DX12Sample";
+	windowClass.lpszClassName = crassName;
 	windowClass.hInstance = GetModuleHandle(nullptr);
 	windowClass.hCursor = LoadCursor(NULL, IDC_ARROW);
 	RegisterClassEx(&windowClass);
@@ -36,7 +41,7 @@ void Application::CreateWindows(HWND& hwnd, WNDCLASSEX& windowClass) {
 
 	//ウィンドウオブジェクトの生成
 	hwnd = CreateWindow(windowClass.lpszClassName,//クラス名指定
-		L"DirectXgame",	//タイトルバーの文字
+		crassName,	//タイトルバーの文字
 		WS_OVERLAPPEDWINDOW,//タイトルバーと境界線があるウィンドウ
 		CW_USEDEFAULT,		//表示x座標はOSにお任せ
 		CW_USEDEFAULT,		//表示y座標はOSにお任せ
@@ -51,24 +56,7 @@ void Application::CreateWindows(HWND& hwnd, WNDCLASSEX& windowClass) {
 	ShowWindow(hwnd, SW_SHOW);
 }
 
-bool Application::Init() {
-	CreateWindows(hwnd, windowClass);
-	return true;
-}
 
-void Application::Run() {
-	//メッセージループ
-	MSG msg = {};
-
-	if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
-		TranslateMessage(&msg);
-		DispatchMessage(&msg);
-	}
-	//アプリケーションが終わるときにmessageがWM_QUITになる
-	//if (msg.message == WM_QUIT) {
-	//	break;
-	//}
-}
 
 void Application::Processing() {
 	UnregisterClass(windowClass.lpszClassName, windowClass.hInstance);
@@ -79,17 +67,19 @@ Application& Application::Instance() {
 	return instance;
 }
 
-SIZE Application::GetWindowSize() const {
-	SIZE winSize;
-	winSize.cx = window_width;
-	winSize.cy = window_height;
-	return winSize;
-}
+bool Application::processMessage()
+{
+	//メッセージループ
+	MSG msg = {};
 
-HWND Application::_hwnd() {
-	return hwnd;
-}
+	if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+	}
+	//アプリケーションが終わるときにmessageがWM_QUITになる
+	if (msg.message == WM_QUIT) {
+		return true;
+	}
 
-WNDCLASSEX Application::_windowClass() {
-	return windowClass;
+	return false;
 }

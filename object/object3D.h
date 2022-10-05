@@ -18,18 +18,23 @@ class Wrapper;
 class Object3Ds : public BaseObject
 {
 	static Wrapper* dx12;
-private: // 静的メンバ変数
-	//3Dオブジェクト用
-	//static ComPtr<ID3D12RootSignature>			_rootsignature;
-	//static ComPtr<ID3D12PipelineState>			_pipelinestate;
+private: // メンバ関数
 
 public:
+	/// <summary>
+	/// コンストラクタ
+	/// </summary>
+	Object3Ds() = default;
+	/// <summary>
+	/// 仮想デストラクタ
+	/// </summary>
+	virtual ~Object3Ds();
 	// 静的初期化
 	/// <param name="device">デバイス</param>
 	/// <param name="window_width">画面幅</param>
 	/// <param name="window_height">画面高さ</param>
 	/// <returns>成否</returns>
-	static bool StaticInitialize(ID3D12Device* _device, SIZE _ret);
+	static bool StaticInitialize(ID3D12Device* _device);
 
 	// 3Dオブジェクト生成
 	static Object3Ds* Create();
@@ -40,9 +45,9 @@ public:
 	/// <returns>成否</returns>
 	static bool InitializeGraphicsPipeline();
 
-public:
 	//モデルセット
-	void SetModel(Model* model);
+	void SetModel(Model* _model);
+public:
 	// 毎フレーム処理
 	virtual bool Initialize();
 	// 毎フレーム処理
@@ -68,11 +73,6 @@ public:
 	Model* model = nullptr;
 
 public:
-	static void MoveEyeTarget(XMFLOAT3 s) {
-		eye.x += s.x;
-		eye.y += s.y;
-		eye.z += s.z;
-	}
 	void SetPosition(XMFLOAT3 position) {
 		this->position = position;
 	}

@@ -270,8 +270,11 @@
     <ClInclude Include="bullet.h" />
     <ClInclude Include="Camera\Camera.h" />
     <ClInclude Include="Camera\DebugCamera.h" />
+    <ClInclude Include="Collision\BaseCollision.h" />
     <ClInclude Include="Collision\Collision.h" />
+    <ClInclude Include="Collision\CollisionInfo.h" />
     <ClInclude Include="Collision\CollisionPrimitive.h" />
+    <ClInclude Include="Collision\CollisionType.h" />
     <ClInclude Include="DefCannon.h" />
     <ClInclude Include="delete.h" />
     <ClInclude Include="DirectInput.h" />
@@ -315,7 +318,6 @@
     <ClInclude Include="Sprite\spriteCommon.h" />
     <ClInclude Include="stage.h" />
     <ClInclude Include="stageObject.h" />
-    <ClInclude Include="testObj.h" />
     <ClInclude Include="Vector2.h" />
     <ClInclude Include="Vector3.h" />
   </ItemGroup>
@@ -364,7 +366,6 @@
     <ClCompile Include="Sprite\sprite.cpp" />
     <ClCompile Include="stage.cpp" />
     <ClCompile Include="stageObject.cpp" />
-    <ClCompile Include="testObj.cpp" />
     <ClCompile Include="Vector3.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

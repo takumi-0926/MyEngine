@@ -5,8 +5,7 @@
 
 #include "..\DirectInput.h"
 #include "..\Application\application.h"
-
-#define DIRECTINPUT_VERSION 0x0800
+#include "..\includes.h"
 
 #pragma comment(lib,"dinput8.lib")
 #pragma comment(lib,"dxguid.lib")
@@ -21,6 +20,8 @@ public:
 	//namespace省略
 	//エイリアス
 	template <class T> using ComPtr = Microsoft::WRL::ComPtr<T>;
+	// DirectX::を省略
+	using XMFLOAT2 = DirectX::XMFLOAT2;
 
 private:
 	Application* App = nullptr;
