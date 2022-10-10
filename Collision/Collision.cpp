@@ -1,6 +1,6 @@
 #include "Collision.h"
 
-bool Coliision::CheckSqhere2Plane(const Sqhere& sqhere, const Plane& plane, XMVECTOR* inter)
+bool Collision::CheckSqhere2Plane(const Sqhere& sqhere, const Plane& plane, XMVECTOR* inter)
 {
     XMVECTOR distV = XMVector3Dot(sqhere.center, plane.normal);
 
@@ -15,7 +15,7 @@ bool Coliision::CheckSqhere2Plane(const Sqhere& sqhere, const Plane& plane, XMVE
     return true;
 }
 
-void Coliision::ClosestPtPoint2Triangle(const XMVECTOR& point, const Triangle& triangle, XMVECTOR* closest)
+void Collision::ClosestPtPoint2Triangle(const XMVECTOR& point, const Triangle& triangle, XMVECTOR* closest)
 {
 	// pointがp0の外側の頂点領域の中にあるかどうかチェック
 	XMVECTOR p0_p1 = triangle.p1 - triangle.p0;
@@ -89,7 +89,7 @@ void Coliision::ClosestPtPoint2Triangle(const XMVECTOR& point, const Triangle& t
 	*closest = triangle.p0 + p0_p1 * v + p0_p2 * w;
 }
 
-bool Coliision::CheckSqhere2Triangle(const Sqhere& sqhere, const Triangle& triangle, XMVECTOR* inter)
+bool Collision::CheckSqhere2Triangle(const Sqhere& sqhere, const Triangle& triangle, XMVECTOR* inter)
 {
 	XMVECTOR p;
 
@@ -111,7 +111,7 @@ bool Coliision::CheckSqhere2Triangle(const Sqhere& sqhere, const Triangle& trian
 	return true;
 }
 
-bool Coliision::CheckRay2Plane(const Ray& ray, const Plane& plane, float* distance, XMVECTOR* inter)
+bool Collision::CheckRay2Plane(const Ray& ray, const Plane& plane, float* distance, XMVECTOR* inter)
 {
 	const float epsilon = 1.0e-5f;
 
@@ -137,7 +137,7 @@ bool Coliision::CheckRay2Plane(const Ray& ray, const Plane& plane, float* distan
 	return true;
 }
 
-bool Coliision::CheckRay2Trianlge(const Ray& ray, const Triangle& triangle, float* distance, XMVECTOR* inter)
+bool Collision::CheckRay2Trianlge(const Ray& ray, const Triangle& triangle, float* distance, XMVECTOR* inter)
 {
 	Plane plane;
 	XMVECTOR interPlane;
@@ -186,7 +186,7 @@ bool Coliision::CheckRay2Trianlge(const Ray& ray, const Triangle& triangle, floa
 	return true;
 }
 
-bool Coliision::CheckRay2Sqhere(const Ray& ray, const Sqhere& sqhere, float* distance, XMVECTOR* inter)
+bool Collision::CheckRay2Sqhere(const Ray& ray, const Sqhere& sqhere, float* distance, XMVECTOR* inter)
 {
 	XMVECTOR m = ray.start - sqhere.center;
 
@@ -219,7 +219,7 @@ bool Coliision::CheckRay2Sqhere(const Ray& ray, const Sqhere& sqhere, float* dis
 	return true;
 }
 
-bool Coliision::CheckSqhere2Sqhere(const Sqhere& sqhere1, const Sqhere& sqhere2)
+bool Collision::CheckSqhere2Sqhere(const Sqhere& sqhere1, const Sqhere& sqhere2)
 {
 	float a
 		= (sqhere2.center.m128_f32[0] - sqhere1.center.m128_f32[0])

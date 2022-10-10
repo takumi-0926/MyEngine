@@ -6,6 +6,7 @@
 #include "..\includes.h"
 #include "..\pipelineSet.h"
 #include "..\PMD\PMDmodel.h"
+#include "..\Collision\CollisionInfo.h"
 
 //3Dオブジェクト用頂点データ
 struct  Vertex {
@@ -15,11 +16,15 @@ struct  Vertex {
 };
 
 class Wrapper;
+class BaseCollider;
 class Object3Ds : public BaseObject
 {
 	static Wrapper* dx12;
-private: // メンバ関数
+protected: // メンバ変数
 
+	const char* name = nullptr;
+
+	BaseCollider* collider = nullptr;
 public:
 	/// <summary>
 	/// コンストラクタ
@@ -55,6 +60,15 @@ public:
 	// 描画
 	virtual void Draw();
 
+	/// <summary>
+	/// ワールド行列取得
+	/// </summary>
+	/// <returns></returns>
+	const XMMATRIX GetMatWorld() { return matWorld; }
+
+	void SetCollider(BaseCollider* collider);
+
+	virtual void OnCollision(const CollisionInfo& info){}
 public:
 	ComPtr<ID3D12Resource> constBuffB0; // 定数バッファ(OBJ)
 	ComPtr<ID3D12Resource> constBuffB1; // 定数バッファ(OBJ)

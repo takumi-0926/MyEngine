@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CollisionType.h"
+#include "CollisionInfo.h"
 #include "..\object\object3D.h"
 
 /// <summary>
@@ -18,6 +19,10 @@ public:
 
 	inline Object3Ds* GetObject3d() {
 		return object3d;
+	}
+
+	inline void OnCllision(const CollisionInfo& info) {
+		object3d->OnCollision(info);
 	}
 
 	/// <summary>

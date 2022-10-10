@@ -1,6 +1,7 @@
 #include "object3D.h"
 #include "..\Application\dx12Wrapper.h"
 #include "..\pipelineSet.h"
+#include "..\Collision\BaseCollision.h"
 
 // デバイス
 ID3D12Device* Object3Ds::device;
@@ -11,6 +12,9 @@ Wrapper* Object3Ds::dx12 = nullptr;
 
 Object3Ds::~Object3Ds()
 {
+	if (collider) {
+		delete collider;
+	}
 }
 
 bool Object3Ds::StaticInitialize(ID3D12Device* _device)
@@ -63,6 +67,8 @@ bool Object3Ds::Initialize()
 
 	this->dx12 = dx12;
 
+	name = typeid(*this).name();
+
 	HRESULT result;
 	// 定数バッファの生成
 	result = device->CreateCommittedResource(
@@ -108,6 +114,10 @@ void Object3Ds::Update()
 	constMap->world = matWorld;
 	constMap->cameraPos = cameraPos;
 	constBuffB0->Unmap(0, nullptr);
+
+	if (collider) {
+		collider->Update();
+	}
 }
 
 void Object3Ds::Draw()
@@ -133,4 +143,10 @@ void Object3Ds::Draw()
 
 	// モデル描画
 	model->Draw(cmdList);
+}
+
+void Object3Ds::SetCollider(BaseCollider* collider)
+{
+	collider->SetObject(this);
+	this->collider = collider;
 }

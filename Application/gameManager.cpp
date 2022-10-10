@@ -66,7 +66,7 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 
 	//基本オブジェクト--------------
 	model01 = Model::CreateFromOBJ("Block");
-	model02 = Model::CreateFromOBJ("ground");
+	model02 = Model::CreateFromOBJ("FieldStage");
 	model03 = Model::CreateFromOBJ("Cannon");
 	model04 = Model::CreateFromOBJ("Gate");
 	model05 = Model::CreateFromOBJ("sqhere");
@@ -76,9 +76,9 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	stage = Stage::Create();
 	stage->SetModel(model02);
 	stage->Update();
-	stage->scale = { 2,2,2 };
-	stage->rotation.y = 90;
-	stage->SetPosition({ 0,-30,0 });
+	stage->scale = { 100,100,100 };
+	stage->rotation.y = -90;
+	stage->SetPosition({ 0,0,0 });
 
 	//ゲート（最終関門）
 	obj03 = Object3Ds::Create();
@@ -107,7 +107,7 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	pmdObject.reset(new PMDobject(dx12));
 	pmdModel.reset(new PMDmodel(dx12, "Resources/Model/初音ミクmetal.pmd", *pmdObject));
 	pmdModel->scale = { 1,1,1 };
-	pmdModel->SetPosition({ 0,10,0 });
+	pmdModel->SetPosition({ 0,0,0 });
 
 	//スプライト---------------------
 	sprite01 = Sprite::Create(0, { 0.0f,0.0f });
@@ -257,9 +257,9 @@ void GameManager::Update()
 		//当たり判定（プレイヤー / 敵 / 最終関門）
 		for (int i = 0; i < sqhere.size(); i++) {
 			for (int j = 0; j < HitBox::_hit.size(); j++) {
-				bool Hhit = Coliision::CheckSqhere2Sqhere(sqhere[i], HitBox::_hit[j]);
+				bool Hhit = Collision::CheckSqhere2Sqhere(sqhere[i], HitBox::_hit[j]);
 				XMVECTOR inter;
-				bool Ghit = Coliision::CheckSqhere2Triangle(sqhere[i], triangle[0], &inter);
+				bool Ghit = Collision::CheckSqhere2Triangle(sqhere[i], triangle[0], &inter);
 
 				//ゲート攻撃
 				if (Ghit == true && reception <= 0 && _enemy[i]->attackHit == true) {
@@ -284,8 +284,8 @@ void GameManager::Update()
 			}
 		}
 		//当たり判定(プレイヤー/ステージ)仮
-		if (pmdModel->position.y < stage->position.y + 40) {
-			pmdModel->position.y = stage->position.y + 40;
+		if (pmdModel->position.y < 0) {
+			pmdModel->position.y = 0;
 		}
 		//エネミー同士の当たり判定
 		//for (int i = 0; i < sqhere.size(); i++) {
@@ -350,7 +350,7 @@ void GameManager::Update()
 				HitBox::_hit[0].radius = 10;
 				for (int i = 0; i < sqhere.size(); i++)
 				{
-					bool Hhit = Coliision::CheckSqhere2Sqhere(sqhere[i], HitBox::_hit[0]);
+					bool Hhit = Collision::CheckSqhere2Sqhere(sqhere[i], HitBox::_hit[0]);
 
 					if (Hhit != true) { continue; }
 					_enemy[i]->damage = true;
@@ -522,24 +522,24 @@ void GameManager::Draw()
 		dx12->ClearDepthBuffer();
 
 		BaseObject::PreDraw(cmdList);
-		stage->Draw();
-		obj03->Draw();
-		for (int i = 0; i < 6; i++) {
-			cannon[i]->Draw();
-		}
-		for (int i = 0; i < _enemy.size(); i++) {
-			if (_enemy[i]->damage == true) {
-				_enemy[i]->damegeCount += 1.0f / 60.0f;
-				if (_enemy[i]->damegeCount >= 0.1f) {
-					_enemy[i]->damage = false;
-					_enemy[i]->damegeCount = 0;
-				}
-				continue;
-			}
+		//stage->Draw();
+		//obj03->Draw();
+		//for (int i = 0; i < 6; i++) {
+		//	cannon[i]->Draw();
+		//}
+		//for (int i = 0; i < _enemy.size(); i++) {
+		//	if (_enemy[i]->damage == true) {
+		//		_enemy[i]->damegeCount += 1.0f / 60.0f;
+		//		if (_enemy[i]->damegeCount >= 0.1f) {
+		//			_enemy[i]->damage = false;
+		//			_enemy[i]->damegeCount = 0;
+		//		}
+		//		continue;
+		//	}
 
-			_enemy[i]->Draw();
+		//	_enemy[i]->Draw();
 
-		}
+		//}
 		pmdObject->Draw();
 		dx12->SceneDraw();
 		pmdModel->Draw(cmdList);

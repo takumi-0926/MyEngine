@@ -35,9 +35,9 @@ using namespace DirectX;
 using namespace Microsoft::WRL;
 
 #define	ENEM_NUM	1000
-#define P_HP 100
+#define P_HP		 100
 
-enum {
+enum Scene{
 	TITLE,
 	GAME,
 	END
@@ -182,21 +182,16 @@ public://メンバ関数
 
 	//初期化
 	bool Initalize(Wrapper* dx12, Audio* audio, Input* input);
-
 	//更新
 	void Update();
-
-	void titleUpdate();
-	void gameUpdate();
-	void endUpdate();
-
 	//描画
 	void Draw();
 
-	void titleDraw();
-	void gameDraw();
-	void endDraw();
-
+	/// <summary>
+	/// 移動
+	/// </summary>
+	/// <param name="pos">移動させる座標</param>
+	/// <returns>移動後の座標</returns>
 	XMFLOAT3 MoveBefore(XMFLOAT3 pos)
 	{
 		XMMATRIX matRot = XMMatrixIdentity();
@@ -214,9 +209,6 @@ public://メンバ関数
 		pos.x += Zv.m128_f32[0] * directInput->getLeftY() * speed;
 		pos.y += Zv.m128_f32[1] * directInput->getLeftY() * speed;
 		pos.z += Zv.m128_f32[2] * directInput->getLeftY() * speed;
-		//pos.x -= Zv.m128_f32[0];
-		//pos.y -= Zv.m128_f32[1];
-		//pos.z -= Zv.m128_f32[2];
 
 		return pos;
 	}
@@ -237,9 +229,6 @@ public://メンバ関数
 		pos.x += Zv.m128_f32[0] * directInput->getLeftY() * speed;
 		pos.y += Zv.m128_f32[1] * directInput->getLeftY() * speed;
 		pos.z += Zv.m128_f32[2] * directInput->getLeftY() * speed;
-		//pos.x += Zv.m128_f32[0];
-		//pos.y += Zv.m128_f32[1];
-		//pos.z += Zv.m128_f32[2];
 
 		return pos;
 	}
@@ -260,9 +249,6 @@ public://メンバ関数
 		pos.x -= Xv.m128_f32[0] * directInput->getLeftX() * speed;
 		pos.y -= Xv.m128_f32[1] * directInput->getLeftX() * speed;
 		pos.z -= Xv.m128_f32[2] * directInput->getLeftX() * speed;
-		//pos.x += Xv.m128_f32[0];
-		//pos.y += Xv.m128_f32[1];
-		//pos.z += Xv.m128_f32[2];
 
 		return pos;
 	}
@@ -283,13 +269,16 @@ public://メンバ関数
 		pos.x -= Xv.m128_f32[0] * directInput->getLeftX() * speed;
 		pos.y -= Xv.m128_f32[1] * directInput->getLeftX() * speed;
 		pos.z -= Xv.m128_f32[2] * directInput->getLeftX() * speed;
-		//pos.x -= Xv.m128_f32[0];
-		//pos.y -= Xv.m128_f32[1];
-		//pos.z -= Xv.m128_f32[2];
 
 		return pos;
 	}
 
+	/// <summary>
+	/// 進行方向に回転
+	/// </summary>
+	/// <param name="forward">進行方向ベクトル</param>
+	/// <param name="upward">上ベクトル</param>
+	/// <returns>回転行列（クォータニオン）</returns>
 	XMMATRIX LookAtRotation(XMFLOAT3 forward, XMFLOAT3 upward) {
 		Vector3 z = Vector3(forward.x, forward.y, forward.z);//進行方向ベクトル（前方向）
 		Vector3 up = Vector3(upward.x, upward.y, upward.z);  //上方向

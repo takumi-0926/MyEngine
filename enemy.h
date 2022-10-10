@@ -37,8 +37,8 @@ public:
 	XMFLOAT3 attackPos;
 	XMFLOAT3 oldPos;
 private:
-	float	 objectDistance(XMFLOAT3 pos1, XMFLOAT3 pos2);				//建物との直線距離を計算
-	XMVECTOR objectVector(XMFLOAT3 pos1, XMFLOAT3 pos2);				//建物間のベクトルを計算
+	float	 objectDistance(XMFLOAT3 pos1, XMFLOAT3 pos2);	//建物との直線距離を計算
+	XMVECTOR objectVector(XMFLOAT3 pos1, XMFLOAT3 pos2);	//建物間のベクトルを計算
 	XMVECTOR normalize(XMVECTOR vec);
 	XMFLOAT3 moveObject(XMFLOAT3 pos1, XMFLOAT3 pos2, float pct);	//指定の建物へ移動
 	void moveReset();

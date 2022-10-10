@@ -23,7 +23,7 @@
     <Keyword>Win32Proj</Keyword>
     <ProjectGuid>{421080d1-1364-45ef-9dbd-1baa3f3413cf}</ProjectGuid>
     <RootNamespace>newDirectXGame</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.18362.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
     <ProjectName>MyGameEngine</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -273,8 +273,10 @@
     <ClInclude Include="Collision\BaseCollision.h" />
     <ClInclude Include="Collision\Collision.h" />
     <ClInclude Include="Collision\CollisionInfo.h" />
+    <ClInclude Include="Collision\CollisionManager.h" />
     <ClInclude Include="Collision\CollisionPrimitive.h" />
     <ClInclude Include="Collision\CollisionType.h" />
+    <ClInclude Include="Collision\SphereCollider.h" />
     <ClInclude Include="DefCannon.h" />
     <ClInclude Include="delete.h" />
     <ClInclude Include="DirectInput.h" />
@@ -331,7 +333,9 @@
     <ClCompile Include="Camera\Camera.cpp" />
     <ClCompile Include="Camera\DebugCamera.cpp" />
     <ClCompile Include="Collision\Collision.cpp" />
+    <ClCompile Include="Collision\CollisionManager.cpp" />
     <ClCompile Include="Collision\CollisionPrimitive.cpp" />
+    <ClCompile Include="Collision\SphereCollider.cpp" />
     <ClCompile Include="DefCannon.cpp" />
     <ClCompile Include="DirectInput.cpp" />
     <ClCompile Include="enemy.cpp" />
@@ -363,6 +367,7 @@
     <ClCompile Include="Quaternion.cpp" />
     <ClCompile Include="SceneEffectManager.cpp" />
     <ClCompile Include="shaderTest.cpp" />
+    <ClCompile Include="spherecllider.cpp" />
     <ClCompile Include="Sprite\sprite.cpp" />
     <ClCompile Include="stage.cpp" />
     <ClCompile Include="stageObject.cpp" />

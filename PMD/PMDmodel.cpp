@@ -347,7 +347,7 @@ void PMDmodel::Draw(ID3D12GraphicsCommandList* cmdList)
 	for (auto& m : materials) {
 
 		cmdList->SetGraphicsRootDescriptorTable(2, heapHandle);
-		cmdList->DrawIndexedInstanced(m.indicesNum, 1, idxOffset, 0, 0);
+		cmdList->DrawIndexedInstanced(m.indicesNum, 2, idxOffset, 0, 0);
 
 		//ヒープポインターとインデックスを次に進める
 		heapHandle.ptr += cbvsrvIncSize;

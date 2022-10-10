@@ -40,6 +40,15 @@
     <Filter Include="ソース ファイル\Collision">
       <UniqueIdentifier>{619ad274-5b74-4e91-86cf-ce3fc9176968}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ソース ファイル\Math">
+      <UniqueIdentifier>{06a64642-9b47-4846-abda-8e64d17a35ff}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Sprite">
+      <UniqueIdentifier>{adb2938b-69a2-4b4a-a016-d3aa4fdf5d09}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Light">
+      <UniqueIdentifier>{2ceae371-e4f3-44e5-9676-06d3f5a12e38}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\shaders\2dObjPS.hlsl">
@@ -115,9 +124,6 @@
     <ClInclude Include="delete.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectInput.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="Easing.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -133,12 +139,6 @@
     <ClInclude Include="includes.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="moving.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="pipelineSet.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="Player.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -148,73 +148,13 @@
     <ClInclude Include="stage.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Vector2.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="2d\PostEffect.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Application\application.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Application\dx12Wrapper.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Application\gameManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Audio\audio.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Camera\Camera.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Camera\DebugCamera.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="FBX\FbxLoader.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="FBX\FbxModel.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="FBX\FbxObject3d.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="Input\dx12input.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Input\input.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="light\Light.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="object\baseObject.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="object\Material.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="object\Mesh.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="object\Model.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="object\object2d.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="object\object3D.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Sprite\sprite.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Sprite\spriteCommon.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Vector3.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="stageObject.h">
@@ -250,12 +190,6 @@
     <ClInclude Include="SceneEffectManager.h">
       <Filter>ソース ファイル\SceneEffect</Filter>
     </ClInclude>
-    <ClInclude Include="Matrix4.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Quaternion.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="DefCannon.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -286,6 +220,87 @@
     <ClInclude Include="PMD\PMDmodel.h">
       <Filter>ソース ファイル\MMD</Filter>
     </ClInclude>
+    <ClInclude Include="FBX\FbxLoader.h">
+      <Filter>ソース ファイル\FBX</Filter>
+    </ClInclude>
+    <ClInclude Include="FBX\FbxObject3d.h">
+      <Filter>ソース ファイル\FBX</Filter>
+    </ClInclude>
+    <ClInclude Include="FBX\FbxModel.h">
+      <Filter>ソース ファイル\FBX</Filter>
+    </ClInclude>
+    <ClInclude Include="object\baseObject.h">
+      <Filter>ソース ファイル\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\dx12Wrapper.h">
+      <Filter>ソース ファイル\DirectX12</Filter>
+    </ClInclude>
+    <ClInclude Include="Quaternion.h">
+      <Filter>ソース ファイル\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Matrix4.h">
+      <Filter>ソース ファイル\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Vector3.h">
+      <Filter>ソース ファイル\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Vector2.h">
+      <Filter>ソース ファイル\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Sprite\sprite.h">
+      <Filter>ソース ファイル\Sprite</Filter>
+    </ClInclude>
+    <ClInclude Include="Sprite\spriteCommon.h">
+      <Filter>ソース ファイル\Sprite</Filter>
+    </ClInclude>
+    <ClInclude Include="Audio\audio.h">
+      <Filter>ソース ファイル\DirectX12</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\application.h">
+      <Filter>ソース ファイル\DirectX12</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectInput.h">
+      <Filter>ソース ファイル\DirectX12</Filter>
+    </ClInclude>
+    <ClInclude Include="object\object3D.h">
+      <Filter>ソース ファイル\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera\DebugCamera.h">
+      <Filter>ソース ファイル\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera\Camera.h">
+      <Filter>ソース ファイル\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="object\object2d.h">
+      <Filter>ソース ファイル\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="object\Material.h">
+      <Filter>ソース ファイル\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="object\Model.h">
+      <Filter>ソース ファイル\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="object\Mesh.h">
+      <Filter>ソース ファイル\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Input\input.h">
+      <Filter>ソース ファイル\DirectX12</Filter>
+    </ClInclude>
+    <ClInclude Include="pipelineSet.h">
+      <Filter>ソース ファイル\DirectX12</Filter>
+    </ClInclude>
+    <ClInclude Include="light\Light.h">
+      <Filter>ソース ファイル\Light</Filter>
+    </ClInclude>
+    <ClInclude Include="moving.h">
+      <Filter>ソース ファイル\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Collision\SphereCollider.h">
+      <Filter>ソース ファイル\Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="Collision\CollisionManager.h">
+      <Filter>ソース ファイル\Collision</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="enemy.cpp">
@@ -310,12 +325,6 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Application\gameManager.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="light\Light.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Sprite\sprite.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Application\dx12Wrapper.cpp">
@@ -375,9 +384,6 @@
     <ClCompile Include="pipelineSet.cpp">
       <Filter>ソース ファイル\DirectX12</Filter>
     </ClCompile>
-    <ClCompile Include="Vector3.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="stageObject.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -405,12 +411,6 @@
     <ClCompile Include="SceneEffectManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Matrix4.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Quaternion.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="DefCannon.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -421,6 +421,30 @@
       <Filter>ソース ファイル\Collision</Filter>
     </ClCompile>
     <ClCompile Include="Collision\CollisionPrimitive.cpp">
+      <Filter>ソース ファイル\Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="Matrix4.cpp">
+      <Filter>ソース ファイル\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Quaternion.cpp">
+      <Filter>ソース ファイル\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Vector3.cpp">
+      <Filter>ソース ファイル\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Sprite\sprite.cpp">
+      <Filter>ソース ファイル\Sprite</Filter>
+    </ClCompile>
+    <ClCompile Include="light\Light.cpp">
+      <Filter>ソース ファイル\Light</Filter>
+    </ClCompile>
+    <ClCompile Include="spherecllider.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Collision\SphereCollider.cpp">
+      <Filter>ソース ファイル\Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="Collision\CollisionManager.cpp">
       <Filter>ソース ファイル\Collision</Filter>
     </ClCompile>
   </ItemGroup>
