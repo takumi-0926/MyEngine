@@ -85,21 +85,8 @@ bool Object3Ds::Initialize()
 void Object3Ds::Update()
 {
 	HRESULT result;
-	XMMATRIX matScale, matRot, matTrans;
 
-	// スケール、回転、平行移動行列の計算
-	matScale = XMMatrixScaling(scale.x, scale.y, scale.z);
-	matRot   = XMMatrixIdentity();
-	matRot  *= XMMatrixRotationZ(XMConvertToRadians(rotation.z));
-	matRot  *= XMMatrixRotationX(XMConvertToRadians(rotation.x));
-	matRot  *= XMMatrixRotationY(XMConvertToRadians(rotation.y));
-	matTrans = XMMatrixTranslation(position.x, position.y, position.z);
-
-	// ワールド行列の合成
-	matWorld  = XMMatrixIdentity();// 変形をリセット
-	matWorld *= matScale;// ワールド行列に	スケーリングを反映
-	matWorld *=	  matRot;// ワールド行列に			回転を反映
-	matWorld *= matTrans;// ワールド行列に		平行移動を反映
+	UpdateWorldMatrix();
 
 	const XMMATRIX&		  matView	= dx12->Camera()->GetViewMatrix();
 	const XMMATRIX& matProjection   = dx12->Camera()->GetProjectionMatrix();
@@ -145,8 +132,30 @@ void Object3Ds::Draw()
 	model->Draw(cmdList);
 }
 
+void Object3Ds::UpdateWorldMatrix()
+{
+	XMMATRIX matScale, matRot, matTrans;
+
+	// スケール、回転、平行移動行列の計算
+	matScale = XMMatrixScaling(scale.x, scale.y, scale.z);
+	matRot = XMMatrixIdentity();
+	matRot *= XMMatrixRotationZ(XMConvertToRadians(rotation.z));
+	matRot *= XMMatrixRotationX(XMConvertToRadians(rotation.x));
+	matRot *= XMMatrixRotationY(XMConvertToRadians(rotation.y));
+	matTrans = XMMatrixTranslation(position.x, position.y, position.z);
+
+	// ワールド行列の合成
+	matWorld = XMMatrixIdentity();// 変形をリセット
+	matWorld *= matScale;// ワールド行列に	スケーリングを反映
+	matWorld *= matRot;	 // ワールド行列に	回転        を反映
+	matWorld *= matTrans;// ワールド行列に	平行移動    を反映
+
+}
+
 void Object3Ds::SetCollider(BaseCollider* collider)
 {
 	collider->SetObject(this);
 	this->collider = collider;
+	UpdateWorldMatrix();
+	collider->Update();
 }

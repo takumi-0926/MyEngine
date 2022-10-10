@@ -140,6 +140,6 @@ private: // ƒƒ“ƒo•Ï”
 	std::unordered_map<unsigned short, std::vector<unsigned short>> smoothData;
 
 	public:
-		const std::vector<VertexPosNormalUv> GetVertex() { return vertices; }
-		const std::vector<unsigned short> GetIndex() { return indices; }
+		inline const std::vector<VertexPosNormalUv>& GetVertex() { return vertices; }
+		inline const std::vector<unsigned short>& GetIndex() { return indices; }
 };

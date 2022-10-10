@@ -20,7 +20,8 @@ public:
 	static bool CheckSqhere2Triangle(
 		const Sqhere& sqhere,
 		const Triangle& triangle,
-		XMVECTOR* inter = nullptr);
+		XMVECTOR* inter = nullptr,
+		XMVECTOR* reject = nullptr);
 
 	static bool CheckRay2Plane(
 		const Ray& ray,
@@ -43,6 +44,7 @@ public:
 
 	static bool CheckSqhere2Sqhere(
 		const Sqhere& sqhere1,
-		const Sqhere& sqhere2
-		);
+		const Sqhere& sqhere2,
+		XMVECTOR* inter = nullptr,
+		XMVECTOR* reject = nullptr);
 };

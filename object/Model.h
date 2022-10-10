@@ -96,5 +96,5 @@ private: // ƒƒ“ƒoŠÖ”
 
 public:
 
-	std::vector<Mesh*> GetMesh() { return meshes; }
+	inline const std::vector<Mesh*>& GetMesh() { return meshes; }
 };

@@ -44,12 +44,6 @@ public:
 	// 3Dオブジェクト生成
 	static Object3Ds* Create();
 
-	/// <summary>
-	/// グラフィックパイプライン生成
-	/// </summary>
-	/// <returns>成否</returns>
-	static bool InitializeGraphicsPipeline();
-
 	//モデルセット
 	void SetModel(Model* _model);
 public:
@@ -59,6 +53,9 @@ public:
 	virtual void Update();
 	// 描画
 	virtual void Draw();
+
+	//行列の更新
+	void UpdateWorldMatrix();
 
 	/// <summary>
 	/// ワールド行列取得
@@ -90,4 +87,10 @@ public:
 	void SetPosition(XMFLOAT3 position) {
 		this->position = position;
 	}
+
+	/// <summary>
+	/// モデル取得
+	/// </summary>
+	/// <returns></returns>
+	inline Model* GetModel() { return model; }
 };

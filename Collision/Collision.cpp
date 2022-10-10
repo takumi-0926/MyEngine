@@ -1,22 +1,26 @@
 #include "Collision.h"
 
-bool Collision::CheckSqhere2Plane(const Sqhere& sqhere, const Plane& plane, XMVECTOR* inter)
-{
-    XMVECTOR distV = XMVector3Dot(sqhere.center, plane.normal);
+bool Collision::CheckSqhere2Plane(
+	const Sqhere& sqhere, 
+	const Plane& plane, 
+	XMVECTOR* inter){
+	XMVECTOR distV = XMVector3Dot(sqhere.center, plane.normal);
 
-    float dist = distV.m128_f32[0] - plane.distance;
+	float dist = distV.m128_f32[0] - plane.distance;
 
-    if (fabsf(dist) > sqhere.radius) return false;
+	if (fabsf(dist) > sqhere.radius) return false;
 
-    if (inter) {
-        *inter = -dist * plane.normal + sqhere.center;
-    }
+	if (inter) {
+		*inter = -dist * plane.normal + sqhere.center;
+	}
 
-    return true;
+	return true;
 }
 
-void Collision::ClosestPtPoint2Triangle(const XMVECTOR& point, const Triangle& triangle, XMVECTOR* closest)
-{
+void Collision::ClosestPtPoint2Triangle(
+	const XMVECTOR& point, 
+	const Triangle& triangle, 
+	XMVECTOR* closest){
 	// pointがp0の外側の頂点領域の中にあるかどうかチェック
 	XMVECTOR p0_p1 = triangle.p1 - triangle.p0;
 	XMVECTOR p0_p2 = triangle.p2 - triangle.p0;
@@ -89,8 +93,11 @@ void Collision::ClosestPtPoint2Triangle(const XMVECTOR& point, const Triangle& t
 	*closest = triangle.p0 + p0_p1 * v + p0_p2 * w;
 }
 
-bool Collision::CheckSqhere2Triangle(const Sqhere& sqhere, const Triangle& triangle, XMVECTOR* inter)
-{
+bool Collision::CheckSqhere2Triangle(
+	const Sqhere& sqhere, 
+	const Triangle& triangle, 
+	XMVECTOR* inter,
+	XMVECTOR* reject){
 	XMVECTOR p;
 
 	ClosestPtPoint2Triangle(
@@ -107,12 +114,21 @@ bool Collision::CheckSqhere2Triangle(const Sqhere& sqhere, const Triangle& trian
 	if (inter) {
 		*inter = p;
 	}
-
+	//押し出すベクトルを計算
+	if (reject) {
+		float ds = XMVector3Dot(sqhere.center, triangle.normal).m128_f32[0];
+		float dt = XMVector3Dot(triangle.p0, triangle.normal).m128_f32[0];
+		float rejectLen = dt - ds + sqhere.radius;
+		*reject = triangle.normal * rejectLen;
+	}
 	return true;
 }
 
-bool Collision::CheckRay2Plane(const Ray& ray, const Plane& plane, float* distance, XMVECTOR* inter)
-{
+bool Collision::CheckRay2Plane(
+	const Ray& ray, 
+	const Plane& plane, 
+	float* distance,
+	XMVECTOR* inter){
 	const float epsilon = 1.0e-5f;
 
 	float d1 = XMVector3Dot(
@@ -137,8 +153,11 @@ bool Collision::CheckRay2Plane(const Ray& ray, const Plane& plane, float* distan
 	return true;
 }
 
-bool Collision::CheckRay2Trianlge(const Ray& ray, const Triangle& triangle, float* distance, XMVECTOR* inter)
-{
+bool Collision::CheckRay2Trianlge(
+	const Ray& ray, 
+	const Triangle& triangle, 
+	float* distance, 
+	XMVECTOR* inter){
 	Plane plane;
 	XMVECTOR interPlane;
 	plane.normal = triangle.normal;
@@ -186,8 +205,11 @@ bool Collision::CheckRay2Trianlge(const Ray& ray, const Triangle& triangle, floa
 	return true;
 }
 
-bool Collision::CheckRay2Sqhere(const Ray& ray, const Sqhere& sqhere, float* distance, XMVECTOR* inter)
-{
+bool Collision::CheckRay2Sqhere(
+	const Ray& ray, 
+	const Sqhere& sqhere, 
+	float* distance, 
+	XMVECTOR* inter){
 	XMVECTOR m = ray.start - sqhere.center;
 
 	float b = XMVector3Dot(m, ray.dir).m128_f32[0];
@@ -219,23 +241,53 @@ bool Collision::CheckRay2Sqhere(const Ray& ray, const Sqhere& sqhere, float* dis
 	return true;
 }
 
-bool Collision::CheckSqhere2Sqhere(const Sqhere& sqhere1, const Sqhere& sqhere2)
+bool Collision::CheckSqhere2Sqhere(
+	const Sqhere& sqhere1,
+	const Sqhere& sqhere2,
+	XMVECTOR* inter,
+	XMVECTOR* reject)
 {
 	float a
 		= (sqhere2.center.m128_f32[0] - sqhere1.center.m128_f32[0])
 		* (sqhere2.center.m128_f32[0] - sqhere1.center.m128_f32[0]);
-	float b 
+	float b
 		= (sqhere2.center.m128_f32[1] - sqhere1.center.m128_f32[1])
 		* (sqhere2.center.m128_f32[1] - sqhere1.center.m128_f32[1]);
 	float c
 		= (sqhere2.center.m128_f32[2] - sqhere1.center.m128_f32[2])
 		* (sqhere2.center.m128_f32[2] - sqhere1.center.m128_f32[2]);
 	float d
-		= (sqhere1.radius + sqhere2.radius) 
+		= (sqhere1.radius + sqhere2.radius)
 		* (sqhere1.radius + sqhere2.radius);
 
 	if (a + b + c <= d) {
 		return true;
 	}
-		return false;
+	return false;
+
+	//--------------------------------------------------------
+
+	// 中心点の距離の２乗 <= 半径の和の２乗　なら交差
+	float dist = XMVector3LengthSq(sqhere1.center - sqhere2.center).m128_f32[0];
+
+	float radius2 = sqhere1.radius + sqhere2.radius;
+	radius2 *= radius2;
+
+	if (dist <= radius2) {
+		if (inter) {
+			// Aの半径が0の時座標はBの中心　Bの半径が0の時座標はAの中心　となるよう補完
+			float t = sqhere2.radius / (sqhere1.radius + sqhere2.radius);
+			*inter = XMVectorLerp(sqhere1.center, sqhere2.center, t);
+		}
+		// 押し出すベクトルを計算
+		if (reject) {
+			float rejectLen = sqhere1.radius + sqhere2.radius - sqrtf(dist);
+			*reject = XMVector3Normalize(sqhere1.center - sqhere2.center);
+			*reject *= rejectLen;
+		}
+		return true;
+	}
+
+	return false;
+
 }

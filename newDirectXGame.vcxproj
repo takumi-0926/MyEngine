@@ -276,6 +276,9 @@
     <ClInclude Include="Collision\CollisionManager.h" />
     <ClInclude Include="Collision\CollisionPrimitive.h" />
     <ClInclude Include="Collision\CollisionType.h" />
+    <ClInclude Include="Collision\MeshCollider.h" />
+    <ClInclude Include="Collision\QueryCallBack.h" />
+    <ClInclude Include="Collision\RaycastHit.h" />
     <ClInclude Include="Collision\SphereCollider.h" />
     <ClInclude Include="DefCannon.h" />
     <ClInclude Include="delete.h" />
@@ -335,6 +338,7 @@
     <ClCompile Include="Collision\Collision.cpp" />
     <ClCompile Include="Collision\CollisionManager.cpp" />
     <ClCompile Include="Collision\CollisionPrimitive.cpp" />
+    <ClCompile Include="Collision\MeshCollider.cpp" />
     <ClCompile Include="Collision\SphereCollider.cpp" />
     <ClCompile Include="DefCannon.cpp" />
     <ClCompile Include="DirectInput.cpp" />

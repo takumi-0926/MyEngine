@@ -9,6 +9,8 @@
 /// </summary>
 class BaseCollider {
 public:
+	friend class CollisionManager;
+public:
 	BaseCollider() = default;
 	//仮想デストラクタ
 	virtual ~BaseCollider() = default;
@@ -39,4 +41,6 @@ protected:
 	Object3Ds* object3d = nullptr;
 	//形状タイプ
 	CollisionShapeType shapeType = SHAPE_UNKNOWN;
+	//当たり判定属性
+	unsigned short attribute = 0b1111111111111111;
 };
