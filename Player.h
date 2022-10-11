@@ -1,8 +1,6 @@
 #pragma once
 #include "..\PMD\PMDmodel.h"
-#include "..\object\object3D.h"
 
-class Object3D;
 class Player : public PMDmodel{
 
 	struct Status {
@@ -10,14 +8,12 @@ class Player : public PMDmodel{
 		float Attack;
 	};
 
-	shared_ptr<PMDmodel> player;
-	Object3Ds* HitBox[];
+	PMDmodel* player;
 
 public:
 	Player(Wrapper* _dx12, const char* filepath, PMDobject& object);
-	//void Initialize() override;
-	void Update()override;
-	void Draw(ID3D12GraphicsCommandList* cmdList)override;
+	//void Update()override;
+	//void Draw(ID3D12GraphicsCommandList* cmdList)override;
 
 
 };

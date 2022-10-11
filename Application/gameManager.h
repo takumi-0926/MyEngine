@@ -21,7 +21,6 @@
 #include "..\hitBox.h"
 #include "..\shaderTest.h"
 
-#include "..\stage.h"
 #include "..\stageObject.h"
 #include "..\DefCannon.h"
 
@@ -42,7 +41,8 @@ enum Scene{
 	GAME,
 	END
 };
-
+class Player;
+class Stage;
 class GameManager {
 private://メンバ変数(初期化)
 	Input* input;
@@ -50,10 +50,17 @@ private://メンバ変数(初期化)
 	Wrapper* dx12;
 	std::shared_ptr<PMDmodel> pmdModel;
 	std::shared_ptr<PMDobject> pmdObject;
+	PMDobject* player = nullptr;
+	PMDobject* enemy = nullptr;
+	PMDmodel* modelPlayer = nullptr;
 private://メンバ変数(ゲームシーン)
 	vector<Enemy*> _enemy;
 	vector<Sqhere> sqhere;
 	Stage* stage;
+	Model* modelPlane = nullptr;
+	Model* modelBox = nullptr;
+	Model* modelPyramid = nullptr; 
+	vector<Object3Ds*>stageObjects;
 	StageObject* wall[6] = {};
 	DefCannon* cannon[6] = {};
 	Sprite* hp[P_HP] = {};
@@ -94,41 +101,6 @@ private://メンバ変数(ゲームシーン)
 
 	Triangle triangle02[2] = {};
 	Sqhere sqhere02 = {};
-	//運動
-	Move move1{
-		9.8f,	//重力
-		0.0f,	//Y方向
-		0.0f,	//X方向
-		0.0f,	//初速度
-		0.01f,	//加速度
-		0.0f,	//空気抵抗
-		0.0f,	//時間
-		0.0f,	//速度
-		1.0f,	//比例定数
-		7.0f,	//質量
-		move1.m * move1.v,	//運動量
-		0.8f,
-
-		false,	//移動開始フラグ
-		0		//運動番号
-	};
-	Move move2{
-	9.8f,	//重力
-	0.0f,	//Y方向
-	0.0f,	//X方向
-	2.0f,	//初速度
-	0.01f,	//加速度
-	0.0f,	//空気抵抗
-	0.0f,	//時間
-	0.0f,	//速度
-	1.0f,	//比例定数
-	5.0f,	//質量
-	move2.m * move2.v,	//運動量
-	0.8f,
-
-	false,	//移動開始フラグ
-	0		//運動番号
-	};
 
 	Easing easing;
 
@@ -137,10 +109,6 @@ private://メンバ変数(ゲームシーン)
 	int count = 24;
 
 	bool resetFlag = false;
-
-	bool shotFlag[10] = {};
-	bool cubeFlag[25] = {};
-
 
 	XMMATRIX rot = {};
 	float angle;
@@ -199,7 +167,7 @@ public://メンバ関数
 		//Z方向ベクトル
 		Zv = { 0.0f,0.0f,0.5f,0.0f };
 
-		//弾角度回転
+		//角度回転
 		matRot = XMMatrixRotationY(XMConvertToRadians(angleHorizonal));
 
 		//Z方向ベクトルを回転

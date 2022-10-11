@@ -92,6 +92,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//Fbx‰Šú‰»
 	FbxLoader::GetInstance()->Initialize(dx12->GetDevice());
 
+	PMDobject::StaticInitialize(dx12);
+
 	Light::StaticInitalize(dx12->GetDevice());
 
 	GameManager gameScene;

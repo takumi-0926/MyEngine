@@ -1,4 +1,6 @@
 #include "PMDmodel.h"
+#include "pmdObject3D.h"
+
 #include <d3dcompiler.h>
 #include <DirectXTex.h>
 #include<fstream>
@@ -15,9 +17,7 @@ using namespace Microsoft::WRL;
 using namespace DirectX;
 using namespace std;
 
-//静的メンバの実体
-ID3D12Device* PMDmodel::device = nullptr;
-
+Wrapper* PMDmodel::dx12 = nullptr;
 ComPtr<ID3D12DescriptorHeap> PMDmodel::materialDescHeap;
 
 namespace {
@@ -157,7 +157,7 @@ ComPtr<ID3D12Resource> PMDmodel::LoadTextureFromFile(string& texPath) {
 	texresDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
 
 	//テクスチャバッファのリソース生成
-	result = device->CreateCommittedResource(
+	result = dx12->GetDevice()->CreateCommittedResource(
 		&texHeapProp,
 		D3D12_HEAP_FLAG_NONE,
 		&texresDesc,
@@ -198,7 +198,7 @@ ID3D12Resource* PMDmodel::CreateWhiteTexture()
 	resDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
 
 	ID3D12Resource* whiteBuff = nullptr;
-	auto result = device->CreateCommittedResource(
+	auto result = dx12->GetDevice()->CreateCommittedResource(
 		&texHeapProp,
 		D3D12_HEAP_FLAG_NONE,
 		&resDesc,
@@ -243,7 +243,7 @@ ID3D12Resource* PMDmodel::CreateBlackTexture()
 	resDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
 
 	ID3D12Resource* blackBuff = nullptr;
-	auto result = device->CreateCommittedResource(
+	auto result = dx12->GetDevice()->CreateCommittedResource(
 		&texHeapProp,
 		D3D12_HEAP_FLAG_NONE,
 		&resDesc,
@@ -271,34 +271,72 @@ void* PMDmodel::Transform::operator new(size_t size)
 	return _aligned_malloc(size, 16);
 }
 
-PMDmodel::PMDmodel(Wrapper* _dx12, const char* filepath, PMDobject& object) :
-	_object(object)
+PMDmodel::PMDmodel(/*Wrapper* _dx12, const char* filepath, PMDobject& object*/)
+//_object(object)
 {
-	// 再初期化チェック
-	assert(!PMDmodel::device);
+	//// 再初期化チェック
+	//assert(!PMDmodel::dx12);
 
-	// nullptrチェック
-	assert(_dx12->GetDevice());
+	//// nullptrチェック
+	//assert(_dx12->GetDevice());
 
-	PMDmodel::device = _dx12->GetDevice();
+	//PMDmodel::dx12 = _dx12;
 
-	PMDmodel::dx12 = _dx12;
-
-	transform.world = XMMatrixIdentity();
-	LoadPMDFile(filepath);
-	CreateDescHeap();
-	CreateTransform();
-	LoadVMDFile(vmdData::WALK, "Resources/vmd/Rick式走りモーション02.vmd");
-	LoadVMDFile(vmdData::WAIT, "Resources/vmd/marieru_stand.vmd");
-	LoadVMDFile(vmdData::ATTACK, "Resources/vmd/test.vmd");
-	CreateMaterial();
-	CreateMaterialAndTextureView();
+	//transform.world = XMMatrixIdentity();
+	//LoadPMDFile(filepath);
+	//CreateDescHeap();
+	//CreateTransform();
+	//LoadVMDFile(vmdData::WALK, "Resources/vmd/Rick式走りモーション02.vmd");
+	//LoadVMDFile(vmdData::WAIT, "Resources/vmd/marieru_stand.vmd");
+	//LoadVMDFile(vmdData::ATTACK, "Resources/vmd/test.vmd");
+	//CreateMaterial();
+	//CreateMaterialAndTextureView();
 }
 
 PMDmodel::~PMDmodel()
 {
 }
 
+bool PMDmodel::StaticInitialize(Wrapper* _dx12)
+{
+	// 再初期化チェック
+	assert(!PMDmodel::dx12);
+
+	// nullptrチェック
+	assert(_dx12->GetDevice());
+
+	//設定
+	PMDmodel::dx12 = _dx12;
+
+	return false;
+}
+
+PMDmodel* PMDmodel::CreateFromPMD(const char* filepath)
+{
+	PMDmodel* instance = new PMDmodel();
+	if (instance == nullptr) {
+		return nullptr;
+	}
+
+	if (!instance->Initialize(filepath)) {
+		delete instance;
+		assert(0);
+	}
+
+	return instance;
+}
+
+bool PMDmodel::Initialize(const char* filepath)
+{
+	LoadPMDFile(filepath);
+
+	if (CreateDescHeap())assert(0);
+	if (CreateTransform())assert(0);
+	if (CreateMaterial())assert(0);
+	if (CreateMaterialAndTextureView())assert(0);
+
+	return true;
+}
 void PMDmodel::Update()
 {
 	// スケール、回転、平行移動行列の計算
@@ -320,16 +358,13 @@ void PMDmodel::Update()
 
 	transformBuff->Unmap(0, nullptr);
 
-	MotionUpdate();
+	//MotionUpdate();
 }
 void PMDmodel::Draw(ID3D12GraphicsCommandList* cmdList)
 {
 	// nullptrチェック
 	assert(dx12->GetDevice());
 	assert(cmdList);
-
-	cmdList->IASetVertexBuffers(0, 1, &vbView);
-	cmdList->IASetIndexBuffer(&ibView);
 
 	auto heapHandle = dx12->GetDescHeap()->GetGPUDescriptorHandleForHeapStart();
 	auto IncSize = dx12->GetDevice()->GetDescriptorHandleIncrementSize(
@@ -447,7 +482,7 @@ HRESULT PMDmodel::LoadPMDFile(const char* path)
 		vertices.size() * sizeof(vertices[0]));
 
 	//頂点バッファのリソース生成
-	result = device->CreateCommittedResource(
+	result = dx12->GetDevice()->CreateCommittedResource(
 		&heapprop, D3D12_HEAP_FLAG_NONE,
 		&resdesc, D3D12_RESOURCE_STATE_GENERIC_READ,
 		nullptr, IID_PPV_ARGS(vertBuff.ReleaseAndGetAddressOf()));
@@ -493,7 +528,7 @@ HRESULT PMDmodel::LoadPMDFile(const char* path)
 	resdesc = CD3DX12_RESOURCE_DESC::Buffer(
 		indices.size() * sizeof(indices[0]));
 
-	result = device->CreateCommittedResource(
+	result = dx12->GetDevice()->CreateCommittedResource(
 		&heapprop, D3D12_HEAP_FLAG_NONE,
 		&resdesc, D3D12_RESOURCE_STATE_GENERIC_READ,
 		nullptr, IID_PPV_ARGS(&indexBuff));
@@ -1026,7 +1061,7 @@ void PMDmodel::MotionUpdate()
 	unsigned int frameNo = 30 * (elapsedTime / 1000.0f);
 
 	if (frameNo > data.duration) {
-		if (oldVmdNumber == vmdData::ATTACK) { 
+		if (oldVmdNumber == vmdData::ATTACK) {
 			oldVmdNumber = vmdData::WAIT;
 			vmdNumber = vmdData::WAIT;
 		}

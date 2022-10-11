@@ -36,8 +36,6 @@ public:
 	virtual ~Object3Ds();
 	// 静的初期化
 	/// <param name="device">デバイス</param>
-	/// <param name="window_width">画面幅</param>
-	/// <param name="window_height">画面高さ</param>
 	/// <returns>成否</returns>
 	static bool StaticInitialize(ID3D12Device* _device);
 

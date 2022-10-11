@@ -3,6 +3,64 @@
 
 ComPtr<ID3D12RootSignature> PMDobject::_rootsignature;
 ComPtr<ID3D12PipelineState> PMDobject::_pipelinestate;
+Wrapper* PMDobject::dx12 = nullptr;
+
+PMDobject::PMDobject(/*Wrapper* dx12*/)
+//:model(model)
+{
+	//this->dx12 = dx12;
+	//assert(SUCCEEDED(CreateRootSignaturePMD()));
+	//assert(SUCCEEDED(CreateGraphicsPipelinePMD()));
+}
+PMDobject::~PMDobject()
+{
+}
+
+bool PMDobject::StaticInitialize(Wrapper* _dx12)
+{
+	// 再初期化チェック
+	assert(!PMDobject::dx12);
+
+	// nullptrチェック
+	assert(_dx12->GetDevice());
+
+	//設定
+	PMDobject::dx12 = _dx12;
+
+	//モデル静的初期化
+	PMDmodel::StaticInitialize(_dx12);
+
+	return false;
+}
+
+PMDobject* PMDobject::Create(PMDmodel* _model)
+{
+	//インスタンス生成
+	PMDobject* instance = new PMDobject();
+	if (instance == nullptr) {
+		return nullptr;
+	}
+
+	//初期化
+	if (!instance->Initialize(_model)) {
+		delete instance;
+		assert(0);
+	}
+
+	return instance;
+}
+
+bool PMDobject::Initialize(PMDmodel* _model)
+{
+	this->dx12 = dx12;
+
+	assert(SUCCEEDED(CreateRootSignaturePMD()));
+	assert(SUCCEEDED(CreateGraphicsPipelinePMD()));
+
+	SetModel(_model);
+
+	return true;
+}
 
 void PMDobject::Update()
 {
@@ -17,6 +75,8 @@ void PMDobject::Update()
 	//_mappedSceneData->cameraPos = cameraPos;
 
 	//_sceneConstBuff->Unmap(0, nullptr);
+
+	model->Update();
 }
 
 void PMDobject::Draw()
@@ -25,18 +85,13 @@ void PMDobject::Draw()
 	cmdList->SetPipelineState(_pipelinestate.Get());
 	// ルートシグネチャの設定
 	cmdList->SetGraphicsRootSignature(_rootsignature.Get());
-}
 
-PMDobject::PMDobject(Wrapper* dx12):
-model(model)
-{
-	this->dx12 = dx12;
-	assert(SUCCEEDED(CreateRootSignaturePMD()));
-	assert(SUCCEEDED(CreateGraphicsPipelinePMD()));
-}
+	cmdList->IASetVertexBuffers(0, 1, &model->vbView);
+	cmdList->IASetIndexBuffer(&model->ibView);
 
-PMDobject::~PMDobject()
-{
+	dx12->SceneDraw();
+	//モデル描画
+	model->Draw(cmdList);
 }
 
 HRESULT PMDobject::CreateGraphicsPipelinePMD()
@@ -224,4 +279,9 @@ HRESULT PMDobject::CreateRootSignaturePMD()
 		return result;
 	}
 	return result;
+}
+
+void PMDobject::SetModel(PMDmodel* _model)
+{
+	this->model = _model;
 }

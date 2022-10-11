@@ -23,7 +23,7 @@ class PMDobject;
 class Wrapper;
 class PMDmodel {
 	friend PMDobject;
-	Wrapper* dx12;
+	static Wrapper* dx12;
 private: // エイリアス
 	// Microsoft::WRL::を省略
 	template <class T> using ComPtr = Microsoft::WRL::ComPtr<T>;
@@ -38,7 +38,6 @@ private: // エイリアス
 	//std::省略
 	using string = std::string;
 
-	PMDobject& _object;
 private:
 	//シェーダに投げられるマテリアルデータ
 	struct MaterialForHlsl {
@@ -120,8 +119,6 @@ private:
 	};
 
 private:
-	// デバイス
-	static ID3D12Device* device;
 	// デスクリプタサイズ
 	static UINT descriptorHandleIncrementSize;
 	// デスクリプタヒープ
@@ -236,13 +233,28 @@ private:
 	void IKSolve(int frameNo);
 
 public:
-	PMDmodel(Wrapper* _dx12, const char* filepath, PMDobject& object);
+	PMDmodel(/*Wrapper* _dx12, const char* filepath, PMDobject& object*/);
 	~PMDmodel();
 
 public:
-	virtual void Update();
+	/// <summary>
+	/// 静的初期化
+	/// </summary>
+	/// <param name="_dx12">DirectX基本情報</param>
+	/// <returns>成功：true / 失敗：false</returns>
+	static bool StaticInitialize(Wrapper* _dx12);
+	/// <summary>
+	/// インスタンス生成及びPMDファイル読み込み
+	/// </summary>
+	/// <param name="filepath">ファイルパス</param>
+	/// <returns>インスタンス</returns>
+	static PMDmodel* CreateFromPMD(const char* filepath);
 
-	virtual void Draw(ID3D12GraphicsCommandList* cmdList);
+	bool Initialize(const char* filepath);
+
+	void Update();
+
+	void Draw(ID3D12GraphicsCommandList* cmdList);
 
 	void playAnimation();
 

@@ -1,31 +1,38 @@
 #include "stage.h"
+#include "..\Collision\MeshCollider.h"
 
-Stage* Stage::Create()
+Stage* Stage::Create(Model* model)
 {
 	// 3Dオブジェクトのインスタンスを生成
-	Stage* object3d = new Stage();
-	if (object3d == nullptr) {
+	Stage* instance = new Stage();
+	if (instance == nullptr) {
 		return nullptr;
 	}
 
-	object3d->position.y = -40;
-
 	// 初期化
-	if (!object3d->Initialize()) {
-		delete object3d;
+	if (!instance->Initialize(model)) {
+		delete instance;
 		assert(0);
 		return nullptr;
 	}
 
-	return object3d;
+	return instance;
 }
 
-void Stage::CreateHitMesh() {
-	//Triangle _hit;
-	//std::vector<Mesh*> mesh = model->GetMesh();
-	//auto vertex = mesh.
-	//_hit.p0 = Mesh::
+bool Stage::Initialize(Model* model)
+{
+	if (!Object3Ds::Initialize()) {
+		return false;
+	}
 
+	SetModel(model);
+
+	MeshCollider* collider = new MeshCollider();
+	SetCollider(collider);
+	collider->ConstructTriangles(model);
+
+	Update();
+	return true;
 }
 
 Stage::Stage()

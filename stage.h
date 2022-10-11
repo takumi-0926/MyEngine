@@ -3,13 +3,10 @@
 #include "..\Collision\Collision.h"
 
 class Stage : public Object3Ds {
-	std::vector<Triangle> hit;
-
 public:
+	static Stage* Create(Model* model = nullptr);
 
-	static Stage* Create();
-
-	void CreateHitMesh();
+	bool Initialize(Model* model);
 
 	Stage();
 	void Update() override;
