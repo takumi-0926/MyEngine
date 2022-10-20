@@ -374,7 +374,6 @@
     <ClCompile Include="Quaternion.cpp" />
     <ClCompile Include="SceneEffectManager.cpp" />
     <ClCompile Include="shaderTest.cpp" />
-    <ClCompile Include="spherecllider.cpp" />
     <ClCompile Include="Sprite\sprite.cpp" />
     <ClCompile Include="stage.cpp" />
     <ClCompile Include="stageObject.cpp" />
