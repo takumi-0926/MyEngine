@@ -39,6 +39,13 @@ private: // エイリアス
 	// デスクリプタヒープ
 	ComPtr<ID3D12DescriptorHeap> descHeap = nullptr;
 
+	//座標変換
+	Transform transform;
+	Transform* mappedTransform = nullptr;
+	ComPtr<ID3D12Resource> transformBuff = nullptr;
+	ComPtr<ID3D12Resource> transformMat = nullptr;
+	ComPtr<ID3D12DescriptorHeap> transformHeap = nullptr;
+
 private:
 	//パイプライン初期化
 	HRESULT CreateGraphicsPipelinePMD();
@@ -62,22 +69,24 @@ public:
 	void Draw();
 
 	void SetModel(PMDmodel* _model);
-	void SetScale(XMFLOAT3 _scale)  { this->scale =  _scale; }
-	void SetPosition(XMFLOAT3 _pos) { this->position = _pos; }
+	//void SetScale(XMFLOAT3 _scale)  { this->scale =  _scale; }
+	//void SetPosition(XMFLOAT3 _pos) { this->position = _pos; }
+	//void SetMatRot(XMMATRIX rot)    { this->matRot    = rot; }
+
+	//XMFLOAT3 GetPosition() { return position; }
 private:
 	ComPtr<ID3D12Resource> PMDconstBuffB1; // 定数バッファ
 
-	// 色
-	XMFLOAT4 color = { 1,1,1,1 };
-	// ローカルスケール
-	XMFLOAT3 scale = { 1,1,1 };
-	// X,Y,Z軸回りのローカル回転角
-	XMFLOAT3 rotation = { 0,0,0 };
-	// ローカル座標
-	XMFLOAT3 position = { 0,0,0 };
-	// ローカルワールド変換行列
-	XMMATRIX matWorld;
+	//// 色
+	//XMFLOAT4 color = { 1,1,1,1 };
+	//// ローカルスケール
+	//XMFLOAT3 scale = { 1,1,1 };
+	//// X,Y,Z軸回りのローカル回転角
+	//XMFLOAT3 rotation = { 0,0,0 };
+	//// ローカル座標
+	//XMFLOAT3 position = { 0,0,0 };
+	//// ローカルワールド変換行列
+	//XMMATRIX matWorld;
 
-	XMMATRIX matRot = XMMatrixIdentity();;
-
+	//XMMATRIX matRot = XMMatrixIdentity();;
 };

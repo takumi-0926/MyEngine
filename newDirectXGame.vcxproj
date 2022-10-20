@@ -272,6 +272,7 @@
     <ClInclude Include="Camera\DebugCamera.h" />
     <ClInclude Include="Collision\BaseCollision.h" />
     <ClInclude Include="Collision\Collision.h" />
+    <ClInclude Include="Collision\CollisionAttribute.h" />
     <ClInclude Include="Collision\CollisionInfo.h" />
     <ClInclude Include="Collision\CollisionManager.h" />
     <ClInclude Include="Collision\CollisionPrimitive.h" />
@@ -286,6 +287,7 @@
     <ClInclude Include="Easing.h" />
     <ClInclude Include="enemy.h" />
     <ClInclude Include="EnemyManager.h" />
+    <ClInclude Include="Fade.h" />
     <ClInclude Include="FBX\FbxLoader.h" />
     <ClInclude Include="FBX\FbxModel.h" />
     <ClInclude Include="FBX\FbxObject3d.h" />
@@ -343,6 +345,7 @@
     <ClCompile Include="DefCannon.cpp" />
     <ClCompile Include="DirectInput.cpp" />
     <ClCompile Include="enemy.cpp" />
+    <ClCompile Include="Fade.cpp" />
     <ClCompile Include="FBX\FbxLoader.cpp" />
     <ClCompile Include="FBX\FbxModel.cpp" />
     <ClCompile Include="FBX\FbxObject3d.cpp" />

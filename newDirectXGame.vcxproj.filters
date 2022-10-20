@@ -214,9 +214,6 @@
     <ClInclude Include="PMD\PMXLoader.h">
       <Filter>ソース ファイル\MMD</Filter>
     </ClInclude>
-    <ClInclude Include="PMD\pmdObject3D.h">
-      <Filter>ソース ファイル\MMD</Filter>
-    </ClInclude>
     <ClInclude Include="PMD\PMDmodel.h">
       <Filter>ソース ファイル\MMD</Filter>
     </ClInclude>
@@ -310,6 +307,15 @@
     <ClInclude Include="Collision\QueryCallBack.h">
       <Filter>ソース ファイル\Collision</Filter>
     </ClInclude>
+    <ClInclude Include="Collision\CollisionAttribute.h">
+      <Filter>ソース ファイル\Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="PMD\pmdObject3D.h">
+      <Filter>ソース ファイル\MMD</Filter>
+    </ClInclude>
+    <ClInclude Include="Fade.h">
+      <Filter>ソース ファイル\SceneEffect</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="enemy.cpp">
@@ -371,9 +377,6 @@
     </ClCompile>
     <ClCompile Include="object\object3D.cpp">
       <Filter>ソース ファイル\Object</Filter>
-    </ClCompile>
-    <ClCompile Include="PMD\PMDmodel.cpp">
-      <Filter>ソース ファイル\MMD</Filter>
     </ClCompile>
     <ClCompile Include="PMD\pmdObject3D.cpp">
       <Filter>ソース ファイル\MMD</Filter>
@@ -455,6 +458,12 @@
     </ClCompile>
     <ClCompile Include="Collision\MeshCollider.cpp">
       <Filter>ソース ファイル\Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="PMD\PMDmodel.cpp">
+      <Filter>ソース ファイル\MMD</Filter>
+    </ClCompile>
+    <ClCompile Include="Fade.cpp">
+      <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

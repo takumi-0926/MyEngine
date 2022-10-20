@@ -91,7 +91,7 @@ void Model::Initialize(const std::string& modelname, bool smoothing)
 			LoadMaterial(directoryPath, filename);
 		}
 		// 先頭文字列がgならグループの開始
-		if (key == "g") {
+		if (key == "o") {
 			// カレントメッシュの情報が揃っているなら
 			if (mesh->GetName().size() > 0 && mesh->GetVertexCount() > 0) {
 

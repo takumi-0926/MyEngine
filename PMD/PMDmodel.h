@@ -79,17 +79,6 @@ private:
 		XMFLOAT3 cameraPos;
 	};
 
-#pragma pack(1)
-	struct PMDBone {
-		char boneName[20];
-		unsigned short parentNo;
-		unsigned short nextNo;
-		unsigned char  type;
-		unsigned short ikBoneNo;
-		XMFLOAT3       pos;
-	};
-#pragma pack()
-
 	struct BoneNode {
 		uint32_t boneIdx;
 		uint32_t boneType;
@@ -158,6 +147,16 @@ private:
 		std::unordered_map<string, std::vector<Motion>> _motionData;
 		unsigned int duration = 0;
 	};
+#pragma pack(1)
+	struct PMDBone {
+		char boneName[20];
+		unsigned short parentNo;
+		unsigned short nextNo;
+		unsigned char  type;
+		unsigned short ikBoneNo;
+		XMFLOAT3       pos;
+	};
+#pragma pack()
 
 	map<unsigned int, vmdMotion> motion;
 
@@ -215,8 +214,6 @@ private:
 
 	HRESULT LoadPMDFile(const char* path);
 
-	HRESULT LoadVMDFile(const unsigned int Number, const char* path);
-
 	void recursiveMatrixMultiply(BoneNode* node, const XMMATRIX& mat);
 
 	void MotionUpdate();
@@ -258,6 +255,8 @@ public:
 
 	void playAnimation();
 
+	HRESULT LoadVMDFile(const unsigned int Number, const char* path);
+
 	//アクセッサ
 	ID3D12DescriptorHeap* MaterialDescHeap() { return materialDescHeap.Get(); }
 	ID3D12DescriptorHeap* DescHeap() { return descHeap.Get(); }
@@ -298,10 +297,7 @@ public:
 	XMFLOAT3 GetPosition() {
 		return position;
 	}
-
-	void SetMatRot(XMMATRIX rot) {
-		this->matRot = rot;
-	}
+	void SetMatRot(XMMATRIX rot) { this->matRot = rot; }
 
 public://メンバ変数
 	ComPtr<ID3D12Resource> PMDconstBuffB1; // 定数バッファ

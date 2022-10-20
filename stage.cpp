@@ -31,6 +31,8 @@ bool Stage::Initialize(Model* model)
 	SetCollider(collider);
 	collider->ConstructTriangles(model);
 
+	collider->SetAttribute(COLLISION_ATTR_LANDSHAPE);
+
 	Update();
 	return true;
 }
