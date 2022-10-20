@@ -1,6 +1,7 @@
 #pragma once
 #include "..\object\object3D.h"
 #include "..\Collision\Collision.h"
+#include "..\Collision\CollisionAttribute.h"
 
 class Stage : public Object3Ds {
 public:

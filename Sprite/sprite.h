@@ -114,9 +114,9 @@ public:
 
 	bool Initalize();
 
-	void Update();
+	virtual void Update();
 
-	void Draw();
+	virtual void Draw();
 	
 public:
 	/// <summary>

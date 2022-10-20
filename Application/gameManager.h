@@ -28,6 +28,7 @@
 #include "..\Quaternion.h"
 
 #include "..\SceneEffectManager.h"
+#include "..\Fade.h"
 
 using namespace std;
 using namespace DirectX;
@@ -41,6 +42,20 @@ enum Scene{
 	GAME,
 	END
 };
+enum GameMode {
+	NASI,
+	START,
+	CLEAR,
+	OVER,
+};
+enum SpriteName {
+
+};
+
+enum modelName {
+
+};
+
 class Player;
 class Stage;
 class GameManager {
@@ -53,6 +68,11 @@ private://メンバ変数(初期化)
 	PMDobject* player = nullptr;
 	PMDobject* enemy = nullptr;
 	PMDmodel* modelPlayer = nullptr;
+
+	Fade* fade = nullptr;
+	Fade* clear = nullptr;
+	Fade* failed = nullptr;
+	bool result = false;
 private://メンバ変数(ゲームシーン)
 	vector<Enemy*> _enemy;
 	vector<Sqhere> sqhere;
@@ -104,9 +124,17 @@ private://メンバ変数(ゲームシーン)
 
 	Easing easing;
 
+	//シーン番号
 	int SceneNum = TITLE;
-
+	bool SceneChange = false;
+	//ゲームモード
+	int GameModeNum = GameMode::START;
 	int count = 24;
+
+	//クリアまでの必要討伐数
+	int ClearCount = 15;
+	//撃退数
+	int repelCount = 0;
 
 	bool resetFlag = false;
 
@@ -131,16 +159,12 @@ private://メンバ変数(ゲームシーン)
 
 	float speed = 0.0;
 
-	float a;//角度保存用
-	float b;//角度保存用
-	float c;//角度保存用
-	float d;//角度保存用
-
 	bool isDamege = false;
 
 	bool enemyToPlayerDamege = false;
 	float DamegeAlpha = 1.0f;
 
+	XMFLOAT3 afterEye;
 public://メンバ関数
 	//コンストラクタ
 	GameManager();
@@ -152,8 +176,16 @@ public://メンバ関数
 	bool Initalize(Wrapper* dx12, Audio* audio, Input* input);
 	//更新
 	void Update();
+
+	void TitleUpdate();
+	void GameUpdate();
+	void EndUpdate();
 	//描画
 	void Draw();
+
+	void TitleDraw();
+	void GameDraw();
+	void EndDraw();
 
 	/// <summary>
 	/// 移動
@@ -256,6 +288,11 @@ public://メンバ関数
 		Vector3 cross;
 		XMMATRIX matRot = XMMatrixIdentity();
 
+		float a;//角度保存用
+		float b;//角度保存用
+		float c;//角度保存用
+		float d;//角度保存用
+
 		//カメラに合わせるための回転行列
 		matRot = XMMatrixRotationY(XMConvertToRadians(angleHorizonal));
 
@@ -282,5 +319,26 @@ public://メンバ関数
 		rot = XMMatrixRotationQuaternion(rq);
 
 		return rot;
+	}
+
+	/// <summary>
+	/// カメラの移動（指定した場所まで）
+	/// </summary>
+	/// <param name="pos1">元の位置</param>
+	/// <param name="pos2">指定場所</param>
+	/// <param name="pct">経過時間</param>
+	XMFLOAT3 moveCamera(XMFLOAT3 pos1, XMFLOAT3 pos2, float pct);
+
+	/// <summary>
+	/// 同一地点判別
+	/// </summary>
+	/// <param name="pos1"></param>
+	/// <param name="pos2"></param>
+	/// <returns></returns>
+	bool samePoint(XMFLOAT3 pos1, XMFLOAT3 pos2) {
+		if (pos1.x != pos2.x) { return false; }
+		if (pos1.y != pos2.y) { return false; }
+		if (pos1.z != pos2.z) { return false; }
+		return true;
 	}
 };

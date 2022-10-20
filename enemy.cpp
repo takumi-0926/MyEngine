@@ -1,5 +1,14 @@
 #include "enemy.h"
 
+XMFLOAT3 Enemy::VectorToXMFloat(XMVECTOR vec)
+{
+	XMFLOAT3 ret;
+	ret.x = vec.m128_f32[0];
+	ret.y = vec.m128_f32[1];
+	ret.z = vec.m128_f32[2];
+	return ret;
+}
+
 float Enemy::objectDistance(XMFLOAT3 pos1, XMFLOAT3 pos2)
 {
 	float distance;
@@ -17,26 +26,35 @@ XMVECTOR Enemy::objectVector(XMFLOAT3 pos1, XMFLOAT3 pos2)
 	return distance;
 
 }
-XMVECTOR Enemy::normalize(XMVECTOR vec)
+XMVECTOR Enemy::Normalize(XMVECTOR vec)
 {
-	return XMVECTOR();
+	Vector3 ret;
+	ret.x = vec.m128_f32[0];
+	ret.y = vec.m128_f32[1];
+	ret.z = vec.m128_f32[2];
+	ret.normalize();
+
+	XMVECTOR _ret;
+	_ret.m128_f32[0] = ret.x;
+	_ret.m128_f32[1] = ret.y;
+	_ret.m128_f32[2] = ret.z;
+	_ret.m128_f32[3] = 0;
+	return _ret;
 }
-XMFLOAT3 Enemy::moveObject(XMFLOAT3 pos1, XMFLOAT3 pos2, float pct)
+void Enemy::move(XMVECTOR vector)
 {
-	XMFLOAT3 pos;
-	pos.x = pos1.x + ((pos2.x - pos1.x) * pct);
-	pos.z = pos1.z + ((pos2.z - pos1.z) * pct);
-	pos.y = pos1.y;
-	return pos;
+	this->position.x -= vector.m128_f32[0] * this->status.speed;
+	this->position.y -= vector.m128_f32[1] * this->status.speed;
+	this->position.z -= vector.m128_f32[2] * this->status.speed;
 }
 
 Enemy::Enemy()
 {
 	status = {
-			  1,//デフォルトHP
+			  2,//デフォルトHP
 			  1,//デフォルト攻撃力
 			  1,//デフォルト防御力
-			  1,//デフォルト速度
+			  0.2,//デフォルト速度
 		{1,1,1},//デフォルト大きさ
 	};
 	alive = false;
@@ -80,7 +98,7 @@ void Enemy::moveUpdate(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 	this->oldPos = this->position;
 
 	//移動処理
-	if (this->move == true) {
+	if (this->Move == true) {
 		//パターン1
 		if (this->mode == 1) {
 			float distance = 1000;//距離保存用
@@ -95,10 +113,10 @@ void Enemy::moveUpdate(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 				}
 			}
 
-			if (this->pct <= 1.0f) {
-				this->position = moveObject(this->position, bPos[objectNo]->position, this->pct);
-				this->pct += this->step;
-			}
+			move(Normalize(objectVector(this->position, bPos[objectNo]->position)));
+			this->matRot = LookAtRotation(
+				VectorToXMFloat(Normalize(objectVector(this->position, bPos[objectNo]->position))),
+				XMFLOAT3(0.0f, 1.0f, 0.0f));
 
 			//攻撃対象がなくなった場合
 			for (int i = 0; i < 6; i++)
@@ -112,34 +130,34 @@ void Enemy::moveUpdate(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 			//移動から攻撃へ
 			if (objectDistance(this->position, bPos[objectNo]->position) <= d) {
 				this->attack = true;
-				this->move = false;
+				this->Move = false;
 				this->attackOnMove = false;
 			}
 		}
 		//パターン2
 		if (this->mode == 2) {
-			if (this->pct <= 1.0f) {
-				this->position = moveObject(this->position, pPos, this->pct);
-				this->pct += this->step;
-			}
+			move(Normalize(objectVector(this->position, pPos)));
+			this->matRot = LookAtRotation(
+				VectorToXMFloat(Normalize(objectVector(this->position, pPos))),
+				XMFLOAT3(0.0f, 1.0f, 0.0f));
 
 			//移動から攻撃へ
 			if (objectDistance(this->position, pPos) <= d) {
 				this->attack = true;
-				this->move = false;
+				this->Move = false;
 			}
 		}
 		//パターン3
 		if (this->mode == 3) {
-			if (this->pct <= 0.1f) {
-				this->position = moveObject(this->position, gPos, this->pct);
-				this->pct += this->step;
-			}
+			move(Normalize(objectVector(this->position, gPos)));
+			this->matRot = LookAtRotation(
+				VectorToXMFloat(Normalize(objectVector(this->position, gPos))),
+				XMFLOAT3(0.0f, 1.0f, 0.0f));
 
 			//移動から攻撃へ
 			if (objectDistance(this->position, gPos) <= d) {
 				this->attack = true;
-				this->move = false;
+				this->Move = false;
 				this->attackOnMove = false;
 			}
 		}
@@ -164,8 +182,11 @@ void Enemy::moveUpdate(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 					this->attackOnMove = true;
 				}
 				else {
-					this->position = moveObject(this->position, this->attackPos, this->pct);
-					this->pct += this->step;
+					move(Normalize(objectVector(this->position, bPos[objectNo]->position)));
+					this->matRot = LookAtRotation(
+						VectorToXMFloat(Normalize(objectVector(this->position, gPos))),
+						XMFLOAT3(0.0f, 1.0f, 0.0f));
+
 				}
 			}
 			else if (this->attackTime >= 1.0f) {
@@ -180,7 +201,7 @@ void Enemy::moveUpdate(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 					if (this->position.z == this->attackPos.z) {
 						moveReset();
 						this->attackTime = 0.0f;
-						this->move = true;
+						this->Move = true;
 						this->attack = false;
 						this->startAttack = false;
 						this->attackHit = true;
@@ -214,7 +235,7 @@ void Enemy::moveUpdate(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 			if (this->attackTime >= 5.0f) {
 				moveReset();
 				this->attackTime = 0.0f;
-				this->move = true;
+				this->Move = true;
 				this->attack = false;
 				this->startAttack = false;
 				this->attackHit = true;
@@ -240,8 +261,10 @@ void Enemy::moveUpdate(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 					this->attackOnMove = true;
 				}
 				else {
-					this->position = moveObject(this->position, this->attackPos, this->pct);
-					this->pct += this->step;
+					move(Normalize(objectVector(this->position, bPos[objectNo]->position)));
+					this->matRot = LookAtRotation(
+						VectorToXMFloat(Normalize(objectVector(this->position, bPos[objectNo]->position))),
+						XMFLOAT3(0.0f, 1.0f, 0.0f));
 				}
 			}
 			else if (this->attackTime >= 1.0f) {
@@ -256,7 +279,7 @@ void Enemy::moveUpdate(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 					if (this->position.z == this->attackPos.z) {
 						moveReset();
 						this->attackTime = 0.0f;
-						this->move = true;
+						this->Move = true;
 						this->attack = false;
 						this->startAttack = false;
 						this->attackHit = true;

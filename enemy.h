@@ -3,6 +3,9 @@
 #include "..\PMD\PMDmodel.h"
 #include "..\stageObject.h"
 #include "..\DefCannon.h"
+#include "Vector3.h"
+#include "Matrix4.h"
+#include "Quaternion.h"
 
 class PMDmodel;
 class StageObject;
@@ -19,7 +22,7 @@ class Enemy : public Object3Ds {
 public:
 	Status status;
 	bool alive = false;	//生存判定
-	bool move = true;  //移動フラグ
+	bool Move = true;  //移動フラグ
 	bool attack = false;//攻撃フラグ
 	bool startAttack = false;
 	bool attackHit = true;
@@ -37,10 +40,11 @@ public:
 	XMFLOAT3 attackPos;
 	XMFLOAT3 oldPos;
 private:
+	XMFLOAT3 VectorToXMFloat(XMVECTOR vec);
 	float	 objectDistance(XMFLOAT3 pos1, XMFLOAT3 pos2);	//建物との直線距離を計算
 	XMVECTOR objectVector(XMFLOAT3 pos1, XMFLOAT3 pos2);	//建物間のベクトルを計算
-	XMVECTOR normalize(XMVECTOR vec);
-	XMFLOAT3 moveObject(XMFLOAT3 pos1, XMFLOAT3 pos2, float pct);	//指定の建物へ移動
+	XMVECTOR Normalize(XMVECTOR vec);
+	void move(XMVECTOR vector);	//ベクトル移動
 	void moveReset();
 public:
 	Enemy();		//コンストラクタ
@@ -49,4 +53,49 @@ public:
 	void moveUpdate(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos);
 	void Draw() override;
 
+	/// <summary>
+	/// 進行方向に回転
+	/// </summary>
+	/// <param name="forward">進行方向ベクトル</param>
+	/// <param name="upward">上ベクトル</param>
+	/// <returns>回転行列（クォータニオン）</returns>
+	XMMATRIX LookAtRotation(XMFLOAT3 forward, XMFLOAT3 upward) {
+		Vector3 z = Vector3(forward.x, forward.y, forward.z);//進行方向ベクトル（前方向）
+		Vector3 up = Vector3(upward.x, upward.y, upward.z);  //上方向
+		XMMATRIX rot;//回転行列
+		Quaternion q = quaternion(0, 0, 0, 1);//回転クォータニオン
+		Vector3 _z = { 0.0f,0.0f,-1.0f };//Z方向単位ベクトル
+		Vector3 cross;
+
+		float a;//角度保存用
+		float b;//角度保存用
+		float c;//角度保存用
+		float d;//角度保存用
+
+		cross = z.cross(_z);
+
+		q.x = cross.x;
+		q.y = cross.y;
+		q.z = cross.z;
+
+		q.w = sqrt(
+			(z.length() * z.length())
+			* (_z.length() * _z.length())) + z.dot(_z);
+
+		//単位クォータニオン化
+		
+		q = normalize(q);
+		q = conjugate(q);
+		a = q.x;
+		b = q.y;
+		c = q.z;
+		d = q.w;
+
+		//任意軸回転
+		XMVECTOR rq = { q.x,q.y,q.z,q.w };
+		rot = XMMatrixRotationQuaternion(rq);
+
+		this->useRotMat = true;
+		return rot;
+	}
 };
