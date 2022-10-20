@@ -464,7 +464,7 @@ void Sprite::Update()
 
 	ConstBufferData* constMap = nullptr;
 
-	this->color.w = 0.0f;
+	this->color.w = this->alpha;
 
 	HRESULT result = constBuff->Map(0, nullptr, (void**)&constMap);
 	constMap->mat = matWorld * spritecommon.matProjection;

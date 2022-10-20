@@ -62,6 +62,7 @@ void CollisionManager::CheckAllCollision()
 
 bool CollisionManager::Raycast(
 	const Ray& ray,
+	unsigned short attribute,
 	RaycastHit* hitInfo,
 	float maxDistance)
 {
@@ -75,6 +76,9 @@ bool CollisionManager::Raycast(
 	for (; it != colliders.end(); ++it)
 	{
 		BaseCollider* colA = *it;
+
+		//‘®«‚ª‡‚í‚È‚©‚Á‚½‚ç”ò‚Î‚·
+		if (!(colA->attribute & attribute)) { continue; }
 
 		//ƒŒƒC‚Æ‹…
 		if (colA->GEtShapeType() == COLLISIONSHAPE_SQHERE) {

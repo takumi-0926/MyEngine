@@ -37,6 +37,15 @@ public:
 		return shapeType;
 	}
 
+	inline void SetAttribute(unsigned short attribute) {
+		this->attribute = attribute;
+	}
+	inline void AddAttribute(unsigned short attribute) {
+		this->attribute |= attribute;
+	}
+	inline void RemoveAttribute(unsigned short attribute) {
+		this-> attribute &= !attribute;
+	}
 protected:
 	Object3Ds* object3d = nullptr;
 	//形状タイプ
