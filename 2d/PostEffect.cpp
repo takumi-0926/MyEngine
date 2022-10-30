@@ -1,5 +1,5 @@
 #include "PostEffect.h"
-#include "..\Application\application.h";
+#include "application.h";
 
 #include <d3dx12.h>
 #include <d3dcompiler.h>

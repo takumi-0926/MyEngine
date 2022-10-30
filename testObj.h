@@ -1,6 +1,6 @@
 #pragma once
-#include "..\object\object3D.h"
-#include "Vector2.h"
+#include "object\object3D.h"
+#include "Math/Vector2.h"
 
 #define	SX_SCREEN	1280
 #define	SY_SCREEN	1024

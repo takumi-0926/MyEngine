@@ -1,7 +1,7 @@
 
-#include "Application/gameManager.h"
-#include "Application/application.h"
-#include "Application/dx12Wrapper.h"
+#include "gameManager.h"
+#include "application.h"
+#include "dx12Wrapper.h"
 #include "Audio/audio.h"
 #include "Input/input.h"
 #include "delete.h"
@@ -22,7 +22,7 @@
 #include "FBX/FbxModel.h"
 #include "FBX/FbxObject3d.h"
 
-#include "..\Camera\DebugCamera.h"
+#include "Camera\DebugCamera.h"
 
 #include "..\light\Light.h"
 

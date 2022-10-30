@@ -1,5 +1,5 @@
 #pragma once
-#include "..\object\object3D.h"
+#include "object/object3D.h"
 
 class ShaderTest : public Object3Ds{
 public:

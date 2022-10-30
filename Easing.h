@@ -8,9 +8,9 @@ public:
 	float end = -10.0f;
 	float end2 = 10.0f;
 
-	float maxTime = 2.0f;
+	float maxTime = 1.0f;
 	float timeRate = 0.0f;
-	float addTime = 0.1f;
+	float addTime = 1.0f / 120.0f;
 
 	float timeRate2 = 0.0f;
 	float addTime2 = 0.1f;

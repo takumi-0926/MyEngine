@@ -1,5 +1,5 @@
 #pragma once
-#include "..\Sprite\sprite.h"
+#include "Sprite\sprite.h"
 class PostEffect :
     public Sprite
 {

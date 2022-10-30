@@ -1,6 +1,6 @@
 #pragma once
-#include "..\object\object3D.h"
-#include "..\Collision\Collision.h"
+#include "object\object3D.h"
+#include "Collision\Collision.h"
 
 class StageObject : public Object3Ds {
 	std::vector<Triangle> hit;
