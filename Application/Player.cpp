@@ -1,4 +1,5 @@
 #include "Player.h"
+#include "Input/input.h"
 
 Player* Player::Create(PMDmodel* _model)
 {
@@ -19,6 +20,7 @@ Player* Player::Create(PMDmodel* _model)
 
 void Player::Update()
 {
+	//ˆÚ“®
 	PMDobject::Update();
 }
 

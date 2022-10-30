@@ -1108,20 +1108,31 @@ void PMDmodel::MotionUpdate()
         data = motion.at(vmdData::ATTACK);
     }
 
+    if (oldVmdNumber == vmdData::DAMAGE) {
+        oldVmdNumber = vmdData::DAMAGE;
+        vmdNumber = vmdData::DAMAGE;
+        data = motion.at(vmdData::DAMAGE);
+    }
+
     auto elapsedTime = timeGetTime() - _startTime;
 
     unsigned int frameNo = 30 * (elapsedTime / 1000.0f);
+
+    if (vmdNumber != oldVmdNumber) {
+        _startTime = timeGetTime();
+        frameNo = 0;
+    }
 
     if (frameNo > data.duration) {
         if (oldVmdNumber == vmdData::ATTACK) {
             oldVmdNumber = vmdData::WAIT;
             vmdNumber = vmdData::WAIT;
         }
-        _startTime = timeGetTime();
-        frameNo = 0;
-    }
+        if (oldVmdNumber == vmdData::DAMAGE) {
+            oldVmdNumber = vmdData::WAIT;
+            vmdNumber = vmdData::WAIT;
+        }
 
-    if (vmdNumber != oldVmdNumber) {
         _startTime = timeGetTime();
         frameNo = 0;
     }
