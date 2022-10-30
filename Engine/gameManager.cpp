@@ -198,7 +198,6 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 		hp[i]->Update();
 	}
 
-	Damege = Sprite::Create(5, { 0,0 });
 	BreakBar = Sprite::Create(10, { 540,640 });
 	BreakBar->Update();
 	for (int i = 0; i < 15; i++) {
@@ -372,9 +371,6 @@ void GameManager::Draw()
 		}
 
 		sprite04->Draw();
-		if (enemyToPlayerDamege == true) {
-			Damege->Draw();
-		}
 
 		BreakBar->Draw();
 		for (int i = 0; i < repelCount; i++) {
@@ -549,11 +545,9 @@ void GameManager::GameUpdate() {
 
 						//エネミーからのダメージ
 						if (Hhit == true && _enemy[i]->attackHit == true) {
-							if (_enemy[i]->mode != 2) { continue; }
 							_enemy[i]->attackHit = false;
-							enemyToPlayerDamege = true;
-							DamegeAlpha = 1.0f;
 							playerHp -= 10;
+							_player->model->vmdNumber = vmdData::ATTACK;
 						}
 						//ゲームオーバー条件				
 						//if (gateHP <= 0 || playerHp <= 0) { SceneChange = true; }
@@ -567,13 +561,14 @@ void GameManager::GameUpdate() {
 				//移動ベクトル
 				XMVECTOR v = { (directInput->getLeftX()),0.0f,-(directInput->getLeftY()),0.0f };
 				HitBox::hitBox[0]->position = XMFLOAT3(
-					player->model->position.x,
-					player->model->position.y + 10.0f,
-					player->model->position.z);
+					_player->model->position.x,
+					_player->model->position.y + 10.0f,
+					_player->model->position.z);
 
-				if (player->model->oldVmdNumber != vmdData::ATTACK) { player->model->oldVmdNumber = player->model->vmdNumber; }
+				if (player->model->oldVmdNumber != vmdData::ATTACK) { _player->model->oldVmdNumber = player->model->vmdNumber; }
+				if (player->model->oldVmdNumber != vmdData::DAMAGE) { _player->model->oldVmdNumber = player->model->vmdNumber; }
 				if (directInput->leftStickX() < 0.0f || directInput->leftStickX() > 0.0f || directInput->leftStickY() < 0.0f || directInput->leftStickY() > 0.0f) {
-					player->model->vmdNumber = vmdData::WALK;
+					_player->model->vmdNumber = vmdData::WALK;
 					HitBox::hitBox[0]->scale = XMFLOAT3(5, 10, 5);
 					HitBox::_hit[0].radius = 5;
 
@@ -583,25 +578,25 @@ void GameManager::GameUpdate() {
 					else { speed = 1.0f; }
 					//左移動
 					if (input->Push(DIK_A) || directInput->leftStickX() < 0.0f) {
-						player->model->position = (MoveLeft(player->model->position));
+						_player->model->position = (MoveLeft(_player->model->position));
 						for (int i = 0; i < HitBox::GetHit().size(); i++) { HitBox::GetHit()[i]->position = MoveLeft(HitBox::GetHit()[i]->position); }
 					}
 					//右移動
 					if (input->Push(DIK_D) || directInput->leftStickX() > 0.0f) {
 						//pmdModel->position = MoveRight(pmdModel->position);
-						player->model->position = (MoveRight(player->model->position));
+						_player->model->position = (MoveRight(_player->model->position));
 						for (int i = 0; i < HitBox::GetHit().size(); i++) { HitBox::GetHit()[i]->position = MoveRight(HitBox::GetHit()[i]->position); }
 					}
 					//下移動
 					if (input->Push(DIK_W) || directInput->leftStickY() < 0.0f) {
 						//pmdModel->position = MoveBefore(pmdModel->position);
-						player->model->position = (MoveBefore(player->model->position));
+						_player->model->position = (MoveBefore(_player->model->position));
 						for (int i = 0; i < HitBox::GetHit().size(); i++) { HitBox::GetHit()[i]->position = MoveBefore(HitBox::GetHit()[i]->position); }
 					}
 					//上移動
 					if (input->Push(DIK_S) || directInput->leftStickY() > 0.0f) {
 						//pmdModel->position = MoveAfter(pmdModel->position);
-						player->model->position = (MoveAfter(player->model->position));
+						_player->model->position = (MoveAfter(_player->model->position));
 						for (int i = 0; i < HitBox::GetHit().size(); i++) { HitBox::GetHit()[i]->position = MoveAfter(HitBox::GetHit()[i]->position); }
 					}
 					XMMATRIX matRot = XMMatrixIdentity();
@@ -612,10 +607,10 @@ void GameManager::GameUpdate() {
 
 					XMFLOAT3 _v(v.m128_f32[0], v.m128_f32[1], v.m128_f32[2]);
 
-					player->model->SetMatRot(LookAtRotation(_v, XMFLOAT3(0.0f, 1.0f, 0.0f)));
+					_player->model->SetMatRot(LookAtRotation(_v, XMFLOAT3(0.0f, 1.0f, 0.0f)));
 				}
 				else if (directInput->IsButtonPush(DirectInput::ButtonKind::Button01) || input->Push(DIK_X)) {
-					player->model->vmdNumber = vmdData::ATTACK;
+					_player->model->vmdNumber = vmdData::ATTACK;
 					HitBox::hitBox[0]->scale = XMFLOAT3(10, 10, 10);
 					HitBox::_hit[0].radius = 10;
 					for (int i = 0; i < sqhere.size(); i++)
@@ -633,7 +628,7 @@ void GameManager::GameUpdate() {
 					}
 				}
 				else {
-					player->model->vmdNumber = vmdData::WAIT;
+					_player->model->vmdNumber = vmdData::WAIT;
 					HitBox::hitBox[0]->scale = XMFLOAT3(5, 10, 5);
 					HitBox::_hit[0].radius = 5;
 				}
@@ -736,32 +731,18 @@ void GameManager::GameUpdate() {
 
 				CollisionManager::GetInstance()->CheckAllCollision();
 				//collisionManager->CheckAllCollision();
-
-				static float count = 0.0f;
-				if (enemyToPlayerDamege == true) {
-					count += 1.0f / 60.0f;
-					if (count >= 1.5f) {
-						DamegeAlpha -= 1.0f / 120.0f;
-						Damege->SetAlpha(DamegeAlpha);
-						if (DamegeAlpha <= 0) {
-							enemyToPlayerDamege = false;
-							count = 0;
-						}
-					}
-				}
-
 				//
-				if (player->model->position.x <= -100.0f) {
+				if (_player->model->position.x <= -100.0f) {
 					player->model->position.x = -100.0f;
 				}
-				if (player->model->position.x >= 100.0f) {
-					player->model->position.x = 100.0f;
+				if (_player->model->position.x >= 100.0f) {
+					_player->model->position.x = 100.0f;
 				}
-				if (player->model->position.z <= -100.0f) {
-					player->model->position.z = -100.0f;
+				if (_player->model->position.z <= -100.0f) {
+					_player->model->position.z = -100.0f;
 				}
-				if (player->model->position.z >= 322.0f) {
-					player->model->position.z = 322.0f;
+				if (_player->model->position.z >= 322.0f) {
+					_player->model->position.z = 322.0f;
 				}
 
 				if (input->Push(DIK_Q)) {
@@ -817,7 +798,7 @@ void GameManager::GameUpdate() {
 			stage->Update();
 			obj03->Update();
 			//pmdModel->Update();
-			player->Update();
+			//player->Update();
 			_player->Update();
 			for (int i = 0; i < 6; i++) {
 				cannon[i]->Update();
@@ -825,8 +806,6 @@ void GameManager::GameUpdate() {
 			}
 			HitBox::mainUpdate(player->model->GetBoneMat(), player->model->rotation);
 			light->Update();
-
-			Damege->Update();
 		}
 	}
 }

@@ -4,6 +4,12 @@
 #include "Collision/CollisionAttribute.h"
 #include "Collision/QueryCallBack.h"
 
+enum MoveMode {
+	move,
+	attack,
+	retract
+};
+
 XMFLOAT3 Enemy::VectorToXMFloat(XMVECTOR vec)
 {
 	XMFLOAT3 ret;
@@ -97,7 +103,7 @@ bool Enemy::Initialize()
 
 	float radius = 10.0f;
 
-	SetCollider(new SphereCollider(XMVECTOR({ 0,radius,0,0 }),radius));
+	SetCollider(new SphereCollider(XMVECTOR({ 0,radius,0,0 }), radius));
 
 	return true;
 }
@@ -144,7 +150,7 @@ void Enemy::Update() {
 		*sphereCollider,
 		&callback,
 		COLLISION_ATTR_LANDSHAPE
-		);
+	);
 
 	this->position.x += callback.move.m128_f32[0];
 	this->position.y += callback.move.m128_f32[1];
@@ -179,15 +185,13 @@ void Enemy::OnCollision(const CollisionInfo& info)
 	int a = 0;
 }
 
-void Enemy::moveUpdate(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
+void Enemy::Move(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 {
 	static int d = 7;
 	int objectNo = 0;
 
-	this->oldPos = this->position;
-
 	//ˆÚ“®ˆ—
-	if (this->Move == true) {
+	if (this->_move == true) {
 		//ƒpƒ^[ƒ“1
 		if (this->mode == 1) {
 			float distance = 1000;//‹——£•Û‘¶—p
@@ -221,7 +225,7 @@ void Enemy::moveUpdate(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 			//ˆÚ“®‚©‚çUŒ‚‚Ö
 			if (objectDistance(this->position, bPos[objectNo]->position) <= d) {
 				this->attack = true;
-				this->Move = false;
+				this->_move = false;
 				this->attackOnMove = false;
 			}
 		}
@@ -235,7 +239,7 @@ void Enemy::moveUpdate(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 			//ˆÚ“®‚©‚çUŒ‚‚Ö
 			if (objectDistance(this->position, pPos) <= d) {
 				this->attack = true;
-				this->Move = false;
+				this->_move = false;
 			}
 		}
 		//ƒpƒ^[ƒ“3
@@ -248,11 +252,17 @@ void Enemy::moveUpdate(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 			//ˆÚ“®‚©‚çUŒ‚‚Ö
 			if (objectDistance(this->position, gPos) <= d) {
 				this->attack = true;
-				this->Move = false;
+				this->_move = false;
 				this->attackOnMove = false;
 			}
 		}
 	}
+}
+
+void Enemy::Attack(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
+{
+	static int d = 7;
+	int objectNo = 0;
 
 	//UŒ‚ˆ—
 	if (this->attack == true) {
@@ -292,7 +302,7 @@ void Enemy::moveUpdate(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 					if (this->position.z == this->attackPos.z) {
 						moveReset();
 						this->attackTime = 0.0f;
-						this->Move = true;
+						this->_move = true;
 						this->attack = false;
 						this->startAttack = false;
 						this->attackHit = true;
@@ -326,7 +336,7 @@ void Enemy::moveUpdate(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 			if (this->attackTime >= 5.0f) {
 				moveReset();
 				this->attackTime = 0.0f;
-				this->Move = true;
+				this->_move = true;
 				this->attack = false;
 				this->startAttack = false;
 				this->attackHit = true;
@@ -368,7 +378,7 @@ void Enemy::moveUpdate(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 			if (attackTime >= 5.0f && this->attackOnMove == true) {
 				moveReset();
 				this->attackTime = 0.0f;
-				this->Move = true;
+				this->_move = true;
 				this->attack = false;
 				this->startAttack = false;
 				this->attackHit = true;
@@ -376,9 +386,16 @@ void Enemy::moveUpdate(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 			this->attackTime += 1.0f / 60.0f;
 		}
 	}
+}
+
+void Enemy::moveUpdate(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
+{
+
+	Move(pPos, bPos, gPos);
+
+	Attack(pPos, bPos, gPos);
 
 	Object3Ds::Update();
-	//Update();
 }
 void Enemy::moveReset()
 {

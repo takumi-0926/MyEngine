@@ -21,7 +21,7 @@ class Enemy : public Object3Ds {
 public:
 	Status status;
 	bool alive = false;	//生存判定
-	bool Move = true;  //移動フラグ
+	bool _move = true;  //移動フラグ
 	bool attack = false;//攻撃フラグ
 	bool startAttack = false;
 	bool attackHit = true;
@@ -40,6 +40,7 @@ public:
 	XMVECTOR vectol;
 	XMFLOAT3 attackPos;
 	XMFLOAT3 oldPos;
+	XMFLOAT3 RetreatPos = { 0.0f,20.0f,-150.0f };
 private:
 	XMFLOAT3 VectorToXMFloat(XMVECTOR vec);
 	float	 objectDistance(XMFLOAT3 pos1, XMFLOAT3 pos2);	//建物との直線距離を計算
@@ -111,9 +112,20 @@ public:
 	}
 
 	/// <summary>
+	/// 移動時処理
+	/// </summary>
+	void Move(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos);
+
+	/// <summary>
+	/// 攻撃時処理
+	/// </summary>
+	void Attack(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos);
+
+	/// <summary>
 	/// 退却時処理
 	/// </summary>
 	void Retreat() {
+		move(Normalize(objectVector(this->position, RetreatPos)));
 		this->alpha -= 0.01f;
 	}
 
@@ -121,9 +133,18 @@ public:
 	/// 被ダメージ時処理
 	/// </summary>
 	void Damege() {
+		static float count = 0.0f;
 		for (int i = 0; i < model->GetMesh().size(); i++) {
-			this->model->GetMesh()[i]->GetMaterial()->ambient.x *= 2.0f;
+			this->model->GetMesh()[i]->GetMaterial()->ambient.x = 1.5f;
 			this->model->GetMesh()[i]->GetMaterial()->Update();
+		}
+		count += 1.0f / 30.0f;
+		if (count >= 1.0f) {
+			for (int i = 0; i < model->GetMesh().size(); i++) {
+				this->model->GetMesh()[i]->GetMaterial()->ambient.x = 0.8f;
+				this->model->GetMesh()[i]->GetMaterial()->Update();
+			}
+			this->damage = false;
 		}
 	}
 };
