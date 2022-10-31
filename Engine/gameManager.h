@@ -128,7 +128,7 @@ private://メンバ変数(ゲームシーン)
 	Triangle triangle[50] = {};
 	Ray ray;
 
-	object2d* line[10] = {};
+	//object2d* line[10] = {};
 
 	Triangle triangle02[2] = {};
 	Sqhere sqhere02 = {};

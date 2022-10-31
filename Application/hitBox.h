@@ -5,6 +5,7 @@
 
 class Wrapper;
 class PMDmodel;
+
 class HitBox : public Object3Ds {
 
 	static Wrapper* dx12;

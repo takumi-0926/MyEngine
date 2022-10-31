@@ -74,7 +74,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			assert(0);
 			return 1;
 		}
-		object2d::StaticInitialize(dx12->GetDevice());
+		//object2d::StaticInitialize(dx12->GetDevice());
 	}
 
 	{

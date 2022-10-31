@@ -7,7 +7,7 @@
 enum MoveMode {
 	move,
 	attack,
-	retract
+	retreat
 };
 
 XMFLOAT3 Enemy::VectorToXMFloat(XMVECTOR vec)
@@ -67,8 +67,6 @@ Enemy::Enemy()
 		{1,1,1},//デフォルト大きさ
 	};
 	alive = false;
-	step = 0.00005f;
-	pct = 0.0f;
 	mode = 0;
 }
 Enemy* Enemy::Create(Model* model)
@@ -81,6 +79,11 @@ Enemy* Enemy::Create(Model* model)
 
 	object3d->position.y = 20;
 	object3d->position.z = -150;
+
+	//アンビエント元を取得
+	for (int i = 0; i < model->GetMesh().size(); i++) {
+		object3d->defalt_ambient.push_back(model->GetMesh()[i]->GetMaterial()->ambient);
+	}
 
 	// 初期化
 	if (!object3d->Initialize()) {
@@ -158,12 +161,12 @@ void Enemy::Update() {
 
 	UpdateWorldMatrix();
 
-	if (!alive) {
-		Retreat();
-	}
+	//if (!alive) {
+	//	Retreat();
+	//}
 
 	if (damage) {
-		Damege();
+		Damage();
 	}
 
 	collider->Update();
@@ -190,71 +193,67 @@ void Enemy::Move(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 	static int d = 7;
 	int objectNo = 0;
 
+	if (actionPattern != MoveMode::move)return;
 	//移動処理
-	if (this->_move == true) {
-		//パターン1
-		if (this->mode == 1) {
-			float distance = 1000;//距離保存用
-			for (int i = 0; i < 6; i++)
-			{
-				//距離を測定して攻撃対象を決定
-				float dis = objectDistance(this->position, bPos[i]->position);
-				if (distance >= dis) {
-					if (bPos[i]->isAlive != true) { continue; }
-					distance = dis;
-					objectNo = i;
-				}
-			}
-
-			move(Normalize(objectVector(this->position, bPos[objectNo]->position)));
-			this->matRot = LookAtRotation(
-				VectorToXMFloat(Normalize(objectVector(this->position, bPos[objectNo]->position))),
-				XMFLOAT3(0.0f, 1.0f, 0.0f));
-
-			//攻撃対象がなくなった場合
-			for (int i = 0; i < 6; i++)
-			{
-				static int Num = 0;
-				if (bPos[i]->isAlive == false) { Num++; }
-				//行動パターンを変化
-				if (Num == 6) {
-					this->mode = 3;
-				}
-			}
-
-			//移動から攻撃へ
-			if (objectDistance(this->position, bPos[objectNo]->position) <= d) {
-				this->attack = true;
-				this->_move = false;
-				this->attackOnMove = false;
+	//パターン1
+	if (this->mode == 1) {
+		float distance = 1000;//距離保存用
+		for (int i = 0; i < 6; i++)
+		{
+			//距離を測定して攻撃対象を決定
+			float dis = objectDistance(this->position, bPos[i]->position);
+			if (distance >= dis) {
+				if (bPos[i]->isAlive != true) { continue; }
+				distance = dis;
+				objectNo = i;
 			}
 		}
-		//パターン2
-		if (this->mode == 2) {
-			move(Normalize(objectVector(this->position, pPos)));
-			this->matRot = LookAtRotation(
-				VectorToXMFloat(Normalize(objectVector(this->position, pPos))),
-				XMFLOAT3(0.0f, 1.0f, 0.0f));
 
-			//移動から攻撃へ
-			if (objectDistance(this->position, pPos) <= d) {
-				this->attack = true;
-				this->_move = false;
+		move(Normalize(objectVector(this->position, bPos[objectNo]->position)));
+		this->matRot = LookAtRotation(
+			VectorToXMFloat(Normalize(objectVector(this->position, bPos[objectNo]->position))),
+			XMFLOAT3(0.0f, 1.0f, 0.0f));
+
+		//攻撃対象がなくなった場合
+		for (int i = 0; i < 6; i++)
+		{
+			static int Num = 0;
+			if (bPos[i]->isAlive == false) { Num++; }
+			//行動パターンを変化
+			if (Num == 6) {
+				this->mode = 3;
 			}
 		}
-		//パターン3
-		if (this->mode == 3) {
-			move(Normalize(objectVector(this->position, gPos)));
-			this->matRot = LookAtRotation(
-				VectorToXMFloat(Normalize(objectVector(this->position, gPos))),
-				XMFLOAT3(0.0f, 1.0f, 0.0f));
 
-			//移動から攻撃へ
-			if (objectDistance(this->position, gPos) <= d) {
-				this->attack = true;
-				this->_move = false;
-				this->attackOnMove = false;
-			}
+		//移動から攻撃へ
+		if (objectDistance(this->position, bPos[objectNo]->position) <= d) {
+			actionPattern = MoveMode::attack;
+			this->attackOnMove = false;
+		}
+	}
+	//パターン2
+	if (this->mode == 2) {
+		move(Normalize(objectVector(this->position, pPos)));
+		this->matRot = LookAtRotation(
+			VectorToXMFloat(Normalize(objectVector(this->position, pPos))),
+			XMFLOAT3(0.0f, 1.0f, 0.0f));
+
+		//移動から攻撃へ
+		if (objectDistance(this->position, pPos) <= d) {
+			actionPattern = MoveMode::attack;
+		}
+	}
+	//パターン3
+	if (this->mode == 3) {
+		move(Normalize(objectVector(this->position, gPos)));
+		this->matRot = LookAtRotation(
+			VectorToXMFloat(Normalize(objectVector(this->position, gPos))),
+			XMFLOAT3(0.0f, 1.0f, 0.0f));
+
+		//移動から攻撃へ
+		if (objectDistance(this->position, gPos) <= d) {
+			actionPattern = MoveMode::attack;
+			this->attackOnMove = false;
 		}
 	}
 }
@@ -264,128 +263,160 @@ void Enemy::Attack(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 	static int d = 7;
 	int objectNo = 0;
 
+	if (actionPattern != MoveMode::attack)return;
+
 	//攻撃処理
-	if (this->attack == true) {
-		if (this->mode == 1) {
-			//攻撃時の情報取得
-			if (this->startAttack == false) {
-				moveReset();
-				this->vectol = objectVector(bPos[objectNo]->position, this->position);
-				this->attackPos = this->position;
-				this->startAttack = true;
-			}
+	if (this->mode == 1) {
+		//攻撃時の情報取得
+		if (this->startAttack == false) {
+			moveReset();
+			this->vectol = objectVector(bPos[objectNo]->position, this->position);
+			this->attackPos = this->position;
+			this->startAttack = true;
+		}
 
-			if (this->attackTime >= 3.0f) {
-				if (this->attackHit == true) {
-					this->position.x += this->vectol.m128_f32[0] / 25;
-					this->position.y += this->vectol.m128_f32[1] / 25;
-					this->position.z += this->vectol.m128_f32[2] / 25;
-					this->attackOnMove = true;
-				}
-				else {
-					move(Normalize(objectVector(this->position, bPos[objectNo]->position)));
-					this->matRot = LookAtRotation(
-						VectorToXMFloat(Normalize(objectVector(this->position, gPos))),
-						XMFLOAT3(0.0f, 1.0f, 0.0f));
-
-				}
+		if (this->attackTime >= 3.0f) {
+			if (this->attackHit == true) {
+				this->position.x += this->vectol.m128_f32[0] / 25;
+				this->position.y += this->vectol.m128_f32[1] / 25;
+				this->position.z += this->vectol.m128_f32[2] / 25;
+				this->attackOnMove = true;
 			}
-			else if (this->attackTime >= 1.0f) {
-				this->position.x -= this->vectol.m128_f32[0] / 100;
-				this->position.y -= this->vectol.m128_f32[1] / 100;
-				this->position.z -= this->vectol.m128_f32[2] / 100;
-			}
+			else {
+				move(Normalize(objectVector(this->position, bPos[objectNo]->position)));
+				this->matRot = LookAtRotation(
+					VectorToXMFloat(Normalize(objectVector(this->position, gPos))),
+					XMFLOAT3(0.0f, 1.0f, 0.0f));
 
-			//移動処理移行時の初期化
-			if (this->position.x == this->attackPos.x && this->attackOnMove == true) {
-				if (this->position.y == this->attackPos.y) {
-					if (this->position.z == this->attackPos.z) {
-						moveReset();
-						this->attackTime = 0.0f;
-						this->_move = true;
-						this->attack = false;
-						this->startAttack = false;
-						this->attackHit = true;
-					};
+			}
+		}
+		else if (this->attackTime >= 1.0f) {
+			this->position.x -= this->vectol.m128_f32[0] / 100;
+			this->position.y -= this->vectol.m128_f32[1] / 100;
+			this->position.z -= this->vectol.m128_f32[2] / 100;
+		}
+
+		//移動処理移行時の初期化
+		if (this->position.x == this->attackPos.x && this->attackOnMove == true) {
+			if (this->position.y == this->attackPos.y) {
+				if (this->position.z == this->attackPos.z) {
+					moveReset();
+					this->attackTime = 0.0f;
+					actionPattern = MoveMode::move;
+					this->startAttack = false;
+					this->attackHit = true;
 				};
-			}
-
-			this->attackTime += 1.0f / 60.0f;
+			};
 		}
-		if (this->mode == 2) {
-			//攻撃時の情報取得
-			if (this->startAttack == false) {
-				this->vectol = objectVector(pPos, this->position);
-				this->attackPos = this->position;
-				this->startAttack = true;
-			}
 
-			//攻撃開始（突進）
-			if (this->attackTime >= 3.0f) {
-				this->position.x += vectol.m128_f32[0] / 25;
-				this->position.y += vectol.m128_f32[1] / 25;
-				this->position.z += vectol.m128_f32[2] / 25;
-			}
-			else if (this->attackTime >= 1.0f) {
-				this->position.x -= this->vectol.m128_f32[0] / 100;
-				this->position.y -= this->vectol.m128_f32[1] / 100;
-				this->position.z -= this->vectol.m128_f32[2] / 100;
-			}
-
-			//移動処理移行時の初期化
-			if (this->attackTime >= 5.0f) {
-				moveReset();
-				this->attackTime = 0.0f;
-				this->_move = true;
-				this->attack = false;
-				this->startAttack = false;
-				this->attackHit = true;
-			}
-
-			this->attackTime += 1.0f / 60.0f;
-		}
-		if (this->mode == 3) {
-			//攻撃時の情報取得
-			if (this->startAttack == false) {
-				moveReset();
-				this->vectol = objectVector(gPos, this->position);
-				this->attackPos = this->position;
-				this->startAttack = true;
-			}
-
-			//攻撃開始（突進）
-			if (this->attackTime >= 3.0f) {
-				if (this->attackHit == true) {
-					this->position.x += this->vectol.m128_f32[0] / 25;
-					this->position.y += this->vectol.m128_f32[1] / 25;
-					this->position.z += this->vectol.m128_f32[2] / 25;
-					this->attackOnMove = true;
-				}
-				else {
-					move(Normalize(objectVector(this->position, this->attackPos)));
-					this->matRot = LookAtRotation(
-						VectorToXMFloat(Normalize(objectVector(this->position, this->attackPos))),
-						XMFLOAT3(0.0f, 1.0f, 0.0f));
-				}
-			}
-			else if (this->attackTime >= 1.0f) {
-				this->position.x -= this->vectol.m128_f32[0] / 100;
-				this->position.y -= this->vectol.m128_f32[1] / 100;
-				this->position.z -= this->vectol.m128_f32[2] / 100;
-			}
-
-			//移動処理移行時の初期化
-			if (attackTime >= 5.0f && this->attackOnMove == true) {
-				moveReset();
-				this->attackTime = 0.0f;
-				this->_move = true;
-				this->attack = false;
-				this->startAttack = false;
-				this->attackHit = true;
-			}
-			this->attackTime += 1.0f / 60.0f;
-		}
+		this->attackTime += 1.0f / 60.0f;
 	}
+	if (this->mode == 2) {
+		//攻撃時の情報取得
+		if (this->startAttack == false) {
+			this->vectol = objectVector(pPos, this->position);
+			this->attackPos = this->position;
+			this->startAttack = true;
+		}
+
+		//攻撃開始（突進）
+		if (this->attackTime >= 3.0f) {
+			this->position.x += vectol.m128_f32[0] / 25;
+			this->position.y += vectol.m128_f32[1] / 25;
+			this->position.z += vectol.m128_f32[2] / 25;
+		}
+		else if (this->attackTime >= 1.0f) {
+			this->position.x -= this->vectol.m128_f32[0] / 100;
+			this->position.y -= this->vectol.m128_f32[1] / 100;
+			this->position.z -= this->vectol.m128_f32[2] / 100;
+		}
+
+		//移動処理移行時の初期化
+		if (this->attackTime >= 5.0f) {
+			moveReset();
+			this->attackTime = 0.0f;
+			actionPattern = MoveMode::move;
+			this->startAttack = false;
+			this->attackHit = true;
+		}
+
+		this->attackTime += 1.0f / 60.0f;
+	}
+	if (this->mode == 3) {
+		//攻撃時の情報取得
+		if (this->startAttack == false) {
+			moveReset();
+			this->vectol = objectVector(gPos, this->position);
+			this->attackPos = this->position;
+			this->startAttack = true;
+		}
+
+		//攻撃開始（突進）
+		if (this->attackTime >= 3.0f) {
+			if (this->attackHit == true) {
+				this->position.x += this->vectol.m128_f32[0] / 25;
+				this->position.y += this->vectol.m128_f32[1] / 25;
+				this->position.z += this->vectol.m128_f32[2] / 25;
+				this->attackOnMove = true;
+			}
+			else {
+				move(Normalize(objectVector(this->position, this->attackPos)));
+				this->matRot = LookAtRotation(
+					VectorToXMFloat(Normalize(objectVector(this->position, this->attackPos))),
+					XMFLOAT3(0.0f, 1.0f, 0.0f));
+			}
+		}
+		else if (this->attackTime >= 1.0f) {
+			this->position.x -= this->vectol.m128_f32[0] / 100;
+			this->position.y -= this->vectol.m128_f32[1] / 100;
+			this->position.z -= this->vectol.m128_f32[2] / 100;
+		}
+
+		//移動処理移行時の初期化
+		if (attackTime >= 5.0f && this->attackOnMove == true) {
+			moveReset();
+			this->attackTime = 0.0f;
+			actionPattern = MoveMode::move;
+			this->startAttack = false;
+			this->attackHit = true;
+		}
+		this->attackTime += 1.0f / 60.0f;
+	}
+}
+
+void Enemy::Retreat()
+{
+	if (actionPattern != MoveMode::retreat)return;
+
+	move(Normalize(objectVector(position, RetreatPos)));
+
+	matRot = LookAtRotation(
+		VectorToXMFloat(Normalize(objectVector(position, RetreatPos))),
+		XMFLOAT3(0.0f, 1.0f, 0.0f));
+
+	if (alpha <= 0) { alive = false; }
+
+	alpha -= 0.01f;
+}
+
+void Enemy::Damage()
+{
+	static float count = 0.0f;
+	for (int i = 0; i < model->GetMesh().size(); i++) {
+		this->model->GetMesh()[i]->GetMaterial()->ambient.x = defalt_ambient[i].x * 2.0f;
+		this->model->GetMesh()[i]->GetMaterial()->Update();
+	}
+	count += 1.0f / 30.0f;
+	if (count >= 1.0f) {
+		for (int i = 0; i < model->GetMesh().size(); i++) {
+			this->model->GetMesh()[i]->GetMaterial()->ambient.x = defalt_ambient[i].x;
+			this->model->GetMesh()[i]->GetMaterial()->Update();
+		}
+		count = 0.0f;
+		this->damage = false;
+	}
+
+	if (status.HP <= 0) { MoveMode::retreat; }
 }
 
 void Enemy::moveUpdate(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
@@ -395,11 +426,11 @@ void Enemy::moveUpdate(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 
 	Attack(pPos, bPos, gPos);
 
+	Retreat();
+
 	Object3Ds::Update();
 }
 void Enemy::moveReset()
 {
-	this->step = 0.00005f;	//進行
-	this->pct = 0.0f;		//経過
 }
 

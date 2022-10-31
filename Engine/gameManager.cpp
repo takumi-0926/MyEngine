@@ -358,10 +358,6 @@ void GameManager::Draw()
 		}
 		//player->Draw();
 		_player->Draw();
-		//enemy->Draw();
-		//pmdObject->Draw();
-		//dx12->SceneDraw();
-		//pmdModel->Draw(cmdList);
 
 		BaseObject::PostDraw();
 
@@ -522,8 +518,8 @@ void GameManager::GameUpdate() {
 					sqhere[i].center = XMVectorSet(_enemy[i]->position.x, _enemy[i]->position.y, _enemy[i]->position.z, 1);
 					_enemy[i]->Update();
 					if (_enemy[i]->alive == true) { continue; }
-					//_enemy.erase(_enemy.begin());
-					//sqhere.erase(sqhere.begin());
+					_enemy.erase(_enemy.begin());
+					sqhere.erase(sqhere.begin());
 				}
 			}
 			//当たり判定（プレイヤー / 敵 / 最終関門）
