@@ -21,22 +21,19 @@ class Enemy : public Object3Ds {
 public:
 	Status status;
 	bool alive = false;	//生存判定
-	bool _move = true;  //移動フラグ
-	bool attack = false;//攻撃フラグ
+	int actionPattern = 0;//行動パターン
 	bool startAttack = false;
 	bool attackHit = true;
 	bool attackOnMove = false;
 	bool damage = false;
 
-	float step = 0.00005f;	//進行
-	float pct = 0.0f;		//経過
 	float attackTime = 0.0f;
 	int mode = 0;
 
 	float damegeCount = 0.0f;
 
 	float alpha = 1.0f;
-
+	vector<XMFLOAT3> defalt_ambient;
 	XMVECTOR vectol;
 	XMFLOAT3 attackPos;
 	XMFLOAT3 oldPos;
@@ -124,27 +121,10 @@ public:
 	/// <summary>
 	/// 退却時処理
 	/// </summary>
-	void Retreat() {
-		move(Normalize(objectVector(this->position, RetreatPos)));
-		this->alpha -= 0.01f;
-	}
+	void Retreat();
 
 	/// <summary>
 	/// 被ダメージ時処理
 	/// </summary>
-	void Damege() {
-		static float count = 0.0f;
-		for (int i = 0; i < model->GetMesh().size(); i++) {
-			this->model->GetMesh()[i]->GetMaterial()->ambient.x = 1.5f;
-			this->model->GetMesh()[i]->GetMaterial()->Update();
-		}
-		count += 1.0f / 30.0f;
-		if (count >= 1.0f) {
-			for (int i = 0; i < model->GetMesh().size(); i++) {
-				this->model->GetMesh()[i]->GetMaterial()->ambient.x = 0.8f;
-				this->model->GetMesh()[i]->GetMaterial()->Update();
-			}
-			this->damage = false;
-		}
-	}
+	void Damage();
 };

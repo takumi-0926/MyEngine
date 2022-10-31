@@ -5,6 +5,7 @@
 
 class Enemy;
 class Bullet;
+
 class DefCannon : public Object3Ds{
 
 	std::vector<Bullet*> bullet;

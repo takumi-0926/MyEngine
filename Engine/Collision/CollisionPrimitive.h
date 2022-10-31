@@ -3,6 +3,7 @@
 #include <DirectXMath.h>
 
 using namespace DirectX;
+
 struct Sqhere {
 	XMVECTOR center = { 0,0,0,1 };
 
