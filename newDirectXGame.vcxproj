@@ -307,7 +307,6 @@
     <ClInclude Include="Engine\object\Material.h" />
     <ClInclude Include="Engine\object\Mesh.h" />
     <ClInclude Include="Engine\object\Model.h" />
-    <ClInclude Include="Engine\object\object2d.h" />
     <ClInclude Include="Engine\object\object3D.h" />
     <ClInclude Include="Engine\pipelineSet.h" />
     <ClInclude Include="Application\Player.h" />
@@ -361,7 +360,6 @@
     <ClCompile Include="Engine\object\Material.cpp" />
     <ClCompile Include="Engine\object\Mesh.cpp" />
     <ClCompile Include="Engine\object\Model.cpp" />
-    <ClCompile Include="Engine\object\object2d.cpp" />
     <ClCompile Include="Engine\object\object3D.cpp" />
     <ClCompile Include="Engine\pipelineSet.cpp" />
     <ClCompile Include="Application\Player.cpp" />

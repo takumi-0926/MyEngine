@@ -268,9 +268,6 @@
     <ClInclude Include="Engine\Camera\Camera.h">
       <Filter>ソース ファイル\Camera</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\object\object2d.h">
-      <Filter>ソース ファイル\Object</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\object\Material.h">
       <Filter>ソース ファイル\Object</Filter>
     </ClInclude>
@@ -370,9 +367,6 @@
       <Filter>ソース ファイル\Object</Filter>
     </ClCompile>
     <ClCompile Include="Engine\object\Model.cpp">
-      <Filter>ソース ファイル\Object</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\object\object2d.cpp">
       <Filter>ソース ファイル\Object</Filter>
     </ClCompile>
     <ClCompile Include="Engine\object\object3D.cpp">
