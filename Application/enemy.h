@@ -127,4 +127,4 @@ public:
 	/// ”íƒ_ƒ[ƒWˆ—
 	/// </summary>
 	void Damage();
-}
+};
