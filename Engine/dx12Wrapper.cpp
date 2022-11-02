@@ -53,7 +53,7 @@ bool Wrapper::Init(HWND _hwnd, SIZE _ret) {
 	EnableDebugLayer();
 
 	ComPtr<ID3D12DeviceRemovedExtendedDataSettings> dredSettings;
-	if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&dredSettings)))); {
+	if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&dredSettings)))) {
 		dredSettings->SetAutoBreadcrumbsEnablement(D3D12_DRED_ENABLEMENT_FORCED_ON);
 		dredSettings->SetPageFaultEnablement(D3D12_DRED_ENABLEMENT_FORCED_ON);
 	}
@@ -321,7 +321,7 @@ HRESULT Wrapper::InitializeRenderHeap()
 	rtvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
 	rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
 
-	for (int i = 0; i < swcDesc.BufferCount; ++i) {
+	for (uint32_t i = 0; i < swcDesc.BufferCount; ++i) {
 		result = _swapchain->GetBuffer(i, IID_PPV_ARGS(&_backBuffer[i]));
 		if (FAILED(result)) {
 			assert(0);
@@ -486,7 +486,7 @@ HRESULT Wrapper::CreateSceneView()
 
 	D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc = {};
 	cbvDesc.BufferLocation = _sceneConstBuff->GetGPUVirtualAddress();
-	cbvDesc.SizeInBytes = _sceneConstBuff->GetDesc().Width;
+	cbvDesc.SizeInBytes = (UINT)_sceneConstBuff->GetDesc().Width;
 	//定数バッファビューの作成
 	_dev->CreateConstantBufferView(&cbvDesc, heapHandle);
 

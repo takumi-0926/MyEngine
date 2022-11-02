@@ -8,6 +8,7 @@ class MeshCollider : public BaseCollider {
 public:
 	MeshCollider() {
 		shapeType = COLLISIONSHAPE_MESH;
+		invMatWorld = {};
 	}
 
 	/// <summary>

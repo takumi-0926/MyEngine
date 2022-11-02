@@ -68,35 +68,40 @@ Enemy::Enemy()
 	};
 	alive = false;
 	mode = 0;
+	vectol = {};
+	oldPos = {};
+	attackPos = {};
 }
 Enemy* Enemy::Create(Model* model)
 {
 	// 3Dオブジェクトのインスタンスを生成
-	Enemy* object3d = new Enemy();
-	if (object3d == nullptr) {
+	Enemy* instance = new Enemy();
+	if (instance == nullptr) {
 		return nullptr;
 	}
 
-	object3d->position.y = 20;
-	object3d->position.z = -150;
+	instance->position.y = 20;
+	instance->position.z = -150;
 
 	//アンビエント元を取得
 	for (int i = 0; i < model->GetMesh().size(); i++) {
-		object3d->defalt_ambient.push_back(model->GetMesh()[i]->GetMaterial()->ambient);
+		instance->defalt_ambient.push_back(model->GetMesh()[i]->GetMaterial()->ambient);
 	}
 
 	// 初期化
-	if (!object3d->Initialize()) {
-		delete object3d;
+	if (!instance->Initialize()) {
+		delete instance;
 		assert(0);
 		return nullptr;
 	}
 
 	if (model) {
-		object3d->SetModel(model);
+
+		Model* _model = model;
+		instance->SetModel(_model);
 	}
 
-	return object3d;
+	return instance;
 }
 bool Enemy::Initialize()
 {
@@ -186,6 +191,37 @@ void Enemy::Draw()
 void Enemy::OnCollision(const CollisionInfo& info)
 {
 	int a = 0;
+}
+
+Enemy* Enemy::Appearance(Model* model1, Model* model2)
+{
+	Enemy* ene = nullptr;
+	static float popTime = 0;
+	//三体まで
+	if (popTime >= 10.0f) {
+		int r = rand() % 10;
+		if (r % 2 == 1) { ene = Enemy::Create(model1); }
+		if (r % 2 != 1) { ene = Enemy::Create(model2); }
+		if (r % 2 == 1) {
+			ene->mode = 2;
+			ene->position.y = 0;
+			ene->scale = { 25,25,25 };
+			ene->alive = true;
+		}
+		else if (r % 2 != 1) {
+			ene->mode = 3;
+			ene->position = { 0,0,-150 };
+			ene->scale = { 3,3,3 };
+			ene->alive = true;
+		}
+
+		popTime = 0;
+	}
+	else {
+		popTime += 1.0f / 60.0f;
+	}
+
+	return ene;
 }
 
 void Enemy::Move(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
@@ -401,12 +437,13 @@ void Enemy::Retreat()
 
 void Enemy::Damage()
 {
+	
 	static float count = 0.0f;
 	for (int i = 0; i < model->GetMesh().size(); i++) {
 		this->model->GetMesh()[i]->GetMaterial()->ambient.x = defalt_ambient[i].x * 2.0f;
 		this->model->GetMesh()[i]->GetMaterial()->Update();
 	}
-	count += 1.0f / 30.0f;
+	count += 1.0f / 20.0f;
 	if (count >= 1.0f) {
 		for (int i = 0; i < model->GetMesh().size(); i++) {
 			this->model->GetMesh()[i]->GetMaterial()->ambient.x = defalt_ambient[i].x;
@@ -416,7 +453,7 @@ void Enemy::Damage()
 		this->damage = false;
 	}
 
-	if (status.HP <= 0) { MoveMode::retreat; }
+	if (status.HP <= 0) { actionPattern = MoveMode::retreat; }
 }
 
 void Enemy::moveUpdate(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
@@ -428,7 +465,7 @@ void Enemy::moveUpdate(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 
 	Retreat();
 
-	Object3Ds::Update();
+	Update();
 }
 void Enemy::moveReset()
 {

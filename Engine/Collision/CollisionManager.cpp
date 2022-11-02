@@ -126,6 +126,7 @@ bool CollisionManager::Raycast(
 		}
 		return result;
 	}
+	return result;
 }
 
 void CollisionManager::QuerySqhere(const Sqhere& sphere, QueryCallBack* callBack, unsigned short attribute)

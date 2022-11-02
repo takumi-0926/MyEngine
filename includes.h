@@ -8,11 +8,11 @@
 #include "d3dx12.h"
 #include <dinput.h>
 #include <dxgi1_6.h>
-#include <DirectXTex.h>
 #include <DirectXMath.h>
 #include <d3dcompiler.h>
 
-#pragma comment(lib,"DirectXTex.lib")
+//#include <DirectXTex.h>
+//#pragma comment(lib,"DirectXTex.lib")
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
 #pragma comment(lib,"d3dcompiler.lib")

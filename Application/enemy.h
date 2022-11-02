@@ -37,7 +37,7 @@ public:
 	XMVECTOR vectol;
 	XMFLOAT3 attackPos;
 	XMFLOAT3 oldPos;
-	XMFLOAT3 RetreatPos = { 0.0f,20.0f,-150.0f };
+	XMFLOAT3 RetreatPos = { 1.0f,20.0f,-150.0f };
 private:
 	XMFLOAT3 VectorToXMFloat(XMVECTOR vec);
 	float	 objectDistance(XMFLOAT3 pos1, XMFLOAT3 pos2);	//Œš•¨‚Æ‚Ì’¼ü‹——£‚ğŒvZ
@@ -107,6 +107,11 @@ public:
 			this->model->GetMesh()[i]->GetMaterial()->Update();
 		}
 	}
+
+	/// <summary>
+	/// oŒ»ˆ—
+	/// </summary>
+	static Enemy* Appearance(Model* model1, Model* model2);
 
 	/// <summary>
 	/// ˆÚ“®ˆ—

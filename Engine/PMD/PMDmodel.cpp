@@ -26,8 +26,8 @@ namespace {
     //@param texPath PMD モデルから見たテクスチャのパス
     //@return アプリケーションから見たテクスチャのパス
     static string GetTexturePathFromModelAndTexPath(const string& modelPath, const char* texPath) {
-        int pathIndex1 = modelPath.rfind('/');
-        int pathIndex2 = modelPath.rfind('\\');
+        size_t pathIndex1 = modelPath.rfind('/');
+        size_t pathIndex2 = modelPath.rfind('\\');
 
         auto pathIndex = max(pathIndex1, pathIndex2);
         auto folderPath = modelPath.substr(0, pathIndex + 1);
@@ -64,7 +64,7 @@ namespace {
     //@param path 対象のパス文字列
     //@return 拡張子
     static string GetExtension(const string& path) {
-        int idx = path.rfind('.');
+        size_t idx = path.rfind('.');
         return path.substr(idx + 1, path.length() - idx - 1);
     }
 
@@ -73,7 +73,7 @@ namespace {
     //@param splitter 区切り文字
     //@return 分離前後の文字列ペア
     static std::pair<string, string>SplitFileName(const string& path, const char splitter = '*') {
-        int idx = path.find(splitter);
+        size_t idx = path.find(splitter);
         std::pair<string, string>ret;
         ret.first = path.substr(0, idx);
         ret.second = path.substr((idx + 1), path.length() - idx - 1);
@@ -147,11 +147,11 @@ ComPtr<ID3D12Resource> PMDmodel::LoadTextureFromFile(string& texPath) {
     D3D12_RESOURCE_DESC texresDesc = {};
     texresDesc.Format = metadata.format;
     texresDesc.Width = metadata.width;
-    texresDesc.Height = metadata.height;
-    texresDesc.DepthOrArraySize = metadata.arraySize;
+    texresDesc.Height = (UINT)metadata.height;
+    texresDesc.DepthOrArraySize = (UINT16)metadata.arraySize;
     texresDesc.SampleDesc.Count = 1;
     texresDesc.SampleDesc.Quality = 0;
-    texresDesc.MipLevels = metadata.mipLevels;
+    texresDesc.MipLevels = (UINT16)metadata.mipLevels;
     texresDesc.Dimension = static_cast<D3D12_RESOURCE_DIMENSION>(metadata.dimension);
     texresDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;//
     texresDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
@@ -170,7 +170,7 @@ ComPtr<ID3D12Resource> PMDmodel::LoadTextureFromFile(string& texPath) {
         0, nullptr,
         img->pixels,
         img->rowPitch,
-        img->slicePitch);
+        (UINT)img->slicePitch);
     if (FAILED(result))return nullptr;
 
     return texbuff;
@@ -216,7 +216,7 @@ ID3D12Resource* PMDmodel::CreateWhiteTexture()
         nullptr,
         data.data(),
         4 * 4,
-        data.size());
+        (UINT)data.size());
 
     return whiteBuff;
 }
@@ -261,7 +261,7 @@ ID3D12Resource* PMDmodel::CreateBlackTexture()
         nullptr,
         data.data(),
         4 * 4,
-        data.size());
+        (UINT)data.size());
 
     return blackBuff;
 }
@@ -464,7 +464,7 @@ HRESULT PMDmodel::LoadPMDFile(const char* path)
 
     std::vector<PMDVertex> t_vertices;
 
-    for (int i = 0; i < vertnum; ++i)
+    for (uint32_t i = 0; i < vertnum; ++i)
     {
         PMDVertexFile p =
             reinterpret_cast<PMDVertexFile*>(vertices.data())[i];
@@ -509,7 +509,7 @@ HRESULT PMDmodel::LoadPMDFile(const char* path)
     vertBuff->Unmap(0, nullptr);//マップ解除
 
     vbView.BufferLocation = vertBuff->GetGPUVirtualAddress();
-    vbView.SizeInBytes = t_vertices.size() * sizeof(t_vertices[0]);
+    vbView.SizeInBytes = (UINT)t_vertices.size() * sizeof(t_vertices[0]);
     vbView.StrideInBytes = sizeof(t_vertices[0]);
 
     //D3D12_RESOURCE_DESC resdesc = {};
@@ -555,7 +555,7 @@ HRESULT PMDmodel::LoadPMDFile(const char* path)
 
     ibView.BufferLocation = indexBuff->GetGPUVirtualAddress();
     ibView.Format = DXGI_FORMAT_R16_UINT;
-    ibView.SizeInBytes = indices.size() * sizeof(indices[0]);
+    ibView.SizeInBytes = (UINT)indices.size() * sizeof(indices[0]);
 
     //*マテリアル関連*------------------------------------
 //マテリアルの読み込み
@@ -684,6 +684,7 @@ HRESULT PMDmodel::LoadVMDFile(const unsigned int Number, const char* path)
 
     result = fopen_s(&fp, modelPath.c_str(), "rb");//ファイルを開く
     if (FAILED(result)) { assert(0); }
+    if(fp == 0){ assert(0); }
 
     fseek(fp, 50, SEEK_SET);
     unsigned int motionDataNum = 0;
@@ -779,7 +780,7 @@ HRESULT PMDmodel::LoadVMDFile(const unsigned int Number, const char* path)
         fread(&ikBoneCount, sizeof(ikBoneCount), 1, fp);
 
         //名前とオン/オフ情報取得
-        for (int i = 0; i < ikBoneCount; ++i)
+        for (uint32_t i = 0; i < ikBoneCount; ++i)
         {
             char ikBoneName[20];
             fread(ikBoneName, _countof(ikBoneName), 1, fp);
@@ -876,7 +877,7 @@ HRESULT PMDmodel::CreateTransform()
 
     D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc = {};
     cbvDesc.BufferLocation = transformBuff->GetGPUVirtualAddress();
-    cbvDesc.SizeInBytes = buffSize;
+    cbvDesc.SizeInBytes = (UINT)buffSize;
     dx12->GetDevice()->CreateConstantBufferView(
         &cbvDesc,
         heapHandle);
@@ -1021,7 +1022,7 @@ HRESULT PMDmodel::CreateMaterialAndTextureView()
         D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
     matDescHeapH.ptr += inc;
     matDescHeapH.ptr += inc;
-    for (int i = 0; i < materialNum; ++i) {
+    for (uint32_t i = 0; i < materialNum; ++i) {
         //マテリアル用定数バッファビュー
         dx12->GetDevice()->CreateConstantBufferView(&matCBVDesc, matDescHeapH);
         matDescHeapH.ptr += inc;
@@ -1223,7 +1224,7 @@ float PMDmodel::GetYFromXOn(float x, const XMFLOAT2& a, const XMFLOAT2& b, uint8
     return t * t * t + 3 * t * t * r * b.y + 3 * t * r * r * a.y;
 }
 
-void PMDmodel::IKSolve(int frameNo)
+void PMDmodel::IKSolve(uint32_t frameNo)
 {
     //IKオン/オフ情報をフレーム番号で逆から検索
     auto it = find_if(_ikEnableData.rbegin(), _ikEnableData.rend(),

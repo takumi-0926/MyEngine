@@ -5,9 +5,9 @@
 #include "Collision\CollisionManager.h"
 
 // デバイス
-ID3D12Device* Object3Ds::device;
+ID3D12Device* Object3Ds::device = nullptr;
 // コマンドリスト
-ID3D12GraphicsCommandList* Object3Ds::cmdList;
+ID3D12GraphicsCommandList* Object3Ds::cmdList = nullptr;
 
 Wrapper* Object3Ds::dx12 = nullptr;
 

@@ -227,7 +227,7 @@ private:
 	//LookAts—ñ
 	void SolveLookAt(const PMDIK& ik);
 	//ê‡•ª‚¯
-	void IKSolve(int frameNo);
+	void IKSolve(uint32_t frameNo);
 
 public:
 	PMDmodel(/*Wrapper* _dx12, const char* filepath, PMDobject& object*/);
