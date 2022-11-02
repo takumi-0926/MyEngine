@@ -20,6 +20,19 @@ Player* Player::Create(PMDmodel* _model)
 
 void Player::Update()
 {
+	if (model->position.x <= -100.0f) {
+		model->position.x = -100.0f;
+	}
+	if (model->position.x >= 100.0f) {
+		model->position.x = 100.0f;
+	}
+	if (model->position.z <= -100.0f) {
+		model->position.z = -100.0f;
+	}
+	if (model->position.z >= 322.0f) {
+		model->position.z = 322.0f;
+	}
+
 	//ˆÚ“®
 	PMDobject::Update();
 }

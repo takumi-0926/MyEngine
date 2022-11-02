@@ -78,8 +78,6 @@ int DirectInput::InputInit(HINSTANCE hInstance, HWND hWnd)
 		g_ButtonStates[i] = ButtonState::ButtonStateNone;
 	}
 	return true;
-
-	return 0;
 }
 
 

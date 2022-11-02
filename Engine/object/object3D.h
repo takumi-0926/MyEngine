@@ -63,7 +63,7 @@ public:
 
 	void SetCollider(BaseCollider* collider);
 
-	virtual void OnCollision(const CollisionInfo& info){}
+	virtual void OnCollision(const CollisionInfo& info) {}
 public:
 	ComPtr<ID3D12Resource> constBuffB0; // 定数バッファ(OBJ)
 	ComPtr<ID3D12Resource> constBuffB1; // 定数バッファ(OBJ)
@@ -79,8 +79,10 @@ public:
 	// ローカル座標
 	XMFLOAT3 position = { 0,0,0 };
 	// ローカルワールド変換行列
-	XMMATRIX matScale, matRot, matTrans;
-	XMMATRIX matWorld;
+	XMMATRIX matScale = {};
+	XMMATRIX matRot = {};
+	XMMATRIX matTrans = {};
+	XMMATRIX matWorld = {};
 
 	Model* model = nullptr;
 

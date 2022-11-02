@@ -48,10 +48,12 @@ void Mesh::CreateBuffers()
 
 	UINT sizeVB = static_cast<UINT>(sizeof(VertexPosNormalUv) * vertices.size());
 	// 頂点バッファ生成
+	CD3DX12_HEAP_PROPERTIES properties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+	CD3DX12_RESOURCE_DESC desc = CD3DX12_RESOURCE_DESC::Buffer(sizeVB);
 	result = device->CreateCommittedResource(
-		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+		&properties,
 		D3D12_HEAP_FLAG_NONE,
-		&CD3DX12_RESOURCE_DESC::Buffer(sizeVB),
+		&desc,
 		D3D12_RESOURCE_STATE_GENERIC_READ,
 		nullptr,
 		IID_PPV_ARGS(&vertBuff));
@@ -76,10 +78,12 @@ void Mesh::CreateBuffers()
 
 	UINT sizeIB = static_cast<UINT>(sizeof(unsigned short) * indices.size());
 	// インデックスバッファ生成
+	properties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+	desc = CD3DX12_RESOURCE_DESC::Buffer(sizeIB);
 	result = device->CreateCommittedResource(
-		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+		&properties,
 		D3D12_HEAP_FLAG_NONE,
-		&CD3DX12_RESOURCE_DESC::Buffer(sizeIB),
+		&desc,
 		D3D12_RESOURCE_STATE_GENERIC_READ,
 		nullptr,
 		IID_PPV_ARGS(&indexBuff));

@@ -34,7 +34,7 @@ public:
 	virtual void Update() = 0;
 
 	//形状タイプ取得
-	inline CollisionShapeType GEtShapeType(){
+	inline CollisionShapeType GetShapeType(){
 		return shapeType;
 	}
 

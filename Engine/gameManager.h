@@ -63,16 +63,18 @@ class Stage;
 class CollisionManager;
 class GameManager {
 private://メンバ変数(初期化)
-	Input* input;
-	Audio* audio;
-	Wrapper* dx12;
-	std::shared_ptr<PMDmodel> pmdModel;
+	Input*	 input;
+	Audio*   audio;
+	Wrapper*  dx12;
+	std::shared_ptr<PMDmodel>   pmdModel;
 	std::shared_ptr<PMDobject> pmdObject;
-	PMDobject* player = nullptr;
-	Player* _player = nullptr;
-	PMDobject* enemy = nullptr;
+	Player*		   _player = nullptr;
 	vector<Enemy*> _enemy;
 	PMDmodel* modelPlayer = nullptr;
+
+	Stage* stage;
+	HitBox* HitBox = {};
+	DefCannon* cannon[6] = {};
 
 	//衝突マネージャー
 	CollisionManager* collisionManager = nullptr;
@@ -87,16 +89,12 @@ private://メンバ変数(初期化)
 	Sprite* BreakGage[15] = {};
 private://メンバ変数(ゲームシーン)
 	vector<Sqhere> sqhere;
-	Stage* stage;
 	Model* modelPlane = nullptr;
 	Model* modelBox = nullptr;
 	Model* modelPyramid = nullptr; 
 	vector<Object3Ds*>stageObjects;
-	StageObject* wall[6] = {};
-	DefCannon* cannon[6] = {};
-	Sprite* hp[P_HP] = {};
+	Sprite* hp = nullptr;
 	Sprite* Damege = nullptr;
-	HitBox* HitBox = {};
 
 	Model* model01 = nullptr;
 	Model* model02 = nullptr;
@@ -174,6 +172,7 @@ private://メンバ変数(ゲームシーン)
 
 	bool enemyToPlayerDamege = false;
 	float DamegeAlpha = 1.0f;
+	float popHp = 0;
 
 	XMFLOAT3 afterEye;
 public://メンバ関数

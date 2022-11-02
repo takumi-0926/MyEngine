@@ -47,7 +47,7 @@ bool LoadPmx(PMXModelData& data, const std::wstring& _filePath)
 
 	for (int i = 0; i < 4; i++)
 	{
-		pmxHeader[i] = pmxFile.get();
+		pmxHeader[i] = byte(pmxFile.get());
 	}
 	if (pmxHeader != PMX_MAGIC_NUMBER)
 	{
@@ -58,7 +58,7 @@ bool LoadPmx(PMXModelData& data, const std::wstring& _filePath)
 	float version{};
 	pmxFile.read(reinterpret_cast<char*>(&version), 4);
 
-	byte hederDataLength = pmxFile.get();
+	byte hederDataLength = byte(pmxFile.get());
 	if (hederDataLength != 8)
 	{
 		pmxFile.close();
@@ -67,7 +67,7 @@ bool LoadPmx(PMXModelData& data, const std::wstring& _filePath)
 	std::array<byte, 8> hederData{};
 	for (int i = 0; i < hederDataLength; i++)
 	{
-		hederData[i] = pmxFile.get();
+		hederData[i] = byte(pmxFile.get());
 	}
 	//UTF-8‚Í”ñ‘Î‰ž
 	if (hederData[0] != 0)
@@ -105,7 +105,7 @@ bool LoadPmx(PMXModelData& data, const std::wstring& _filePath)
 			}
 		}
 
-		const byte weightMethod = pmxFile.get();
+		const byte weightMethod = byte(pmxFile.get());
 		switch (weightMethod)
 		{
 		case pmxWeight::BDEF1:
@@ -235,7 +235,7 @@ bool LoadPmx(PMXModelData& data, const std::wstring& _filePath)
 		}
 		pmxFile.get();
 
-		const byte shareToonFlag = pmxFile.get();
+		const byte shareToonFlag = byte(pmxFile.get());
 		if (shareToonFlag)
 		{
 			pmxFile.get();
@@ -269,7 +269,7 @@ bool LoadPmx(PMXModelData& data, const std::wstring& _filePath)
 		data.bones[i].EngName.resize(arrayLength);
 		for (unsigned j = 0; j < arrayLength; ++j)
 		{
-			data.bones[i].EngName[j] = pmxFile.get();
+			data.bones[i].EngName[j] = char(pmxFile.get());
 		}
 
 		pmxFile.read(reinterpret_cast<char*>(&data.bones[i].position), 12);
@@ -336,7 +336,7 @@ bool LoadPmx(PMXModelData& data, const std::wstring& _filePath)
 			for (int j = 0; j < ikLinkSize; ++j)
 			{
 				pmxFile.read(reinterpret_cast<char*>(&data.bones[i].ikLinks[j].index), hederData[5]);
-				angleLim = pmxFile.get();
+				angleLim = unsigned char(pmxFile.get());
 				data.bones[i].ikLinks[j].existAngleLimited = false;
 				if (angleLim == 1)
 				{

@@ -48,17 +48,17 @@ Wrapper::~Wrapper()
 }
 
 bool Wrapper::Init(HWND _hwnd, SIZE _ret) {
-	#ifdef _DEBUG
-		//エラーチェック//
+#ifdef _DEBUG
+	//エラーチェック//
 	EnableDebugLayer();
 
 	ComPtr<ID3D12DeviceRemovedExtendedDataSettings> dredSettings;
-	if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&dredSettings)))); {
+	if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&dredSettings)))) {
 		dredSettings->SetAutoBreadcrumbsEnablement(D3D12_DRED_ENABLEMENT_FORCED_ON);
 		dredSettings->SetPageFaultEnablement(D3D12_DRED_ENABLEMENT_FORCED_ON);
 	}
 
-	#endif
+#endif
 	InitalizeCamera(_ret.cx, _ret.cy);
 
 	//DirectX12関連初期化
@@ -108,11 +108,8 @@ void Wrapper::PreRun()
 	auto bbIdx = SwapChain()->GetCurrentBackBufferIndex();
 
 	//リソースバリア（Present⇔レンダターゲット）状態の変更
-	_cmdList->ResourceBarrier(
-		1,
-		&CD3DX12_RESOURCE_BARRIER::Transition(_backBuffer[bbIdx].Get(),
-			D3D12_RESOURCE_STATE_PRESENT,
-			D3D12_RESOURCE_STATE_RENDER_TARGET));
+	CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(_backBuffer[bbIdx].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+	_cmdList->ResourceBarrier(1, &barrier);
 
 	//描画先を指定
 	//レンダターゲットビュー用のディスクリプタヒープのハンドルを用意
@@ -127,11 +124,11 @@ void Wrapper::PreRun()
 	_cmdList->ClearDepthStencilView(dsvH, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
 	// ビューポートの設定
-	_cmdList->RSSetViewports(1,
-		&CD3DX12_VIEWPORT(0.0f, 0.0f, Application::window_width, Application::window_height));
+	CD3DX12_VIEWPORT viewport = CD3DX12_VIEWPORT(0.0f, 0.0f, Application::window_width, Application::window_height);
+	_cmdList->RSSetViewports(1, &viewport);
 	// シザリング矩形の設定
-	_cmdList->RSSetScissorRects(1,
-		&CD3DX12_RECT(0, 0, Application::window_width, Application::window_height));
+	CD3DX12_RECT rect = CD3DX12_RECT(0, 0, Application::window_width, Application::window_height);
+	_cmdList->RSSetScissorRects(1, &rect);
 }
 
 void Wrapper::PostRun() {
@@ -139,11 +136,8 @@ void Wrapper::PostRun() {
 	auto bbIdx = _swapchain->GetCurrentBackBufferIndex();
 
 	//リソースバリア（レンダターゲット⇔Present）状態の変更
-	_cmdList->ResourceBarrier(
-		1,
-		&CD3DX12_RESOURCE_BARRIER::Transition(_backBuffer[bbIdx].Get(),
-			D3D12_RESOURCE_STATE_RENDER_TARGET,
-			D3D12_RESOURCE_STATE_PRESENT));
+	CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(_backBuffer[bbIdx].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
+	_cmdList->ResourceBarrier(1, &barrier);
 
 	//命令のクローズ
 	_cmdList->Close();
@@ -158,6 +152,8 @@ void Wrapper::PostRun() {
 	_cmdQueue->Signal(_fence.Get(), ++_fenceval);
 	if (_fence->GetCompletedValue() != _fenceval) {
 		auto event = CreateEvent(nullptr, false, false, nullptr);
+		if (event == 0) { assert(0); }
+
 		_fence->SetEventOnCompletion(_fenceval, event);
 		//イベントが発生するまで待つ(INFINITE)
 		WaitForSingleObject(event, INFINITE);
@@ -321,7 +317,7 @@ HRESULT Wrapper::InitializeRenderHeap()
 	rtvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
 	rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
 
-	for (int i = 0; i < swcDesc.BufferCount; ++i) {
+	for (uint32_t i = 0; i < swcDesc.BufferCount; ++i) {
 		result = _swapchain->GetBuffer(i, IID_PPV_ARGS(&_backBuffer[i]));
 		if (FAILED(result)) {
 			assert(0);
@@ -456,10 +452,12 @@ HRESULT Wrapper::CreateSceneView()
 {
 	HRESULT result;
 
+	CD3DX12_HEAP_PROPERTIES properties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+	CD3DX12_RESOURCE_DESC desc = CD3DX12_RESOURCE_DESC::Buffer((sizeof(ConstBufferDataB0_1) + 0xff) & ~0xff);
 	result = _dev->CreateCommittedResource(
-		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+		&properties,
 		D3D12_HEAP_FLAG_NONE,
-		&CD3DX12_RESOURCE_DESC::Buffer((sizeof(ConstBufferDataB0_1) + 0xff) & ~0xff),
+		&desc,
 		D3D12_RESOURCE_STATE_GENERIC_READ,
 		nullptr,
 		IID_PPV_ARGS(_sceneConstBuff.ReleaseAndGetAddressOf())
@@ -482,11 +480,11 @@ HRESULT Wrapper::CreateSceneView()
 	_mappedSceneData->shadow = XMMatrixShadow(
 		XMLoadFloat4(&planeVec),
 		-XMLoadFloat3(&lightVec));
-		_mappedSceneData->cameraPos = cameraPos;
+	_mappedSceneData->cameraPos = cameraPos;
 
 	D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc = {};
 	cbvDesc.BufferLocation = _sceneConstBuff->GetGPUVirtualAddress();
-	cbvDesc.SizeInBytes = _sceneConstBuff->GetDesc().Width;
+	cbvDesc.SizeInBytes = UINT(_sceneConstBuff->GetDesc().Width);
 	//定数バッファビューの作成
 	_dev->CreateConstantBufferView(&cbvDesc, heapHandle);
 

@@ -119,11 +119,12 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>Level4</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_WINDOWS;DIRECTINPUT_VERSION=0x0800;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>false</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)External\DirectXTex;$(ProjectDir)lib\fbx_sdk\include;$(IncludePath);$(SolutionDir)Application;$(SolutionDir)Engine;$(SolutionDir)External</AdditionalIncludeDirectories>
+      <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -341,6 +342,7 @@
     <ClCompile Include="Application\DefCannon.cpp" />
     <ClCompile Include="Engine\Input\DirectInput.cpp" />
     <ClCompile Include="Application\enemy.cpp" />
+    <ClCompile Include="Engine\object\baseObject.cpp" />
     <ClCompile Include="Engine\SceneEffect\Fade.cpp" />
     <ClCompile Include="Engine\FBX\FbxLoader.cpp" />
     <ClCompile Include="Engine\FBX\FbxModel.cpp" />

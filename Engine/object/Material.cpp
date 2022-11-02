@@ -37,10 +37,12 @@ void Material::CreateConstantBuffer()
 {
 	HRESULT result;
 	// 定数バッファの生成
+	CD3DX12_HEAP_PROPERTIES properties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+	CD3DX12_RESOURCE_DESC desc = CD3DX12_RESOURCE_DESC::Buffer((sizeof(ConstBufferDataB1) + 0xff) & ~0xff);
 	result = device->CreateCommittedResource(
-		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD), 	// アップロード可能
+		&properties, 	// アップロード可能
 		D3D12_HEAP_FLAG_NONE,
-		&CD3DX12_RESOURCE_DESC::Buffer((sizeof(ConstBufferDataB1) + 0xff) & ~0xff),
+		&desc,
 		D3D12_RESOURCE_STATE_GENERIC_READ,
 		nullptr,
 		IID_PPV_ARGS(&constBuff));
@@ -91,8 +93,9 @@ void Material::LoadTexture(const std::string& directoryPath, CD3DX12_CPU_DESCRIP
 	);
 
 	// テクスチャ用バッファの生成
+	CD3DX12_HEAP_PROPERTIES properties = CD3DX12_HEAP_PROPERTIES(D3D12_CPU_PAGE_PROPERTY_WRITE_BACK, D3D12_MEMORY_POOL_L0);
 	result = device->CreateCommittedResource(
-		&CD3DX12_HEAP_PROPERTIES(D3D12_CPU_PAGE_PROPERTY_WRITE_BACK, D3D12_MEMORY_POOL_L0),
+		&properties,
 		D3D12_HEAP_FLAG_NONE,
 		&texresDesc,
 		D3D12_RESOURCE_STATE_GENERIC_READ, // テクスチャ用指定

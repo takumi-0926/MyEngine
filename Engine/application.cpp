@@ -3,7 +3,7 @@
 
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND, UINT, WPARAM, LPARAM);
 
-const wchar_t Application::crassName[] = L"MyGameEngine";
+const wchar_t Application::crassName[] = L"百獣夜荒(ビーステッド・ナイト・クロウズ)";
 
 Application::Application()
 {

@@ -2,6 +2,9 @@
 #include <DirectXMath.h>
 #include "..\includes.h"
 
+#include <DirectXTex.h>
+#pragma comment(lib,"DirectXTex.lib")
+
 #include "PMDModel.h"
 #include "dx12Wrapper.h"
 #include "object/baseObject.h"

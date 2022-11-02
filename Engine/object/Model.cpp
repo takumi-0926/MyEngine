@@ -64,7 +64,7 @@ void Model::Initialize(const std::string& modelname, bool smoothing)
 	// メッシュ生成
 	Mesh* mesh = new Mesh;
 	int indexCountTex = 0;
-	int indexCountNoTex = 0;
+	//int indexCountNoTex = 0;
 
 	vector<XMFLOAT3> positions;	// 頂点座標
 	vector<XMFLOAT3> normals;	// 法線ベクトル
@@ -217,7 +217,7 @@ void Model::Initialize(const std::string& modelname, bool smoothing)
 
 						//エッジ平滑化用のデータを追加
 						if (smoothing) {
-							mesh->AddSmoothData(indexPosition, (unsigned short)mesh->GetVertexCount() - 1);
+							mesh->AddSmoothData(indexPosition, unsigned short(mesh->GetVertexCount() - 1));
 						}
 					}
 				}
@@ -225,17 +225,17 @@ void Model::Initialize(const std::string& modelname, bool smoothing)
 				if (faceIndexCount >= 3) {
 					// 四角形ポリゴンの4点目なので、
 					// 四角形の0,1,2,3の内 2,3,0で三角形を構築する
-					mesh->AddIndex(indexCountTex - 1);
-					mesh->AddIndex(indexCountTex);
-					mesh->AddIndex(indexCountTex - 3);
+					mesh->AddIndex(unsigned short(indexCountTex - 1));
+					mesh->AddIndex(unsigned short(indexCountTex));
+					mesh->AddIndex(unsigned short(indexCountTex - 3));
 				}
 				else
 				{
-					mesh->AddIndex(indexCountTex);
+					mesh->AddIndex(unsigned short(indexCountTex));
 
 					//エッジ平滑化用のデータを追加
 					if (smoothing) {
-						mesh->AddSmoothData(indexPosition, (unsigned short)mesh->GetVertexCount() - 1);
+						mesh->AddSmoothData(indexPosition, unsigned short(mesh->GetVertexCount() - 1));
 					}
 				}
 				indexCountTex++;

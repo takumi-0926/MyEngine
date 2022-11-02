@@ -459,5 +459,8 @@
     <ClCompile Include="Engine\SceneEffect\Fade.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\object\baseObject.cpp">
+      <Filter>ソース ファイル\Object</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

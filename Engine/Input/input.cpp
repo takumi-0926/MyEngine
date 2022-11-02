@@ -70,8 +70,8 @@ void Input::Update()
 
 		devMouse->GetDeviceState(sizeof(mouseState), &mouseState);
 
-		mousePos.x = point.x;
-		mousePos.y = point.y;
+		mousePos.x = float(point.x);
+		mousePos.y = float(point.y);
 	}
 }
 

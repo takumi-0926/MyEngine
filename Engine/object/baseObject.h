@@ -41,9 +41,9 @@ protected:
 
 protected: // 静的メンバ変数
 	// デバイス
-	static ID3D12Device* device;
+	static ComPtr<ID3D12Device> device;
 	// コマンドリスト
-	static ID3D12GraphicsCommandList* cmdList;
+	static ComPtr<ID3D12GraphicsCommandList> cmdList;
 
 	// ビュー行列
 	static XMMATRIX matView;
@@ -53,20 +53,8 @@ protected: // 静的メンバ変数
 public:
 	// 描画前処理
 	/// <param name="cmdList">描画コマンドリスト</param>
-	static void PreDraw(ID3D12GraphicsCommandList* cmdList) {
-		// PreDrawとPostDrawがペアで呼ばれていなければエラー
-		assert(BaseObject::cmdList == nullptr);
-
-		// コマンドリストをセット
-		BaseObject::cmdList = cmdList;
-
-		// プリミティブ形状を設定
-		cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	}
+	static void PreDraw(ID3D12GraphicsCommandList* cmdList);
 
 	// 描画後処理
-	static void PostDraw() {
-		// コマンドリストを解除
-		BaseObject::cmdList = nullptr;
-	}
+	static void PostDraw();
 };
