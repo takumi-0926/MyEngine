@@ -4,11 +4,6 @@
 #include "Collision\BaseCollision.h"
 #include "Collision\CollisionManager.h"
 
-// デバイス
-ID3D12Device* Object3Ds::device = nullptr;
-// コマンドリスト
-ID3D12GraphicsCommandList* Object3Ds::cmdList = nullptr;
-
 Wrapper* Object3Ds::dx12 = nullptr;
 
 Object3Ds::~Object3Ds()
@@ -32,7 +27,7 @@ bool Object3Ds::StaticInitialize(ID3D12Device* _device)
 	//パイプライン生成
 	LoadHlsls::LoadHlsl_VS(ShaderNo::OBJ, L"Resources/shaders/OBJVertexShader.hlsl", "main", "vs_5_0");
 	LoadHlsls::LoadHlsl_PS(ShaderNo::OBJ, L"Resources/shaders/OBJPixelShader.hlsl", "main", "ps_5_0");
-	LoadHlsls::createPipeline(device, ShaderNo::OBJ);
+	LoadHlsls::createPipeline(device.Get(), ShaderNo::OBJ);
 
 	Model::StaticInitialize(_device);
 
@@ -73,10 +68,12 @@ bool Object3Ds::Initialize()
 
 	HRESULT result;
 	// 定数バッファの生成
+	CD3DX12_HEAP_PROPERTIES properties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+	CD3DX12_RESOURCE_DESC desc = CD3DX12_RESOURCE_DESC::Buffer((sizeof(ConstBufferDataB0) + 0xff) & ~0xff);
 	result = device->CreateCommittedResource(
-		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD), 	// アップロード可能
+		&properties, 	// アップロード可能
 		D3D12_HEAP_FLAG_NONE,
-		&CD3DX12_RESOURCE_DESC::Buffer((sizeof(ConstBufferDataB0) + 0xff) & ~0xff),
+		&desc,
 		D3D12_RESOURCE_STATE_GENERIC_READ,
 		nullptr,
 		IID_PPV_ARGS(&constBuffB0));
@@ -90,8 +87,8 @@ void Object3Ds::Update()
 
 	UpdateWorldMatrix();
 
-	const XMMATRIX& matView = dx12->Camera()->GetViewMatrix();
-	const XMMATRIX& matProjection = dx12->Camera()->GetProjectionMatrix();
+	//const XMMATRIX& matView = dx12->Camera()->GetViewMatrix();
+	//const XMMATRIX& matProjection = dx12->Camera()->GetProjectionMatrix();
 	const XMMATRIX& matViewProjection = dx12->Camera()->GetViewProjectionMatrix();
 	const XMFLOAT3& cameraPos = dx12->Camera()->GetEye();
 
@@ -128,10 +125,10 @@ void Object3Ds::Draw()
 	// 定数バッファビューをセット
 	cmdList->SetGraphicsRootConstantBufferView(0, constBuffB0->GetGPUVirtualAddress());
 
-	dx12->DrawLight(cmdList);
+	dx12->DrawLight(cmdList.Get());
 
 	// モデル描画
-	model->Draw(cmdList);
+	model->Draw(cmdList.Get());
 }
 
 void Object3Ds::UpdateWorldMatrix()

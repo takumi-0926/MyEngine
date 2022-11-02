@@ -51,15 +51,15 @@ private:
 	//上記以外のマテリアルデータ
 	struct AdditionalMaterial {
 		string texpath;
-		int toonIdx;
-		bool edgeFlg;
+		int toonIdx = 0;
+		bool edgeFlg = 0;
 	};
 
 	//全体をまとめるデータ
 	struct Material {
-		unsigned int indicesNum;
-		MaterialForHlsl material;
-		AdditionalMaterial additional;
+		unsigned int indicesNum = 0;
+		MaterialForHlsl material = {};
+		AdditionalMaterial additional = {};
 	};
 	Material material;
 
@@ -80,11 +80,11 @@ private:
 	};
 
 	struct BoneNode {
-		uint32_t boneIdx;
-		uint32_t boneType;
-		uint32_t ikParentBone;
-		XMFLOAT3 startPos;
-		XMFLOAT3 endPos;
+		uint32_t boneIdx = 0;
+		uint32_t boneType = 0;
+		uint32_t ikParentBone = 0;
+		XMFLOAT3 startPos = {};
+		XMFLOAT3 endPos = {};
 		std::vector<BoneNode*> children;
 	};
 
@@ -94,15 +94,15 @@ private:
 		XMFLOAT3 offset;
 		XMFLOAT2 p1, p2;
 		Motion(
-			unsigned int fno, 
-			XMVECTOR& q, 
+			unsigned int fno,
+			XMVECTOR& q,
 			XMFLOAT3& ofst,
-			XMFLOAT2& ip1, 
+			XMFLOAT2& ip1,
 			const XMFLOAT2& ip2) :
-			frameNo(fno), 
-			quaternion(q), 
+			frameNo(fno),
+			quaternion(q),
 			offset(ofst),
-			p1(ip1), 
+			p1(ip1),
 			p2(ip2) {
 		}
 	};
@@ -168,10 +168,10 @@ private:
 
 	//IKボーン
 	struct PMDIK {
-		uint16_t boneIdx;
-		uint16_t targetidx;
-		uint16_t iterations;
-		float limit;
+		uint16_t boneIdx = 0;;
+		uint16_t targetidx = 0;
+		uint16_t iterations = 0;;
+		float limit = 0.0f;
 		std::vector<uint16_t> nodeIdx;
 	};
 	std::vector<PMDIK> _ikData;
@@ -185,7 +185,7 @@ private:
 
 	struct VMDIKEnable {
 		//キーフレームがあるフレーム番号
-		uint32_t freamNo;
+		uint32_t freamNo = 0;;
 
 		//名前のオン/オフフラグのマップ
 		std::unordered_map<std::string, bool> ikEnableTable;

@@ -124,14 +124,14 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	stage->rotation.y = -90;
 	stage->SetPosition({ 0.0f,-0.01f,0.0f });
 
-	const int DIV_NUM = 10;
-	const float LAND_SCALE = 3.0f;
-	for (int i = 0; i < DIV_NUM; i++) {
-		for (int j = 0; j < DIV_NUM; j++) {
-			int modelIndex = rand() % 10;
+	//const int DIV_NUM = 10;
+	//const float LAND_SCALE = 3.0f;
+	//for (int i = 0; i < DIV_NUM; i++) {
+	//	for (int j = 0; j < DIV_NUM; j++) {
+	//		int modelIndex = rand() % 10;
 
-		}
-	}
+	//	}
+	//}
 
 	//ゲート（最終関門）
 	obj03 = Object3Ds::Create();

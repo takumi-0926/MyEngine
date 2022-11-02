@@ -63,7 +63,7 @@ void Audio::Load()
 //音声データのロード
 SoundData Audio::SoundLoadWave(const char* filename)
 {
-	HRESULT result;
+	HRESULT result = 0;
 
 	////ファイルオープン
 	//ファイル入力ストリームのインスタンス

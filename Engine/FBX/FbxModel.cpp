@@ -10,10 +10,12 @@ void FbxModel::CreateBuffers(ID3D12Device* device)
 	//’¸“_-------------------------------------------
 	UINT sizeVB = static_cast<UINT>(sizeof(VertexPosNormalUvSkin) * vertices.size());
 
+	CD3DX12_HEAP_PROPERTIES properties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+	CD3DX12_RESOURCE_DESC desc = CD3DX12_RESOURCE_DESC::Buffer(sizeVB);
 	auto result = device->CreateCommittedResource(
-		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+		&properties,
 		D3D12_HEAP_FLAG_NONE,
-		&CD3DX12_RESOURCE_DESC::Buffer(sizeVB),
+		&desc,
 		D3D12_RESOURCE_STATE_GENERIC_READ,
 		nullptr,
 		IID_PPV_ARGS(&vertBuff)
@@ -36,10 +38,12 @@ void FbxModel::CreateBuffers(ID3D12Device* device)
 	UINT sizeIB = 
 		static_cast<UINT>(sizeof(unsigned short) * indices.size());
 
+	properties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+	desc = CD3DX12_RESOURCE_DESC::Buffer(sizeIB);
 	result = device->CreateCommittedResource(
-		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+		&properties,
 		D3D12_HEAP_FLAG_NONE,
-		&CD3DX12_RESOURCE_DESC::Buffer(sizeIB),
+		&desc,
 		D3D12_RESOURCE_STATE_GENERIC_READ,
 		nullptr,
 		IID_PPV_ARGS(&indexBuff)
@@ -66,15 +70,16 @@ void FbxModel::CreateBuffers(ID3D12Device* device)
 		CD3DX12_RESOURCE_DESC::Tex2D(
 			metadata.format,
 			metadata.width,
-			(UINT)metadata.height,
-			(UINT16)metadata.arraySize,
-			(UINT16)metadata.mipLevels
+			UINT(metadata.height),
+			UINT16(metadata.arraySize),
+			UINT16(metadata.mipLevels)
 		);
 
+	properties = CD3DX12_HEAP_PROPERTIES(
+		D3D12_CPU_PAGE_PROPERTY_WRITE_BACK,
+		D3D12_MEMORY_POOL_L0);
 	result = device->CreateCommittedResource(
-		&CD3DX12_HEAP_PROPERTIES(
-			D3D12_CPU_PAGE_PROPERTY_WRITE_BACK,
-			D3D12_MEMORY_POOL_L0),
+		&properties,
 		D3D12_HEAP_FLAG_NONE,
 		&texresdesc,
 		D3D12_RESOURCE_STATE_GENERIC_READ,
@@ -129,5 +134,5 @@ void FbxModel::Draw(ID3D12GraphicsCommandList* cmdList)
 	);
 
 	//•`‰æ
-	cmdList->DrawIndexedInstanced((UINT)indices.size(),1, 0, 0, 0);
+	cmdList->DrawIndexedInstanced(UINT(indices.size()),1, 0, 0, 0);
 }

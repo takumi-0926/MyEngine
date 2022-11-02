@@ -91,7 +91,7 @@ void PMDobject::Draw()
 
 	dx12->SceneDraw();
 	//モデル描画
-	model->Draw(cmdList);
+	model->Draw(cmdList.Get());
 }
 
 HRESULT PMDobject::CreateGraphicsPipelinePMD()
@@ -99,7 +99,7 @@ HRESULT PMDobject::CreateGraphicsPipelinePMD()
 	//パイプライン生成
 	LoadHlsls::LoadHlsl_VS(ShaderNo::PMD, L"Resources/shaders/BasicVertexShader.hlsl", "BasicVS", "vs_5_0");
 	LoadHlsls::LoadHlsl_PS(ShaderNo::PMD, L"Resources/shaders/BasicPixelShader.hlsl", "BasicPS", "ps_5_0");
-	LoadHlsls::createPipeline(device, ShaderNo::PMD);
+	LoadHlsls::createPipeline(device.Get(), ShaderNo::PMD);
 
 	HRESULT result = S_FALSE;
 	ComPtr<ID3DBlob> vsBlob; // 頂点シェーダオブジェクト

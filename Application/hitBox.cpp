@@ -97,7 +97,7 @@ void HitBox::Draw()
 	cmdList->SetGraphicsRootConstantBufferView(0, constBuffB0->GetGPUVirtualAddress());
 
 	// モデル描画
-	model->Draw(cmdList);
+	model->Draw(cmdList.Get());
 }
 
 void HitBox::mainDraw()
@@ -135,7 +135,7 @@ void HitBox::CreatePipeline(Wrapper* _dx12)
 	//パイプライン生成
 	LoadHlsls::LoadHlsl_VS(ShaderNo::HIT, L"Resources/shaders/hitBoxVS.hlsl", "main", "vs_5_0");
 	LoadHlsls::LoadHlsl_PS(ShaderNo::HIT, L"Resources/shaders/hitBoxPS.hlsl", "main", "ps_5_0");
-	LoadHlsls::createPipeline(device, ShaderNo::HIT);
+	LoadHlsls::createPipeline(device.Get(), ShaderNo::HIT);
 }
 
 //void* HitBox::Transform::operator new(size_t size)

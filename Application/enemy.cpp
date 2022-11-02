@@ -60,11 +60,11 @@ void Enemy::move(XMVECTOR vector)
 Enemy::Enemy()
 {
 	status = {
-			  2,//デフォルトHP
-			  1,//デフォルト攻撃力
-			  1,//デフォルト防御力
-			  0.2,//デフォルト速度
-		{1,1,1},//デフォルト大きさ
+					   2,//デフォルトHP
+					1.0f,//デフォルト攻撃力
+					1.0f,//デフォルト防御力
+					0.2f,//デフォルト速度
+		{1.0f,1.0f,1.0f},//デフォルト大きさ
 	};
 	alive = false;
 	mode = 0;
@@ -190,7 +190,7 @@ void Enemy::Draw()
 
 void Enemy::OnCollision(const CollisionInfo& info)
 {
-	int a = 0;
+	info.collider;
 }
 
 Enemy* Enemy::Appearance(Model* model1, Model* model2)

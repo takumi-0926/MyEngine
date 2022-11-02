@@ -25,8 +25,8 @@ void CollisionManager::CheckAllCollision()
 			BaseCollider* colA = *itA;
 			BaseCollider* colB = *itB;
 
-			if (colA->GEtShapeType() == COLLISIONSHAPE_SQHERE &&
-				colB->GEtShapeType() == COLLISIONSHAPE_SQHERE) {
+			if (colA->GetShapeType() == COLLISIONSHAPE_SQHERE &&
+				colB->GetShapeType() == COLLISIONSHAPE_SQHERE) {
 				Sqhere* SphereA = dynamic_cast<Sqhere*>(colA);
 				Sqhere* SphereB = dynamic_cast<Sqhere*>(colB);
 
@@ -36,8 +36,8 @@ void CollisionManager::CheckAllCollision()
 					colB->OnCllision(CollisionInfo(colA->GetObject3d(), colA, inter));
 				}
 			}
-			else if (colA->GEtShapeType() == COLLISIONSHAPE_MESH &&
-				colB->GEtShapeType() == COLLISIONSHAPE_SQHERE) {
+			else if (colA->GetShapeType() == COLLISIONSHAPE_MESH &&
+				colB->GetShapeType() == COLLISIONSHAPE_SQHERE) {
 				MeshCollider* meshCollider = dynamic_cast<MeshCollider*>(colA);
 				Sqhere* sphere = dynamic_cast<Sqhere*>(colB);
 				DirectX::XMVECTOR inter;
@@ -46,8 +46,8 @@ void CollisionManager::CheckAllCollision()
 					colB->OnCllision(CollisionInfo(colA->GetObject3d(), colA, inter));
 				}
 			}
-			else if (colA->GEtShapeType() == COLLISIONSHAPE_SQHERE &&
-				colB->GEtShapeType() == COLLISIONSHAPE_MESH) {
+			else if (colA->GetShapeType() == COLLISIONSHAPE_SQHERE &&
+				colB->GetShapeType() == COLLISIONSHAPE_MESH) {
 				MeshCollider* meshCollider = dynamic_cast<MeshCollider*>(colB);
 				Sqhere* sphere = dynamic_cast<Sqhere*>(colA);
 				DirectX::XMVECTOR inter;
@@ -78,7 +78,7 @@ bool CollisionManager::Raycast(
 	std::forward_list<BaseCollider*>::iterator it;
 	std::forward_list<BaseCollider*>::iterator it_hit;
 	float distance = maxDistance;
-	XMVECTOR inter;
+	XMVECTOR inter ={};
 
 	it = colliders.begin();
 	for (; it != colliders.end(); ++it)
@@ -89,7 +89,7 @@ bool CollisionManager::Raycast(
 		if (!(colA->attribute & attribute)) { continue; }
 
 		//レイと球
-		if (colA->GEtShapeType() == COLLISIONSHAPE_SQHERE) {
+		if (colA->GetShapeType() == COLLISIONSHAPE_SQHERE) {
 			Sqhere* sphere = dynamic_cast<Sqhere*>(colA);
 
 			float tempDistance;
@@ -104,7 +104,7 @@ bool CollisionManager::Raycast(
 			it_hit = it;
 		}
 		//レイとメッシュ
-		else if (colA->GEtShapeType() == COLLISIONSHAPE_MESH) {
+		else if (colA->GetShapeType() == COLLISIONSHAPE_MESH) {
 			MeshCollider* meshCollider = dynamic_cast<MeshCollider*>(colA);
 
 			float tempDistance;
@@ -146,7 +146,7 @@ void CollisionManager::QuerySqhere(const Sqhere& sphere, QueryCallBack* callBack
 		}
 
 		//球の場合
-		if (col->GEtShapeType() == COLLISIONSHAPE_SQHERE) {
+		if (col->GetShapeType() == COLLISIONSHAPE_SQHERE) {
 			Sqhere* sphereB = dynamic_cast<Sqhere*>(col);
 
 			XMVECTOR tempInter;
@@ -167,7 +167,7 @@ void CollisionManager::QuerySqhere(const Sqhere& sphere, QueryCallBack* callBack
 			}
 		}
 		//メッシュの場合
-		else if (col->GEtShapeType() == COLLISIONSHAPE_MESH) {
+		else if (col->GetShapeType() == COLLISIONSHAPE_MESH) {
 			MeshCollider* meshCollider = dynamic_cast<MeshCollider*>(col);
 
 			XMVECTOR tempInter;
