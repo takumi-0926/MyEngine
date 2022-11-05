@@ -10,7 +10,7 @@ class PMDmodel;
 class StageObject;
 class DefCannon;
 class Enemy : public Object3Ds {
-	struct Status {
+	struct Status {//28
 		int HP;
 		float attack;	//攻撃力
 		float defense;	//防御力
@@ -19,14 +19,14 @@ class Enemy : public Object3Ds {
 	};
 
 public:
-	Status status;
+	Status status;//28
 	bool alive = false;	//生存判定
-	int actionPattern = 0;//行動パターン
 	bool startAttack = false;
 	bool attackHit = true;
 	bool attackOnMove = false;
 	bool damage = false;
 
+	int actionPattern = 0;//行動パターン
 	float attackTime = 0.0f;
 	int mode = 0;
 

@@ -100,12 +100,16 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	Wrapper::SetLight(light);
 
 	//基本オブジェクト--------------
-	model01 = Model::CreateFromOBJ("Stone");
 	model02 = Model::CreateFromOBJ("FieldStage");
 	model03 = Model::CreateFromOBJ("Cannon");
 	model04 = Model::CreateFromOBJ("Gate");
-	model05 = Model::CreateFromOBJ("Wolf");
 	model06 = Model::CreateFromOBJ("maru");
+
+	for (int i = 0; i < 3; i++)
+	{
+		golem[i] = Model::CreateFromOBJ("Stone");
+		wolf[i] = Model::CreateFromOBJ("Wolf");
+	}
 
 	//modelPlane = Model::CreateFromOBJ("");
 	//modelBox = Model::CreateFromOBJ("");
@@ -157,13 +161,6 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	cannon[5]->SetPosition({ -40,0,  180 });
 
 	//MMDオブジェクト----------------
-	//pmdObject.reset(new PMDobject(dx12));
-	//pmdModel.reset(new PMDmodel(dx12, "Resources/Model/初音ミクmetal.pmd", *pmdObject));
-	//pmdModel->scale = { 1,1,1 };
-	//pmdModel->SetPosition({ 0,0,0 });
-	//pmdModel->playAnimation();
-	//pmdModel->animation = true;
-
 	modelPlayer = PMDmodel::CreateFromPMD("Resources/Model/初音ミク.pmd");
 	modelPlayer->LoadVMDFile(vmdData::WAIT, "Resources/vmd/squat.vmd");
 	modelPlayer->LoadVMDFile(vmdData::WALK, "Resources/vmd/Rick式走りモーション02.vmd");
@@ -173,17 +170,11 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	//model->playAnimation();
 	//model->animation = true;
 
-
 	_player = Player::Create(modelPlayer);
 	_player->model->scale = { 1,1,1 };
 	_player->model->position = { 0,0,0 };
 	_player->model->playAnimation();
 	_player->model->animation = true;
-	//player = PMDobject::Create(modelPlayer);
-	//player->model->scale = { 1,1,1 };
-	//player->model->position = { 0,0,0 };
-	//player->model->playAnimation();
-	//player->model->animation = true;
 
 	//スプライト---------------------
 	sprite01 = Sprite::Create(0, { 0.0f,0.0f });
@@ -221,7 +212,7 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	//ヒットボックス-----------------
 	HitBox::CreatePipeline(dx12);
 	HitBox::CreateTransform();
-	HitBox::CreateHitBox(_player->model->GetBonePos("頭先"), model01);
+	HitBox::CreateHitBox(_player->model->GetBonePos("頭先"), model06);
 	HitBox::hitBox[0]->scale = XMFLOAT3(5, 10, 5);
 	triangle[0].p0 = XMVectorSet(obj03->position.x - 100.0f, obj03->position.y, obj03->position.z, 1);
 	triangle[0].p1 = XMVectorSet(obj03->position.x - 100.0f, obj03->position.y + 120.0f, obj03->position.z, 1);
@@ -475,10 +466,12 @@ void GameManager::GameUpdate() {
 				//三体まで
 				if (_enemy.size() <= 2) {
 					Enemy* ene = nullptr;
-					ene = Enemy::Appearance(model05, model01);
+					static int usemModel = 0;
+					if (usemModel >= 3) { usemModel = 0; }
+					ene = Enemy::Appearance(golem[usemModel], wolf[usemModel]);
 					if (ene != nullptr) {
 						_enemy.push_back(ene);
-
+						usemModel += 1;
 						Sqhere _sqhere;
 						_sqhere.radius = 5.0f;
 						_sqhere.center = XMVectorSet(ene->position.x, ene->position.y, ene->position.z, 1);
@@ -587,6 +580,7 @@ void GameManager::GameUpdate() {
 
 						if (Hhit != true) { continue; }
 						_enemy[i]->damage = true;
+						if (_enemy[i]->damage != true)continue;
 						_enemy[i]->status.HP -= 1;
 						//体力がなくなっていれば
 						if (_enemy[i]->status.HP <= 0) {
@@ -759,7 +753,7 @@ void GameManager::GameUpdate() {
 				cannon[i]->Update();
 				cannon[i]->moveUpdate(_enemy);
 			}
-			HitBox::mainUpdate(_player->model->GetBoneMat(),_player->model->rotation);
+			HitBox::mainUpdate(_player->model->GetBoneMat(), _player->model->rotation);
 			light->Update();
 
 			hp->SetSize(XMFLOAT2(playerHp * 4.5f, 30));

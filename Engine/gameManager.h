@@ -76,6 +76,9 @@ private://メンバ変数(初期化)
 	HitBox* HitBox = {};
 	DefCannon* cannon[6] = {};
 
+	Model* golem[3] = {};
+	Model* wolf[3] = {};
+
 	//衝突マネージャー
 	CollisionManager* collisionManager = nullptr;
 
@@ -96,11 +99,9 @@ private://メンバ変数(ゲームシーン)
 	Sprite* hp = nullptr;
 	Sprite* Damege = nullptr;
 
-	Model* model01 = nullptr;
 	Model* model02 = nullptr;
 	Model* model03 = nullptr;
 	Model* model04 = nullptr;
-	Model* model05 = nullptr;
 	Model* model06 = nullptr;
 	Object3Ds* obj01 = nullptr;
 	Object3Ds* obj02 = nullptr;

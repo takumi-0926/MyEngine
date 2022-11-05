@@ -200,8 +200,8 @@ Enemy* Enemy::Appearance(Model* model1, Model* model2)
 	//ŽO‘Ì‚Ü‚Å
 	if (popTime >= 10.0f) {
 		int r = rand() % 10;
-		if (r % 2 == 1) { ene = Enemy::Create(model1); }
-		if (r % 2 != 1) { ene = Enemy::Create(model2); }
+		if (r % 2 == 1) { ene = Enemy::Create(model2); }
+		if (r % 2 != 1) { ene = Enemy::Create(model1); }
 		if (r % 2 == 1) {
 			ene->mode = 2;
 			ene->position.y = 0;
@@ -443,6 +443,7 @@ void Enemy::Damage()
 		this->model->GetMesh()[i]->GetMaterial()->ambient.x = defalt_ambient[i].x * 2.0f;
 		this->model->GetMesh()[i]->GetMaterial()->Update();
 	}
+	damage = false;
 	count += 1.0f / 20.0f;
 	if (count >= 1.0f) {
 		for (int i = 0; i < model->GetMesh().size(); i++) {
@@ -450,7 +451,6 @@ void Enemy::Damage()
 			this->model->GetMesh()[i]->GetMaterial()->Update();
 		}
 		count = 0.0f;
-		this->damage = false;
 	}
 
 	if (status.HP <= 0) { actionPattern = MoveMode::retreat; }

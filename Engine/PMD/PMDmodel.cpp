@@ -817,7 +817,13 @@ HRESULT PMDmodel::LoadVMDFile(const unsigned int Number, const char* path)
 	}
 
 	for (auto& boneMoiton : data._motionData) {
-		auto node = _boneNodeTable[boneMoiton.first];
+
+		auto itBoneNode = _boneNodeTable.find(boneMoiton.first);
+		if (itBoneNode == _boneNodeTable.end()) {
+			continue;
+		}
+
+		auto node = itBoneNode->second;
 		auto& pos = node.startPos;
 		auto mat =
 			XMMatrixTranslation(-pos.x, -pos.y, -pos.z)
@@ -1146,7 +1152,12 @@ void PMDmodel::MotionUpdate()
 	std::fill(boneMatrices.begin(), boneMatrices.end(), XMMatrixIdentity());
 
 	for (auto& boneMoiton : data._motionData) {
-		auto node = _boneNodeTable[boneMoiton.first];
+		auto itBoneNode = _boneNodeTable.find(boneMoiton.first);
+		if (itBoneNode == _boneNodeTable.end()) {
+			continue;
+		}
+
+		auto node = itBoneNode->second;
 
 		auto motions = boneMoiton.second;
 		auto rit = std::find_if(
@@ -1165,6 +1176,7 @@ void PMDmodel::MotionUpdate()
 		//auto& pos = position;
 
 		XMMATRIX rotation;
+		XMVECTOR offset = XMLoadFloat3(&rit->offset);
 		auto it = rit.base();
 
 		if (it != motions.end()) {
@@ -1175,16 +1187,19 @@ void PMDmodel::MotionUpdate()
 
 			rotation = XMMatrixRotationQuaternion(
 				XMQuaternionSlerp(rit->quaternion, it->quaternion, t));//球面線形補間
+
+			offset = XMVectorLerp(offset, XMLoadFloat3(&it->offset), t);
 		}
 		else {
 			rotation = XMMatrixRotationQuaternion(rit->quaternion);
 		}
 
-		auto mat = XMMatrixTranslation(-pos.x, -pos.y, -pos.z)
-			* rotation
-			* XMMatrixTranslation(pos.x, pos.y, pos.z);
+		auto mat = 
+			XMMatrixTranslation(-pos.x, -pos.y, -pos.z)//原点に移動して
+			* rotation								   //回転させて
+			* XMMatrixTranslation(pos.x, pos.y, pos.z);//元の位置に戻す
 
-		boneMatrices[node.boneIdx] = mat;
+		boneMatrices[node.boneIdx] = mat * XMMatrixTranslationFromVector(offset);
 	}
 
 	recursiveMatrixMultiply(&_boneNodeTable["センター"], XMMatrixIdentity());
