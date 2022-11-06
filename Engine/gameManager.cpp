@@ -466,12 +466,12 @@ void GameManager::GameUpdate() {
 				//ŽO‘Ì‚Ü‚Å
 				if (_enemy.size() <= 2) {
 					Enemy* ene = nullptr;
-					static int usemModel = 0;
-					if (usemModel >= 3) { usemModel = 0; }
-					ene = Enemy::Appearance(golem[usemModel], wolf[usemModel]);
+					static int useModel = 0;
+					if (useModel >= 3) { useModel = 0; }
+					ene = Enemy::Appearance(golem[useModel], wolf[useModel]);
 					if (ene != nullptr) {
 						_enemy.push_back(ene);
-						usemModel += 1;
+						useModel += 1;
 						Sqhere _sqhere;
 						_sqhere.radius = 5.0f;
 						_sqhere.center = XMVectorSet(ene->position.x, ene->position.y, ene->position.z, 1);
