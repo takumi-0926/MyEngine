@@ -6,10 +6,12 @@
 #include "Math/Matrix4.h"
 #include "Math/Quaternion.h"
 
+#include "FBX/FbxObject3d.h"
+
 class PMDmodel;
 class StageObject;
 class DefCannon;
-class Enemy : public Object3Ds {
+class Enemy : public FbxObject3d {
 	struct Status {//28
 		int HP;
 		float attack;	//攻撃力
@@ -47,11 +49,11 @@ private:
 	void moveReset();
 public:
 	Enemy();		//コンストラクタ
-	static Enemy* Create(Model* model);//インスタンス生成
-	bool Initialize()override;
+	static Enemy* Create(FbxModel* model);//インスタンス生成
+	void Initialize()override;
 	void Update() override;
 	void moveUpdate(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos);
-	void Draw() override;
+	void Draw(ID3D12GraphicsCommandList* cmdList) override;
 
 	void OnCollision(const CollisionInfo& info)override;
 
@@ -102,16 +104,18 @@ public:
 	}
 
 	void SetAlpha() {
-		for (int i = 0; i < model->GetMesh().size(); i++) {
-			this->model->GetMesh()[i]->GetMaterial()->alpha = this->alpha;
-			this->model->GetMesh()[i]->GetMaterial()->Update();
-		}
+		//for (int i = 0; i < model->GetMesh().size(); i++) {
+		//	this->model->GetMesh()[i]->GetMaterial()->alpha = this->alpha;
+		//	this->model->GetMesh()[i]->GetMaterial()->Update();
+		//}
+		model->alpha = this->alpha;
+		model->Update();
 	}
 
 	/// <summary>
 	/// 出現処理
 	/// </summary>
-	static Enemy* Appearance(Model* model1, Model* model2);
+	static Enemy* Appearance(FbxModel* model1, FbxModel* model2);
 
 	/// <summary>
 	/// 移動時処理

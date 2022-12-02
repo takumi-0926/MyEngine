@@ -3,6 +3,7 @@
 #include <DirectXMath.h>
 
 class Object3Ds;
+class FbxObject3d;
 class BaseCollider;
 
 /// <summary>
@@ -12,6 +13,7 @@ struct CollisionInfo {
 public:
 	CollisionInfo(
 		Object3Ds* _object,
+		FbxObject3d* _fbx,
 		BaseCollider* _collider, 
 		const DirectX::XMVECTOR& _inter) {
 		this->object = _object;
@@ -21,6 +23,9 @@ public:
 
 	//衝突相手のオブジェクト
 	Object3Ds* object = nullptr;
+
+	FbxObject3d* fbx = nullptr;
+
 	//衝突相手のコライダー
 	BaseCollider* collider = nullptr;
 	//衝突点

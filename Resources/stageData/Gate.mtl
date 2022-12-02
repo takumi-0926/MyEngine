@@ -1,0 +1,12 @@
+# Blender 3.3.1 MTL File: 'None'
+# www.blender.org
+
+newmtl Material.001
+Ns 47.058819
+Ka 1.000000 1.000000 1.000000
+Ks 0.050000 0.050000 0.050000
+Ke 0.120000 0.120000 0.120000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd C:/K020G1160/自作エンジン/MyGameEngine/Resources/Gate/tex.jpg

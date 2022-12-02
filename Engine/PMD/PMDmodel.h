@@ -17,6 +17,7 @@ enum vmdData {
 	DASH,
 	ATTACK,
 	DAMAGE,
+	AVOID,
 };
 
 class PMDobject;
@@ -146,6 +147,7 @@ private:
 	struct vmdMotion {
 		std::unordered_map<string, std::vector<Motion>> _motionData;
 		unsigned int duration = 0;
+		std::vector<DirectX::XMMATRIX> invBoneMatrices;
 	};
 #pragma pack(1)
 	struct PMDBone {

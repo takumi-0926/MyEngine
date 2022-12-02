@@ -17,7 +17,7 @@ XMFLOAT3 Wrapper::target = { 0,0,0 };
 // 上方向ベクトル
 XMFLOAT3 Wrapper::up = { 0,1,0 };
 
-Light* Wrapper::light[3] = { nullptr };
+Light* Wrapper::light = { nullptr };
 int Wrapper::lightNum = 0;
 
 //@brief コンソール画面にフォーマット付き文字列を表示
@@ -522,7 +522,5 @@ ComPtr<ID3D12GraphicsCommandList> Wrapper::CommandList() {
 void Wrapper::DrawLight(ID3D12GraphicsCommandList* cmdlist)
 {
 	assert(cmdlist);
-	for (int i = 0; i < lightNum; i++) {
-		light[i]->Draw(cmdlist, 3);
-	}
+	light->Draw(cmdlist, 3);
 }
