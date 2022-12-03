@@ -50,12 +50,25 @@ private:
 public:
 	void CreateBuffers(ID3D12Device* device);
 
+	void Update();
+
 	void Draw(ID3D12GraphicsCommandList* cmdList);
 
 public:
 	friend class FbxLoader;
 
 	static const int MAX_BONE_INDICES = 4;
+
+	// 定数バッファ用データ構造体B1
+	struct ConstBufferDataB1
+	{
+		XMFLOAT3 ambient; // アンビエント係数
+		float pad1; // パディング
+		XMFLOAT3 diffuse; // ディフューズ係数
+		float pad2; // パディング
+		XMFLOAT3 specular; // スペキュラー係数
+		float alpha;	// アルファ
+	};
 
 	struct VertexPosNormalUvSkin {
 		DirectX::XMFLOAT3 pos;
@@ -79,6 +92,8 @@ public:
 
 	DirectX::XMFLOAT3 diffuse = { 1,1,1 };
 
+	float alpha = 1.0f;		// アルファ
+
 	DirectX::TexMetadata metadata = {};
 
 	DirectX::ScratchImage scrachImg = {};
@@ -96,9 +111,27 @@ private:
 
 	std::vector<Node> nodes;
 
+	// デバイス
+	static ID3D12Device* device;
+
+	// 定数バッファ
+	ComPtr<ID3D12Resource> constBuff;
+
 public:
 	//ゲッター
 	const XMMATRIX& GetModelTransform() { return meshNode->globleTransForm; }
 	vector<Bone>& GetBones() { return bones; }
 	FbxScene* GetFbxScene() { return fbxScene; }
+
+	/// <summary>
+	/// 静的初期化
+	/// </summary>
+	/// <param name="device">デバイス</param>
+	static void StaticInitialize(ID3D12Device* device);
+
+	/// <summary>
+	/// 定数バッファの生成
+	/// </summary>
+	void CreateConstantBuffer();
+
 };

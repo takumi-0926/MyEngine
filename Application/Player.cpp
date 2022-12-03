@@ -1,5 +1,49 @@
 #include "Player.h"
-#include "Input/input.h"
+#include "Math/Vector3.h"
+#include "Math/Quaternion.h"
+
+XMMATRIX Player::LookAtRotation(XMFLOAT3 forward, XMFLOAT3 upward)
+{
+	Vector3 z = Vector3(forward.x, forward.y, forward.z);//進行方向ベクトル（前方向）
+	Vector3 up = Vector3(upward.x, upward.y, upward.z);  //上方向
+	XMMATRIX rot;//回転行列
+	Quaternion q = quaternion(0, 0, 0, 1);//回転クォータニオン
+	Vector3 _z = { 0.0f,0.0f,1.0f };//Z方向単位ベクトル
+	Vector3 cross;
+	XMMATRIX matRot = XMMatrixIdentity();
+
+	float a;//角度保存用
+	float b;//角度保存用
+	float c;//角度保存用
+	float d;//角度保存用
+
+	//カメラに合わせるための回転行列
+	matRot = XMMatrixRotationY(XMConvertToRadians(angleHorizonal));
+
+	cross = z.cross(_z);
+
+	q.x = cross.x;
+	q.y = cross.y;
+	q.z = cross.z;
+
+	q.w = sqrt(
+		(z.length() * z.length())
+		* (_z.length() * _z.length())) + z.dot(_z);
+
+	//単位クォータニオン化
+	q = normalize(q);
+	q = conjugate(q);
+	a = q.x;
+	b = q.y;
+	c = q.z;
+	d = q.w;
+
+	//任意軸回転
+	XMVECTOR rq = { q.x,q.y,q.z,q.w };
+	rot = XMMatrixRotationQuaternion(rq);
+
+	return rot;
+}
 
 Player* Player::Create(PMDmodel* _model)
 {
@@ -18,6 +62,41 @@ Player* Player::Create(PMDmodel* _model)
 	return instance;
 }
 
+void Player::Avoid() {
+	if (avoidTime >= 30.0f) {
+		Action = action::Wait;
+		avoidTime = 0.0f;
+	}
+
+	XMVECTOR vec = XMLoadFloat3(&avoidVec);
+	vec = XMVector3Normalize(vec);
+	model->position.x += -vec.m128_f32[0] * avoidSpeed;
+	model->position.y += -vec.m128_f32[1] * avoidSpeed;
+	model->position.z += -vec.m128_f32[2] * avoidSpeed;
+
+	avoidTime += 1.0f;
+}
+XMFLOAT3 Player::MoveBefore(XMFLOAT3 pos)
+{
+	XMMATRIX matRot = XMMatrixIdentity();
+
+	//Z方向ベクトル
+	Zv = { 0.0f,0.0f,0.5f,0.0f };
+
+	//角度回転
+	matRot = XMMatrixRotationY(XMConvertToRadians(angleHorizonal));
+
+	//Z方向ベクトルを回転
+	Zv = XMVector3TransformNormal(Zv, matRot);
+
+	//加算
+	pos.x += Zv.m128_f32[0] * directInput->getLeftY() * speed;
+	pos.y += Zv.m128_f32[1] * directInput->getLeftY() * speed;
+	pos.z += Zv.m128_f32[2] * directInput->getLeftY() * speed;
+
+	return pos;
+}
+
 void Player::Update()
 {
 	if (model->position.x <= -100.0f) {
@@ -32,6 +111,65 @@ void Player::Update()
 	if (model->position.z >= 322.0f) {
 		model->position.z = 322.0f;
 	}
+
+	//移動
+	//{
+	//	//移動ベクトル
+	//	XMFLOAT3 v = { (directInput->getLeftX()),0.0f,-(directInput->getLeftY()) };
+
+	//	if (model->oldVmdNumber != vmdData::ATTACK) { model->oldVmdNumber = model->vmdNumber; }
+	//	else if (model->oldVmdNumber != vmdData::DAMAGE) { model->oldVmdNumber = model->vmdNumber; }
+	//	if (directInput->leftStickX() < 0.0f || directInput->leftStickX() > 0.0f || directInput->leftStickY() < 0.0f || directInput->leftStickY() > 0.0f) {
+	//		model->vmdNumber = vmdData::WALK;
+	//		if (GetAction() == action::Avoid) { model->vmdNumber = vmdData::AVOID; }
+	//		if (directInput->getTriggerZ() != 0) {
+	//			speed = 2.0f;
+	//		}
+	//		else { speed = 1.0f; }
+	//		//左移動
+	//		if (input.Push(DIK_A) || directInput->leftStickX() < 0.0f) {
+	//			model->position = (MoveLeft(model->position));
+	//		}
+	//		//右移動
+	//		if (input.Push(DIK_D) || directInput->leftStickX() > 0.0f) {
+	//			model->position = (MoveRight(model->position));
+	//		}
+	//		//下移動
+	//		if (input.Push(DIK_W) || directInput->leftStickY() < 0.0f) {
+	//			model->position = (MoveBefore(model->position));
+	//		}
+	//		//上移動
+	//		if (input.Push(DIK_S) || directInput->leftStickY() > 0.0f) {
+	//			model->position = (MoveAfter(model->position));
+	//		}
+	//		XMMATRIX matRot = XMMatrixIdentity();
+	//		//角度回転
+	//		matRot = XMMatrixRotationY(XMConvertToRadians(angleHorizonal));
+
+	//		XMVECTOR _v({ v.x, v.y, v.z, 0 });
+	//		_v = XMVector3TransformNormal(_v, matRot);
+	//		v.x = _v.m128_f32[0];
+	//		v.y = _v.m128_f32[1];
+	//		v.z = _v.m128_f32[2];
+
+	//		model->SetMatRot(LookAtRotation(v, XMFLOAT3(0.0f, 1.0f, 0.0f)));
+	//		if (directInput->IsButtonPush(DirectInput::ButtonKind::Button02) || input.Push(DIK_Z)) {
+	//			model->vmdNumber = vmdData::AVOID;
+	//			SetAction(action::Avoid);
+	//			SetAvoidVec(v);
+	//		}
+
+	//	}
+	//	else if (directInput->IsButtonPush(DirectInput::ButtonKind::Button01) || input.Push(DIK_X)) {
+	//		model->vmdNumber = vmdData::ATTACK;
+	//	}
+	//	else {
+	//		model->vmdNumber = vmdData::WAIT;
+	//	}
+	//}
+
+	//回避行動
+	if (Action == action::Avoid) { Avoid(); }
 
 	//移動
 	PMDobject::Update();

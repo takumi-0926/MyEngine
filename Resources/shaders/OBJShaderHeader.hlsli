@@ -1,4 +1,11 @@
 
+// 平行光源の数
+static const int DIRLIGHT_NUM = 3;
+
+static const int POINTLIGHT_NUM = 3;
+
+static const int CIRCLESHADOW_NUM = 3;
+
 cbuffer cbuff0 : register(b0)
 {
 	//matrix view; // ビュー行列
@@ -15,9 +22,34 @@ cbuffer cbuff1 : register(b1) {
 	float m_alpha : packoffset(c2.w);
 }
 
-cbuffer cbuff2 : register(b2){
-	float3 lightv;
+struct DirLight {
+	float3 lightv;    // ライトへの方向の単位ベクトル
+	float3 lightcolor;    // ライトの色(RGB)
+	uint active;
+};
+
+struct PointLight
+{
+	float3 lightpos;    // ライト座標
+	float3 lightcolor;  // ライトの色(RGB)
+	float3 lightatten;	// ライト距離減衰係数
+	uint active;
+};
+
+struct CircleShadow {
+	float3 dir;
+	float3 casterPos;
+	float distanceCasterLight;
+	float3 atten;
+	float2 factorAngleCos;
+	uint active;
+};
+
+cbuffer cbuff2 : register(b2) {
 	float3 lightcolor;
+	DirLight dirLights[DIRLIGHT_NUM];
+	PointLight pointLights[POINTLIGHT_NUM];
+	CircleShadow circleShadows[CIRCLESHADOW_NUM];
 }
 
 // 頂点シェーダーからピクセルシェーダーへのやり取りに使用する構造体

@@ -34,7 +34,7 @@ bool Object3Ds::StaticInitialize(ID3D12Device* _device)
 	return true;
 }
 
-Object3Ds* Object3Ds::Create()
+Object3Ds* Object3Ds::Create(Model* model)
 {
 	// 3Dオブジェクトのインスタンスを生成
 	Object3Ds* object3d = new Object3Ds();
@@ -47,6 +47,10 @@ Object3Ds* Object3Ds::Create()
 		delete object3d;
 		assert(0);
 		return nullptr;
+	}
+
+	if (model) {
+		object3d->SetModel(model);
 	}
 
 	return object3d;

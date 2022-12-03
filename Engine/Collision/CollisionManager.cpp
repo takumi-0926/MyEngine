@@ -32,8 +32,8 @@ void CollisionManager::CheckAllCollision()
 
 				DirectX::XMVECTOR inter;
 				if (Collision::CheckSqhere2Sqhere(*SphereA, *SphereB)) {
-					colA->OnCllision(CollisionInfo(colB->GetObject3d(), colB, inter));
-					colB->OnCllision(CollisionInfo(colA->GetObject3d(), colA, inter));
+					colA->OnCllision(CollisionInfo(colB->GetObject3d(), colB->GetFbxObject3d(), colB, inter));
+					colB->OnCllision(CollisionInfo(colA->GetObject3d(), colA->GetFbxObject3d(), colA, inter));
 				}
 			}
 			else if (colA->GetShapeType() == COLLISIONSHAPE_MESH &&
@@ -42,8 +42,8 @@ void CollisionManager::CheckAllCollision()
 				Sqhere* sphere = dynamic_cast<Sqhere*>(colB);
 				DirectX::XMVECTOR inter;
 				if (meshCollider->CheckCollisionSqhere(*sphere, &inter)) {
-					colA->OnCllision(CollisionInfo(colB->GetObject3d(), colB, inter));
-					colB->OnCllision(CollisionInfo(colA->GetObject3d(), colA, inter));
+					colA->OnCllision(CollisionInfo(colB->GetObject3d(), colB->GetFbxObject3d(), colB, inter));
+					colB->OnCllision(CollisionInfo(colA->GetObject3d(), colA->GetFbxObject3d(), colA, inter));
 				}
 			}
 			else if (colA->GetShapeType() == COLLISIONSHAPE_SQHERE &&
@@ -52,8 +52,8 @@ void CollisionManager::CheckAllCollision()
 				Sqhere* sphere = dynamic_cast<Sqhere*>(colA);
 				DirectX::XMVECTOR inter;
 				if (meshCollider->CheckCollisionSqhere(*sphere, &inter)) {
-					colA->OnCllision(CollisionInfo(colB->GetObject3d(), colB, inter));
-					colB->OnCllision(CollisionInfo(colA->GetObject3d(), colA, inter));
+					colA->OnCllision(CollisionInfo(colB->GetObject3d(), colB->GetFbxObject3d(), colB, inter));
+					colB->OnCllision(CollisionInfo(colA->GetObject3d(), colA->GetFbxObject3d(), colA, inter));
 				}
 			}
 		}
@@ -61,8 +61,8 @@ void CollisionManager::CheckAllCollision()
 }
 
 bool CollisionManager::Raycast(
-	const Ray& ray, 
-	RaycastHit* hitInfo, 
+	const Ray& ray,
+	RaycastHit* hitInfo,
 	float maxDistance)
 {
 	return Raycast(ray, 0xffff, hitInfo, maxDistance);
@@ -78,7 +78,7 @@ bool CollisionManager::Raycast(
 	std::forward_list<BaseCollider*>::iterator it;
 	std::forward_list<BaseCollider*>::iterator it_hit;
 	float distance = maxDistance;
-	XMVECTOR inter ={};
+	XMVECTOR inter = {};
 
 	it = colliders.begin();
 	for (; it != colliders.end(); ++it)
@@ -123,6 +123,7 @@ bool CollisionManager::Raycast(
 			hitInfo->inter = inter;
 			hitInfo->collider = *it_hit;
 			hitInfo->object = hitInfo->collider->GetObject3d();
+			hitInfo->fbx = hitInfo->collider->GetFbxObject3d();
 		}
 		return result;
 	}
@@ -137,11 +138,11 @@ void CollisionManager::QuerySqhere(const Sqhere& sphere, QueryCallBack* callBack
 
 	//全てのコライダーと総当たりチェック
 	it = colliders.begin();
-	for (; it != colliders.end(); ++it){
+	for (; it != colliders.end(); ++it) {
 		BaseCollider* col = *it;
 
 		//属性が合わなければスキップ
-		if (!(col->attribute & attribute)){
+		if (!(col->attribute & attribute)) {
 			continue;
 		}
 
@@ -158,6 +159,7 @@ void CollisionManager::QuerySqhere(const Sqhere& sphere, QueryCallBack* callBack
 			QueryHit info;
 			info.collider = col;
 			info.object = col->GetObject3d();
+			info.fbx = col->GetFbxObject3d();
 			info.inter = tempInter;
 			info.reject = tempReject;
 
@@ -178,6 +180,7 @@ void CollisionManager::QuerySqhere(const Sqhere& sphere, QueryCallBack* callBack
 			QueryHit info;
 			info.collider = col;
 			info.object = col->GetObject3d();
+			info.fbx = col->GetFbxObject3d();
 			info.inter = tempInter;
 			info.reject = tempReject;
 

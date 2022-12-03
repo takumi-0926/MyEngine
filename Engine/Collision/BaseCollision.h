@@ -4,6 +4,7 @@
 #include "CollisionInfo.h"
 //#include"CollisionManager.h"
 #include "..\object\object3D.h"
+#include "FBX/FbxObject3d.h"
 
 /// <summary>
 /// コライダー基底クラス
@@ -24,8 +25,17 @@ public:
 		return object3d;
 	}
 
+	inline void SetObject(FbxObject3d* _object) {
+		this->fbxObject = _object;
+	}
+
+	inline FbxObject3d* GetFbxObject3d() {
+		return fbxObject;
+	}
+
 	inline void OnCllision(const CollisionInfo& info) {
-		object3d->OnCollision(info);
+		if (object3d != nullptr) { object3d->OnCollision(info); }
+		//if (fbxObject != nullptr) { fbxObject->OnCollision(info); }
 	}
 
 	/// <summary>
@@ -51,6 +61,9 @@ public:
 
 protected:
 	Object3Ds* object3d = nullptr;
+
+	FbxObject3d* fbxObject = nullptr;
+
 	//形状タイプ
 	CollisionShapeType shapeType = SHAPE_UNKNOWN;
 	//当たり判定属性

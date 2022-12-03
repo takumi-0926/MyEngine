@@ -1,6 +1,8 @@
 #include "FbxObject3d.h"
 #include "FbxLoader.h"
 #include "..\pipelineSet.h"
+#include "Collision\BaseCollision.h"
+#include "Collision\CollisionManager.h"
 
 #include <d3dcompiler.h>
 #pragma comment(lib,"d3dcompiler.lib")
@@ -30,6 +32,7 @@ void FbxObject3d::Initialize()
 		IID_PPV_ARGS(&constBufferTransform)
 	);
 
+	desc = CD3DX12_RESOURCE_DESC::Buffer((sizeof(ConstBufferDataSkin) + 0xff) & ~0xff);
 	result = device->CreateCommittedResource(
 		&properties,
 		D3D12_HEAP_FLAG_NONE,
@@ -42,19 +45,7 @@ void FbxObject3d::Initialize()
 
 void FbxObject3d::Update()
 {
-	XMMATRIX matScale, matRot, matTrans;
-
-	matScale = XMMatrixScaling(scale.x, scale.y, scale.z);
-	matRot = XMMatrixIdentity();
-	matRot *= XMMatrixRotationZ(XMConvertToRadians(rotation.z));
-	matRot *= XMMatrixRotationX(XMConvertToRadians(rotation.x));
-	matRot *= XMMatrixRotationY(XMConvertToRadians(rotation.y));
-	matTrans = XMMatrixTranslation(position.x, position.y, position.z);
-
-	matWorld = XMMatrixIdentity();
-	matWorld *= matScale;
-	matWorld *= matRot;
-	matWorld *= matTrans;
+	UpdateWorldMatrix();
 
 	const XMMATRIX& matViewProjection =
 		camera->GetViewProjectionMatrix();
@@ -121,10 +112,27 @@ void FbxObject3d::Draw(ID3D12GraphicsCommandList* cmdList)
 	);
 
 	cmdList->SetGraphicsRootConstantBufferView(
-		2, constBuffSkin->GetGPUVirtualAddress()
+		3, constBuffSkin->GetGPUVirtualAddress()
 	);
 
 	model->Draw(cmdList);
+}
+
+void FbxObject3d::UpdateWorldMatrix()
+{
+	matScale = XMMatrixScaling(scale.x, scale.y, scale.z);
+	if (!useRotMat) {
+		matRot = XMMatrixIdentity();
+		matRot *= XMMatrixRotationZ(XMConvertToRadians(rotation.z));
+		matRot *= XMMatrixRotationX(XMConvertToRadians(rotation.x));
+		matRot *= XMMatrixRotationY(XMConvertToRadians(rotation.y));
+	}
+	matTrans = XMMatrixTranslation(position.x, position.y, position.z);
+
+	matWorld = XMMatrixIdentity();
+	matWorld *= matScale;
+	matWorld *= matRot;
+	matWorld *= matTrans;
 }
 
 void FbxObject3d::PlayAnimation()
@@ -309,4 +317,13 @@ void FbxObject3d::CreateGraphicsPipeline()
 	//// グラフィックスパイプラインの生成
 	//result = device->CreateGraphicsPipelineState(&gpipeline, IID_PPV_ARGS(pipelinestate.ReleaseAndGetAddressOf()));
 	//if (FAILED(result)) { assert(0); }
+}
+
+void FbxObject3d::SetCollider(BaseCollider* collider)
+{
+	collider->SetObject(this);
+	this->collider = collider;
+	CollisionManager::GetInstance()->AddCollider(collider);
+	UpdateWorldMatrix();
+	collider->Update();
 }

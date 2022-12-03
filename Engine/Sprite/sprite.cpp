@@ -49,7 +49,7 @@ bool Sprite::staticInitalize(ID3D12Device* _dev, SIZE ret)
 	ComPtr<ID3DBlob> psBlob;	// ピクセルシェーダオブジェクト
 	ComPtr<ID3DBlob> errorBlob; // エラーオブジェクト
 
-		//パイプライン生成
+	//パイプライン生成
 	LoadHlsls::LoadHlsl_VS(ShaderNo::OBJ, L"Resources/shaders/OBJVertexShader.hlsl", "main", "vs_5_0");
 	LoadHlsls::LoadHlsl_PS(ShaderNo::OBJ, L"Resources/shaders/OBJPixelShader.hlsl", "main", "ps_5_0");
 	LoadHlsls::createPipeline(device, ShaderNo::OBJ);
@@ -492,4 +492,14 @@ void Sprite::Draw()
 	cmdList->SetGraphicsRootDescriptorTable(1, CD3DX12_GPU_DESCRIPTOR_HANDLE(spritecommon._descHeap->GetGPUDescriptorHandleForHeapStart(), this->texNumber, descriptorHandleIncrementSize));
 	// 描画コマンド
 	cmdList->DrawInstanced(4, 1, 0, 0);
+}
+
+void Sprite::SetTextureRect(XMFLOAT2 texBase, XMFLOAT2 texSize)
+{
+	this->texBase = texBase;
+	this->texSize = texSize;
+
+	// 頂点バッファへのデータ転送
+	TransVertex();
+
 }
