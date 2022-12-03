@@ -190,7 +190,7 @@ void DefCannon::FixedShot()
 		//¶‚«‚Ä‚¢‚È‚¢
 		if (bullet[i]->GetStatus().isAlive != false) { continue; }
 		////–Ú•W‚ª’è‚Ü‚Á‚Ä‚¢‚é
-		if (bullet[i]->GetStatus().vecSet != false) { continue; }
+		//if (bullet[i]->GetStatus().vecSet != false) { continue; }
 		bullet[i]->SetVec(shotVec);
 		bullet[i]->SetVec(XMVector3Normalize(bullet[i]->GetStatus().vec));
 		bullet[i]->SetVecSet(true);

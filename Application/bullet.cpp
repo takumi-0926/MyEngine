@@ -50,7 +50,7 @@ void Bullet::Update()
 
 		SetMatRot(LookAtRotation(status.vec, XMFLOAT3(0, 1, 0)));
 
-		//collider->Update();
+		collider->Update();
 	}
 	else {
 		this->position = this->status.basePos;
@@ -59,7 +59,7 @@ void Bullet::Update()
 	count += 1.0f / 60.0f;
 	if (count >= 3.0f) {
 		status.isAlive = false;
-		//CollisionManager::GetInstance()->RemoveCollider(collider);
+		CollisionManager::GetInstance()->RemoveCollider(collider);
 		count = 0;
 	}
 
@@ -72,7 +72,7 @@ void Bullet::Draw()
 void Bullet::OnCollision(const CollisionInfo& info)
 {
 	status.isAlive = false;
-	//CollisionManager::GetInstance()->RemoveCollider(collider);
+	CollisionManager::GetInstance()->RemoveCollider(collider);
 }
 
 XMMATRIX Bullet::LookAtRotation(XMVECTOR forward, XMFLOAT3 upward)
@@ -119,9 +119,9 @@ XMMATRIX Bullet::LookAtRotation(XMVECTOR forward, XMFLOAT3 upward)
 void Bullet::SetAlive(bool flag)
 {
 	if (flag == true) {
-		//float radius = 2.0f;
+		float radius = 2.0f;
 
-		//SetCollider(new SphereCollider(XMVECTOR({ 0,radius,0,0 }), radius));
+		SetCollider(new SphereCollider(XMVECTOR({ 0,radius,0,0 }), radius));
 	}
 
 	this->status.isAlive = flag;
