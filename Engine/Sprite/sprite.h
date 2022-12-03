@@ -2,7 +2,7 @@
 #include "spriteCommon.h"
 #include "..\pipelineSet.h"
 
-class Sprite : public LoadHlsls{
+class Sprite : public LoadHlsls {
 protected://エイリアス
 	template <class T> using ComPtr = Microsoft::WRL::ComPtr<T>;
 	using XMFLOAT2 = DirectX::XMFLOAT2;
@@ -39,9 +39,9 @@ public://静的メンバ関数
 
 	static Sprite* Create(
 		UINT texNumber,
-		XMFLOAT2 position, 
-		XMFLOAT4 color = { 1,1,1,1 }, 
-		XMFLOAT2 anchorpoint = { 0.0f,0.0f }, 
+		XMFLOAT2 position,
+		XMFLOAT4 color = { 1,1,1,1 },
+		XMFLOAT2 anchorpoint = { 0.0f,0.0f },
 		bool isFlipX = false, bool isFlipY = false);
 
 	Sprite(
@@ -80,7 +80,7 @@ protected:
 	//回転角
 	float rotation = 0.0f;
 	//座標
-	XMFLOAT2 position = { 0,0};
+	XMFLOAT2 position = { 0,0 };
 	//ワールド行列
 	XMMATRIX matWorld;
 
@@ -104,6 +104,8 @@ protected:
 
 	//テクスチャ切り出しサイズ
 	XMFLOAT2 texSize = { 100.0f,100.0f };
+	// テクスチャ始点
+	XMFLOAT2 texBase = { 0, 0 };
 
 	//非表示
 	bool isInvisible = false;
@@ -117,7 +119,7 @@ public:
 	virtual void Update();
 
 	virtual void Draw();
-	
+
 public:
 	/// <summary>
 	/// サイズ設定
@@ -148,10 +150,16 @@ public:
 		this->anchorpoint = anchorpoint;
 		TransVertex();
 	}
-	
+
 	void SetAlpha(float alpha) {
 		this->alpha = alpha;
 	}
+	/// <summary>
+	/// テクスチャ範囲設定
+	/// </summary>
+	/// <param name="texBase">テクスチャ左上座標</param>
+	/// <param name="texSize">テクスチャサイズ</param>
+	void SetTextureRect(XMFLOAT2 texBase, XMFLOAT2 texSize);
 
 	XMFLOAT2 Pos() { return position; }
 };

@@ -49,6 +49,7 @@ Fade* Fade::Create(UINT texNumber, XMFLOAT2 position, XMFLOAT4 color, XMFLOAT2 a
 
 void Fade::Update()
 {
+	if (shake) { Shake(); }
 	Sprite::Update();
 }
 
@@ -75,8 +76,8 @@ void Fade::FadeOut()
 	if (!fadeOut) { return; }
 	SetAlpha(_alpha);
 	_alpha -= fadeNum;
-	if (_alpha <= 0.0f) { 
-		fadeOut = false; 
+	if (_alpha <= 0.0f) {
+		fadeOut = false;
 	}
 	Update();
 }
@@ -93,6 +94,35 @@ void Fade::SlideOut()
 			this->slideOut = false;
 		}
 	}
+}
+
+void Fade::Shake()
+{
+	//リセット
+	if (shakeTime <= 1.0f) {
+		shakeTime = 20.0f;
+		position = BasePos;
+		PosDecision = false;
+		shake = false;
+		return;
+	}
+
+	//元座標決定
+	if (!PosDecision) {
+		BasePos = position;
+		PosDecision = true;
+	}
+
+	//シェイク乱数決定
+	shakeRand.x = rand() % int(shakeTime) - (int(shakeTime) / 3.0f);
+	shakeRand.y = rand() % int(shakeTime) - (int(shakeTime) / 3.0f);
+
+	//シェイク加算
+	position.x = BasePos.x + shakeRand.x;
+	position.y = BasePos.y + shakeRand.y;
+
+	//シェイクタイム減算
+	shakeTime -= 1.0f;
 }
 
 void Fade::SlideIn()

@@ -3,6 +3,7 @@
 #include<DirectXMath.h>
 
 class Object3Ds;
+class FbxObject3d;
 class BaseCollider;
 
 /// <summary>
@@ -10,6 +11,8 @@ class BaseCollider;
 /// </summary>
 struct QueryHit {
 	Object3Ds* object = nullptr;
+
+	FbxObject3d* fbx = nullptr;
 
 	BaseCollider* collider = nullptr;
 

@@ -2,6 +2,8 @@
 
 #include "FbxModel.h"
 #include "Camera\Camera.h"
+#include "Collision\BaseCollision.h"
+#include "Collision\CollisionManager.h"
 
 #include <Windows.h>
 #include <wrl.h>
@@ -26,29 +28,42 @@ public:
 		XMFLOAT3 cameraPos;
 	};
 
-	static const int MAX_BONES = 32;
+	static const int MAX_BONES = 256;
 
 	struct ConstBufferDataSkin {
 		XMMATRIX bones[MAX_BONES];
 	};
 
 public:
-	void Initialize();
+	virtual void Initialize();
 
-	void Update();
+	virtual void Update();
 
-	void Draw(ID3D12GraphicsCommandList* cmdList);
+	virtual void Draw(ID3D12GraphicsCommandList* cmdList);
 
-	void Setmodel(FbxModel* model) { this->model = model; }
+	//行列の更新
+	void UpdateWorldMatrix();
+
+	void SetModel(FbxModel* model) { this->model = model; }
 
 	void PlayAnimation();
 
 public:
 	static void SetDevice(ID3D12Device* device) { FbxObject3d::device = device; }
-	static void SetCamera(Camera* camera) { FbxObject3d::camera = camera; }
+	static void SetCamera(Camera* camera) { 
+		FbxObject3d::camera = camera; }
 	void SetPosition(XMFLOAT3 pos) { this->position = pos; }
-
+	void SetScale(XMFLOAT3 scale) { this->scale = scale; }
 	static void CreateGraphicsPipeline();
+
+	void SetCollider(BaseCollider* collider);
+	virtual void OnCollision(const CollisionInfo& info){}
+
+	/// <summary>
+	/// ワールド行列取得
+	/// </summary>
+	/// <returns></returns>
+	const XMMATRIX GetMatWorld() { return matWorld; }
 
 private:
 	static ID3D12Device* device;
@@ -66,14 +81,18 @@ protected:
 
 	XMFLOAT3 position = { 0,0,0 };
 
-	XMMATRIX matWorld;
+	// ローカルワールド変換行列
+	XMMATRIX matScale = {};
+	XMMATRIX matRot = {};
+	XMMATRIX matTrans = {};
+	XMMATRIX matWorld = {};
 
 	FbxModel* model = nullptr;
 
 	FbxTime frameTime;
 
 	FbxTime startTime;
-	
+
 	FbxTime endTime;
 
 	FbxTime currentTime;
@@ -83,4 +102,12 @@ protected:
 	ComPtr<ID3D12Resource> constBufferTransform;
 
 	ComPtr<ID3D12Resource> constBuffSkin;
+
+	//回転行列の使用先
+	bool useRotMat = false;
+
+	BaseCollider* collider = nullptr;
+
+public:
+	XMFLOAT3 GetPosition() { return position; }
 };

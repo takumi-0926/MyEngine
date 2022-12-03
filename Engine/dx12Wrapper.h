@@ -1,8 +1,8 @@
 #pragma once
 #include "application.h"
-#include "..\includes.h"
+#include "includes.h"
 #include "Camera/Camera.h"
-#include "..\light\Light.h"
+#include "light\Light.h"
 
 #include "imgui\imgui.h"
 #include "imgui\imgui_impl_win32.h"
@@ -58,7 +58,7 @@ private:
 
 	D3D12_DESCRIPTOR_HEAP_DESC          heapDesc = {};
 
-	static Light* light[3];
+	static Light* light;
 
 	static Camera* camera;
 	// ƒrƒ…[s—ñ
@@ -139,9 +139,7 @@ public:
 	}
 
 	static void SetLight(Light* light) {
-		if (lightNum > 2) { assert(0); }
-		Wrapper::light[lightNum] = light;
-		lightNum++;
+		Wrapper::light = light;
 	}
 
 	void DrawLight(ID3D12GraphicsCommandList* cmdlist);

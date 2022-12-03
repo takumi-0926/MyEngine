@@ -24,7 +24,7 @@
 
 #include "Camera\DebugCamera.h"
 
-#include "..\light\Light.h"
+#include "light\Light.h"
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
@@ -75,6 +75,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			return 1;
 		}
 		//object2d::StaticInitialize(dx12->GetDevice());
+	}
+
+	if (!ParticleManager::StaticInitialize(dx12->GetDevice(), app->window_width, app->window_height)) {
+		assert(0);
+		return 1;
 	}
 
 	{

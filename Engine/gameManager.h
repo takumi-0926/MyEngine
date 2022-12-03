@@ -10,16 +10,16 @@
 #include "PMD\pmdObject3D.h"
 #include "PMD\PMDmodel.h"
 #include "FBX\FbxObject3d.h"
-#include "..\moving.h"
-#include "..\light\Light.h"
-#include "..\Easing.h"
+#include "moving.h"
+#include "light\Light.h"
+#include "Easing.h"
 
-#include "..\testObj.h"
+#include "testObj.h"
 #include "enemy.h"
 
 #include "object\object2d.h"
 #include "hitBox.h"
-#include "..\shaderTest.h"
+#include "shaderTest.h"
 
 #include "DefCannon.h"
 
@@ -30,6 +30,11 @@
 #include "SceneEffect/Fade.h"
 
 #include "Collision\MeshCollider.h"
+
+#include "Sprite/DebugText.h"
+
+#include "ParticleManager.h"
+#include "SceneEffect/SceneEffect.h"
 
 using namespace std;
 using namespace DirectX;
@@ -46,6 +51,7 @@ enum Scene{
 enum GameMode {
 	NASI,
 	START,
+	SET,
 	CLEAR,
 	OVER,
 };
@@ -60,12 +66,16 @@ enum modelName {
 class Player;
 class Stage;
 
+struct JsonData;
+
 class CollisionManager;
 class GameManager {
 private://メンバ変数(初期化)
 	Input*	 input;
 	Audio*   audio;
 	Wrapper*  dx12;
+	DebugText debugText;
+
 	std::shared_ptr<PMDmodel>   pmdModel;
 	std::shared_ptr<PMDobject> pmdObject;
 	Player*		   _player = nullptr;
@@ -73,21 +83,39 @@ private://メンバ変数(初期化)
 	PMDmodel* modelPlayer = nullptr;
 
 	Stage* stage;
+	vector<Stage*> stages;
+	map<string, Model*> stageModels;
+	JsonData* jsonData;
+
+	Object3Ds* skyDome = nullptr;
 	HitBox* HitBox = {};
 	DefCannon* cannon[6] = {};
-
-	Model* golem[3] = {};
-	Model* wolf[3] = {};
+	Model* bulletModel = nullptr;
+	FbxModel* golem[3] = {};
+	FbxModel* wolf[3] = {};
+	Model* skyDomeModel = nullptr;
 
 	//衝突マネージャー
 	CollisionManager* collisionManager = nullptr;
+	ParticleManager* particlemanager = nullptr;
+	SceneEffect* sceneEffect = nullptr;
+
+	//ライト
+	Light* light = nullptr;
+	float circleShadowDir[3] = { 0,-1,0 };
+	float circleShadowAtten[3] = { 0.5f,0.8f,0.0f };
+	float circleShadowFacterAnlge[2] = { 0.0f,0.5f };
+	float testPos[3] = { 1,0.0f,0 };
+	Object3Ds* lightTest = nullptr;
 
 	Fade* fade = nullptr;//シーン切り替え時
 	Fade* clear = nullptr;//クリア時
 	Fade* failed = nullptr;//ゲームオーバー時
 	Fade* start = nullptr;//スタート時
+	Fade* gateBreak = nullptr;
 	bool result = false;
 
+	DebugText* text = nullptr;
 	Sprite* BreakBar = nullptr;
 	Sprite* BreakGage[15] = {};
 private://メンバ変数(ゲームシーン)
@@ -120,8 +148,8 @@ private://メンバ変数(ゲームシーン)
 	vector<Object3Ds> block;
 	DebugCamera* camera = nullptr;
 	Camera* mainCamera = nullptr;
+	Camera* setCamera = nullptr;
 
-	Light* light = nullptr;
 
 	Plane plane[25] = {};
 	Triangle triangle[50] = {};
@@ -133,6 +161,8 @@ private://メンバ変数(ゲームシーン)
 	Sqhere sqhere02 = {};
 
 	Easing easing;
+
+	float particleColor[4] = {};
 
 	//シーン番号
 	int SceneNum = TITLE;
@@ -175,7 +205,20 @@ private://メンバ変数(ゲームシーン)
 	float DamegeAlpha = 1.0f;
 	float popHp = 0;
 
+	static const int debugTextTexNumber = 100;
+
 	XMFLOAT3 afterEye;
+	XMFLOAT3 setObjectPos;
+
+	//シェイク関係
+	float shakeTime = 20.0f;//シェイク時間
+	XMFLOAT3 BasePos;//シェイク元座標
+	XMFLOAT3 shakeRand;//シェイク加算値
+	bool PosDecision = false; //座標決定
+	bool shake = false;
+
+	int SetNum = 0;
+
 public://メンバ関数
 	//コンストラクタ
 	GameManager();
@@ -351,5 +394,36 @@ public://メンバ関数
 		if (pos1.y != pos2.y) { return false; }
 		if (pos1.z != pos2.z) { return false; }
 		return true;
+	}
+
+	void Shake3D(XMFLOAT3& base) {
+		//リセット
+		if (shakeTime <= 1.0f) {
+			shakeTime = 20.0f;
+			base = BasePos;
+			PosDecision = false;
+			shake = false;
+			return;
+		}
+
+		//元座標決定
+		if (!PosDecision) {
+			BasePos = base;
+			PosDecision = true;
+		}
+
+		//シェイク乱数決定
+		shakeRand.x = rand() % int(shakeTime) - (int(shakeTime) / 3.0f);
+		//shakeRand.y = rand() % int(shakeTime) - (int(shakeTime) / 3.0f);
+		shakeRand.z = rand() % int(shakeTime) - (int(shakeTime) / 3.0f);
+
+		//シェイク加算
+		base.x = BasePos.x + shakeRand.x;
+		//base.y = BasePos.y + shakeRand.y;
+		base.z = BasePos.z + shakeRand.z;
+
+		//シェイクタイム減算
+		shakeTime -= 1.0f;
+
 	}
 };

@@ -1,11 +1,12 @@
 #pragma once
 #include "Sprite/sprite.h"
-#include "..\Easing.h"
+#include "Easing.h"
 #include "application.h"
 
 class Easing;
 class Fade : public Sprite {
 private:
+	float AddTime = 1.0f / 60.0f;
 	//フェード関係
 	float fadeTime = 60;
 	float fadeNum = 1 / fadeTime;
@@ -27,6 +28,12 @@ private:
 	bool slideOut = false;
 	float waitTime = 1.0f;
 
+	//シェイク関係
+	float shakeTime = 20.0f;//シェイク時間
+	XMFLOAT2 BasePos;//シェイク元座標
+	XMFLOAT2 shakeRand;//シェイク加算値
+	bool PosDecision = false; //座標決定
+	bool shake = false;
 public:
 	Fade(UINT texNumber,
 		XMFLOAT2 position,
@@ -45,13 +52,17 @@ public:
 	void Update()override;
 	void Draw()override;
 
+	//フェードイン / アウト
 	void FadeIn();
 	void FadeOut();
+	void halfFade();
 
+	//イーズイン / アウト
 	void SlideIn();
 	void SlideOut();
 
-	void halfFade();
+	//シェイク
+	void Shake();
 public:
 	float GetAlpha() { return alpha; }
 
@@ -61,9 +72,11 @@ public:
 	bool GetClear() { return clear; }
 	bool GetFailed() { return failed; }
 	bool GetSlideOut() { return slideOut; }
+	bool GetShake() { return slideOut; }
 	void SetFadeIn(bool _flag) { this->fadeIn = _flag; }
 	void SetFadeOut(bool _flag) { this->fadeOut = _flag; }
 	void SethalfFade(bool _flag) { this->halffade = _flag; }
 	void SetClear(bool _flag) { this->clear = _flag; }
 	void SetFailed(bool _flag) { this->failed = _flag; }
+	void SetShake(bool _flag) { this->shake = _flag; }
 };

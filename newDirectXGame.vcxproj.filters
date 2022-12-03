@@ -49,6 +49,9 @@
     <Filter Include="ソース ファイル\Light">
       <UniqueIdentifier>{2ceae371-e4f3-44e5-9676-06d3f5a12e38}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ソース ファイル\Json">
+      <UniqueIdentifier>{7de49814-e54f-4238-8f91-7122311af9cb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\shaders\2dObjPS.hlsl">
@@ -96,6 +99,15 @@
     <FxCompile Include="Resources\shaders\SpritePS.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
+    <FxCompile Include="Resources\shaders\ParticleGS.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\shaders\particlePS.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\shaders\ParticleVS.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\shaders\BasicShaderHeader.hlsli">
@@ -119,36 +131,39 @@
     <None Include="Resources\shaders\Sprite.hlsli">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="Resources\shaders\Particle.hlsli">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="delete.h">
+    <ClInclude Include="Engine\delete.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Easing.h">
+    <ClInclude Include="Application\Easing.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Application\enemy.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="EnemyManager.h">
+    <ClInclude Include="Application\EnemyManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Application\hitBox.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="includes.h">
+    <ClInclude Include="Engine\includes.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Application\Player.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="shaderTest.h">
+    <ClInclude Include="Application\shaderTest.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Application\stage.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="2d\PostEffect.h">
+    <ClInclude Include="Engine\2d\PostEffect.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Engine\gameManager.h">
@@ -157,7 +172,7 @@
     <ClInclude Include="Engine\Input\dx12input.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="stageObject.h">
+    <ClInclude Include="Application\stageObject.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="External\imgui\imconfig.h">
@@ -283,10 +298,10 @@
     <ClInclude Include="Engine\pipelineSet.h">
       <Filter>ソース ファイル\DirectX12</Filter>
     </ClInclude>
-    <ClInclude Include="light\Light.h">
+    <ClInclude Include="Engine\light\Light.h">
       <Filter>ソース ファイル\Light</Filter>
     </ClInclude>
-    <ClInclude Include="moving.h">
+    <ClInclude Include="Engine\moving.h">
       <Filter>ソース ファイル\Math</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Collision\SphereCollider.h">
@@ -313,6 +328,27 @@
     <ClInclude Include="Engine\SceneEffect\Fade.h">
       <Filter>ソース ファイル\SceneEffect</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\ParticleManager.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Sprite\DebugText.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\light\LightGroup.h">
+      <Filter>ソース ファイル\Light</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\light\PointLight.h">
+      <Filter>ソース ファイル\Light</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\light\DirectionalLight.h">
+      <Filter>ソース ファイル\Light</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\shadow\circleShadow.h">
+      <Filter>ソース ファイル\Light</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\JsonLoader.h">
+      <Filter>ソース ファイル\Json</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application\enemy.cpp">
@@ -327,13 +363,13 @@
     <ClCompile Include="Application\Player.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="shaderTest.cpp">
+    <ClCompile Include="Application\shaderTest.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Application\stage.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="2d\PostEffect.cpp">
+    <ClCompile Include="Engine\2d\PostEffect.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Engine\gameManager.cpp">
@@ -390,7 +426,7 @@
     <ClCompile Include="Engine\pipelineSet.cpp">
       <Filter>ソース ファイル\DirectX12</Filter>
     </ClCompile>
-    <ClCompile Include="stageObject.cpp">
+    <ClCompile Include="Application\stageObject.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="External\imgui\imgui.cpp">
@@ -441,7 +477,7 @@
     <ClCompile Include="Engine\Sprite\sprite.cpp">
       <Filter>ソース ファイル\Sprite</Filter>
     </ClCompile>
-    <ClCompile Include="light\Light.cpp">
+    <ClCompile Include="Engine\light\Light.cpp">
       <Filter>ソース ファイル\Light</Filter>
     </ClCompile>
     <ClCompile Include="Engine\Collision\SphereCollider.cpp">
@@ -461,6 +497,21 @@
     </ClCompile>
     <ClCompile Include="Engine\object\baseObject.cpp">
       <Filter>ソース ファイル\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\ParticleManager.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Sprite\DebugText.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\light\LightGroup.cpp">
+      <Filter>ソース ファイル\Light</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\SceneEffect\SceneEffect.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\JsonLoader.cpp">
+      <Filter>ソース ファイル\Json</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -53,9 +53,12 @@ PMDobject* PMDobject::Create(PMDmodel* _model)
 bool PMDobject::Initialize(PMDmodel* _model)
 {
 	this->dx12 = dx12;
+	HRESULT result;
 
-	assert(SUCCEEDED(CreateRootSignaturePMD()));
-	assert(SUCCEEDED(CreateGraphicsPipelinePMD()));
+	result = CreateRootSignaturePMD();
+	assert(SUCCEEDED(result));
+	result = CreateGraphicsPipelinePMD();
+	assert(SUCCEEDED(result));
 
 	SetModel(_model);
 
@@ -97,9 +100,9 @@ void PMDobject::Draw()
 HRESULT PMDobject::CreateGraphicsPipelinePMD()
 {
 	//パイプライン生成
-	LoadHlsls::LoadHlsl_VS(ShaderNo::PMD, L"Resources/shaders/BasicVertexShader.hlsl", "BasicVS", "vs_5_0");
-	LoadHlsls::LoadHlsl_PS(ShaderNo::PMD, L"Resources/shaders/BasicPixelShader.hlsl", "BasicPS", "ps_5_0");
-	LoadHlsls::createPipeline(device.Get(), ShaderNo::PMD);
+	//LoadHlsls::LoadHlsl_VS(ShaderNo::PMD, L"Resources/shaders/BasicVertexShader.hlsl", "BasicVS", "vs_5_0");
+	//LoadHlsls::LoadHlsl_PS(ShaderNo::PMD, L"Resources/shaders/BasicPixelShader.hlsl", "BasicPS", "ps_5_0");
+	//LoadHlsls::createPipeline(device.Get(), ShaderNo::PMD);
 
 	HRESULT result = S_FALSE;
 	ComPtr<ID3DBlob> vsBlob; // 頂点シェーダオブジェクト

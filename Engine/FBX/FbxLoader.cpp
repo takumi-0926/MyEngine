@@ -24,6 +24,8 @@ void FbxLoader::Initialize(ID3D12Device* device)
 	fbxManager->SetIOSettings(ios);
 
 	fbxImporter = FbxImporter::Create(fbxManager, "");
+
+	FbxModel::StaticInitialize(device);
 }
 
 void FbxLoader::Finalize()
@@ -143,7 +145,7 @@ void FbxLoader::ParseMeshFaces(FbxModel* model, FbxMesh* fbxMesh)
 	auto& indices = model->indices;
 
 	//1ファイルに複数メッシュのモデルは非対応
-	assert(indices.size() == 0);
+	//assert(indices.size() == 0);
 
 	//面の数
 	const int polygonCount = fbxMesh->GetPolygonCount();

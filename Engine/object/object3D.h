@@ -40,7 +40,7 @@ public:
 	static bool StaticInitialize(ID3D12Device* _device);
 
 	// 3Dオブジェクト生成
-	static Object3Ds* Create();
+	static Object3Ds* Create(Model* model);
 
 	//モデルセット
 	void SetModel(Model* _model);
@@ -89,6 +89,10 @@ public:
 public:
 	void SetPosition(XMFLOAT3 position) {
 		this->position = position;
+	}
+	void SetMatRot(XMMATRIX rot) { 
+		this->matRot = rot;
+		useRotMat = true;
 	}
 
 	/// <summary>
