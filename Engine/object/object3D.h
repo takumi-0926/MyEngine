@@ -3,10 +3,10 @@
 
 #include "baseObject.h"
 #include "Model.h"
-#include "..\includes.h"
-#include "..\pipelineSet.h"
-#include "..\PMD\PMDmodel.h"
-#include "..\Collision\CollisionInfo.h"
+#include "includes.h"
+#include "pipelineSet.h"
+#include "PMD\PMDmodel.h"
+#include "Collision\CollisionInfo.h"
 
 //3Dオブジェクト用頂点データ
 struct  Vertex {

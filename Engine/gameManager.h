@@ -35,6 +35,7 @@
 
 #include "ParticleManager.h"
 #include "SceneEffect/SceneEffect.h"
+#include "BillboardObject.h"
 
 using namespace std;
 using namespace DirectX;
@@ -51,10 +52,16 @@ enum Scene{
 enum GameMode {
 	NASI,
 	START,
+	POSE,
 	SET,
 	CLEAR,
 	OVER,
 };
+enum GameLocation {
+	BaseCamp,
+	BaseStage,
+};
+
 enum SpriteName {
 
 };
@@ -83,9 +90,12 @@ private://メンバ変数(初期化)
 	PMDmodel* modelPlayer = nullptr;
 
 	Stage* stage;
-	vector<Stage*> stages;
 	map<string, Model*> stageModels;
-	JsonData* jsonData;
+	vector<Stage*> stages;
+	vector<Stage*> baseCamp;
+	JsonData* stageData;
+	JsonData* baseCampData;
+	int UseStage = 0;
 
 	Object3Ds* skyDome = nullptr;
 	HitBox* HitBox = {};
@@ -99,6 +109,7 @@ private://メンバ変数(初期化)
 	CollisionManager* collisionManager = nullptr;
 	ParticleManager* particlemanager = nullptr;
 	SceneEffect* sceneEffect = nullptr;
+	BillboardObject* Bottom = nullptr;
 
 	//ライト
 	Light* light = nullptr;
@@ -106,7 +117,6 @@ private://メンバ変数(初期化)
 	float circleShadowAtten[3] = { 0.5f,0.8f,0.0f };
 	float circleShadowFacterAnlge[2] = { 0.0f,0.5f };
 	float testPos[3] = { 1,0.0f,0 };
-	Object3Ds* lightTest = nullptr;
 
 	Fade* fade = nullptr;//シーン切り替え時
 	Fade* clear = nullptr;//クリア時
@@ -115,9 +125,11 @@ private://メンバ変数(初期化)
 	Fade* gateBreak = nullptr;
 	bool result = false;
 
+
 	DebugText* text = nullptr;
 	Sprite* BreakBar = nullptr;
 	Sprite* BreakGage[15] = {};
+	Sprite* Pose = nullptr;
 private://メンバ変数(ゲームシーン)
 	vector<Sqhere> sqhere;
 	Model* modelPlane = nullptr;
@@ -219,6 +231,7 @@ private://メンバ変数(ゲームシーン)
 
 	int SetNum = 0;
 
+	bool pose = false;//ポーズフラグ
 public://メンバ関数
 	//コンストラクタ
 	GameManager();

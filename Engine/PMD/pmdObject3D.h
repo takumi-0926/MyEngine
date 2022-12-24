@@ -8,6 +8,7 @@
 #include "PMDModel.h"
 #include "dx12Wrapper.h"
 #include "object/baseObject.h"
+#include "Collision\CollisionInfo.h"
 
 class Wrapper;
 class PMDmodel;
@@ -64,10 +65,10 @@ public:
 	static bool StaticInitialize(Wrapper* _dx12);
 	static PMDobject* Create(PMDmodel* _model = nullptr);
 
-	bool Initialize(PMDmodel* _model);
+	//初期化
+	virtual bool Initialize(PMDmodel* _model);
 	//更新
 	virtual void Update();
-	void UpdateWorldMatrix();
 	//描画
 	virtual void Draw();
 
@@ -77,8 +78,16 @@ public:
 	//void SetMatRot(XMMATRIX rot)    { this->matRot    = rot; }
 
 	//XMFLOAT3 GetPosition() { return position; }
+
+	void SetCollider(BaseCollider* collider);
+
+	virtual void OnCollision(const CollisionInfo& info) {}
+
 private:
 	ComPtr<ID3D12Resource> PMDconstBuffB1; // 定数バッファ
+
+protected:
+	BaseCollider* collider = nullptr;
 
 	//// 色
 	//XMFLOAT4 color = { 1,1,1,1 };

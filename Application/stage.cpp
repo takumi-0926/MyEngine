@@ -28,11 +28,11 @@ bool Stage::Initialize(Model* model)
 	SetModel(model);
 
 	//コライダー追加
-	//MeshCollider* collider = new MeshCollider();
-	//collider->ConstructTriangles(model);
-	//SetCollider(collider);
+	MeshCollider* collider = new MeshCollider();
+	collider->ConstructTriangles(model);
+	SetCollider(collider);
 
-	//collider->SetAttribute(COLLISION_ATTR_LANDSHAPE);
+	collider->SetAttribute(COLLISION_ATTR_LANDSHAPE);
 
 	Update();
 	return true;

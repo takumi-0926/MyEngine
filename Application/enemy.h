@@ -34,6 +34,11 @@ public:
 
 	float damegeCount = 0.0f;
 
+	unsigned short myNumber = 0;
+	//’n–Ê”»’è—p
+	bool OnGround = true;
+	XMVECTOR fallV;
+
 	float alpha = 1.0f;
 	vector<XMFLOAT3> defalt_ambient;
 	XMVECTOR vectol;

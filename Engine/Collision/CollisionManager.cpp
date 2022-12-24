@@ -1,7 +1,7 @@
 #include "CollisionManager.h"
 #include "BaseCollision.h"
 #include "Collision.h"
-
+#include "CollisionAttribute.h"
 #include "MeshCollider.h"
 
 CollisionManager* CollisionManager::GetInstance()
@@ -32,8 +32,19 @@ void CollisionManager::CheckAllCollision()
 
 				DirectX::XMVECTOR inter;
 				if (Collision::CheckSqhere2Sqhere(*SphereA, *SphereB)) {
-					colA->OnCllision(CollisionInfo(colB->GetObject3d(), colB->GetFbxObject3d(), colB, inter));
-					colB->OnCllision(CollisionInfo(colA->GetObject3d(), colA->GetFbxObject3d(), colA, inter));
+					colA->OnCllision(CollisionInfo(colB->GetObject3d(), colB->GetFbxObject3d(), colB->GetPmdObject3d(), colB, inter));
+					colB->OnCllision(CollisionInfo(colA->GetObject3d(), colA->GetFbxObject3d(), colA->GetPmdObject3d(), colA, inter));
+				}
+			}
+			else if (colA->GetShapeType() == COLLISIONSHAPE_SQHERE &&
+				colB->GetShapeType() == COLLISIONSHAPE_TRYANGLE) {
+				Sqhere* sphere = dynamic_cast<Sqhere*>(colA);
+				Triangle* triangle = dynamic_cast<Triangle*>(colB);
+
+				DirectX::XMVECTOR inter;
+				if (Collision::CheckSqhere2Triangle(*sphere, *triangle)) {
+					colA->OnCllision(CollisionInfo(colB->GetObject3d(), colB->GetFbxObject3d(), colB->GetPmdObject3d(), colB, inter));
+					colB->OnCllision(CollisionInfo(colA->GetObject3d(), colA->GetFbxObject3d(), colA->GetPmdObject3d(), colA, inter));
 				}
 			}
 			else if (colA->GetShapeType() == COLLISIONSHAPE_MESH &&
@@ -42,8 +53,8 @@ void CollisionManager::CheckAllCollision()
 				Sqhere* sphere = dynamic_cast<Sqhere*>(colB);
 				DirectX::XMVECTOR inter;
 				if (meshCollider->CheckCollisionSqhere(*sphere, &inter)) {
-					colA->OnCllision(CollisionInfo(colB->GetObject3d(), colB->GetFbxObject3d(), colB, inter));
-					colB->OnCllision(CollisionInfo(colA->GetObject3d(), colA->GetFbxObject3d(), colA, inter));
+					colA->OnCllision(CollisionInfo(colB->GetObject3d(), colB->GetFbxObject3d(), colB->GetPmdObject3d(), colB, inter));
+					colB->OnCllision(CollisionInfo(colA->GetObject3d(), colA->GetFbxObject3d(), colA->GetPmdObject3d(), colA, inter));
 				}
 			}
 			else if (colA->GetShapeType() == COLLISIONSHAPE_SQHERE &&
@@ -52,8 +63,8 @@ void CollisionManager::CheckAllCollision()
 				Sqhere* sphere = dynamic_cast<Sqhere*>(colA);
 				DirectX::XMVECTOR inter;
 				if (meshCollider->CheckCollisionSqhere(*sphere, &inter)) {
-					colA->OnCllision(CollisionInfo(colB->GetObject3d(), colB->GetFbxObject3d(), colB, inter));
-					colB->OnCllision(CollisionInfo(colA->GetObject3d(), colA->GetFbxObject3d(), colA, inter));
+					colA->OnCllision(CollisionInfo(colB->GetObject3d(), colB->GetFbxObject3d(), colB->GetPmdObject3d(), colB, inter));
+					colB->OnCllision(CollisionInfo(colA->GetObject3d(), colA->GetFbxObject3d(), colA->GetPmdObject3d(), colA, inter));
 				}
 			}
 		}
@@ -130,7 +141,7 @@ bool CollisionManager::Raycast(
 	return result;
 }
 
-void CollisionManager::QuerySqhere(const Sqhere& sphere, QueryCallBack* callBack, unsigned short attribute)
+void CollisionManager::QuerySqhere(const Sqhere& sphere, QueryCallBack* callBack, unsigned short attribute, unsigned short MyNumber)
 {
 	assert(callBack);
 
@@ -142,8 +153,11 @@ void CollisionManager::QuerySqhere(const Sqhere& sphere, QueryCallBack* callBack
 		BaseCollider* col = *it;
 
 		//属性が合わなければスキップ
-		if (!(col->attribute & attribute)) {
-			continue;
+		if (!(col->attribute & attribute) || col->attribute == COLLISION_ATTR_BULLET) {
+			//自分でなければスキップしない
+			if (!(col->MyNumber & MyNumber)) {
+				continue;
+			}
 		}
 
 		//球の場合
@@ -160,6 +174,30 @@ void CollisionManager::QuerySqhere(const Sqhere& sphere, QueryCallBack* callBack
 			info.collider = col;
 			info.object = col->GetObject3d();
 			info.fbx = col->GetFbxObject3d();
+			info.pmd = col->GetPmdObject3d();
+			info.inter = tempInter;
+			info.reject = tempReject;
+
+			//クエリーコールバック呼び出し
+			if (!callBack->OnQueryHit(info)) {
+				return;
+			}
+		}
+		//三角形の場合
+		if (col->GetShapeType() == COLLISIONSHAPE_TRYANGLE) {
+			Triangle* triangle = dynamic_cast<Triangle*>(col);
+
+			XMVECTOR tempInter;
+			XMVECTOR tempReject;
+			if (!Collision::CheckSqhere2Triangle(sphere, *triangle, &tempInter, &tempReject)) {
+				continue;
+			}
+			//交差情報設定
+			QueryHit info;
+			info.collider = col;
+			info.object = col->GetObject3d();
+			info.fbx = col->GetFbxObject3d();
+			info.pmd = col->GetPmdObject3d();
 			info.inter = tempInter;
 			info.reject = tempReject;
 
@@ -181,6 +219,7 @@ void CollisionManager::QuerySqhere(const Sqhere& sphere, QueryCallBack* callBack
 			info.collider = col;
 			info.object = col->GetObject3d();
 			info.fbx = col->GetFbxObject3d();
+			info.pmd = col->GetPmdObject3d();
 			info.inter = tempInter;
 			info.reject = tempReject;
 

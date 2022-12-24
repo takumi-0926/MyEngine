@@ -4,6 +4,7 @@
 
 class Object3Ds;
 class FbxObject3d;
+class PMDobject;
 class BaseCollider;
 
 /// <summary>
@@ -13,6 +14,8 @@ struct QueryHit {
 	Object3Ds* object = nullptr;
 
 	FbxObject3d* fbx = nullptr;
+
+	PMDobject* pmd = nullptr;
 
 	BaseCollider* collider = nullptr;
 

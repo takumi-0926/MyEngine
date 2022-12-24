@@ -11,10 +11,10 @@ float4 main(VSOutput input) : SV_TARGET
 	//shade_color = m_ambient;
 	//shade_color += m_diffuse * light_diffuse;
 	//float4 texcolor = tex.Sample(smp, input.uv);
-	//return float4(texcolor.rgb * shade_color, texcolor.a * m_alpha);
+	//return float4(texcolor.rgb, texcolor.a * m_alpha);
 	//return float4(1, 1, 1, 1);
 
-			//テクスチャマッピング
+	//テクスチャマッピング
 	float4 texcolor = tex.Sample(smp, input.uv);
 
 	//光沢度
@@ -42,7 +42,7 @@ float4 main(VSOutput input) : SV_TARGET
 
 			// 全て加算する
 			shadecolor.rgb += (diffuse + specular) * dirLights[i].lightcolor;
-			//shadecolor.a = m_alpha;
+			shadecolor.a = m_alpha;
 		}
 	}
 
@@ -71,6 +71,7 @@ float4 main(VSOutput input) : SV_TARGET
 		}
 	}
 
+	//丸影
 	for (i = 0; i < CIRCLESHADOW_NUM; i++)
 	{
 		if (circleShadows[i].active) {

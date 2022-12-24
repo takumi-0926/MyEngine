@@ -21,6 +21,7 @@ class Player : public PMDobject {
 
 	Input input;
 
+private:
 	/// <summary>
 	/// ステータス
 	/// </summary>
@@ -39,6 +40,10 @@ class Player : public PMDobject {
 	float avoidTime = 0.0f;
 	float speed = 0.0;
 	float angleVertical, angleHorizonal;
+
+	//地面判定用
+	bool OnGround = true;
+	XMVECTOR fallV;
 
 private:
 	void Avoid();
@@ -125,6 +130,10 @@ public:
 	/// <param name="_model"></param>
 	/// <returns></returns>
 	static Player* Create(PMDmodel* _model);
+	/// <summary>
+	/// 初期化
+	/// </summary>
+	bool Initialize(PMDmodel* _model)override;
 	/// <summary>
 	/// 更新処理
 	/// </summary>

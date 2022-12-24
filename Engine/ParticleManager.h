@@ -141,7 +141,7 @@ public: // 静的メンバ関数
 	/// <param name="move">移動量</param>
 	static void CameraMoveEyeVector(XMFLOAT3 move);
 
-
+	static ParticleManager* GetInstance();
 	ParticleManager();
 	~ParticleManager();
 

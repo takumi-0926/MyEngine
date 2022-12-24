@@ -4,6 +4,7 @@
 
 class Object3Ds;
 class FbxObject3d;
+class PMDobject;
 class BaseCollider;
 
 /// <summary>
@@ -14,6 +15,7 @@ public:
 	CollisionInfo(
 		Object3Ds* _object,
 		FbxObject3d* _fbx,
+		PMDobject* pmd,
 		BaseCollider* _collider, 
 		const DirectX::XMVECTOR& _inter) {
 		this->object = _object;
@@ -26,6 +28,7 @@ public:
 
 	FbxObject3d* fbx = nullptr;
 
+	PMDobject* pmd = nullptr;
 	//衝突相手のコライダー
 	BaseCollider* collider = nullptr;
 	//衝突点

@@ -1,11 +1,13 @@
 #include "pmdObject3D.h"
 #include "..\pipelineSet.h"
+#include "Collision\BaseCollision.h"
+#include "Collision\CollisionManager.h"
 
 ComPtr<ID3D12RootSignature> PMDobject::_rootsignature;
 ComPtr<ID3D12PipelineState> PMDobject::_pipelinestate;
 Wrapper* PMDobject::dx12 = nullptr;
 
-PMDobject::PMDobject(/*Wrapper* dx12*/)
+PMDobject::PMDobject()
 //:model(model)
 {
 	//this->dx12 = dx12;
@@ -67,18 +69,6 @@ bool PMDobject::Initialize(PMDmodel* _model)
 
 void PMDobject::Update()
 {
-	//HRESULT result;
-	//_mappedSceneData = nullptr;//マップ先を示すポインタ
-	//result = _sceneConstBuff->Map(0, nullptr, (void**)&_mappedSceneData);//マップ
-
-	//const XMMATRIX& matViewProjection = dx12->Camera()->GetViewProjectionMatrix();
-	//const XMFLOAT3& cameraPos = dx12->Camera()->GetEye();
-
-	//_mappedSceneData->viewproj = matViewProjection;
-	//_mappedSceneData->cameraPos = cameraPos;
-
-	//_sceneConstBuff->Unmap(0, nullptr);
-
 	model->Update();
 }
 
@@ -287,4 +277,13 @@ HRESULT PMDobject::CreateRootSignaturePMD()
 void PMDobject::SetModel(PMDmodel* _model)
 {
 	this->model = _model;
+}
+
+void PMDobject::SetCollider(BaseCollider* collider)
+{
+	collider->SetObject(this);
+	this->collider = collider;
+	CollisionManager::GetInstance()->AddCollider(collider);
+	model->UpdateWorldMatrix();
+	collider->Update();
 }

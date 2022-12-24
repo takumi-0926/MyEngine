@@ -339,17 +339,19 @@ bool PMDmodel::Initialize(const char* filepath)
 }
 void PMDmodel::Update()
 {
-	// スケール、回転、平行移動行列の計算
-	XMMATRIX matScale, matTrans;
 	HRESULT result;
-	matScale = XMMatrixScaling(scale.x, scale.y, scale.z);
-	matTrans = XMMatrixTranslation(position.x, position.y, position.z);
+	//// スケール、回転、平行移動行列の計算
+	//XMMATRIX matScale, matTrans;
+	//matScale = XMMatrixScaling(scale.x, scale.y, scale.z);
+	//matTrans = XMMatrixTranslation(position.x, position.y, position.z);
 
-	// ワールド行列の合成
-	matWorld = XMMatrixIdentity(); // 変形をリセット
-	matWorld *= matScale; // ワールド行列にスケーリングを反映
-	matWorld *= matRot; // ワールド行列に回転を反映
-	matWorld *= matTrans; // ワールド行列に平行移動を反映
+	//// ワールド行列の合成
+	//matWorld = XMMatrixIdentity(); // 変形をリセット
+	//matWorld *= matScale; // ワールド行列にスケーリングを反映
+	//matWorld *= matRot; // ワールド行列に回転を反映
+	//matWorld *= matTrans; // ワールド行列に平行移動を反映
+
+	UpdateWorldMatrix();
 
 	result = transformBuff->Map(0, nullptr, (void**)&_mappedMatrices);
 	if (FAILED(result)) { assert(0); }
@@ -359,6 +361,19 @@ void PMDmodel::Update()
 	transformBuff->Unmap(0, nullptr);
 
 	MotionUpdate();
+}
+void PMDmodel::UpdateWorldMatrix()
+{
+	// スケール、回転、平行移動行列の計算
+	XMMATRIX matScale, matTrans;
+	matScale = XMMatrixScaling(scale.x, scale.y, scale.z);
+	matTrans = XMMatrixTranslation(position.x, position.y, position.z);
+
+	// ワールド行列の合成
+	matWorld = XMMatrixIdentity(); // 変形をリセット
+	matWorld *= matScale; // ワールド行列にスケーリングを反映
+	matWorld *= matRot; // ワールド行列に回転を反映
+	matWorld *= matTrans; // ワールド行列に平行移動を反映
 }
 void PMDmodel::Draw(ID3D12GraphicsCommandList* cmdList)
 {
