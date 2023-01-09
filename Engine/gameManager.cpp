@@ -103,6 +103,15 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 		assert(0);
 		return false;
 	}
+	if (!Sprite::loadTexture(16, L"Resources/weapon.png")) {
+		assert(0);
+		return false;
+	}
+	if (!Sprite::loadTexture(17, L"Resources/weaponSlot.png")) {
+		assert(0);
+		return false;
+	}
+
 	if (!BillboardObject::LoadTexture(0, L"Resources/GateUI_red.png")) {
 		assert(0);
 		return false;
@@ -174,6 +183,7 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	stageModels.insert(std::make_pair("Gate", Model::CreateFromOBJ("Gate")));
 	stageModels.insert(std::make_pair("Wall", Model::CreateFromOBJ("Wall")));
 	stageModels.insert(std::make_pair("Tree", Model::CreateFromOBJ("Tree")));
+	stageModels.insert(std::make_pair("Foundation", Model::CreateFromOBJ("Foundation")));
 	for (auto& objectData : stageData->objects) {
 		Model* model = nullptr;
 		decltype(stageModels)::iterator it = stageModels.find(objectData.name);
@@ -192,6 +202,10 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 		XMFLOAT3 scale{};
 		XMStoreFloat3(&scale, objectData.scale);
 		newObject->scale = scale;
+
+		if (objectData.name == "Foundation") {
+			newObject->SetObjectNum(ObjectType::FounDation);
+		}
 
 		stages.push_back(newObject);
 	}
@@ -244,7 +258,7 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	cannon[5]->SetPosition({ -40,5,  180 });
 
 	skyDome = Object3Ds::Create(skyDomeModel);
-	skyDome->scale = { 5,5,5 };
+	skyDome->scale = { 10,10,10 };
 	//MMDオブジェクト----------------
 	modelPlayer = PMDmodel::CreateFromPMD("Resources/Model/初音ミク.pmd");
 	modelPlayer->LoadVMDFile(vmdData::WAIT, "Resources/vmd/marieru_stand.vmd");
@@ -265,9 +279,14 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	sprite02 = Sprite::Create(1, { 0.0f,0.0f });
 	sprite03 = Sprite::Create(2, { 0.0f,0.0f });
 	sprite04 = Sprite::Create(3, { 0.0f,0.0f });
-
 	Pose = Sprite::Create(15, { 0.0f,0.0f });
 
+	weaponSelect = Sprite::Create(16, { 0.0f,0.0f });
+	for (int i = 0; i < 3; i++)
+	{
+		weaponSlot[i] = Sprite::Create(17, { 455.0f + (176.0f * i),551.0f });
+		weaponSlot[i]->SetAnchorPoint({ 0.5f,0.5f });
+	}
 	hp = Sprite::Create(4, { 36.0f,32.0f });
 	hp->SetSize(XMFLOAT2(playerHp * 4.5f, 30));
 	hp->Update();
@@ -294,10 +313,21 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	start->SetAlpha(0.0f);
 	start->SetSize({ 360,360 });
 	start->Update();
-	gateBreak = Fade::Create(12, { 72,134 });
-	gateBreak->SetAnchorPoint({ 0.5f,0.5f });
-	gateBreak->SetSize({ 80,80 });
-	gateBreak->Update();
+	//門HP（赤状態）
+	gateBreak_red = Fade::Create(12, { 72,134 });
+	gateBreak_red->SetAnchorPoint({ 0.5f,0.5f });
+	gateBreak_red->SetSize({ 80,80 });
+	gateBreak_red->Update();
+	//門HP（黄状態）
+	gateBreak_yellow = Fade::Create(13, { 72,134 });
+	gateBreak_yellow->SetAnchorPoint({ 0.5f,0.5f });
+	gateBreak_yellow->SetSize({ 80,80 });
+	gateBreak_yellow->Update();
+	//門HP（）緑状態
+	gateBreak_green = Fade::Create(14, { 72,134 });
+	gateBreak_green->SetAnchorPoint({ 0.5f,0.5f });
+	gateBreak_green->SetSize({ 80,80 });
+	gateBreak_green->Update();
 
 	//ヒットボックス-----------------
 	HitBox::CreatePipeline(dx12);
@@ -423,7 +453,7 @@ void GameManager::TitleUpdate()
 			resetFlag = true;
 		}
 
-		if (input->Trigger(DIK_SPACE) || directInput->IsButtonPush(DirectInput::ButtonKind::Button03)) {
+		if (input->Trigger(DIK_SPACE) || directInput->IsButtonPush(DirectInput::ButtonKind::ButtonA)) {
 			sprite01->Update();
 			fade->SetFadeIn(true);
 			start->SetFadeIn(true);
@@ -438,7 +468,7 @@ void GameManager::TitleUpdate()
 			}
 		}
 
-		//debugText.Print("hello", 100.0f, 100.0f, 8.0f);
+		debugText.Print("hello", 100.0f, 100.0f, 8.0f);
 
 	}
 }
@@ -608,14 +638,14 @@ void GameManager::GameUpdate() {
 					v.z = _v.m128_f32[2];
 
 					_player->model->SetMatRot(LookAtRotation(v, XMFLOAT3(0.0f, 1.0f, 0.0f)));
-					if (directInput->IsButtonPush(DirectInput::ButtonKind::Button02) || input->Push(DIK_Z)) {
+					if (directInput->IsButtonPush(DirectInput::ButtonKind::ButtonA) || input->Push(DIK_Z)) {
 						_player->model->vmdNumber = vmdData::AVOID;
 						_player->SetAction(action::Avoid);
 						_player->SetAvoidVec(v);
 					}
 
 				}
-				else if (directInput->IsButtonPush(DirectInput::ButtonKind::Button01) || input->Push(DIK_X)) {
+				else if (directInput->IsButtonPush(DirectInput::ButtonKind::ButtonX) || input->Push(DIK_X)) {
 					_player->model->vmdNumber = vmdData::ATTACK;
 					HitBox::hitBox[0]->scale = XMFLOAT3(10, 10, 10);
 					HitBox::_hit[0].radius = 10;
@@ -732,8 +762,8 @@ void GameManager::GameUpdate() {
 			{
 				//防衛施設操作
 				for (int i = 0; i < 6; i++) {
-					if (cannon[i]->distance(_player->model->position, cannon[i]->position) >= 3) { continue; }
-					if (!(input->Trigger(DIK_F) || directInput->IsButtonPush(DirectInput::ButtonKind::Button02))) { continue; }
+					if (distance(_player->model->position, cannon[i]->position) >= 3) { continue; }
+					if (!(input->Trigger(DIK_F) || directInput->IsButtonPush(DirectInput::ButtonKind::ButtonB))) { continue; }
 					setObjectPos = cannon[i]->position;
 					SetNum = i;
 					//カメラ注視点を決定
@@ -769,19 +799,48 @@ void GameManager::GameUpdate() {
 				}
 
 				if (input->Trigger(DIK_SPACE)) {
-					gateBreak->SetShake(true);
+					gateBreak_red->SetShake(true);
+					gateBreak_yellow->SetShake(true);
+					gateBreak_green->SetShake(true);
 				}
+
+				//ゲートダメージ時リアクション
 				if (shake) {
 					Shake3D(obj03->position);
 				}
 
+				//ステージ移動
 				if (UseStage == GameLocation::BaseCamp && _player->model->position.z <= -100.0f) {
 					UseStage = GameLocation::BaseStage;
 					_player->model->SetPosition(XMFLOAT3(225.0f, 0.0f, 275.0f));
 					angleHorizonal = 90.0f;
 				}
 
-				if (directInput->IsButtonUp(directInput->ButtonPouse) || input->Trigger(DIK_ESCAPE)) {
+				//施設設置
+				if (directInput->IsButtonPush(DirectInput::ButtonKind::ButtonB)) {
+					for (int i = 0; i < stages.size(); i++) {
+						//土台でなければスルー
+						if (stages[i]->GetObjectNum() != ObjectType::FounDation) { continue; }
+
+						//プレイヤーと土台の距離を計算
+						if (distance(stages[i]->position, _player->model->position) > 5) { continue; }
+
+						//施設が設置されていなければスルー
+						if (stages[i]->GetInstallation()) { continue; }
+
+						//施設番号を保存
+						UseFoundation = i;
+
+						//同ボタン同一フレーム判定回避用フラグ
+						WeaponSelectDo = true;
+
+						//施設設置に移行
+						GameModeNum = GameMode::WEAPONSELECT;
+					}
+				}
+
+				//一時停止
+				if (directInput->IsButtonPush(directInput->Button09) || input->Trigger(DIK_ESCAPE)) {
 					GameModeNum = GameMode::POSE;
 					pose = true;
 				}
@@ -813,6 +872,53 @@ void GameManager::GameUpdate() {
 				createTime = 0.2f;
 			}
 			createTime -= 1.0f / 60.0f;
+		}
+
+		if (GameModeNum == GameMode::WEAPONSELECT) {
+			weaponSelect->Update();
+			for (int i = 0; i < 3; i++) { weaponSlot[i]->Update(); }
+			_player->Update();
+
+			//施設選択
+			if (SlotCount == 0) {
+				weaponSlot[0]->SetSize({ 165.0f, 165.0f });
+				weaponSlot[1]->SetSize({ 150.0f, 150.0f });
+				weaponSlot[2]->SetSize({ 150.0f, 150.0f });
+			}
+			else if (SlotCount == 1) {
+				weaponSlot[0]->SetSize({ 150.0f, 150.0f });
+				weaponSlot[1]->SetSize({ 165.0f, 165.0f });
+				weaponSlot[2]->SetSize({ 150.0f, 150.0f });
+			}
+			else if (SlotCount == 2) {
+				weaponSlot[0]->SetSize({ 150.0f, 150.0f });
+				weaponSlot[1]->SetSize({ 150.0f, 150.0f });
+				weaponSlot[2]->SetSize({ 165.0f, 165.0f });
+			}
+			if (directInput->IsButtonPush(DirectInput::RightButton)) { SlotCount += 1; }
+			else if (directInput->IsButtonPush(DirectInput::LeftButton)) { SlotCount -= 1; }
+
+			//設置施設決定
+			if (directInput->IsButtonPush(DirectInput::ButtonB) && !WeaponSelectDo) {
+				//土台に施設を設置
+				cannon[WeaponCount]->SetPosition({
+					stages[UseFoundation]->position.x,
+					10,stages[UseFoundation]->position.z });
+				cannon[WeaponCount]->SetAlive(true);
+				//施設番号を次に
+				WeaponCount += 1;
+
+				//設置状態有効
+				stages[UseFoundation]->SetInstallation(true);
+
+				//ゲームに戻る
+				GameModeNum = GameMode::NASI;
+			}
+
+			if (directInput->IsButtonPush(DirectInput::ButtonA)) {
+				GameModeNum = GameMode::NASI;
+			}
+			WeaponSelectDo = false;
 		}
 		//防衛施設操作時処理
 		if (GameModeNum == GameMode::SET) {
@@ -855,7 +961,7 @@ void GameManager::GameUpdate() {
 			setCamera->SetTarget(_target);
 			setCamera->Update();
 
-			if (input->Trigger(DIK_F) || directInput->IsButtonPush(DirectInput::ButtonKind::Button03)) {
+			if (input->Trigger(DIK_F) || directInput->IsButtonPush(DirectInput::ButtonKind::ButtonX)) {
 				Wrapper::SetCamera(mainCamera);
 				FbxObject3d::SetCamera(dx12->Camera());
 				GameModeNum = GameMode::NASI;
@@ -933,7 +1039,9 @@ void GameManager::GameUpdate() {
 				}
 				light->Update();
 
-				gateBreak->Update();
+				gateBreak_red->Update();
+				gateBreak_yellow->Update();
+				gateBreak_green->Update();
 			}
 		}
 
@@ -950,7 +1058,7 @@ void GameManager::EndUpdate() {
 	//エンド
 	if (SceneNum == END) {
 		//エンド→タイトル遷移
-		if (input->Trigger(DIK_SPACE) || directInput->IsButtonPush(DirectInput::ButtonKind::Button01)) {
+		if (input->Trigger(DIK_SPACE) || directInput->IsButtonPush(DirectInput::ButtonKind::ButtonA)) {
 			SceneNum = TITLE;
 			sprite01->Update();
 		}
@@ -1002,6 +1110,7 @@ void GameManager::Draw()
 			}
 			//防衛施設描画
 			for (int i = 0; i < 6; i++) {
+				if (!cannon[i]->GetAlive()) { continue; }
 				cannon[i]->Draw();
 			}
 
@@ -1034,6 +1143,11 @@ void GameManager::Draw()
 			for (int i = 0; i < repelCount; i++) {
 				BreakGage[i]->Draw();
 			}
+
+			if (GameModeNum == GameMode::WEAPONSELECT) {
+				weaponSelect->Draw();
+				for (int i =0; i < 3; i++) { weaponSlot[i]->Draw(); }
+			}
 		}
 		if (GameModeNum == GameMode::POSE) {
 			Pose->Draw();
@@ -1059,7 +1173,17 @@ void GameManager::Draw()
 		failed->Draw();
 	}
 	start->Draw();
-	if (SceneNum == GAME) { gateBreak->Draw(); }
+	if (SceneNum == GAME) {
+		if ((GATE_MAX - 3) <= gateHP) {
+			gateBreak_green->Draw();
+		}
+		else if ((GATE_MAX - 6) <= gateHP) {
+			gateBreak_yellow->Draw();
+		}
+		else if ((GATE_MAX - 9) <= gateHP) {
+			gateBreak_red->Draw();
+		}
+	}
 	Sprite::PostDraw();
 }
 

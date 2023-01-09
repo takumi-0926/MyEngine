@@ -281,16 +281,16 @@ void DirectInput::UpdateGamePad()
 		switch (i)
 		{
 		case 0:
-			is_push[ButtonKind::Button01] = true;
+			is_push[ButtonKind::ButtonA] = true;
 			break;
 		case 1:
-			is_push[ButtonKind::Button02] = true;
+			is_push[ButtonKind::ButtonB] = true;
 			break;
 		case 2:
-			is_push[ButtonKind::Button03] = true;
+			is_push[ButtonKind::ButtonX] = true;
 			break;
 		case 3:
-			is_push[ButtonKind::Button04] = true;
+			is_push[ButtonKind::ButtonY] = true;
 			break;
 		case 4:
 			is_push[ButtonKind::ButtonLB] = true;

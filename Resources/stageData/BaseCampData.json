@@ -3,11 +3,11 @@
     "objects": [
         {
             "type": "MESH",
-            "name": "平面",
+            "name": "平面.108",
             "transform": {
                 "translation": [
-                    62.03048324584961,
-                    -25.0,
+                    -47.0428466796875,
+                    523.4052124023438,
                     0.0
                 ],
                 "rotation": [
@@ -25,11 +25,11 @@
         },
         {
             "type": "MESH",
-            "name": "平面.001",
+            "name": "平面.107",
             "transform": {
                 "translation": [
-                    12.03048324584961,
-                    -25.0,
+                    -97.0428466796875,
+                    523.4052124023438,
                     0.0
                 ],
                 "rotation": [
@@ -47,11 +47,11 @@
         },
         {
             "type": "MESH",
-            "name": "平面.002",
+            "name": "平面.106",
             "transform": {
                 "translation": [
-                    12.03048324584961,
-                    25.0,
+                    -97.0428466796875,
+                    573.4052124023438,
                     0.0
                 ],
                 "rotation": [
@@ -69,11 +69,11 @@
         },
         {
             "type": "MESH",
-            "name": "平面.003",
+            "name": "平面.105",
             "transform": {
                 "translation": [
-                    62.03048324584961,
-                    25.0,
+                    -47.0428466796875,
+                    573.4052124023438,
                     0.0
                 ],
                 "rotation": [
@@ -91,55 +91,11 @@
         },
         {
             "type": "MESH",
-            "name": "Plane",
+            "name": "平面.104",
             "transform": {
                 "translation": [
-                    37.03048324584961,
-                    0.0,
-                    0.0
-                ],
-                "rotation": [
-                    0.0,
-                    -0.0,
-                    0.0
-                ],
-                "scaling": [
-                    2.0,
-                    2.0,
-                    2.0
-                ]
-            },
-            "file_name": "Camp"
-        },
-        {
-            "type": "MESH",
-            "name": "Plane.005",
-            "transform": {
-                "translation": [
-                    48.10846710205078,
-                    32.571468353271484,
-                    0.0
-                ],
-                "rotation": [
-                    0.0,
-                    -0.0,
-                    63.316139221191406
-                ],
-                "scaling": [
-                    1.0,
-                    1.0,
-                    1.0
-                ]
-            },
-            "file_name": "Tent"
-        },
-        {
-            "type": "MESH",
-            "name": "平面.004",
-            "transform": {
-                "translation": [
-                    112.03048706054688,
-                    0.0,
+                    2.9571533203125,
+                    548.4052124023438,
                     0.0
                 ],
                 "rotation": [
@@ -157,33 +113,341 @@
         },
         {
             "type": "MESH",
-            "name": "uploads_files_2774098_1LOW.002",
+            "name": "平面.103",
             "transform": {
                 "translation": [
-                    64.03148651123047,
-                    -52.02652359008789,
+                    -147.07333374023438,
+                    573.4052124023438,
                     0.0
                 ],
                 "rotation": [
                     0.0,
-                    0.0,
-                    -56.43210983276367
+                    -0.0,
+                    0.0
                 ],
                 "scaling": [
                     1.0,
                     1.0,
                     1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.102",
+            "transform": {
+                "translation": [
+                    -147.07333374023438,
+                    523.4052124023438,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.101",
+            "transform": {
+                "translation": [
+                    -196.07333374023438,
+                    523.4052124023438,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.100",
+            "transform": {
+                "translation": [
+                    -196.07333374023438,
+                    573.4052124023438,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.099",
+            "transform": {
+                "translation": [
+                    -246.07333374023438,
+                    573.4052124023438,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.098",
+            "transform": {
+                "translation": [
+                    -246.07333374023438,
+                    523.4052124023438,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.097",
+            "transform": {
+                "translation": [
+                    -246.07333374023438,
+                    623.4052124023438,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.096",
+            "transform": {
+                "translation": [
+                    -196.07333374023438,
+                    623.4052124023438,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.095",
+            "transform": {
+                "translation": [
+                    -246.07333374023438,
+                    523.4052124023438,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.094",
+            "transform": {
+                "translation": [
+                    -196.07333374023438,
+                    523.4052124023438,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.093",
+            "transform": {
+                "translation": [
+                    -196.07333374023438,
+                    473.40521240234375,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.092",
+            "transform": {
+                "translation": [
+                    -246.07333374023438,
+                    473.40521240234375,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "uploads_files_2774098_1LOW.014",
+            "transform": {
+                "translation": [
+                    -208.69876098632812,
+                    437.74951171875,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    -64.1507339477539
+                ],
+                "scaling": [
+                    1.4874368906021118,
+                    1.8258440494537354,
+                    2.132176160812378
                 ]
             },
             "file_name": "WallRock"
         },
         {
             "type": "MESH",
-            "name": "uploads_files_2774098_1LOW.001",
+            "name": "uploads_files_2774098_1LOW.015",
             "transform": {
                 "translation": [
-                    21.80583953857422,
-                    -52.02652359008789,
+                    -219.66006469726562,
+                    633.1163330078125,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    -64.1507339477539
+                ],
+                "scaling": [
+                    1.4874368906021118,
+                    1.8258440494537354,
+                    2.132176160812378
+                ]
+            },
+            "file_name": "WallRock"
+        },
+        {
+            "type": "MESH",
+            "name": "uploads_files_2774098_1LOW.016",
+            "transform": {
+                "translation": [
+                    -323.1248474121094,
+                    502.2299499511719,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    19.422119140625
+                ],
+                "scaling": [
+                    5.0,
+                    5.0,
+                    5.0
+                ]
+            },
+            "file_name": "WallRock"
+        },
+        {
+            "type": "MESH",
+            "name": "uploads_files_2774098_1LOW.017",
+            "transform": {
+                "translation": [
+                    -135.05859375,
+                    481.2092590332031,
                     0.0
                 ],
                 "rotation": [
@@ -214,11 +478,11 @@
         },
         {
             "type": "MESH",
-            "name": "uploads_files_2774098_1LOW.003",
+            "name": "uploads_files_2774098_1LOW.018",
             "transform": {
                 "translation": [
-                    17.360536575317383,
-                    55.40803146362305,
+                    -137.7823486328125,
+                    616.9854736328125,
                     0.0
                 ],
                 "rotation": [
@@ -236,77 +500,33 @@
         },
         {
             "type": "MESH",
-            "name": "uploads_files_2774098_1LOW.004",
+            "name": "uploads_files_2774098_1LOW.019",
             "transform": {
                 "translation": [
-                    63.479698181152344,
-                    55.40803146362305,
+                    0.829620361328125,
+                    406.59906005859375,
                     0.0
                 ],
                 "rotation": [
                     0.0,
-                    0.0,
-                    -97.4651870727539
+                    -0.0,
+                    124.24537658691406
                 ],
                 "scaling": [
-                    0.9999999403953552,
-                    0.9999999403953552,
-                    1.0
+                    5.0,
+                    5.0,
+                    5.0
                 ]
             },
             "file_name": "WallRock"
         },
         {
             "type": "MESH",
-            "name": "uploads_files_2774098_1LOW.005",
+            "name": "uploads_files_2774098_1LOW.020",
             "transform": {
                 "translation": [
-                    109.2005615234375,
-                    40.23145294189453,
-                    0.0
-                ],
-                "rotation": [
-                    0.0,
-                    0.0,
-                    -56.763427734375
-                ],
-                "scaling": [
-                    1.0,
-                    1.0,
-                    1.0
-                ]
-            },
-            "file_name": "WallRock"
-        },
-        {
-            "type": "MESH",
-            "name": "uploads_files_2774098_1LOW.006",
-            "transform": {
-                "translation": [
-                    102.89523315429688,
-                    -35.207088470458984,
-                    0.0
-                ],
-                "rotation": [
-                    0.0,
-                    0.0,
-                    -83.01609802246094
-                ],
-                "scaling": [
-                    1.0,
-                    1.0,
-                    1.0
-                ]
-            },
-            "file_name": "WallRock"
-        },
-        {
-            "type": "MESH",
-            "name": "uploads_files_2774098_1LOW.007",
-            "transform": {
-                "translation": [
-                    109.9029541015625,
-                    163.49427795410156,
+                    0.829620361328125,
+                    711.8994750976562,
                     0.0
                 ],
                 "rotation": [
@@ -324,11 +544,77 @@
         },
         {
             "type": "MESH",
-            "name": "uploads_files_2774098_1LOW.008",
+            "name": "uploads_files_2774098_1LOW.021",
             "transform": {
                 "translation": [
-                    109.9029541015625,
-                    -141.80615234375,
+                    -6.1781005859375,
+                    513.1981201171875,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    -83.01609802246094
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "WallRock"
+        },
+        {
+            "type": "MESH",
+            "name": "uploads_files_2774098_1LOW.022",
+            "transform": {
+                "translation": [
+                    0.127227783203125,
+                    588.6366577148438,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    -56.763427734375
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "WallRock"
+        },
+        {
+            "type": "MESH",
+            "name": "uploads_files_2774098_1LOW.023",
+            "transform": {
+                "translation": [
+                    -45.5936279296875,
+                    603.813232421875,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    -97.4651870727539
+                ],
+                "scaling": [
+                    0.9999999403953552,
+                    0.9999999403953552,
+                    1.0
+                ]
+            },
+            "file_name": "WallRock"
+        },
+        {
+            "type": "MESH",
+            "name": "uploads_files_2774098_1LOW.024",
+            "transform": {
+                "translation": [
+                    -91.71279907226562,
+                    603.813232421875,
                     0.0
                 ],
                 "rotation": [
@@ -337,12 +623,113 @@
                     124.24537658691406
                 ],
                 "scaling": [
-                    5.0,
-                    5.0,
-                    5.0
+                    1.0,
+                    1.0,
+                    1.0
                 ]
             },
             "file_name": "WallRock"
+        },
+        {
+            "type": "MESH",
+            "name": "uploads_files_2774098_1LOW.025",
+            "transform": {
+                "translation": [
+                    -45.041839599609375,
+                    496.3786926269531,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    -56.43210983276367
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "WallRock"
+        },
+        {
+            "type": "MESH",
+            "name": "uploads_files_2774098_1LOW.026",
+            "transform": {
+                "translation": [
+                    -87.26748657226562,
+                    496.3786926269531,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    83.00519561767578
+                ],
+                "scaling": [
+                    0.9999999403953552,
+                    0.9999999403953552,
+                    1.0
+                ]
+            },
+            "file_name": "WallRock",
+            "collider": {
+                "type": "BOX",
+                "center": [
+                    1.0,
+                    8.0,
+                    13.489999771118164
+                ],
+                "size": [
+                    45.0,
+                    70.0,
+                    30.0
+                ]
+            }
+        },
+        {
+            "type": "MESH",
+            "name": "Plane.001",
+            "transform": {
+                "translation": [
+                    -60.964874267578125,
+                    580.9766845703125,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    63.316139221191406
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Tent"
+        },
+        {
+            "type": "MESH",
+            "name": "Plane.002",
+            "transform": {
+                "translation": [
+                    -72.0428466796875,
+                    548.4052124023438,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    2.0,
+                    2.0,
+                    2.0
+                ]
+            },
+            "file_name": "Camp"
         }
     ]
 }

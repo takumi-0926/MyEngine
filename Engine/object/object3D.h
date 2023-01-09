@@ -87,14 +87,13 @@ public:
 	Model* model = nullptr;
 
 public:
-	void SetPosition(XMFLOAT3 position) {
+	inline void SetPosition(XMFLOAT3 position) {
 		this->position = position;
 	}
-	void SetMatRot(XMMATRIX rot) { 
+	inline void SetMatRot(XMMATRIX rot) { 
 		this->matRot = rot;
 		useRotMat = true;
 	}
-
 	/// <summary>
 	/// ƒ‚ƒfƒ‹Žæ“¾
 	/// </summary>
