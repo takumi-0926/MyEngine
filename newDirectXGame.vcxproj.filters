@@ -337,6 +337,9 @@
     <ClInclude Include="Application\BillboardObject.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Application\Weapon.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application\enemy.cpp">
@@ -481,6 +484,9 @@
       <Filter>ソース ファイル\Json</Filter>
     </ClCompile>
     <ClCompile Include="Application\BillboardObject.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\Weapon.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>

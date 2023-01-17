@@ -87,9 +87,12 @@ private://メンバ変数(初期化)
 	//プレイヤー / エネミー
 	Player*		  _player = nullptr;
 	PMDmodel* modelPlayer = nullptr;
+	Enemy* ene = nullptr;
 	vector<Enemy*> _enemy;
 	FbxModel* golem[3] = {};
 	FbxModel* wolf[3] = {};
+	HitBox* HitBox = {};
+	int useModel = 0;
 
 	//ステージ
 	map<string, Model*> stageModels;
@@ -105,11 +108,10 @@ private://メンバ変数(初期化)
 	DefCannon* cannon[6] = {};
 	Model* bulletModel = nullptr;
 
-	std::shared_ptr<PMDmodel>   pmdModel;
-	std::shared_ptr<PMDobject> pmdObject;
-	Stage* stage;
+	//std::shared_ptr<PMDmodel>   pmdModel;
+	//std::shared_ptr<PMDobject> pmdObject;
+	//Stage* stage;
 
-	HitBox* HitBox = {};
 
 	//衝突マネージャー
 	CollisionManager* collisionManager = nullptr;
@@ -119,10 +121,7 @@ private://メンバ変数(初期化)
 
 	//ライト
 	Light* light = nullptr;
-	float circleShadowDir[3] = { 0,-1,0 };
-	float circleShadowAtten[3] = { 0.5f,0.8f,0.0f };
-	float circleShadowFacterAnlge[2] = { 0.0f,0.5f };
-	float testPos[3] = { 1,0.0f,0 };
+	XMFLOAT3 pointLightPos = {};
 
 	//テクスチャエフェクト
 	Fade* fade = nullptr;//シーン切り替え時
@@ -143,6 +142,13 @@ private://メンバ変数(初期化)
 	bool WeaponSelectDo = false;
 	bool result = false;
 	
+	//デバック確認用変数
+	float circleShadowDir[3] = { 0,-1,0 };
+	float circleShadowAtten[3] = { 0.5f,0.8f,0.0f };
+	float circleShadowFacterAnlge[2] = { 0.1f,0.5f };
+	float testPos[3] = { 1,0.0f,0 };
+
+	float debugCameraPos[3] = { 0,0,0 };
 
 	DebugText* text = nullptr;
 	Sprite* BreakBar = nullptr;
@@ -249,6 +255,7 @@ private://メンバ変数(ゲームシーン)
 	int SetNum = 0;
 
 	bool pose = false;//ポーズフラグ
+
 public://メンバ関数
 	//コンストラクタ
 	GameManager();

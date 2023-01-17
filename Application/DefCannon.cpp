@@ -38,7 +38,7 @@ void DefCannon::BulletCreate(Model* _model)
 		_bullet = _bullet->Create(_model);
 		_bullet->scale = { 1,1,1 };
 		_bullet->SetAlive(false);
-		_bullet->SetSpeed(3.0f);
+		_bullet->SetSpeed(4.0f);
 		bullet.push_back(_bullet);
 	}
 }

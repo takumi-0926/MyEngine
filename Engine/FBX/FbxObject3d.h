@@ -12,6 +12,11 @@
 #include <DirectXMath.h>
 #include <string>
 
+enum MotionType {
+	WalkMotion = 0,
+	AttackMotion,
+};
+
 class FbxObject3d {
 protected:
 	template <class T> using ComPtr = Microsoft::WRL::ComPtr<T>;
@@ -34,6 +39,16 @@ public:
 		XMMATRIX bones[MAX_BONES];
 	};
 
+	//アニメーション保存用構造体
+	struct AnimationInfelno {
+		const char* Name;	//名前
+		FbxTime startTime;	//開始時間
+		FbxTime endTime;	//終了時間
+		FbxTakeInfo* info;	//
+		FbxAnimStack* stack;//
+	};
+	vector<AnimationInfelno> animas;
+
 public:
 	virtual void Initialize();
 
@@ -46,7 +61,8 @@ public:
 
 	void SetModel(FbxModel* model) { this->model = model; }
 
-	void PlayAnimation();
+	void PlayAnimation(int playNum);
+	void LoadAnima();
 
 public:
 	static void SetDevice(ID3D12Device* device) { FbxObject3d::device = device; }
@@ -91,13 +107,16 @@ protected:
 
 	FbxTime frameTime;
 
-	FbxTime startTime;
-
-	FbxTime endTime;
+	//FbxTime startTime;	//開始時間
+	//FbxTime endTime;	//終了時間
 
 	FbxTime currentTime;
 
 	bool isPlay = false;
+
+	bool changePlay = false;
+
+	int nowPlayMotion = MotionType::WalkMotion;
 
 	ComPtr<ID3D12Resource> constBufferTransform;
 

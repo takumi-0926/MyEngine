@@ -129,9 +129,10 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	//光源
 	light = Light::Create();
 	light->SetDirLightActive(0, true);
-	light->SetDirLightActive(1, false);
+	light->SetDirLightActive(1, true);
 	light->SetDirLightActive(2, false);
-	light->SetPointLightActive(0, false);
+	light->SetPointLightActive(0, true);
+	light->SetPointLightAtten(0, XMFLOAT3(0.0001f, 0.0001f, 0.0001f));
 	light->SetPointLightActive(1, false);
 	light->SetPointLightActive(2, false);
 	light->SetCircleShadowActive(0, true);
@@ -164,17 +165,17 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 
 	skyDomeModel = Model::CreateFromOBJ("skydome");
 
-	fbxObj1 = new FbxObject3d;
-	fbxObj1->Initialize();
-	fbxObj1->SetModel(fbxModel1);
-	fbxObj1->SetScale({ 0.002f,0.002f,0.002f });
-	fbxObj1->PlayAnimation();
+	//fbxObj1 = new FbxObject3d;
+	//fbxObj1->Initialize();
+	//fbxObj1->SetModel(fbxModel1);
+	//fbxObj1->SetScale({ 0.002f,0.002f,0.002f });
+	//fbxObj1->PlayAnimation(0);
 
 	//全体ステージ
-	stage = Stage::Create(model02);
-	stage->scale = { 100,100,100 };
-	stage->rotation.y = -90;
-	stage->SetPosition({ 0.0f,-0.01f,0.0f });
+	//stage = Stage::Create(model02);
+	//stage->scale = { 100,100,100 };
+	//stage->rotation.y = -90;
+	//stage->SetPosition({ 0.0f,-0.01f,0.0f });
 
 
 	//ステージデータ及びモデルデータ読み込み
@@ -183,6 +184,7 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	stageModels.insert(std::make_pair("Gate", Model::CreateFromOBJ("Gate")));
 	stageModels.insert(std::make_pair("Wall", Model::CreateFromOBJ("Wall")));
 	stageModels.insert(std::make_pair("Tree", Model::CreateFromOBJ("Tree")));
+	stageModels.insert(std::make_pair("Cliff", Model::CreateFromOBJ("Cliff")));
 	stageModels.insert(std::make_pair("Foundation", Model::CreateFromOBJ("Foundation")));
 	for (auto& objectData : stageData->objects) {
 		Model* model = nullptr;
@@ -209,6 +211,7 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 
 		stages.push_back(newObject);
 	}
+	//一度リセット（ベースキャンプの読み込みのため）
 	stageData->objects = {};
 	baseCampData = JsonLoader::LoadJsonFile("BaseCampData");
 	stageModels.insert(std::make_pair("WallRock", Model::CreateFromOBJ("WallRock")));
@@ -250,15 +253,12 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 		cannon[i]->Update();
 		cannon[i]->scale = { 5,5,5 };
 	}
-	cannon[0]->SetPosition({ -80,5,  130 });
-	cannon[1]->SetPosition({ 80,5,  130 });
-	cannon[2]->SetPosition({ 80,5,  230 });
-	cannon[3]->SetPosition({ -80,5,  230 });
-	cannon[4]->SetPosition({ 40,5,  180 });
-	cannon[5]->SetPosition({ -40,5,  180 });
 
+	//スカイドーム-------------------
 	skyDome = Object3Ds::Create(skyDomeModel);
-	skyDome->scale = { 10,10,10 };
+	skyDome->scale = { 7,7,7 };
+	skyDome->position = { 0,350,0 };
+
 	//MMDオブジェクト----------------
 	modelPlayer = PMDmodel::CreateFromPMD("Resources/Model/初音ミク.pmd");
 	modelPlayer->LoadVMDFile(vmdData::WAIT, "Resources/vmd/marieru_stand.vmd");
@@ -267,10 +267,11 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	modelPlayer->LoadVMDFile(vmdData::DAMAGE, "Resources/vmd/腹部ダメージモーション.vmd");
 	modelPlayer->LoadVMDFile(vmdData::AVOID, "Resources/vmd/Rick式走りモーション05.vmd");
 
+	//プレイヤー---------------------
 	_player = Player::Create(modelPlayer);
 	_player->SetInput(*input);
 	_player->model->scale = { 1,1,1 };
-	_player->model->position = { 0,0,0 };
+	_player->model->position = { 548.0f,0,196.0f };
 	_player->model->playAnimation();
 	_player->model->animation = true;
 
@@ -300,14 +301,18 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	}
 
 	//シーンエフェクト--------------------
+	//フェードイン・アウト
 	fade = Fade::Create(9, { 0.0f,0.0f });
 	fade->SetAlpha(0.0f);
+	//クリア時UI
 	clear = Fade::Create(7, { Application::window_width / 2,Application::window_height / 2 });
 	clear->SetAnchorPoint({ 0.5f,0.5f });
 	clear->SetSize({ 480,480 });
+	//ゲームオーバー時UI
 	failed = Fade::Create(8, { Application::window_width / 2,Application::window_height / 2 });
 	failed->SetAnchorPoint({ 0.5f,0.5f });
 	failed->SetSize({ 480,480 });
+	//スタート時UI
 	start = Fade::Create(6, { 0,80 });
 	start->SetAnchorPoint({ 0.5f,0.5f });
 	start->SetAlpha(0.0f);
@@ -368,9 +373,9 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 }
 void GameManager::Update()
 {
-	if (input->Trigger(DIK_M)) {
-		pmdModel->playAnimation();
-	}
+	//if (input->Trigger(DIK_M)) {
+	//	pmdModel->playAnimation();
+	//}
 	//imgui
 	static bool blnChk = false;
 	static int radio = 0;
@@ -398,7 +403,7 @@ void GameManager::Update()
 		ImGui::InputFloat3("circleShadowDir", circleShadowDir);
 		ImGui::InputFloat3("circleShadowAtten", circleShadowAtten);
 		ImGui::InputFloat2("circleShadowFactorAngle", circleShadowFacterAnlge);
-		ImGui::InputFloat3("testPos", testPos);
+		ImGui::InputFloat3("DebugCameraEye", debugCameraPos);
 
 		ImGui::End();
 
@@ -424,15 +429,7 @@ void GameManager::Update()
 	}
 
 	//ライト
-	//static XMVECTOR lightDir = { 0,1,5,0 };
-	//{
-	//	if (input->Push(DIK_T)) { lightDir.m128_f32[1] += 1.0f; }
-	//	if (input->Push(DIK_G)) { lightDir.m128_f32[1] -= 1.0f; }
-	//	if (input->Push(DIK_H)) { lightDir.m128_f32[0] += 1.0f; }
-	//	if (input->Push(DIK_F)) { lightDir.m128_f32[0] -= 1.0f; }
-
-	//	light->SetLightDir(lightDir);
-	//}
+	light->SetPointLightPos(0, XMFLOAT3(_player->model->position.x, _player->model->position.y + 20.0f, _player->model->position.z));
 
 	if (input->Push(DIK_I)) { clear->MovePos(XMFLOAT2(0, 1)); }
 	if (input->Push(DIK_K)) { clear->MovePos(XMFLOAT2(0, -1)); }
@@ -531,8 +528,6 @@ void GameManager::GameUpdate() {
 			{
 				//三体まで
 				if (_enemy.size() <= 2) {
-					Enemy* ene = nullptr;
-					static int useModel = 0;
 					if (useModel >= 3) { useModel = 0; }
 					ene = Enemy::Appearance(golem[useModel], wolf[useModel]);
 					if (ene != nullptr) {
@@ -810,7 +805,7 @@ void GameManager::GameUpdate() {
 				}
 
 				//ステージ移動
-				if (UseStage == GameLocation::BaseCamp && _player->model->position.z <= -100.0f) {
+				if (UseStage == GameLocation::BaseCamp && _player->model->position.z <= 5.0f) {
 					UseStage = GameLocation::BaseStage;
 					_player->model->SetPosition(XMFLOAT3(225.0f, 0.0f, 275.0f));
 					angleHorizonal = 90.0f;
@@ -992,7 +987,7 @@ void GameManager::GameUpdate() {
 			fade->Update();
 			failed->Update();
 		}
-
+		//ポーズ画面時処理
 		if (GameModeNum == GameMode::POSE) {
 			if (!pose) {
 				if (directInput->IsButtonUp(directInput->ButtonPouse) || input->Trigger(DIK_ESCAPE)) {
@@ -1009,7 +1004,7 @@ void GameManager::GameUpdate() {
 				dx12->SceneUpdate();
 				camera->Update();
 				mainCamera->Update();
-				stage->Update();
+				//stage->Update();
 				obj03->Update();
 				_player->Update();
 				_player->SetInput(*input);
@@ -1025,9 +1020,10 @@ void GameManager::GameUpdate() {
 				hp->SetSize(XMFLOAT2(playerHp * 4.5f, 30));
 				hp->Update();
 
+				skyDome->SetPosition(XMFLOAT3(_player->model->position.x, _player->model->position.y + 450.0f, _player->model->position.z));
 				skyDome->Update();
 
-				fbxObj1->Update();
+				//fbxObj1->Update();
 
 				particlemanager->Update();
 				Bottom->Update();
@@ -1035,7 +1031,7 @@ void GameManager::GameUpdate() {
 					light->SetCircleShadowCasterPos(i, XMFLOAT3({ _enemy[i]->GetPosition().x, _enemy[i]->GetPosition().y, _enemy[i]->GetPosition().z }));
 					light->SetCircleShadowDir(i, XMVECTOR({ circleShadowDir[0],circleShadowDir[1],circleShadowDir[2],0 }));
 					light->SetCircleShadowAtten(i, XMFLOAT3(circleShadowAtten));
-					light->SetCircleShadowFacterAngle(i, XMFLOAT2(circleShadowFacterAnlge));
+					light->SetCircleShadowFacterAngle(i, XMFLOAT2(circleShadowFacterAnlge[1], circleShadowFacterAnlge[2] * _enemy[i]->shadowOffset));
 				}
 				light->Update();
 
@@ -1146,7 +1142,7 @@ void GameManager::Draw()
 
 			if (GameModeNum == GameMode::WEAPONSELECT) {
 				weaponSelect->Draw();
-				for (int i =0; i < 3; i++) { weaponSlot[i]->Draw(); }
+				for (int i = 0; i < 3; i++) { weaponSlot[i]->Draw(); }
 			}
 		}
 		if (GameModeNum == GameMode::POSE) {

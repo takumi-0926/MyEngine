@@ -37,8 +37,8 @@ void DebugCamera::Update()
 	// マウスの中ボタンが押されていたらカメラを並行移動させる
 	if (input->MouseWheelPush())
 	{
-		float dx = mouseMove.lX / 100.0f;
-		float dy = mouseMove.lY / 100.0f;
+		float dx = mouseMove.lX / 25.0f;
+		float dy = mouseMove.lY / 25.0f;
 
 		XMVECTOR move = {-dx, +dy, 0, 0};
 		move = XMVector3Transform(move, matRot);
@@ -49,7 +49,7 @@ void DebugCamera::Update()
 
 	//ホイール入力で距離を変更
 	if (mouseMove.lZ != 0) {
-		distance -= mouseMove.lZ / 100.0f;
+		distance -= mouseMove.lZ / 50.0f;
 		distance = max(distance, 1.0f);
 		dirty = true;
 	}

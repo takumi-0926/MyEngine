@@ -4,7 +4,6 @@
 #include "Collision/CollisionAttribute.h"
 #include "Collision/QueryCallBack.h"
 
-#include "ParticleManager.h"
 enum MoveMode {
 	move,
 	attack,
@@ -103,7 +102,11 @@ Enemy* Enemy::Create(FbxModel* model)
 
 		FbxModel* _model = model;
 		instance->SetModel(_model);
+		instance->LoadAnima();
 	}
+
+	particle = ParticleManager::Create();
+	particle->Update();
 
 	return instance;
 }
@@ -232,7 +235,7 @@ void Enemy::Update() {
 	//	position.z = 342.0f;
 	//}
 
-
+	ParticleManager::GetInstance()->CreateParticle(position, 10, { 1,0,0,1 });
 	FbxObject3d::Update();
 }
 void Enemy::Draw(ID3D12GraphicsCommandList* cmdList)
@@ -248,6 +251,15 @@ void Enemy::OnCollision(const CollisionInfo& info)
 		position, 10, { 1,0,0,1 });
 }
 
+void Enemy::CreateWeapon(Model* model)
+{
+	Weapon* _weapon = new Weapon();
+	_weapon = Weapon::Create(model);
+	_weapon->SetFollowingObjectBoneMatrix(this->model->GetBones()[0].invInitialPose);
+	weapon = _weapon;
+	delete(_weapon);
+}
+
 Enemy* Enemy::Appearance(FbxModel* model1, FbxModel* model2)
 {
 	Enemy* ene = nullptr;
@@ -260,23 +272,27 @@ Enemy* Enemy::Appearance(FbxModel* model1, FbxModel* model2)
 		if (r % 2 == 1) {
 			ene->mode = 2;
 			ene->status.HP = 2;
-			ene->status.speed = 0.4f;
+			ene->status.speed = 0.6f;
 			ene->position.y = 0;
 			ene->scale = { 0.2f,0.2f,0.2f };
 			ene->alive = true;
+			ene->shadowOffset = 0.5f;
 		}
 		else if (r % 2 != 1) {
 			ene->mode = 3;
 			ene->status.HP = 4;
-			ene->status.speed = 0.2f;
+			ene->status.speed = 0.4f;
 			ene->position = { 0,0,-150 };
 			ene->scale = { 0.1f,0.1f,0.1f };
 			ene->alive = true;
+			ene->shadowOffset = 1.5f;
+
+			//CreateWeapon(Model::CreateFromOBJ("weapon"));
 		}
 
 		popTime = 0;
 		ene->myNumber = rand() % RAND_MAX;
-		ene->PlayAnimation();
+		ene->PlayAnimation(MotionType::WalkMotion);
 	}
 	else {
 		popTime += 1.0f / 60.0f;
@@ -292,6 +308,8 @@ void Enemy::Move(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 	int objectNo = 0;
 
 	if (actionPattern != MoveMode::move)return;
+	ChangeAnimation(MotionType::WalkMotion);
+
 	//移動処理
 	//パターン1
 	if (this->mode == 1) {
@@ -362,6 +380,7 @@ void Enemy::Attack(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 	int objectNo = 0;
 
 	if (actionPattern != MoveMode::attack)return;
+	ChangeAnimation(MotionType::AttackMotion);
 
 	//攻撃処理
 	if (this->mode == 1) {
@@ -499,7 +518,7 @@ void Enemy::Retreat()
 
 void Enemy::Damage()
 {
-	if (!damage)return;
+	if (!damage) { return; }
 
 	static float count = 0.0f;
 	model->ambient.x = 1.0f;
@@ -511,19 +530,28 @@ void Enemy::Damage()
 		count = 0.0f;
 	}
 
+
 	if (status.HP <= 0) { actionPattern = MoveMode::retreat; }
+}
+
+void Enemy::ChangeAnimation(int num)
+{
+	if (nowPlayMotion == num) { return; }
+	PlayAnimation(num);
+	nowPlayMotion = num;
 }
 
 void Enemy::moveUpdate(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 {
+	//移動
 	Move(pPos, bPos, gPos);
-
+	//攻撃
 	Attack(pPos, bPos, gPos);
-
+	//退却
 	Retreat();
-
+	//被ダメージ
 	Damage();
-
+	//更新
 	Update();
 }
 void Enemy::moveReset()

@@ -88,9 +88,9 @@ void FbxObject3d::Update()
 	if (isPlay)
 	{
 		currentTime += frameTime;
-		if (currentTime > endTime)
+		if (currentTime > animas[nowPlayMotion].endTime)
 		{
-			currentTime = startTime;
+			currentTime = animas[nowPlayMotion].startTime;
 		}
 	}
 }
@@ -135,23 +135,50 @@ void FbxObject3d::UpdateWorldMatrix()
 	matWorld *= matTrans;
 }
 
-void FbxObject3d::PlayAnimation()
+void FbxObject3d::PlayAnimation(int playNum)
 {
+	//if (isPlay) { return; }
+
+	nowPlayMotion = playNum;
 	FbxScene* fbxScene = model->GetFbxScene();
 
-	FbxAnimStack* animstack = fbxScene->GetSrcObject<FbxAnimStack>(0);
+	fbxScene->SetCurrentAnimationStack(animas[nowPlayMotion].stack);
 
-	const char* animStrckName = animstack->GetName();
+	animas[nowPlayMotion].startTime = animas[nowPlayMotion].info->mLocalTimeSpan.GetStart();
 
-	FbxTakeInfo* takeInfo = fbxScene->GetTakeInfo(animStrckName);
+	animas[nowPlayMotion].endTime = animas[nowPlayMotion].info->mLocalTimeSpan.GetStop();
 
-	startTime = takeInfo->mLocalTimeSpan.GetStart();
-
-	endTime = takeInfo->mLocalTimeSpan.GetStop();
-
-	currentTime = startTime;
+	currentTime = animas[nowPlayMotion].startTime;
 
 	isPlay = true;
+}
+
+void FbxObject3d::LoadAnima()
+{
+	FbxScene* fbxScene;
+	fbxScene = model->GetFbxScene();
+
+	//アニメーションの個数を保存
+	int AnimaStackNum = fbxScene->GetSrcObjectCount<FbxAnimStack>();
+
+	for (int i = 0; i < AnimaStackNum; i++) {
+		//FbxAnimStack* animStack;
+		//animStack = fbxScene->GetSrcObject<FbxAnimStack>(i);
+
+		AnimationInfelno instance;
+
+		instance.stack = fbxScene->GetSrcObject<FbxAnimStack>(i);
+
+		instance.Name = instance.stack->GetName();
+
+		instance.info = fbxScene->GetTakeInfo(instance.stack->GetName());
+
+		instance.startTime = instance.info->mLocalTimeSpan.GetStart();
+
+		instance.endTime = instance.info->mLocalTimeSpan.GetStop();
+
+		animas.push_back(instance);
+	}
 }
 
 void FbxObject3d::CreateGraphicsPipeline()

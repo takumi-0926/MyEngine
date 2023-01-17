@@ -8,6 +8,9 @@
 
 #include "FBX/FbxObject3d.h"
 
+#include "Weapon.h"
+#include "ParticleManager.h"
+
 class PMDmodel;
 class StageObject;
 class DefCannon;
@@ -39,12 +42,18 @@ public:
 	bool OnGround = true;
 	XMVECTOR fallV;
 
+	float shadowOffset = 0.0f;
+
 	float alpha = 1.0f;
 	vector<XMFLOAT3> defalt_ambient;
 	XMVECTOR vectol;
 	XMFLOAT3 attackPos;
 	XMFLOAT3 oldPos;
 	XMFLOAT3 RetreatPos = { 1.0f,20.0f,-150.0f };
+
+	Weapon* weapon = nullptr;
+	ParticleManager* particle = nullptr;
+
 private:
 	XMFLOAT3 VectorToXMFloat(XMVECTOR vec);
 	float	 objectDistance(XMFLOAT3 pos1, XMFLOAT3 pos2);	//建物との直線距離を計算
@@ -117,6 +126,8 @@ public:
 		model->Update();
 	}
 
+	void CreateWeapon(Model* model);
+
 	/// <summary>
 	/// 出現処理
 	/// </summary>
@@ -141,4 +152,6 @@ public:
 	/// 被ダメージ時処理
 	/// </summary>
 	void Damage();
+
+	void ChangeAnimation(int num);
 };

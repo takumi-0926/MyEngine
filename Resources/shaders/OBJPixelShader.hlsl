@@ -11,7 +11,7 @@ float4 main(VSOutput input) : SV_TARGET
 	//テクスチャマッピング
 	float4 texcolor = tex.Sample(smp, input.uv);
 
-	return float4(brightness.x + offset, brightness.y + offset, brightness.z + offset, 1) * texcolor;
+	//return float4(brightness.x + offset, brightness.y + offset, brightness.z + offset, 1) * texcolor;
 
 	//float3 light = normalize(float3(1,-1,1)); // 右下奥　向きのライト
 	//float light_diffuse = saturate(dot(-light, input.normal));
