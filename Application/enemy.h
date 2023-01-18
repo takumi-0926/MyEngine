@@ -127,6 +127,7 @@ public:
 	}
 
 	void CreateWeapon(Model* model);
+	void CreateParticle();
 
 	/// <summary>
 	/// oŒ»ˆ—

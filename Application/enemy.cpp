@@ -85,9 +85,6 @@ Enemy* Enemy::Create(FbxModel* model)
 	instance->position.z = -150;
 
 	//アンビエント元を取得
-	//for (int i = 0; i < model->GetMesh().size(); i++) {
-	//	instance->defalt_ambient.push_back(model->GetMesh()[i]->GetMaterial()->ambient);
-	//}
 	instance->defalt_ambient.push_back(model->ambient);
 
 	// 初期化
@@ -99,14 +96,10 @@ Enemy* Enemy::Create(FbxModel* model)
 	//}
 
 	if (model) {
-
 		FbxModel* _model = model;
 		instance->SetModel(_model);
 		instance->LoadAnima();
 	}
-
-	particle = ParticleManager::Create();
-	particle->Update();
 
 	return instance;
 }
@@ -258,6 +251,14 @@ void Enemy::CreateWeapon(Model* model)
 	_weapon->SetFollowingObjectBoneMatrix(this->model->GetBones()[0].invInitialPose);
 	weapon = _weapon;
 	delete(_weapon);
+}
+
+void Enemy::CreateParticle()
+{
+	ParticleManager* instance = new ParticleManager();
+	instance = ParticleManager::Create();
+	particle = instance;
+	delete(instance);
 }
 
 Enemy* Enemy::Appearance(FbxModel* model1, FbxModel* model2)

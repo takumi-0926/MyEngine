@@ -43,11 +43,11 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 		assert(0);
 		return false;
 	}
-	if (!Sprite::loadTexture(1, L"Resources/haikei.png")) {
+	if (!Sprite::loadTexture(1, L"Resources/end.png")) {
 		assert(0);
 		return false;
 	}
-	if (!Sprite::loadTexture(2, L"Resources/end.png")) {
+	if (!Sprite::loadTexture(2, L"Resources/haikei.png")) {
 		assert(0);
 		return false;
 	}
@@ -152,31 +152,15 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	FbxObject3d::CreateGraphicsPipeline();
 
 	//基本オブジェクト--------------
-	model02 = Model::CreateFromOBJ("FieldStage");
-	model03 = Model::CreateFromOBJ("Cannon");
-	model04 = Model::CreateFromOBJ("Gate");
-	model06 = Model::CreateFromOBJ("KSR-29");
+	defenceModel = Model::CreateFromOBJ("KSR-29");
+	skyDomeModel = Model::CreateFromOBJ("skydome");
+	bulletModel = Model::CreateFromOBJ("bullet");
+	Box1x1 = Model::CreateFromOBJ("Box");
 
-	fbxModel1 = FbxLoader::GetInstance()->LoadModelFromFile("Wolf");
 	for (int i = 0; i < 3; i++) {
 		golem[i] = FbxLoader::GetInstance()->LoadModelFromFile("Golem");
 		wolf[i] = FbxLoader::GetInstance()->LoadModelFromFile("Wolf");
 	}
-
-	skyDomeModel = Model::CreateFromOBJ("skydome");
-
-	//fbxObj1 = new FbxObject3d;
-	//fbxObj1->Initialize();
-	//fbxObj1->SetModel(fbxModel1);
-	//fbxObj1->SetScale({ 0.002f,0.002f,0.002f });
-	//fbxObj1->PlayAnimation(0);
-
-	//全体ステージ
-	//stage = Stage::Create(model02);
-	//stage->scale = { 100,100,100 };
-	//stage->rotation.y = -90;
-	//stage->SetPosition({ 0.0f,-0.01f,0.0f });
-
 
 	//ステージデータ及びモデルデータ読み込み
 	stageData = JsonLoader::LoadJsonFile("stageData");
@@ -239,19 +223,12 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 		baseCamp.push_back(newObject);
 	}
 
-	//ゲート（最終関門）
-	obj03 = Object3Ds::Create(model04);
-	obj03->Update();
-	obj03->scale = { 50,50,50 };
-	obj03->SetPosition({ 0,0,330 });
-
 	//防衛砲台
-	bulletModel = Model::CreateFromOBJ("bullet");
 	for (int i = 0; i < 6; i++) {
-		cannon[i] = DefCannon::Appearance(0, model06, model06, model06);
-		cannon[i]->BulletCreate(bulletModel);
-		cannon[i]->Update();
-		cannon[i]->scale = { 5,5,5 };
+		defense_facilities[i] = DefCannon::Appearance(0, defenceModel, defenceModel, defenceModel);
+		defense_facilities[i]->BulletCreate(bulletModel);
+		defense_facilities[i]->Update();
+		defense_facilities[i]->scale = { 5,5,5 };
 	}
 
 	//スカイドーム-------------------
@@ -276,10 +253,10 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	_player->model->animation = true;
 
 	//スプライト---------------------
-	sprite01 = Sprite::Create(0, { 0.0f,0.0f });
-	sprite02 = Sprite::Create(1, { 0.0f,0.0f });
-	sprite03 = Sprite::Create(2, { 0.0f,0.0f });
-	sprite04 = Sprite::Create(3, { 0.0f,0.0f });
+	Title = Sprite::Create(0, { 0.0f,0.0f });
+	End	  = Sprite::Create(1, { 0.0f,0.0f });
+	//sprite03 = Sprite::Create(2, { 0.0f,0.0f });
+	HpBer = Sprite::Create(3, { 0.0f,0.0f });
 	Pose = Sprite::Create(15, { 0.0f,0.0f });
 
 	weaponSelect = Sprite::Create(16, { 0.0f,0.0f });
@@ -337,7 +314,7 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	//ヒットボックス-----------------
 	HitBox::CreatePipeline(dx12);
 	HitBox::CreateTransform();
-	HitBox::CreateHitBox(_player->model->GetBonePos("頭先"), model06);
+	HitBox::CreateHitBox(_player->model->GetBonePos("頭先"), defenceModel);
 	HitBox::hitBox[0]->scale = XMFLOAT3(5, 10, 5);
 	triangle[0].p0 = XMVectorSet(stages[66]->position.x - 100.0f, stages[66]->position.y, stages[66]->position.z, 1);
 	triangle[0].p1 = XMVectorSet(stages[66]->position.x - 100.0f, stages[66]->position.y + 120.0f, stages[66]->position.z, 1);
@@ -373,9 +350,6 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 }
 void GameManager::Update()
 {
-	//if (input->Trigger(DIK_M)) {
-	//	pmdModel->playAnimation();
-	//}
 	//imgui
 	static bool blnChk = false;
 	static int radio = 0;
@@ -451,7 +425,7 @@ void GameManager::TitleUpdate()
 		}
 
 		if (input->Trigger(DIK_SPACE) || directInput->IsButtonPush(DirectInput::ButtonKind::ButtonA)) {
-			sprite01->Update();
+			Title->Update();
 			fade->SetFadeIn(true);
 			start->SetFadeIn(true);
 		}
@@ -531,8 +505,14 @@ void GameManager::GameUpdate() {
 					if (useModel >= 3) { useModel = 0; }
 					ene = Enemy::Appearance(golem[useModel], wolf[useModel]);
 					if (ene != nullptr) {
+						//武器生成
+						ene->CreateWeapon(Model::CreateFromOBJ("weapon"));
+						//パーティクル生成
+						ene->CreateParticle();
+						//格納
 						_enemy.push_back(ene);
 						useModel += 1;
+						//当たり判定用球体生成
 						Sqhere _sqhere;
 						_sqhere.radius = 5.0f;
 						_sqhere.center = XMVectorSet(ene->GetPosition().x, ene->GetPosition().y, ene->GetPosition().z, 1);
@@ -543,7 +523,7 @@ void GameManager::GameUpdate() {
 			//エネミー関係の制御
 			{
 				for (int i = 0; i < _enemy.size(); i++) {
-					_enemy[i]->moveUpdate(_player->model->position, cannon, stages[66]->position);
+					_enemy[i]->moveUpdate(_player->model->position, defense_facilities, stages[66]->position);
 					sqhere[i].center = XMVectorSet(_enemy[i]->GetPosition().x, _enemy[i]->GetPosition().y, _enemy[i]->GetPosition().z, 1);
 					if (_enemy[i]->alive == true) { continue; }
 					_enemy.erase(_enemy.begin());
@@ -757,9 +737,9 @@ void GameManager::GameUpdate() {
 			{
 				//防衛施設操作
 				for (int i = 0; i < 6; i++) {
-					if (distance(_player->model->position, cannon[i]->position) >= 3) { continue; }
+					if (distance(_player->model->position, defense_facilities[i]->position) >= 3) { continue; }
 					if (!(input->Trigger(DIK_F) || directInput->IsButtonPush(DirectInput::ButtonKind::ButtonB))) { continue; }
-					setObjectPos = cannon[i]->position;
+					setObjectPos = defense_facilities[i]->position;
 					SetNum = i;
 					//カメラ注視点を決定
 					//カメラとプレイヤーの距離を決定
@@ -801,7 +781,7 @@ void GameManager::GameUpdate() {
 
 				//ゲートダメージ時リアクション
 				if (shake) {
-					Shake3D(obj03->position);
+					Shake3D(stages[66]->position);
 				}
 
 				//ステージ移動
@@ -896,10 +876,10 @@ void GameManager::GameUpdate() {
 			//設置施設決定
 			if (directInput->IsButtonPush(DirectInput::ButtonB) && !WeaponSelectDo) {
 				//土台に施設を設置
-				cannon[WeaponCount]->SetPosition({
+				defense_facilities[WeaponCount]->SetPosition({
 					stages[UseFoundation]->position.x,
 					10,stages[UseFoundation]->position.z });
-				cannon[WeaponCount]->SetAlive(true);
+				defense_facilities[WeaponCount]->SetAlive(true);
 				//施設番号を次に
 				WeaponCount += 1;
 
@@ -937,8 +917,8 @@ void GameManager::GameUpdate() {
 			set_v.y = vv0.m128_f32[1];
 			set_v.z = vv0.m128_f32[2];
 
-			cannon[SetNum]->SetMatRot(LookAtRotation(set_v, XMFLOAT3(0.0f, 1.0f, 0.0f)));
-			cannon[SetNum]->SetShotVec(vv0);
+			defense_facilities[SetNum]->SetMatRot(LookAtRotation(set_v, XMFLOAT3(0.0f, 1.0f, 0.0f)));
+			defense_facilities[SetNum]->SetShotVec(vv0);
 			//カメラ注視点を決定
 			//カメラとプレイヤーの距離を決定
 			const float distanceFromPlayerToCamera = 40.0f;
@@ -1004,16 +984,15 @@ void GameManager::GameUpdate() {
 				dx12->SceneUpdate();
 				camera->Update();
 				mainCamera->Update();
-				//stage->Update();
-				obj03->Update();
+				//obj03->Update();
 				_player->Update();
 				_player->SetInput(*input);
 				for (int i = 0; i < _enemy.size(); i++) {
 					_enemy[i]->Update();
 				}
 				for (int i = 0; i < 6; i++) {
-					cannon[i]->Update();
-					cannon[i]->moveUpdate(_enemy);
+					defense_facilities[i]->Update();
+					defense_facilities[i]->moveUpdate(_enemy);
 				}
 				HitBox::mainUpdate(_player->model->GetBoneMat(), _player->model->rotation);
 
@@ -1022,8 +1001,6 @@ void GameManager::GameUpdate() {
 
 				skyDome->SetPosition(XMFLOAT3(_player->model->position.x, _player->model->position.y + 450.0f, _player->model->position.z));
 				skyDome->Update();
-
-				//fbxObj1->Update();
 
 				particlemanager->Update();
 				Bottom->Update();
@@ -1056,7 +1033,7 @@ void GameManager::EndUpdate() {
 		//エンド→タイトル遷移
 		if (input->Trigger(DIK_SPACE) || directInput->IsButtonPush(DirectInput::ButtonKind::ButtonA)) {
 			SceneNum = TITLE;
-			sprite01->Update();
+			Title->Update();
 		}
 	}
 }
@@ -1068,7 +1045,7 @@ void GameManager::Draw()
 
 	if (SceneNum == TITLE) {
 		Sprite::PreDraw(cmdList);
-		sprite01->Draw();
+		Title->Draw();
 		debugText.DrawAll(cmdList);
 		Sprite::PostDraw();
 
@@ -1106,8 +1083,8 @@ void GameManager::Draw()
 			}
 			//防衛施設描画
 			for (int i = 0; i < 6; i++) {
-				if (!cannon[i]->GetAlive()) { continue; }
-				cannon[i]->Draw();
+				if (!defense_facilities[i]->GetAlive()) { continue; }
+				defense_facilities[i]->Draw();
 			}
 
 			//敵描画
@@ -1116,10 +1093,7 @@ void GameManager::Draw()
 			}
 		}
 
-
 		BaseObject::PostDraw();
-
-		//fbxObj1->Draw(cmdList);
 
 		// 3Dオブジェクト描画前処理
 		ParticleManager::PreDraw(cmdList);
@@ -1133,7 +1107,7 @@ void GameManager::Draw()
 
 			hp->Draw();
 
-			sprite04->Draw();
+			HpBer->Draw();
 
 			BreakBar->Draw();
 			for (int i = 0; i < repelCount; i++) {
@@ -1153,7 +1127,7 @@ void GameManager::Draw()
 	}
 	else if (SceneNum == END) {
 		Sprite::PreDraw(cmdList);
-		sprite02->Draw();
+		End->Draw();
 		Sprite::PostDraw();
 	}
 

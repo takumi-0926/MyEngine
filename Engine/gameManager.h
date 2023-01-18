@@ -85,33 +85,28 @@ private://メンバ変数(初期化)
 	DebugText debugText; //デバッグテキスト
 
 	//プレイヤー / エネミー
-	Player*		  _player = nullptr;
-	PMDmodel* modelPlayer = nullptr;
-	Enemy* ene = nullptr;
-	vector<Enemy*> _enemy;
-	FbxModel* golem[3] = {};
-	FbxModel* wolf[3] = {};
-	HitBox* HitBox = {};
-	int useModel = 0;
+	Player*		  _player = nullptr;//プレイヤー本体
+	PMDmodel* modelPlayer = nullptr;//プレイヤーモデル
+	Enemy*			  ene = nullptr;//エネミー生成用
+	vector<Enemy*>   _enemy;//エネミー本体
+	FbxModel* golem[3] = {};//ゴーレムモデル（FBX）
+	FbxModel*  wolf[3] = {};//ウルフモデル（FBX）
+	HitBox*		HitBox = {};//ヒットボックス（プレイヤー用）
+	int		   useModel = 0;//エネミー識別用変数
 
 	//ステージ
-	map<string, Model*> stageModels;
-	vector<Stage*> stages;
-	vector<Stage*> baseCamp;
-	JsonData* stageData;
-	JsonData* baseCampData;
-	Object3Ds* skyDome = nullptr;
-	Model* skyDomeModel = nullptr;
-	int UseStage = 0;
+	int UseStage = 0;//ゲーム中のステージ識別用変数
+	map<string, Model*> stageModels;//ステージで使用するモデルの格納先
+	vector<Stage*>			 stages;//ステージ情報
+	vector<Stage*>		   baseCamp;//ベースキャンプ情報
+	JsonData*			  stageData;//ステージ構成保存用
+	JsonData*		   baseCampData;//ベースキャンプ構成保存用
+	Object3Ds*	skyDome = nullptr;//背景オブジェクト
+	Model* skyDomeModel = nullptr;//背景モデル
 
 	//防衛施設
-	DefCannon* cannon[6] = {};
-	Model* bulletModel = nullptr;
-
-	//std::shared_ptr<PMDmodel>   pmdModel;
-	//std::shared_ptr<PMDobject> pmdObject;
-	//Stage* stage;
-
+	DefCannon* defense_facilities[6] = {};//全防衛施設情報
+	Model* bulletModel = nullptr;//弾モデル
 
 	//衝突マネージャー
 	CollisionManager* collisionManager = nullptr;
@@ -128,10 +123,10 @@ private://メンバ変数(初期化)
 	Fade* clear = nullptr;//クリア時
 	Fade* failed = nullptr;//ゲームオーバー時
 	Fade* start = nullptr;//スタート時
-	Fade* gateBreak_red = nullptr;
-	Fade* gateBreak_yellow = nullptr;
-	Fade* gateBreak_green = nullptr;
-	int gateHP = GATE_MAX;
+	Fade* gateBreak_red =	 nullptr;//門耐久値UI（赤 : やばいよ）
+	Fade* gateBreak_yellow = nullptr;//門耐久値UI（黄 : 気を付けて）
+	Fade* gateBreak_green =  nullptr;//門耐久値UI（緑 : 大丈夫）
+	int gateHP = GATE_MAX;//門耐久値
 
 	//画面UI
 	Sprite* weaponSelect = nullptr;
@@ -163,19 +158,14 @@ private://メンバ変数(ゲームシーン)
 	Sprite* hp = nullptr;
 	Sprite* Damege = nullptr;
 
-	Model* model02 = nullptr;
-	Model* model03 = nullptr;
-	Model* model04 = nullptr;
-	Model* model06 = nullptr;
-	Object3Ds* obj01 = nullptr;
-	Object3Ds* obj02 = nullptr;
-	Object3Ds* obj03 = nullptr;
-	Object3Ds* obj04[10] = {};
-	Sprite* sprite01 = nullptr;
-	Sprite* sprite02 = nullptr;
-	Sprite* sprite03 = nullptr;
-	Sprite* sprite04 = nullptr;
-	Sprite* sprite05 = nullptr;
+	Model* defenceModel = nullptr;
+	Model* Box1x1 = nullptr;
+
+	Sprite* Title = nullptr;
+	Sprite* End = nullptr;
+	//Sprite* sprite03 = nullptr;
+	Sprite* HpBer = nullptr;
+	//Sprite* sprite05 = nullptr;
 	PMDmodel* pModel = nullptr;
 	PMDobject* pmdObj = nullptr;
 	FbxModel* fbxModel1 = nullptr;
