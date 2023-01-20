@@ -11,6 +11,11 @@
 #include "Weapon.h"
 #include "ParticleManager.h"
 
+enum Activity {
+	wolf = 0,
+	golem,
+};
+
 class PMDmodel;
 class StageObject;
 class DefCannon;
@@ -51,6 +56,7 @@ public:
 	XMFLOAT3 oldPos;
 	XMFLOAT3 RetreatPos = { 1.0f,20.0f,-150.0f };
 
+	FbxModel* modelType[2] = {};
 	Weapon* weapon = nullptr;
 	ParticleManager* particle = nullptr;
 
@@ -63,7 +69,7 @@ private:
 	void moveReset();
 public:
 	Enemy();		//コンストラクタ
-	static Enemy* Create(FbxModel* model);//インスタンス生成
+	static Enemy* Create(FbxModel* model1, FbxModel* model2);//インスタンス生成
 	void Initialize()override;
 	void Update() override;
 	void moveUpdate(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos);
@@ -132,7 +138,7 @@ public:
 	/// <summary>
 	/// 出現処理
 	/// </summary>
-	static Enemy* Appearance(FbxModel* model1, FbxModel* model2);
+	void Appearance();
 
 	/// <summary>
 	/// 移動時処理

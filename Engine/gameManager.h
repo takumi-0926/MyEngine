@@ -87,12 +87,13 @@ private://メンバ変数(初期化)
 	//プレイヤー / エネミー
 	Player*		  _player = nullptr;//プレイヤー本体
 	PMDmodel* modelPlayer = nullptr;//プレイヤーモデル
-	Enemy*			  ene = nullptr;//エネミー生成用
+	Enemy*			  protEnemy[3] = {};//エネミー生成用
 	vector<Enemy*>   _enemy;//エネミー本体
-	FbxModel* golem[3] = {};//ゴーレムモデル（FBX）
-	FbxModel*  wolf[3] = {};//ウルフモデル（FBX）
+	FbxModel* golem = nullptr;//ゴーレムモデル（FBX）
+	FbxModel*  wolf = nullptr;//ウルフモデル（FBX）
 	HitBox*		HitBox = {};//ヒットボックス（プレイヤー用）
-	int		   useModel = 0;//エネミー識別用変数
+	int enemyNum = 0;//エネミー識別用変数
+	float enemyPopTime = 0.0f;
 
 	//ステージ
 	int UseStage = 0;//ゲーム中のステージ識別用変数
@@ -166,10 +167,10 @@ private://メンバ変数(ゲームシーン)
 	//Sprite* sprite03 = nullptr;
 	Sprite* HpBer = nullptr;
 	//Sprite* sprite05 = nullptr;
-	PMDmodel* pModel = nullptr;
-	PMDobject* pmdObj = nullptr;
-	FbxModel* fbxModel1 = nullptr;
-	FbxObject3d* fbxObj1 = nullptr;
+	//PMDmodel* pModel = nullptr;
+	//PMDobject* pmdObj = nullptr;
+	//FbxModel* fbxModel1 = nullptr;
+	//FbxObject3d* fbxObj1 = nullptr;
 
 	vector<Object3Ds> block;
 	DebugCamera* camera = nullptr;

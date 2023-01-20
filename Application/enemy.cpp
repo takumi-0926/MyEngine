@@ -73,7 +73,7 @@ Enemy::Enemy()
 	oldPos = {};
 	attackPos = {};
 }
-Enemy* Enemy::Create(FbxModel* model)
+Enemy* Enemy::Create(FbxModel* model1, FbxModel* model2)
 {
 	// 3Dオブジェクトのインスタンスを生成
 	Enemy* instance = new Enemy();
@@ -84,8 +84,15 @@ Enemy* Enemy::Create(FbxModel* model)
 	instance->position.y = 20;
 	instance->position.z = -150;
 
+	//使用モデル登録
+	instance->modelType[0] = model1;
+	instance->modelType[1] = model2;
+
+	//識別番号設定
+	instance->myNumber = rand() % RAND_MAX;
+
 	//アンビエント元を取得
-	instance->defalt_ambient.push_back(model->ambient);
+	//instance->defalt_ambient.push_back(model->ambient);
 
 	// 初期化
 	instance->Initialize();
@@ -95,11 +102,11 @@ Enemy* Enemy::Create(FbxModel* model)
 	//	return nullptr;
 	//}
 
-	if (model) {
-		FbxModel* _model = model;
-		instance->SetModel(_model);
-		instance->LoadAnima();
-	}
+	//if (model) {
+	//	FbxModel* _model = model;
+	//	instance->SetModel(_model);
+	//	instance->LoadAnima();
+	//}
 
 	return instance;
 }
@@ -261,46 +268,46 @@ void Enemy::CreateParticle()
 	delete(instance);
 }
 
-Enemy* Enemy::Appearance(FbxModel* model1, FbxModel* model2)
+void Enemy::Appearance()
 {
-	Enemy* ene = nullptr;
-	static float popTime = 0;
+	//Enemy* ene = nullptr;
+	//static float popTime = 0;
 	//三体まで
-	if (popTime >= 10.0f) {
-		int r = rand() % 10;
-		if (r % 2 == 1) { ene = Enemy::Create(model2); }
-		if (r % 2 != 1) { ene = Enemy::Create(model1); }
-		if (r % 2 == 1) {
-			ene->mode = 2;
-			ene->status.HP = 2;
-			ene->status.speed = 0.6f;
-			ene->position.y = 0;
-			ene->scale = { 0.2f,0.2f,0.2f };
-			ene->alive = true;
-			ene->shadowOffset = 0.5f;
-		}
-		else if (r % 2 != 1) {
-			ene->mode = 3;
-			ene->status.HP = 4;
-			ene->status.speed = 0.4f;
-			ene->position = { 0,0,-150 };
-			ene->scale = { 0.1f,0.1f,0.1f };
-			ene->alive = true;
-			ene->shadowOffset = 1.5f;
-
-			//CreateWeapon(Model::CreateFromOBJ("weapon"));
-		}
-
-		popTime = 0;
-		ene->myNumber = rand() % RAND_MAX;
-		ene->PlayAnimation(MotionType::WalkMotion);
+	//if (popTime >= 10.0f) {
+	int r = rand() % 10;
+	//if (r % 2 == 1) { ene = Enemy::Create(model2); }
+	//if (r % 2 != 1) { ene = Enemy::Create(model1); }
+	if (r % 2 == 1) {
+		mode = Activity::wolf;
+		SetModel(modelType[Activity::wolf]);
+		status.HP = 2;
+		status.speed = 0.6f;
+		position.y = 0;
+		scale = { 0.2f,0.2f,0.2f };
+		alive = true;
+		shadowOffset = 0.5f;
 	}
-	else {
-		popTime += 1.0f / 60.0f;
+	else if (r % 2 != 1) {
+		mode = Activity::golem;
+		SetModel(modelType[Activity::golem]);
+		status.HP = 4;
+		status.speed = 0.4f;
+		position = { 0,0,-150 };
+		scale = { 0.1f,0.1f,0.1f };
+		alive = true;
+		shadowOffset = 1.5f;
+
+		//CreateWeapon(Model::CreateFromOBJ("weapon"));
 	}
 
+	LoadAnima();
 
-	return ene;
+	//popTime = 0;
+	PlayAnimation(MotionType::WalkMotion);
+	//}
+	//else {
+	//	popTime += 1.0f / 60.0f;
+	//}
 }
 
 void Enemy::Move(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
@@ -349,7 +356,7 @@ void Enemy::Move(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 		}
 	}
 	//パターン2
-	if (this->mode == 2) {
+	if (this->mode == Activity::wolf) {
 		move(Normalize(objectVector(this->position, pPos)));
 		this->matRot = LookAtRotation(
 			VectorToXMFloat(Normalize(objectVector(this->position, pPos))),
@@ -361,7 +368,7 @@ void Enemy::Move(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 		}
 	}
 	//パターン3
-	if (this->mode == 3) {
+	if (this->mode == Activity::golem) {
 		move(Normalize(objectVector(this->position, gPos)));
 		this->matRot = LookAtRotation(
 			VectorToXMFloat(Normalize(objectVector(this->position, gPos))),

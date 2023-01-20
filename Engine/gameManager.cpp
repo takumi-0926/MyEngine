@@ -157,10 +157,8 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	bulletModel = Model::CreateFromOBJ("bullet");
 	Box1x1 = Model::CreateFromOBJ("Box");
 
-	for (int i = 0; i < 3; i++) {
-		golem[i] = FbxLoader::GetInstance()->LoadModelFromFile("Golem");
-		wolf[i] = FbxLoader::GetInstance()->LoadModelFromFile("Wolf");
-	}
+	golem = FbxLoader::GetInstance()->LoadModelFromFile("Golem");
+	wolf = FbxLoader::GetInstance()->LoadModelFromFile("Wolf");
 
 	//ステージデータ及びモデルデータ読み込み
 	stageData = JsonLoader::LoadJsonFile("stageData");
@@ -252,10 +250,14 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	_player->model->playAnimation();
 	_player->model->animation = true;
 
+	//エネミー-----------------------
+	protEnemy[0] = Enemy::Create(wolf, golem);
+	protEnemy[1] = Enemy::Create(wolf, golem);
+	protEnemy[2] = Enemy::Create(wolf, golem);
+
 	//スプライト---------------------
 	Title = Sprite::Create(0, { 0.0f,0.0f });
-	End	  = Sprite::Create(1, { 0.0f,0.0f });
-	//sprite03 = Sprite::Create(2, { 0.0f,0.0f });
+	End = Sprite::Create(1, { 0.0f,0.0f });
 	HpBer = Sprite::Create(3, { 0.0f,0.0f });
 	Pose = Sprite::Create(15, { 0.0f,0.0f });
 
@@ -500,25 +502,37 @@ void GameManager::GameUpdate() {
 		if (GameModeNum == GameMode::NASI) {
 			//エネミーの生成
 			{
-				//三体まで
-				if (_enemy.size() <= 2) {
-					if (useModel >= 3) { useModel = 0; }
-					ene = Enemy::Appearance(golem[useModel], wolf[useModel]);
-					if (ene != nullptr) {
-						//武器生成
-						ene->CreateWeapon(Model::CreateFromOBJ("weapon"));
-						//パーティクル生成
-						ene->CreateParticle();
-						//格納
-						_enemy.push_back(ene);
-						useModel += 1;
-						//当たり判定用球体生成
-						Sqhere _sqhere;
-						_sqhere.radius = 5.0f;
-						_sqhere.center = XMVectorSet(ene->GetPosition().x, ene->GetPosition().y, ene->GetPosition().z, 1);
-						sqhere.push_back(_sqhere);
-					}
+				//生成時間になり、生成対象が生きていないなら
+				if (enemyPopTime >= 1.0f && protEnemy[enemyNum]->alive == false) {
+
+					protEnemy[enemyNum]->Appearance();
+					//武器生成
+					//protEnemy[enemyNum]->CreateWeapon(Model::CreateFromOBJ("weapon"));
+					//パーティクル生成
+					protEnemy[enemyNum]->CreateParticle();
+
+					_enemy.push_back(protEnemy[enemyNum]);
+
+					//当たり判定用球体生成
+					Sqhere _sqhere;
+					_sqhere.radius = 5.0f;
+					_sqhere.center = XMVectorSet(_enemy[enemyNum]->GetPosition().x, _enemy[enemyNum]->GetPosition().y, _enemy[enemyNum]->GetPosition().z, 1);
+					sqhere.push_back(_sqhere);
+
+					enemyNum++;
+					if (enemyNum >= 3) { enemyNum = 0; }
 				}
+				enemyPopTime += 1.0f / 60.0f;
+				//三体まで
+				//if (_enemy.size() <= 2) {
+				//	if (useModel >= 3) { useModel = 0; }
+					//ene = Enemy::Appearance(golem[useModel], wolf[useModel]);
+					//if (ene != nullptr) {
+					//	//格納
+					//	_enemy.push_back(ene);
+					//	useModel += 1;
+				//	}
+				//}
 			}
 			//エネミー関係の制御
 			{
