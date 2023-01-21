@@ -128,6 +128,8 @@ void Enemy::Update() {
 	UpdateWorldMatrix();
 	collider->Update();
 
+	particle->Update();
+
 	//—Ž‰ºˆ—
 	if (!OnGround) {
 		const float fallAcc = -0.01f;
@@ -235,11 +237,13 @@ void Enemy::Update() {
 	//	position.z = 342.0f;
 	//}
 
-	ParticleManager::GetInstance()->CreateParticle(position, 10, { 1,0,0,1 });
+	//particle->CreateParticle(position, 1, { 1,1,1,1 });
+
 	FbxObject3d::Update();
 }
 void Enemy::Draw(ID3D12GraphicsCommandList* cmdList)
 {
+	if (!alive) { return; }
 	SetAlpha();
 	FbxObject3d::Draw(cmdList);
 }
@@ -260,12 +264,9 @@ void Enemy::CreateWeapon(Model* model)
 	delete(_weapon);
 }
 
-void Enemy::CreateParticle()
+void Enemy::Particle()
 {
-	ParticleManager* instance = new ParticleManager();
-	instance = ParticleManager::Create();
-	particle = instance;
-	delete(instance);
+	particle = ParticleManager::Create();
 }
 
 void Enemy::Appearance()
@@ -284,7 +285,6 @@ void Enemy::Appearance()
 		status.speed = 0.6f;
 		position.y = 0;
 		scale = { 0.2f,0.2f,0.2f };
-		alive = true;
 		shadowOffset = 0.5f;
 	}
 	else if (r % 2 != 1) {
@@ -294,11 +294,12 @@ void Enemy::Appearance()
 		status.speed = 0.4f;
 		position = { 0,0,-150 };
 		scale = { 0.1f,0.1f,0.1f };
-		alive = true;
 		shadowOffset = 1.5f;
-
-		//CreateWeapon(Model::CreateFromOBJ("weapon"));
 	}
+
+	alive = true;
+
+	defalt_ambient.push_back(model->ambient);
 
 	LoadAnima();
 
@@ -320,7 +321,7 @@ void Enemy::Move(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 
 	//ˆÚ“®ˆ—
 	//ƒpƒ^[ƒ“1
-	if (this->mode == 1) {
+	if (this->mode == -1) {
 		float distance = 1000;//‹——£•Û‘¶—p
 		for (int i = 0; i < 6; i++)
 		{
@@ -391,7 +392,7 @@ void Enemy::Attack(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 	ChangeAnimation(MotionType::AttackMotion);
 
 	//UŒ‚ˆ—
-	if (this->mode == 1) {
+	if (this->mode == -1) {
 		//UŒ‚Žž‚Ìî•ñŽæ“¾
 		if (this->startAttack == false) {
 			moveReset();
@@ -436,7 +437,7 @@ void Enemy::Attack(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 
 		this->attackTime += 1.0f / 60.0f;
 	}
-	if (this->mode == 2) {
+	if (this->mode == Activity::wolf) {
 		//UŒ‚Žž‚Ìî•ñŽæ“¾
 		if (this->startAttack == false) {
 			this->vectol = objectVector(pPos, this->position);
@@ -467,7 +468,7 @@ void Enemy::Attack(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 
 		this->attackTime += 1.0f / 60.0f;
 	}
-	if (this->mode == 3) {
+	if (this->mode == Activity::golem) {
 		//UŒ‚Žž‚Ìî•ñŽæ“¾
 		if (this->startAttack == false) {
 			moveReset();
@@ -519,9 +520,9 @@ void Enemy::Retreat()
 		VectorToXMFloat(Normalize(objectVector(position, RetreatPos))),
 		XMFLOAT3(0.0f, 1.0f, 0.0f));
 
-	if (alpha <= 0) { alive = false; }
-
 	alpha -= 0.01f;
+
+	if (alpha <= 0.0f) { alive = false; }
 }
 
 void Enemy::Damage()
@@ -538,6 +539,7 @@ void Enemy::Damage()
 		count = 0.0f;
 	}
 
+	particle->CreateParticle(position, 10, { 1,0,0,1 });
 
 	if (status.HP <= 0) { actionPattern = MoveMode::retreat; }
 }

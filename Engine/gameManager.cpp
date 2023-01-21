@@ -157,8 +157,10 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	bulletModel = Model::CreateFromOBJ("bullet");
 	Box1x1 = Model::CreateFromOBJ("Box");
 
-	golem = FbxLoader::GetInstance()->LoadModelFromFile("Golem");
-	wolf = FbxLoader::GetInstance()->LoadModelFromFile("Wolf");
+	for (int i = 0; i < 3; i++) {
+		golem[i] = FbxLoader::GetInstance()->LoadModelFromFile("Golem");
+		wolf[i] = FbxLoader::GetInstance()->LoadModelFromFile("Wolf");
+	}
 
 	//ステージデータ及びモデルデータ読み込み
 	stageData = JsonLoader::LoadJsonFile("stageData");
@@ -251,9 +253,9 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	_player->model->animation = true;
 
 	//エネミー-----------------------
-	protEnemy[0] = Enemy::Create(wolf, golem);
-	protEnemy[1] = Enemy::Create(wolf, golem);
-	protEnemy[2] = Enemy::Create(wolf, golem);
+	protEnemy[0] = Enemy::Create(wolf[0], golem[0]);
+	protEnemy[1] = Enemy::Create(wolf[1], golem[1]);
+	protEnemy[2] = Enemy::Create(wolf[2], golem[2]);
 
 	//スプライト---------------------
 	Title = Sprite::Create(0, { 0.0f,0.0f });
@@ -503,13 +505,13 @@ void GameManager::GameUpdate() {
 			//エネミーの生成
 			{
 				//生成時間になり、生成対象が生きていないなら
-				if (enemyPopTime >= 1.0f && protEnemy[enemyNum]->alive == false) {
+				if (enemyPopTime >= 5.0f && protEnemy[enemyNum]->alive == false) {
 
 					protEnemy[enemyNum]->Appearance();
 					//武器生成
 					//protEnemy[enemyNum]->CreateWeapon(Model::CreateFromOBJ("weapon"));
 					//パーティクル生成
-					protEnemy[enemyNum]->CreateParticle();
+					protEnemy[enemyNum]->Particle();
 
 					_enemy.push_back(protEnemy[enemyNum]);
 
@@ -519,8 +521,11 @@ void GameManager::GameUpdate() {
 					_sqhere.center = XMVectorSet(_enemy[enemyNum]->GetPosition().x, _enemy[enemyNum]->GetPosition().y, _enemy[enemyNum]->GetPosition().z, 1);
 					sqhere.push_back(_sqhere);
 
-					enemyNum++;
+					enemyPopTime = 0.0f;
+
+					enemyNum += 1;
 					if (enemyNum >= 3) { enemyNum = 0; }
+
 				}
 				enemyPopTime += 1.0f / 60.0f;
 				//三体まで
@@ -539,9 +544,10 @@ void GameManager::GameUpdate() {
 				for (int i = 0; i < _enemy.size(); i++) {
 					_enemy[i]->moveUpdate(_player->model->position, defense_facilities, stages[66]->position);
 					sqhere[i].center = XMVectorSet(_enemy[i]->GetPosition().x, _enemy[i]->GetPosition().y, _enemy[i]->GetPosition().z, 1);
-					if (_enemy[i]->alive == true) { continue; }
-					_enemy.erase(_enemy.begin());
-					sqhere.erase(sqhere.begin());
+					if (_enemy[i]->alive) { continue; }
+					_enemy.erase(_enemy.begin() + i);
+					sqhere.erase(sqhere.begin() + i);
+					//protEnemy[i]->alive = false;
 				}
 			}
 			//当たり判定（プレイヤー / 敵 / 最終関門）
@@ -1113,8 +1119,14 @@ void GameManager::Draw()
 		ParticleManager::PreDraw(cmdList);
 		// 3Dオブクジェクトの描画
 		particlemanager->Draw();
+
+		for (int i = 0; i < _enemy.size(); i++) {
+			_enemy[i]->particle->Draw();
+		}
+
 		// 3Dオブジェクト描画後処理
 		ParticleManager::PostDraw();
+
 
 		Sprite::PreDraw(cmdList);
 		if (GameModeNum != GameMode::POSE) {

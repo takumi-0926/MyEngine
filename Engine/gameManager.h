@@ -44,7 +44,7 @@ using namespace Microsoft::WRL;
 #define	ENEM_NUM	1000
 #define P_HP		 100
 #define GATE_MAX      10
-enum Scene{
+enum Scene {
 	TITLE,
 	GAME,
 	END
@@ -79,19 +79,19 @@ struct JsonData;
 class CollisionManager;
 class GameManager {
 private://メンバ変数(初期化)
-	Input*	 input;		 //インプット
-	Audio*   audio;		 //オーディオ
-	Wrapper*  dx12;		 //DirectX
+	Input* input;		 //インプット
+	Audio* audio;		 //オーディオ
+	Wrapper* dx12;		 //DirectX
 	DebugText debugText; //デバッグテキスト
 
 	//プレイヤー / エネミー
-	Player*		  _player = nullptr;//プレイヤー本体
+	Player* _player = nullptr;//プレイヤー本体
 	PMDmodel* modelPlayer = nullptr;//プレイヤーモデル
-	Enemy*			  protEnemy[3] = {};//エネミー生成用
+	Enemy* protEnemy[3] = {};//エネミー生成用
 	vector<Enemy*>   _enemy;//エネミー本体
-	FbxModel* golem = nullptr;//ゴーレムモデル（FBX）
-	FbxModel*  wolf = nullptr;//ウルフモデル（FBX）
-	HitBox*		HitBox = {};//ヒットボックス（プレイヤー用）
+	FbxModel* golem[3] = {};//ゴーレムモデル（FBX）
+	FbxModel* wolf[3] = {};//ウルフモデル（FBX）
+	HitBox* HitBox = {};//ヒットボックス（プレイヤー用）
 	int enemyNum = 0;//エネミー識別用変数
 	float enemyPopTime = 0.0f;
 
@@ -100,9 +100,9 @@ private://メンバ変数(初期化)
 	map<string, Model*> stageModels;//ステージで使用するモデルの格納先
 	vector<Stage*>			 stages;//ステージ情報
 	vector<Stage*>		   baseCamp;//ベースキャンプ情報
-	JsonData*			  stageData;//ステージ構成保存用
-	JsonData*		   baseCampData;//ベースキャンプ構成保存用
-	Object3Ds*	skyDome = nullptr;//背景オブジェクト
+	JsonData* stageData;//ステージ構成保存用
+	JsonData* baseCampData;//ベースキャンプ構成保存用
+	Object3Ds* skyDome = nullptr;//背景オブジェクト
 	Model* skyDomeModel = nullptr;//背景モデル
 
 	//防衛施設
@@ -124,20 +124,20 @@ private://メンバ変数(初期化)
 	Fade* clear = nullptr;//クリア時
 	Fade* failed = nullptr;//ゲームオーバー時
 	Fade* start = nullptr;//スタート時
-	Fade* gateBreak_red =	 nullptr;//門耐久値UI（赤 : やばいよ）
+	Fade* gateBreak_red = nullptr;//門耐久値UI（赤 : やばいよ）
 	Fade* gateBreak_yellow = nullptr;//門耐久値UI（黄 : 気を付けて）
-	Fade* gateBreak_green =  nullptr;//門耐久値UI（緑 : 大丈夫）
+	Fade* gateBreak_green = nullptr;//門耐久値UI（緑 : 大丈夫）
 	int gateHP = GATE_MAX;//門耐久値
 
 	//画面UI
 	Sprite* weaponSelect = nullptr;
-	Sprite* weaponSlot[3] ={};
+	Sprite* weaponSlot[3] = {};
 	int SlotCount = 0;
 	int WeaponCount = 0;
 	int UseFoundation = 0;
 	bool WeaponSelectDo = false;
 	bool result = false;
-	
+
 	//デバック確認用変数
 	float circleShadowDir[3] = { 0,-1,0 };
 	float circleShadowAtten[3] = { 0.5f,0.8f,0.0f };
@@ -154,7 +154,7 @@ private://メンバ変数(ゲームシーン)
 	vector<Sqhere> sqhere;
 	Model* modelPlane = nullptr;
 	Model* modelBox = nullptr;
-	Model* modelPyramid = nullptr; 
+	Model* modelPyramid = nullptr;
 	vector<Object3Ds*>stageObjects;
 	Sprite* hp = nullptr;
 	Sprite* Damege = nullptr;
@@ -365,7 +365,7 @@ public://メンバ関数
 		Vector3 z = Vector3(forward.x, forward.y, forward.z);//進行方向ベクトル（前方向）
 		Vector3 up = Vector3(upward.x, upward.y, upward.z);  //上方向
 		XMMATRIX rot;//回転行列
-		Quaternion q = quaternion(0,0,0,1);//回転クォータニオン
+		Quaternion q = quaternion(0, 0, 0, 1);//回転クォータニオン
 		Vector3 _z = { 0.0f,0.0f,1.0f };//Z方向単位ベクトル
 		Vector3 cross;
 		XMMATRIX matRot = XMMatrixIdentity();
@@ -385,8 +385,8 @@ public://メンバ関数
 		q.z = cross.z;
 
 		q.w = sqrt(
-			( z.length() *  z.length())
-		   *(_z.length() * _z.length())) + z.dot(_z);
+			(z.length() * z.length())
+			* (_z.length() * _z.length())) + z.dot(_z);
 
 		//単位クォータニオン化
 		q = normalize(q);
