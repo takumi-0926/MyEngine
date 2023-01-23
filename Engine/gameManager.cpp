@@ -253,9 +253,15 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	_player->model->animation = true;
 
 	//エネミー-----------------------
-	protEnemy[0] = Enemy::Create(wolf[0], golem[0]);
-	protEnemy[1] = Enemy::Create(wolf[1], golem[1]);
-	protEnemy[2] = Enemy::Create(wolf[2], golem[2]);
+	for (int i = 0; i < 3; i++)
+	{
+		protEnemy[i] = Enemy::Create(wolf[i], golem[i]);
+		//武器生成
+		protEnemy[i]->CreateWeapon(Model::CreateFromOBJ("weapon"));
+		//パーティクル生成
+		protEnemy[i]->Particle();
+
+	}
 
 	//スプライト---------------------
 	Title = Sprite::Create(0, { 0.0f,0.0f });
@@ -505,39 +511,39 @@ void GameManager::GameUpdate() {
 			//エネミーの生成
 			{
 				//生成時間になり、生成対象が生きていないなら
-				if (enemyPopTime >= 5.0f && protEnemy[enemyNum]->alive == false) {
-
-					protEnemy[enemyNum]->Appearance();
-					//武器生成
-					//protEnemy[enemyNum]->CreateWeapon(Model::CreateFromOBJ("weapon"));
-					//パーティクル生成
-					protEnemy[enemyNum]->Particle();
-
-					_enemy.push_back(protEnemy[enemyNum]);
-
-					//当たり判定用球体生成
-					Sqhere _sqhere;
-					_sqhere.radius = 5.0f;
-					_sqhere.center = XMVectorSet(_enemy[enemyNum]->GetPosition().x, _enemy[enemyNum]->GetPosition().y, _enemy[enemyNum]->GetPosition().z, 1);
-					sqhere.push_back(_sqhere);
-
-					enemyPopTime = 0.0f;
-
-					enemyNum += 1;
-					if (enemyNum >= 3) { enemyNum = 0; }
-
-				}
 				enemyPopTime += 1.0f / 60.0f;
-				//三体まで
-				//if (_enemy.size() <= 2) {
-				//	if (useModel >= 3) { useModel = 0; }
-					//ene = Enemy::Appearance(golem[useModel], wolf[useModel]);
-					//if (ene != nullptr) {
-					//	//格納
-					//	_enemy.push_back(ene);
-					//	useModel += 1;
-				//	}
-				//}
+				if (enemyPopTime >= 5.0f) {
+					for (int i = 0; i < 3; i++) {
+						if (protEnemy[i]->alive) { continue; }
+
+						protEnemy[i]->Appearance();
+						//武器生成
+						//protEnemy[enemyNum]->CreateWeapon(Model::CreateFromOBJ("weapon"));
+						//パーティクル生成
+						//protEnemy[useModel]->Particle();
+
+						_enemy.push_back(protEnemy[i]);
+
+						//当たり判定用球体生成
+						Sqhere _sqhere;
+						_sqhere.radius = 5.0f;
+						sqhere.push_back(_sqhere);
+
+						enemyPopTime = 0.0f;
+
+						break;
+					}
+					//三体まで
+					//if (_enemy.size() <= 2) {
+					//	if (useModel >= 3) { useModel = 0; }
+					//	ene = Enemy::Appearance(golem[useModel], wolf[useModel]);
+					//	if (ene != nullptr) {
+					//		//格納
+					//		_enemy.push_back(ene);
+					//		useModel += 1;
+					//	}
+					//}
+				}
 			}
 			//エネミー関係の制御
 			{
@@ -863,7 +869,7 @@ void GameManager::GameUpdate() {
 			//パーティクル生成
 			static float createTime = 0.2f;
 			if (createTime <= 0.0f) {
-				particlemanager->CreateParticle(_player->model->position, 10, XMFLOAT4(particleColor));
+				particlemanager->CreateParticle(30,_player->model->position, 0.01f,0.005f,10,5.0f, XMFLOAT4(particleColor));
 				createTime = 0.2f;
 			}
 			createTime -= 1.0f / 60.0f;

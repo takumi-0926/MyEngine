@@ -30,10 +30,11 @@ Weapon* Weapon::Create(Model* model)
 	return instance;
 }
 
-bool Weapon::Initialize()
-{
-	return Object3Ds::Initialize();
-}
+//bool Weapon::Initialize()
+//{
+//	Object3Ds::Initialize();
+//	return true;
+//}
 
 void Weapon::Update()
 {
@@ -43,7 +44,7 @@ void Weapon::Update()
 	ConstBufferDataB0* constMap = nullptr;
 	auto result = constBuffB0->Map(0, nullptr, (void**)&constMap);
 	if (FAILED(result)) { assert(0); }
-	constMap->world = matWorld * FollowingObjectBoneMatrix;
+	constMap->world = matWorld /** FollowingObjectBoneMatrix*/;
 	constBuffB0->Unmap(0, nullptr);
 }
 

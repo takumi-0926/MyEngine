@@ -157,6 +157,7 @@ void FbxObject3d::LoadAnima()
 {
 	FbxScene* fbxScene;
 	fbxScene = model->GetFbxScene();
+	animas.clear();
 
 	//アニメーションの個数を保存
 	int AnimaStackNum = fbxScene->GetSrcObjectCount<FbxAnimStack>();

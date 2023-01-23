@@ -43,6 +43,9 @@ public:
 	float damegeCount = 0.0f;
 
 	unsigned short myNumber = 0;
+	int registrationNumber = 0;
+
+	float particleOffset = 0.0f;
 	//’n–Ê”»’è—p
 	bool OnGround = true;
 	XMVECTOR fallV;

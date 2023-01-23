@@ -741,7 +741,14 @@ void ParticleManager::Draw()
 	cmdList->DrawInstanced((UINT)std::distance(particles.begin(), particles.end()), 1, 0, 0);
 }
 
-void ParticleManager::CreateParticle(XMFLOAT3 emitter, int num,XMFLOAT4 color)
+void ParticleManager::CreateParticle(
+	int life,
+	XMFLOAT3 emitter, 
+	float velocity,
+	float accel,
+	int num,
+	float scale,
+	XMFLOAT4 color)
 {
 	for (int i = 0; i < num; i++)
 	{
@@ -750,19 +757,19 @@ void ParticleManager::CreateParticle(XMFLOAT3 emitter, int num,XMFLOAT4 color)
 		pos.x = (float)rand() / RAND_MAX * md_pos.x - md_pos.x / 2.0f;
 		pos.y = (float)rand() / RAND_MAX * md_pos.y - md_pos.y / 2.0f;
 		pos.z = (float)rand() / RAND_MAX * md_pos.z - md_pos.z / 2.0f;
-		const float md_vel = 0.01f;
+		const float md_vel = velocity;
 		XMFLOAT3 vel{};
 		vel.x = (float)rand() / RAND_MAX * md_vel - md_vel / 2.0f;
 		vel.y = (float)rand() / RAND_MAX * md_vel - md_vel / 2.0f;
 		vel.z = (float)rand() / RAND_MAX * md_vel - md_vel / 2.0f;
 
 		XMFLOAT3 acc{};
-		const float md_acc = 0.005f;
+		const float md_acc = accel;
 		acc.y = float(sin(rand() % 360) * md_acc);
 		acc.x = float(cos(rand() % 360) * md_acc);
 		acc.z = float(sin(rand() % 360) * md_acc);
 
-		Add(30, emitter, vel, acc, 5.0f, 1.0f, color, { 0,0,0,0 });
+		Add(30, emitter, vel, acc, scale, 1.0f, color, { 1,0,0,0.2f });
 	}
 }
 

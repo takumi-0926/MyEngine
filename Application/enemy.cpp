@@ -130,6 +130,8 @@ void Enemy::Update() {
 
 	particle->Update();
 
+	weapon->Update();
+
 	//—Ž‰ºˆ—
 	if (!OnGround) {
 		const float fallAcc = -0.01f;
@@ -245,23 +247,23 @@ void Enemy::Draw(ID3D12GraphicsCommandList* cmdList)
 {
 	if (!alive) { return; }
 	SetAlpha();
+
+	weapon->Draw();
+
 	FbxObject3d::Draw(cmdList);
 }
 
 void Enemy::OnCollision(const CollisionInfo& info)
 {
 	damage = true;
-	ParticleManager::GetInstance()->CreateParticle(
-		position, 10, { 1,0,0,1 });
 }
 
 void Enemy::CreateWeapon(Model* model)
 {
 	Weapon* _weapon = new Weapon();
 	_weapon = Weapon::Create(model);
-	_weapon->SetFollowingObjectBoneMatrix(this->model->GetBones()[0].invInitialPose);
+	//_weapon->SetFollowingObjectBoneMatrix(this->model->GetBones()[0].invInitialPose);
 	weapon = _weapon;
-	delete(_weapon);
 }
 
 void Enemy::Particle()
@@ -281,27 +283,34 @@ void Enemy::Appearance()
 	if (r % 2 == 1) {
 		mode = Activity::wolf;
 		SetModel(modelType[Activity::wolf]);
+		weapon->SetFollowingObjectBoneMatrix(model->GetBones()[0].invInitialPose);
 		status.HP = 2;
 		status.speed = 0.6f;
 		position.y = 0;
 		scale = { 0.2f,0.2f,0.2f };
 		shadowOffset = 0.5f;
+		particleOffset = 10.0f;
 	}
 	else if (r % 2 != 1) {
 		mode = Activity::golem;
 		SetModel(modelType[Activity::golem]);
+		weapon->SetFollowingObjectBoneMatrix(model->GetBones()[0].invInitialPose);
 		status.HP = 4;
 		status.speed = 0.4f;
 		position = { 0,0,-150 };
 		scale = { 0.1f,0.1f,0.1f };
 		shadowOffset = 1.5f;
+		particleOffset = 40.0f;
 	}
 
 	alive = true;
 
-	defalt_ambient.push_back(model->ambient);
+	alpha = 1.0f;
 
-	LoadAnima();
+	actionPattern = 0;
+
+	defalt_ambient.clear();
+	defalt_ambient.push_back(model->ambient);
 
 	//popTime = 0;
 	PlayAnimation(MotionType::WalkMotion);
@@ -522,7 +531,9 @@ void Enemy::Retreat()
 
 	alpha -= 0.01f;
 
-	if (alpha <= 0.0f) { alive = false; }
+	if (alpha <= 0.0f) { 
+		alive = false; 
+	}
 }
 
 void Enemy::Damage()
@@ -539,7 +550,9 @@ void Enemy::Damage()
 		count = 0.0f;
 	}
 
-	particle->CreateParticle(position, 10, { 1,0,0,1 });
+	particle->CreateParticle(
+		60,XMFLOAT3(position.x,position.y + particleOffset,position.z), 
+		0.0001f,0.05f,5, 8.0f,{1,0,0,1});
 
 	if (status.HP <= 0) { actionPattern = MoveMode::retreat; }
 }

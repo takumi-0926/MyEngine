@@ -59,21 +59,25 @@ public:
 	//行列の更新
 	void UpdateWorldMatrix();
 
-	void SetModel(FbxModel* model) { this->model = model; }
+	void SetModel(FbxModel* model) {
+		this->model = model;
+		LoadAnima();
+	}
 
 	void PlayAnimation(int playNum);
 	void LoadAnima();
 
 public:
 	static void SetDevice(ID3D12Device* device) { FbxObject3d::device = device; }
-	static void SetCamera(Camera* camera) { 
-		FbxObject3d::camera = camera; }
+	static void SetCamera(Camera* camera) {
+		FbxObject3d::camera = camera;
+	}
 	void SetPosition(XMFLOAT3 pos) { this->position = pos; }
 	void SetScale(XMFLOAT3 scale) { this->scale = scale; }
 	static void CreateGraphicsPipeline();
 
 	void SetCollider(BaseCollider* collider);
-	virtual void OnCollision(const CollisionInfo& info){}
+	virtual void OnCollision(const CollisionInfo& info) {}
 
 	/// <summary>
 	/// ワールド行列取得

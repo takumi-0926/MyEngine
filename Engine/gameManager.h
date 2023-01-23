@@ -92,7 +92,7 @@ private://メンバ変数(初期化)
 	FbxModel* golem[3] = {};//ゴーレムモデル（FBX）
 	FbxModel* wolf[3] = {};//ウルフモデル（FBX）
 	HitBox* HitBox = {};//ヒットボックス（プレイヤー用）
-	int enemyNum = 0;//エネミー識別用変数
+	int useModel = 0;//エネミー識別用変数
 	float enemyPopTime = 0.0f;
 
 	//ステージ
