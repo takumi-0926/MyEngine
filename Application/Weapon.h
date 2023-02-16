@@ -1,5 +1,6 @@
 #pragma once
 #include "object/object3D.h"
+#include "FBX/FbxLoader.h"
 
 //手持ち武器クラス
 class Weapon : public Object3Ds {
@@ -10,6 +11,7 @@ class Weapon : public Object3Ds {
 	//追従状態有効フラグ
 	bool FollowFlag = false;
 
+	XMMATRIX FbxWorld;
 public:
 	Weapon(); //コンストラクタ
 	~Weapon();//デストラクタ
@@ -25,8 +27,10 @@ public:
 
 public:
 	//セッター
-	inline void SetFollowingObjectBoneMatrix(XMMATRIX matrix) { 
-		this->FollowingObjectBoneMatrix = matrix; 
+	inline void SetFollowingObjectBoneMatrix(const FbxAMatrix& matrix) {
+		FollowingObjectBoneMatrix = XMMatrixIdentity();
+		FbxLoader::ConvertMatrixFormFbx(&FollowingObjectBoneMatrix, matrix);
+		useWorldMat = true;
 		FollowFlag = true;
 	}
 };

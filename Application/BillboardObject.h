@@ -46,14 +46,14 @@ public:
 	/// 静的初期化
 	/// <param name="device">デバイス</param>
 	/// <returns>成否</returns>
-	static bool StaticInitialize(ID3D12Device * _device);
+	static bool StaticInitialize(ID3D12Device* _device);
 
 	static bool InitializeGraphicsPipeline();
 
 	// 3Dオブジェクト生成
 	static BillboardObject* Create(UINT _texNumber);
 
-	static bool LoadTexture(UINT texNumber,const wchar_t* FlieName);
+	static bool LoadTexture(UINT texNumber, const wchar_t* FlieName);
 
 	// 毎フレーム処理
 	virtual bool Initialize();
@@ -116,10 +116,10 @@ private:
 	static unsigned short indices[indexCount];
 
 	// ローカルワールド変換行列
-	XMMATRIX matScale = {};
-	XMMATRIX matRot = {};
-	XMMATRIX matTrans = {};
-	XMMATRIX matWorld = {};
+	//XMMATRIX matScale = {};
+	//XMMATRIX matRot = {};
+	//XMMATRIX matTrans = {};
+	//XMMATRIX matWorld = {};
 
 	// 視点座標
 	static XMFLOAT3 eye;
@@ -162,4 +162,6 @@ public:
 public:
 	void SetEye(XMFLOAT3 eye);
 	void SetTarget(XMFLOAT3 target);
+
+	inline void SetPosition(XMFLOAT3 pos) { this->position = pos; }
 };

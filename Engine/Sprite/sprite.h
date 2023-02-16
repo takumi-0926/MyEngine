@@ -31,7 +31,7 @@ public://静的メンバ関数
 	//パイプライン生成
 	static bool Createpipeline(ID3D12Device* _dev, SIZE ret);
 	//テクスチャ読み込み
-	static bool loadTexture(UINT texNumber, const wchar_t* fileName);
+	static bool loadTexture(UINT texNumber, std::wstring filepath);
 
 	static void PreDraw(ID3D12GraphicsCommandList* _cmdList);
 
@@ -58,6 +58,12 @@ private://メンバ関数
 	/// </summary>
 	void TransVertex();
 
+	/// <summary>
+	/// フォルダパスとファイルパスを分離
+	/// </summary>
+	/// <param name="filepath"></param>
+	static void SeparateFilePath(const std::wstring& filepath);
+
 protected:
 	//デバイス
 	static ID3D12Device* device;
@@ -69,6 +75,10 @@ protected:
 	static SpriteCommon spritecommon;
 
 	static PipelineSet pipelineset;
+
+	static std::wstring directorypath;
+	static std::wstring fileName;
+	static std::wstring fileExt;;
 
 protected:
 	//頂点ばっふぁ、定数ばっふぁ

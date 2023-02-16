@@ -39,7 +39,7 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	debugText.Initialize(debugTextTexNumber);
 
 	//画像リソース
-	if (!Sprite::loadTexture(0, L"Resources/Title.png")) {
+	if (!Sprite::loadTexture(0, L"Resources/Title.dds")) {
 		assert(0);
 		return false;
 	}
@@ -87,15 +87,15 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 		assert(0);
 		return false;
 	}
-	if (!Sprite::loadTexture(12, L"Resources/GateUI_red.png")) {
+	if (!Sprite::loadTexture(12, L"Resources/GateUI_red.dds")) {
 		assert(0);
 		return false;
 	}
-	if (!Sprite::loadTexture(13, L"Resources/GateUI_yellow.png")) {
+	if (!Sprite::loadTexture(13, L"Resources/GateUI_yellow.dds")) {
 		assert(0);
 		return false;
 	}
-	if (!Sprite::loadTexture(14, L"Resources/GateUI.png")) {
+	if (!Sprite::loadTexture(14, L"Resources/GateUI.dds")) {
 		assert(0);
 		return false;
 	}
@@ -151,6 +151,8 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	FbxObject3d::SetCamera(dx12->Camera());
 	FbxObject3d::CreateGraphicsPipeline();
 
+	Object3Ds::SetCamera(dx12->Camera());
+
 	//基本オブジェクト--------------
 	defenceModel = Model::CreateFromOBJ("KSR-29");
 	skyDomeModel = Model::CreateFromOBJ("skydome");
@@ -170,6 +172,7 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	stageModels.insert(std::make_pair("Tree", Model::CreateFromOBJ("Tree")));
 	stageModels.insert(std::make_pair("Cliff", Model::CreateFromOBJ("Cliff")));
 	stageModels.insert(std::make_pair("Foundation", Model::CreateFromOBJ("Foundation")));
+	stageModels.insert(std::make_pair("Spike", Model::CreateFromOBJ("spike")));
 	for (auto& objectData : stageData->objects) {
 		Model* model = nullptr;
 		decltype(stageModels)::iterator it = stageModels.find(objectData.name);
@@ -233,7 +236,7 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 
 	//スカイドーム-------------------
 	skyDome = Object3Ds::Create(skyDomeModel);
-	skyDome->scale = { 7,7,7 };
+	skyDome->scale = { 10,10,10 };
 	skyDome->position = { 0,350,0 };
 
 	//MMDオブジェクト----------------
@@ -260,7 +263,6 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 		protEnemy[i]->CreateWeapon(Model::CreateFromOBJ("weapon"));
 		//パーティクル生成
 		protEnemy[i]->Particle();
-
 	}
 
 	//スプライト---------------------
@@ -321,6 +323,12 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	gateBreak_green->SetSize({ 80,80 });
 	gateBreak_green->Update();
 
+	//ゲーム内ガイド
+	guideModels[0] = Model::CreateFromOBJ("guide");
+	moveGuide = Object3Ds::Create(guideModels[0]);
+	moveGuide->SetPosition(XMFLOAT3(555.0f, 3.0f, 10.0f));
+	moveGuide->scale = XMFLOAT3(5, 5, 5);
+	
 	//ヒットボックス-----------------
 	HitBox::CreatePipeline(dx12);
 	HitBox::CreateTransform();
@@ -370,6 +378,8 @@ void GameManager::Update()
 		//imguiのUIコントロール
 		ImGui::Text("PlayerPosition : %.2f %.2f", _player->model->position.x, _player->model->position.z);
 		ImGui::Text("ClearResultPos : %.2f %.2f", clear->Pos().x, clear->Pos().y);
+		ImGui::Text("ClearResultPos : %.2f %.2f", protEnemy[0]->weapon->position.x, protEnemy[0]->weapon->position.z);
+		ImGui::Text("ClearResultPos : %.2f %.2f", protEnemy[0]->GetPosition().x, protEnemy[0]->GetPosition().z);
 		ImGui::Checkbox("EnemyPop", &blnChk);
 		ImGui::Checkbox("test", &_player->model->a);
 		ImGui::RadioButton("Game Camera", &radio, 0);
@@ -388,6 +398,8 @@ void GameManager::Update()
 		ImGui::InputFloat3("circleShadowAtten", circleShadowAtten);
 		ImGui::InputFloat2("circleShadowFactorAngle", circleShadowFacterAnlge);
 		ImGui::InputFloat3("DebugCameraEye", debugCameraPos);
+		ImGui::InputFloat3("DebugWeaponPos", testPos);
+		ImGui::InputInt3("DebugBoneNum", testNum);
 
 		ImGui::End();
 
@@ -1006,6 +1018,7 @@ void GameManager::GameUpdate() {
 		//更新処理(固有)
 		{
 			if (GameModeNum != GameMode::POSE) {
+				Object3Ds::SetCamera(dx12->Camera());
 
 				dx12->SceneUpdate();
 				camera->Update();
@@ -1014,7 +1027,9 @@ void GameManager::GameUpdate() {
 				_player->Update();
 				_player->SetInput(*input);
 				for (int i = 0; i < _enemy.size(); i++) {
+					_enemy[i]->SetFollowBoneNum(testNum[i]);
 					_enemy[i]->Update();
+					//_enemy[i]->weapon->SetPosition(XMFLOAT3(testPos[0], testPos[1], testPos[2]));
 				}
 				for (int i = 0; i < 6; i++) {
 					defense_facilities[i]->Update();
@@ -1029,6 +1044,7 @@ void GameManager::GameUpdate() {
 				skyDome->Update();
 
 				particlemanager->Update();
+				Bottom->SetPosition(_player->model->position);
 				Bottom->Update();
 				for (int i = 0; i < _enemy.size(); i++) {
 					light->SetCircleShadowCasterPos(i, XMFLOAT3({ _enemy[i]->GetPosition().x, _enemy[i]->GetPosition().y, _enemy[i]->GetPosition().z }));
@@ -1037,6 +1053,8 @@ void GameManager::GameUpdate() {
 					light->SetCircleShadowFacterAngle(i, XMFLOAT2(circleShadowFacterAnlge[1], circleShadowFacterAnlge[2] * _enemy[i]->shadowOffset));
 				}
 				light->Update();
+
+				moveGuide->Update();
 
 				gateBreak_red->Update();
 				gateBreak_yellow->Update();
@@ -1101,6 +1119,8 @@ void GameManager::Draw()
 			for (auto& object : baseCamp) {
 				object->Draw();
 			}
+
+			moveGuide->Draw();
 		}
 		//ステージ描画
 		else if (UseStage == GameLocation::BaseStage) {

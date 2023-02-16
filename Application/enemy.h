@@ -52,6 +52,8 @@ public:
 
 	float shadowOffset = 0.0f;
 
+	int followBoneNum = 0;
+
 	float alpha = 1.0f;
 	vector<XMFLOAT3> defalt_ambient;
 	XMVECTOR vectol;
@@ -134,6 +136,7 @@ public:
 		model->alpha = this->alpha;
 		model->Update();
 	}
+	inline void SetFollowBoneNum(int num) { this->followBoneNum = num; }
 
 	void CreateWeapon(Model* model);
 	void Particle();

@@ -6048,6 +6048,138 @@
                 ]
             },
             "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "Plane.006",
+            "transform": {
+                "translation": [
+                    66.0,
+                    25.0,
+                    15.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    2.0,
+                    2.0,
+                    2.0
+                ]
+            },
+            "file_name": "Spike"
+        },
+        {
+            "type": "MESH",
+            "name": "Plane.001",
+            "transform": {
+                "translation": [
+                    66.0,
+                    -73.0,
+                    15.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    2.0,
+                    2.0,
+                    2.0
+                ]
+            },
+            "file_name": "Spike"
+        },
+        {
+            "type": "MESH",
+            "name": "Plane.002",
+            "transform": {
+                "translation": [
+                    66.0,
+                    -24.0,
+                    15.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    2.0,
+                    2.0,
+                    2.0
+                ]
+            },
+            "file_name": "Spike"
+        },
+        {
+            "type": "MESH",
+            "name": "Plane.003",
+            "transform": {
+                "translation": [
+                    66.0,
+                    -122.0,
+                    15.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    2.0,
+                    2.0,
+                    2.0
+                ]
+            },
+            "file_name": "Spike"
+        },
+        {
+            "type": "MESH",
+            "name": "Plane.004",
+            "transform": {
+                "translation": [
+                    66.0,
+                    74.0,
+                    15.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    2.0,
+                    2.0,
+                    2.0
+                ]
+            },
+            "file_name": "Spike"
+        },
+        {
+            "type": "MESH",
+            "name": "Plane.005",
+            "transform": {
+                "translation": [
+                    66.0,
+                    123.0,
+                    15.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    2.0,
+                    2.0,
+                    2.0
+                ]
+            },
+            "file_name": "Spike"
         }
     ]
 }

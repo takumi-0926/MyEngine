@@ -34,7 +34,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Wrapper *dx12 = nullptr;
 	Audio audio;
 	Input input;
-	//PostEffect *postEffect = nullptr;
+	PostEffect *postEffect = nullptr;
 
 	//Šî–{‰Šú‰»
 	{
@@ -136,14 +136,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		gameScene.Update();
 
-		//postEffect->PreDrawScene(dx12.CommandList().Get());
-		//postEffect->PostDrawScene(dx12.CommandList().Get());
+		//postEffect->PreDrawScene(dx12->CommandList().Get());
+		//postEffect->PostDrawScene(dx12->CommandList().Get());
 
 		dx12->PreRun();
 
 		gameScene.Draw();
 
-		//postEffect->Draw(dx12.CommandList().Get());
+		//postEffect->Draw(dx12->CommandList().Get());
 
 		ImGui::Render();
 		dx12->CommandList()->SetDescriptorHeaps(
@@ -164,7 +164,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	FbxLoader::GetInstance()->Finalize();
 
-	//delete postEffect;
+	delete postEffect;
 
 #pragma endregion
 

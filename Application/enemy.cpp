@@ -82,7 +82,7 @@ Enemy* Enemy::Create(FbxModel* model1, FbxModel* model2)
 	}
 
 	instance->position.y = 20;
-	instance->position.z = -150;
+	instance->position.z = -70;
 
 	//Žg—pƒ‚ƒfƒ‹“o˜^
 	instance->modelType[0] = model1;
@@ -130,8 +130,11 @@ void Enemy::Update() {
 
 	particle->Update();
 
-	weapon->Update();
 
+	weapon->SetFollowingObjectBoneMatrix(model->GetBones()[followBoneNum].fbxCluster->GetLink()->EvaluateGlobalTransform(currentTime));
+	//weapon->SetPosition(position);
+	weapon->Update();
+	
 	//—Ž‰ºˆ—
 	if (!OnGround) {
 		const float fallAcc = -0.01f;
@@ -239,7 +242,11 @@ void Enemy::Update() {
 	//	position.z = 342.0f;
 	//}
 
-	//particle->CreateParticle(position, 1, { 1,1,1,1 });
+	//static bool flag = false;
+	//if (position.z >= -100.0f && !flag) {
+	//	position.z = -60.0f;
+	//	flag = true;
+	//}
 
 	FbxObject3d::Update();
 }
@@ -248,9 +255,9 @@ void Enemy::Draw(ID3D12GraphicsCommandList* cmdList)
 	if (!alive) { return; }
 	SetAlpha();
 
-	weapon->Draw();
-
 	FbxObject3d::Draw(cmdList);
+
+	weapon->Draw();
 }
 
 void Enemy::OnCollision(const CollisionInfo& info)
@@ -260,10 +267,7 @@ void Enemy::OnCollision(const CollisionInfo& info)
 
 void Enemy::CreateWeapon(Model* model)
 {
-	Weapon* _weapon = new Weapon();
-	_weapon = Weapon::Create(model);
-	//_weapon->SetFollowingObjectBoneMatrix(this->model->GetBones()[0].invInitialPose);
-	weapon = _weapon;
+	weapon = Weapon::Create(model);
 }
 
 void Enemy::Particle()
@@ -283,7 +287,7 @@ void Enemy::Appearance()
 	if (r % 2 == 1) {
 		mode = Activity::wolf;
 		SetModel(modelType[Activity::wolf]);
-		weapon->SetFollowingObjectBoneMatrix(model->GetBones()[0].invInitialPose);
+		//weapon->SetFollowingObjectBoneMatrix(model->GetBones()[23].fbxCluster->GetLink()->EvaluateGlobalTransform());
 		status.HP = 2;
 		status.speed = 0.6f;
 		position.y = 0;
@@ -294,10 +298,9 @@ void Enemy::Appearance()
 	else if (r % 2 != 1) {
 		mode = Activity::golem;
 		SetModel(modelType[Activity::golem]);
-		weapon->SetFollowingObjectBoneMatrix(model->GetBones()[0].invInitialPose);
 		status.HP = 4;
 		status.speed = 0.4f;
-		position = { 0,0,-150 };
+		//position = { 0,0,-150 };
 		scale = { 0.1f,0.1f,0.1f };
 		shadowOffset = 1.5f;
 		particleOffset = 40.0f;
@@ -312,12 +315,7 @@ void Enemy::Appearance()
 	defalt_ambient.clear();
 	defalt_ambient.push_back(model->ambient);
 
-	//popTime = 0;
 	PlayAnimation(MotionType::WalkMotion);
-	//}
-	//else {
-	//	popTime += 1.0f / 60.0f;
-	//}
 }
 
 void Enemy::Move(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)

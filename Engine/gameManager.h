@@ -44,6 +44,9 @@ using namespace Microsoft::WRL;
 #define	ENEM_NUM	1000
 #define P_HP		 100
 #define GATE_MAX      10
+
+#define GUIDE_MODEL_NUM 1
+
 enum Scene {
 	TITLE,
 	GAME,
@@ -138,12 +141,16 @@ private://メンバ変数(初期化)
 	bool WeaponSelectDo = false;
 	bool result = false;
 
+	//ゲーム内ガイドオブジェクト
+	Object3Ds* moveGuide = nullptr;
+	Model* guideModels[GUIDE_MODEL_NUM] = {};
+
 	//デバック確認用変数
 	float circleShadowDir[3] = { 0,-1,0 };
 	float circleShadowAtten[3] = { 0.5f,0.8f,0.0f };
 	float circleShadowFacterAnlge[2] = { 0.1f,0.5f };
 	float testPos[3] = { 1,0.0f,0 };
-
+	int testNum[3] = { 0,0,0 };
 	float debugCameraPos[3] = { 0,0,0 };
 
 	DebugText* text = nullptr;

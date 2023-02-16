@@ -376,7 +376,7 @@ bool BillboardObject::Initialize()
 	//};
 	//std::copy(std::begin(vertices), std::end(vertices), verticesSphere);
 	vertices->pos = { 0.0f,0.0f,0.0f };
-	vertices->scale = 1.0f;
+	vertices->scale = 100.0f;
 	//unsigned short indicesSphere[] = {
 	//	0,1,2,
 	//	2,1,3,

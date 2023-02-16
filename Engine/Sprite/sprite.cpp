@@ -21,6 +21,10 @@ XMMATRIX SpriteCommon::matProjection;
 SpriteCommon Sprite::spritecommon;
 PipelineSet Sprite::pipelineset;
 
+wstring Sprite::fileExt;
+wstring Sprite::directorypath;
+wstring Sprite::fileName;
+
 Sprite::Sprite(UINT texNumber, XMFLOAT2 position, XMFLOAT2 size, XMFLOAT4 color, XMFLOAT2 anchorpoint, bool isFlipX, bool isFlipY)
 {
 	this->position = position;
@@ -236,7 +240,7 @@ bool Sprite::staticInitalize(ID3D12Device* _dev, SIZE ret)
 	return true;
 }
 
-bool Sprite::loadTexture(UINT texNumber, const wchar_t* fileName)
+bool Sprite::loadTexture(UINT texNumber, std::wstring filepath)
 {
 	// nullptrチェック
 	assert(device);
@@ -246,13 +250,37 @@ bool Sprite::loadTexture(UINT texNumber, const wchar_t* fileName)
 	TexMetadata metadata{};
 	ScratchImage scratchImg{};
 
-	result = LoadFromWICFile(
-		fileName, WIC_FLAGS_NONE,
-		&metadata, scratchImg);
-	if (FAILED(result)) {
-		assert(0);
-		return false;
+	SeparateFilePath(filepath);
+
+	if (fileExt == L"dds") {
+		result = LoadFromDDSFile(
+			filepath.c_str(), DDS_FLAGS_NONE,
+			&metadata, scratchImg);
+		if (FAILED(result)) {
+			assert(0);
+			return false;
+		}
 	}
+	else {
+		result = LoadFromWICFile(
+			filepath.c_str(), WIC_FLAGS_NONE,
+			&metadata, scratchImg);
+		if (FAILED(result)) {
+			assert(0);
+			return false;
+		}
+	}
+
+	//ScratchImage mipChain{};
+	//result = GenerateMipMaps(
+	//	scratchImg.GetImages(),
+	//	scratchImg.GetImageCount(),
+	//	scratchImg.GetMetadata(),
+	//	TEX_FILTER_DEFAULT, 0, mipChain);
+	//if (SUCCEEDED(result)) {
+	//	scratchImg = std::move(mipChain);
+	//	metadata = scratchImg.GetMetadata();
+	//}
 
 	const Image* img = scratchImg.GetImage(0, 0, 0); // 生データ抽出
 
@@ -516,4 +544,44 @@ void Sprite::SetTextureRect(XMFLOAT2 texBase, XMFLOAT2 texSize)
 
 	// 頂点バッファへのデータ転送
 	TransVertex();
+}
+
+void Sprite::SeparateFilePath(const std::wstring& filepath) {
+
+	size_t pos1;
+	std::wstring exceptExt;
+
+	pos1 = filepath.rfind('.');
+	if (pos1 != std::wstring::npos) {
+
+		fileExt = filepath.substr(pos1 + 1, filepath.size() - pos1 - 1);
+
+		exceptExt = filepath.substr(0, pos1);
+	}
+	else {
+		fileExt = L"";
+		exceptExt = filepath;
+	}
+
+	pos1 = exceptExt.rfind('\\');
+	if (pos1 != std::wstring::npos) {
+		directorypath = exceptExt.substr(0, pos1 - 1);
+
+		fileName = exceptExt.substr(pos1 + 1, exceptExt.size() - pos1 - 1);
+
+		//return 0;
+	}
+
+	pos1 = exceptExt.rfind('/');
+	if (pos1 != std::wstring::npos) {
+		directorypath = exceptExt.substr(0, pos1 - 1);
+
+		fileName = exceptExt.substr(pos1 + 1, exceptExt.size() - pos1 - 1);
+
+		//return 0;
+	}
+
+	directorypath = L"";
+	fileName = exceptExt;
+
 }

@@ -133,4 +133,6 @@ protected:
 
 public:
 	XMFLOAT3 GetPosition() { return position; }
+	//FbxTime GetCurrentTime() { return currentTime; }
+
 };
