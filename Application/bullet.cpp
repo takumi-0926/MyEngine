@@ -62,7 +62,6 @@ void Bullet::Update()
 		CollisionManager::GetInstance()->RemoveCollider(collider);
 		count = 0;
 	}
-
 }
 void Bullet::Draw()
 {
@@ -116,13 +115,11 @@ XMMATRIX Bullet::LookAtRotation(XMVECTOR forward, XMFLOAT3 upward)
 	return rot;
 }
 
-void Bullet::SetAlive(bool flag)
-{
+void Bullet::SetAlive(bool flag){
 	if (flag == true) {
 		float radius = 2.0f;
-
 		SetCollider(new SphereCollider(XMVECTOR({ 0,radius,0,0 }), radius));
+		collider->SetAttribute(COLLISION_ATTR_BULLET);
 	}
-
 	this->status.isAlive = flag;
 }

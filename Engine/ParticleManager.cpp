@@ -163,6 +163,12 @@ void ParticleManager::CameraMoveEyeVector(XMFLOAT3 move)
 	SetEye(eye_moved);
 }
 
+ParticleManager* ParticleManager::GetInstance()
+{
+	ParticleManager* instance = new ParticleManager();
+	return instance;
+}
+
 ParticleManager::ParticleManager()
 {
 }
@@ -301,11 +307,6 @@ bool ParticleManager::InitializeGraphicsPipeline()
 			D3D12_APPEND_ALIGNED_ELEMENT,
 			D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0
 		},
-		//{ // 法線ベクトル(1行で書いたほうが見やすい)
-		//	"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
-		//	D3D12_APPEND_ALIGNED_ELEMENT,
-		//	D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0
-		//},
 		{ // uv座標(1行で書いたほうが見やすい)
 			"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0,
 			D3D12_APPEND_ALIGNED_ELEMENT,
@@ -487,10 +488,12 @@ void ParticleManager::CreateModel()
 	//}
 
 	// 頂点バッファ生成
+	CD3DX12_HEAP_PROPERTIES properties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+	CD3DX12_RESOURCE_DESC desc = CD3DX12_RESOURCE_DESC::Buffer(sizeof(vertices));
 	result = device->CreateCommittedResource(
-		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+		&properties,
 		D3D12_HEAP_FLAG_NONE,
-		&CD3DX12_RESOURCE_DESC::Buffer(sizeof(vertices)),
+		&desc,
 		D3D12_RESOURCE_STATE_GENERIC_READ,
 		nullptr,
 		IID_PPV_ARGS(&vertBuff));

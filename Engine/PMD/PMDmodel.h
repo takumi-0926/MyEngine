@@ -252,6 +252,7 @@ public:
 	bool Initialize(const char* filepath);
 
 	void Update();
+	void UpdateWorldMatrix();
 
 	void Draw(ID3D12GraphicsCommandList* cmdList);
 

@@ -58,7 +58,8 @@ public:
 	void QuerySqhere(
 		const Sqhere& sphere,
 		QueryCallBack* callBack,
-		unsigned short attribute = unsigned short(0xffffffff));
+		unsigned short attribute = unsigned short(0xffffffff),
+		unsigned short MyNumber = unsigned short(0xffffffff));
 
 private:
 	CollisionManager() = default;

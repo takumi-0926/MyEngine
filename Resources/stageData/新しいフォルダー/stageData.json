@@ -1,0 +1,1941 @@
+{
+    "name": "scene",
+    "objects": [
+        {
+            "type": "MESH",
+            "name": "Cube.001",
+            "transform": {
+                "translation": [
+                    0.0,
+                    50.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    90.00000762939453
+                ],
+                "scaling": [
+                    10.0,
+                    10.0,
+                    10.0
+                ]
+            },
+            "file_name": "Wall"
+        },
+        {
+            "type": "MESH",
+            "name": "Cube.003",
+            "transform": {
+                "translation": [
+                    0.0,
+                    -50.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    -90.00000762939453
+                ],
+                "scaling": [
+                    10.0,
+                    10.0,
+                    10.0
+                ]
+            },
+            "file_name": "Wall"
+        },
+        {
+            "type": "MESH",
+            "name": "平面",
+            "transform": {
+                "translation": [
+                    25.0,
+                    -25.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.001",
+            "transform": {
+                "translation": [
+                    25.0,
+                    25.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.002",
+            "transform": {
+                "translation": [
+                    -25.0,
+                    -25.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.003",
+            "transform": {
+                "translation": [
+                    -25.0,
+                    25.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.004",
+            "transform": {
+                "translation": [
+                    75.0,
+                    25.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.005",
+            "transform": {
+                "translation": [
+                    75.0,
+                    -25.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.006",
+            "transform": {
+                "translation": [
+                    75.0,
+                    75.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.007",
+            "transform": {
+                "translation": [
+                    75.0,
+                    -75.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.008",
+            "transform": {
+                "translation": [
+                    125.0,
+                    -75.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.009",
+            "transform": {
+                "translation": [
+                    125.0,
+                    75.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.010",
+            "transform": {
+                "translation": [
+                    125.0,
+                    -25.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.011",
+            "transform": {
+                "translation": [
+                    125.0,
+                    25.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.012",
+            "transform": {
+                "translation": [
+                    -75.0,
+                    25.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.013",
+            "transform": {
+                "translation": [
+                    -75.0,
+                    -25.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.014",
+            "transform": {
+                "translation": [
+                    -75.0,
+                    75.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.015",
+            "transform": {
+                "translation": [
+                    -75.0,
+                    -75.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.016",
+            "transform": {
+                "translation": [
+                    -125.0,
+                    -75.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.017",
+            "transform": {
+                "translation": [
+                    -125.0,
+                    75.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.018",
+            "transform": {
+                "translation": [
+                    -125.0,
+                    -25.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.019",
+            "transform": {
+                "translation": [
+                    -125.0,
+                    25.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.020",
+            "transform": {
+                "translation": [
+                    -125.0,
+                    -125.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.021",
+            "transform": {
+                "translation": [
+                    -75.0,
+                    -125.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.022",
+            "transform": {
+                "translation": [
+                    -125.0,
+                    125.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.023",
+            "transform": {
+                "translation": [
+                    -75.0,
+                    125.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "Cube.002",
+            "transform": {
+                "translation": [
+                    -50.0,
+                    100.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    10.0,
+                    10.0,
+                    10.0
+                ]
+            },
+            "file_name": "Wall"
+        },
+        {
+            "type": "MESH",
+            "name": "Cube.004",
+            "transform": {
+                "translation": [
+                    -50.0,
+                    -100.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    10.0,
+                    10.0,
+                    10.0
+                ]
+            },
+            "file_name": "Wall"
+        },
+        {
+            "type": "MESH",
+            "name": "Cube.005",
+            "transform": {
+                "translation": [
+                    -100.0,
+                    150.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    90.00000762939453
+                ],
+                "scaling": [
+                    10.0,
+                    10.0,
+                    10.0
+                ]
+            },
+            "file_name": "Wall"
+        },
+        {
+            "type": "MESH",
+            "name": "Cube.006",
+            "transform": {
+                "translation": [
+                    -100.0,
+                    -150.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    -90.00000762939453
+                ],
+                "scaling": [
+                    10.0,
+                    10.0,
+                    10.0
+                ]
+            },
+            "file_name": "Wall"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.024",
+            "transform": {
+                "translation": [
+                    -175.0,
+                    125.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.025",
+            "transform": {
+                "translation": [
+                    -225.0,
+                    125.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.026",
+            "transform": {
+                "translation": [
+                    -175.0,
+                    -125.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.027",
+            "transform": {
+                "translation": [
+                    -225.0,
+                    -125.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.028",
+            "transform": {
+                "translation": [
+                    -225.0,
+                    25.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.029",
+            "transform": {
+                "translation": [
+                    -225.0,
+                    -25.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.030",
+            "transform": {
+                "translation": [
+                    -225.0,
+                    75.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.031",
+            "transform": {
+                "translation": [
+                    -225.0,
+                    -75.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.032",
+            "transform": {
+                "translation": [
+                    -175.0,
+                    -75.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.033",
+            "transform": {
+                "translation": [
+                    -175.0,
+                    75.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.034",
+            "transform": {
+                "translation": [
+                    -175.0,
+                    -25.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.035",
+            "transform": {
+                "translation": [
+                    -175.0,
+                    25.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "Cube.007",
+            "transform": {
+                "translation": [
+                    -200.0,
+                    150.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    90.00000762939453
+                ],
+                "scaling": [
+                    10.0,
+                    10.0,
+                    10.0
+                ]
+            },
+            "file_name": "Wall"
+        },
+        {
+            "type": "MESH",
+            "name": "Cube.008",
+            "transform": {
+                "translation": [
+                    -200.0,
+                    -150.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    -90.00000762939453
+                ],
+                "scaling": [
+                    10.0,
+                    10.0,
+                    10.0
+                ]
+            },
+            "file_name": "Wall"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.036",
+            "transform": {
+                "translation": [
+                    -275.0,
+                    25.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.037",
+            "transform": {
+                "translation": [
+                    -275.0,
+                    -25.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.038",
+            "transform": {
+                "translation": [
+                    -275.0,
+                    75.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.039",
+            "transform": {
+                "translation": [
+                    -275.0,
+                    -75.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.040",
+            "transform": {
+                "translation": [
+                    -325.0,
+                    -75.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.041",
+            "transform": {
+                "translation": [
+                    -325.0,
+                    75.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.042",
+            "transform": {
+                "translation": [
+                    -325.0,
+                    -25.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.043",
+            "transform": {
+                "translation": [
+                    -325.0,
+                    25.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.044",
+            "transform": {
+                "translation": [
+                    -325.0,
+                    -125.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.045",
+            "transform": {
+                "translation": [
+                    -275.0,
+                    -125.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.046",
+            "transform": {
+                "translation": [
+                    -325.0,
+                    125.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.047",
+            "transform": {
+                "translation": [
+                    -275.0,
+                    125.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "Cube.009",
+            "transform": {
+                "translation": [
+                    -350.0,
+                    150.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    90.00000762939453
+                ],
+                "scaling": [
+                    10.0,
+                    10.0,
+                    10.0
+                ]
+            },
+            "file_name": "Wall"
+        },
+        {
+            "type": "MESH",
+            "name": "Cube.010",
+            "transform": {
+                "translation": [
+                    -300.0,
+                    -150.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    -90.00000762939453
+                ],
+                "scaling": [
+                    10.0,
+                    10.0,
+                    10.0
+                ]
+            },
+            "file_name": "Wall"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.048",
+            "transform": {
+                "translation": [
+                    75.0,
+                    100.0,
+                    25.0
+                ],
+                "rotation": [
+                    90.00000762939453,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.049",
+            "transform": {
+                "translation": [
+                    125.0,
+                    100.0,
+                    25.0
+                ],
+                "rotation": [
+                    90.00000762939453,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.050",
+            "transform": {
+                "translation": [
+                    125.0,
+                    -100.0,
+                    25.0
+                ],
+                "rotation": [
+                    -90.00000762939453,
+                    0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.051",
+            "transform": {
+                "translation": [
+                    75.0,
+                    -100.0,
+                    25.0
+                ],
+                "rotation": [
+                    -90.00000762939453,
+                    0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.052",
+            "transform": {
+                "translation": [
+                    -275.0,
+                    175.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.053",
+            "transform": {
+                "translation": [
+                    -275.0,
+                    225.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "Cube.011",
+            "transform": {
+                "translation": [
+                    -245.0,
+                    200.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    10.0,
+                    10.0,
+                    10.0
+                ]
+            },
+            "file_name": "Wall"
+        },
+        {
+            "type": "MESH",
+            "name": "Cube.012",
+            "transform": {
+                "translation": [
+                    -305.0,
+                    200.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    -179.99998474121094
+                ],
+                "scaling": [
+                    10.0,
+                    10.0,
+                    10.0
+                ]
+            },
+            "file_name": "Wall"
+        },
+        {
+            "type": "MESH",
+            "name": "Cube",
+            "transform": {
+                "translation": [
+                    -403.37603759765625,
+                    0.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    25.0,
+                    25.0,
+                    25.0
+                ]
+            },
+            "file_name": "Gate"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.054",
+            "transform": {
+                "translation": [
+                    -325.0,
+                    125.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.055",
+            "transform": {
+                "translation": [
+                    -325.0,
+                    -125.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.056",
+            "transform": {
+                "translation": [
+                    -325.0,
+                    25.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.057",
+            "transform": {
+                "translation": [
+                    -325.0,
+                    -25.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.058",
+            "transform": {
+                "translation": [
+                    -325.0,
+                    75.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.059",
+            "transform": {
+                "translation": [
+                    -325.0,
+                    -75.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.060",
+            "transform": {
+                "translation": [
+                    -375.0,
+                    -75.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.061",
+            "transform": {
+                "translation": [
+                    -375.0,
+                    75.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.062",
+            "transform": {
+                "translation": [
+                    -375.0,
+                    -25.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.063",
+            "transform": {
+                "translation": [
+                    -375.0,
+                    25.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.064",
+            "transform": {
+                "translation": [
+                    -375.0,
+                    -125.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "平面.065",
+            "transform": {
+                "translation": [
+                    -375.0,
+                    125.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Ground"
+        },
+        {
+            "type": "MESH",
+            "name": "Cube.014",
+            "transform": {
+                "translation": [
+                    -380.0,
+                    -100.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    -150.0
+                ],
+                "scaling": [
+                    10.0,
+                    10.0,
+                    10.0
+                ]
+            },
+            "file_name": "Wall"
+        },
+        {
+            "type": "MESH",
+            "name": "Cube.015",
+            "transform": {
+                "translation": [
+                    -400.0,
+                    100.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    -179.99998474121094
+                ],
+                "scaling": [
+                    10.0,
+                    10.0,
+                    10.0
+                ]
+            },
+            "file_name": "Wall"
+        },
+        {
+            "type": "MESH",
+            "name": "Pine_4m",
+            "transform": {
+                "translation": [
+                    -150.0,
+                    240.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Tree"
+        },
+        {
+            "type": "MESH",
+            "name": "Pine_4m.001",
+            "transform": {
+                "translation": [
+                    -400.0,
+                    240.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Tree"
+        },
+        {
+            "type": "MESH",
+            "name": "Pine_4m.002",
+            "transform": {
+                "translation": [
+                    -150.0,
+                    -250.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Tree"
+        },
+        {
+            "type": "MESH",
+            "name": "Pine_4m.003",
+            "transform": {
+                "translation": [
+                    -325.0,
+                    -250.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Tree"
+        },
+        {
+            "type": "MESH",
+            "name": "Pine_4m.004",
+            "transform": {
+                "translation": [
+                    -465.0,
+                    -150.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "Tree"
+        },
+        {
+            "type": "MESH",
+            "name": "Pine_4m.005",
+            "transform": {
+                "translation": [
+                    0.0,
+                    100.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    0.5,
+                    0.5,
+                    0.5
+                ]
+            },
+            "file_name": "Tree"
+        },
+        {
+            "type": "MESH",
+            "name": "Pine_4m.006",
+            "transform": {
+                "translation": [
+                    0.0,
+                    -100.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    0.5,
+                    0.5,
+                    0.5
+                ]
+            },
+            "file_name": "Tree"
+        }
+    ]
+}

@@ -5,17 +5,23 @@ SamplerState smp : register(s0);      // 0番スロットに設定されたサ�
 
 float4 main(VSOutput input) : SV_TARGET
 {
+	float offset = 1.0f;
+	float3 light = normalize(float3(1, -1, 1));
+	float3 brightness = dot(-light, normalize(input.normal.xyz));
+	//テクスチャマッピング
+	float4 texcolor = tex.Sample(smp, input.uv);
+
+	return float4(brightness.x + offset, brightness.y + offset, brightness.z + offset, 1) * texcolor;
+
 	//float3 light = normalize(float3(1,-1,1)); // 右下奥　向きのライト
 	//float light_diffuse = saturate(dot(-light, input.normal));
 	//float3 shade_color;
 	//shade_color = m_ambient;
 	//shade_color += m_diffuse * light_diffuse;
 	//float4 texcolor = tex.Sample(smp, input.uv);
-	//return float4(texcolor.rgb * shade_color, texcolor.a * m_alpha);
+	//return float4(texcolor.rgb, texcolor.a * m_alpha);
 	//return float4(1, 1, 1, 1);
 
-			//テクスチャマッピング
-	float4 texcolor = tex.Sample(smp, input.uv);
 
 	//光沢度
 	const float shininess = 4.0f;
@@ -42,7 +48,7 @@ float4 main(VSOutput input) : SV_TARGET
 
 			// 全て加算する
 			shadecolor.rgb += (diffuse + specular) * dirLights[i].lightcolor;
-			//shadecolor.a = m_alpha;
+			shadecolor.a = m_alpha;
 		}
 	}
 
@@ -71,6 +77,7 @@ float4 main(VSOutput input) : SV_TARGET
 		}
 	}
 
+	//丸影
 	for (i = 0; i < CIRCLESHADOW_NUM; i++)
 	{
 		if (circleShadows[i].active) {

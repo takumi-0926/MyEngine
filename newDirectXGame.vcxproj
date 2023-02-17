@@ -126,6 +126,24 @@
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">BasicVS</EntryPointName>
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">BasicVS</EntryPointName>
     </FxCompile>
+    <FxCompile Include="Resources\shaders\BillboradGeometryShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Geometry</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Geometry</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Resources\shaders\BillboradPixelShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Resources\shaders\BillboradVertexShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+    </FxCompile>
     <FxCompile Include="Resources\shaders\FBXPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
@@ -211,6 +229,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\shaders\BasicShaderHeader.hlsli" />
+    <None Include="Resources\shaders\BillboradShaderHeader.hlsli" />
     <None Include="Resources\shaders\FBX.hlsli" />
     <None Include="Resources\shaders\hitBoxHeader.hlsli" />
     <None Include="Resources\shaders\OBJShaderHeader.hlsli" />
@@ -220,6 +239,7 @@
     <None Include="Resources\shaders\Sprite.hlsli" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Application\BillboardObject.h" />
     <ClInclude Include="Engine\2d\PostEffect.h" />
     <ClInclude Include="Engine\application.h" />
     <ClInclude Include="Engine\dx12Wrapper.h" />
@@ -256,14 +276,6 @@
     <ClInclude Include="Application\hitBox.h" />
     <ClInclude Include="Engine\shadow\circleShadow.h" />
     <ClInclude Include="Engine\Sprite\DebugText.h" />
-    <ClInclude Include="External\imgui\imconfig.h" />
-    <ClInclude Include="External\imgui\imgui.h" />
-    <ClInclude Include="External\imgui\imgui_impl_dx12.h" />
-    <ClInclude Include="External\imgui\imgui_impl_win32.h" />
-    <ClInclude Include="External\imgui\imgui_internal.h" />
-    <ClInclude Include="External\imgui\imstb_rectpack.h" />
-    <ClInclude Include="External\imgui\imstb_textedit.h" />
-    <ClInclude Include="External\imgui\imstb_truetype.h" />
     <ClInclude Include="Engine\includes.h" />
     <ClInclude Include="Engine\Input\dx12input.h" />
     <ClInclude Include="Engine\Input\input.h" />
@@ -293,6 +305,7 @@
     <ClInclude Include="Engine\JsonLoader.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Application\BillboardObject.cpp" />
     <ClCompile Include="Engine\2d\PostEffect.cpp" />
     <ClCompile Include="Engine\application.cpp" />
     <ClCompile Include="Engine\dx12Wrapper.cpp" />
@@ -319,13 +332,6 @@
     <ClCompile Include="Application\hitBox.cpp" />
     <ClCompile Include="Engine\SceneEffect\SceneEffect.cpp" />
     <ClCompile Include="Engine\Sprite\DebugText.cpp" />
-    <ClCompile Include="External\imgui\imgui.cpp" />
-    <ClCompile Include="External\imgui\imgui_demo.cpp" />
-    <ClCompile Include="External\imgui\imgui_draw.cpp" />
-    <ClCompile Include="External\imgui\imgui_impl_dx12.cpp" />
-    <ClCompile Include="External\imgui\imgui_impl_win32.cpp" />
-    <ClCompile Include="External\imgui\imgui_tables.cpp" />
-    <ClCompile Include="External\imgui\imgui_widgets.cpp" />
     <ClCompile Include="Engine\Input\input.cpp" />
     <ClCompile Include="Engine\light\Light.cpp" />
     <ClCompile Include="Engine\JsonLoader.cpp" />
@@ -347,6 +353,11 @@
     <ClCompile Include="Application\stage.cpp" />
     <ClCompile Include="Application\stageObject.cpp" />
     <ClCompile Include="Engine\Math\Vector3.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="imgui\imgui.vcxproj">
+      <Project>{e8911098-4c43-4d41-9e53-28ddb2fc1816}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

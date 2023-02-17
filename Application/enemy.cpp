@@ -4,6 +4,7 @@
 #include "Collision/CollisionAttribute.h"
 #include "Collision/QueryCallBack.h"
 
+#include "ParticleManager.h"
 enum MoveMode {
 	move,
 	attack,
@@ -116,13 +117,25 @@ void Enemy::Initialize()
 	float radius = 10.0f;
 
 	SetCollider(new SphereCollider(XMVECTOR({ 0,radius,0,0 }), radius));
-
+	collider->SetAttribute(COLLISION_ATTR_ENEMYS);
 	//return true;
 }
 void Enemy::Update() {
 
 	UpdateWorldMatrix();
 	collider->Update();
+
+	//落下処理
+	if (!OnGround) {
+		const float fallAcc = -0.01f;
+		const float fallVYMin = -0.5f;
+
+		fallV.m128_f32[1] = max(fallV.m128_f32[1] + fallAcc, fallVYMin);
+
+		position.x += fallV.m128_f32[0];
+		position.y += fallV.m128_f32[1];
+		position.z += fallV.m128_f32[2];
+	}
 
 	//球コライダー取得
 	SphereCollider* sphereCollider = dynamic_cast<SphereCollider*>(collider);
@@ -172,22 +185,52 @@ void Enemy::Update() {
 
 	collider->Update();
 
+	//落下判定用レイ
+	Ray ray;
+	ray.start = sphereCollider->center;
+	ray.start.m128_f32[1] += sphereCollider->GetRadius();
+	ray.dir = { 0,-1,0,0 };
+	RaycastHit raycastHit;
+
+	//接地判定
+	if (OnGround) {
+		const float adsDistance = 0.2f;
+
+		if (CollisionManager::GetInstance()->Raycast(ray, COLLISION_ATTR_LANDSHAPE, &raycastHit, sphereCollider->GetRadius() * 2.0f + adsDistance))
+		{
+			OnGround = true;
+			position.y -= (raycastHit.distance - sphereCollider->GetRadius() * 2.0f);
+			FbxObject3d::Update();
+		}
+		else {
+			OnGround = false;
+			fallV = {};
+		}
+	}
+	else if (fallV.m128_f32[1] <= 0.0f) {
+		if (CollisionManager::GetInstance()->Raycast(ray, COLLISION_ATTR_LANDSHAPE, &raycastHit, sphereCollider->GetRadius() * 2.0f)) {
+			OnGround = true;
+			position.y -= (raycastHit.distance - sphereCollider->GetRadius() * 2.0f);
+			FbxObject3d::Update();
+		}
+	}
+
 	if (!this->alive) {
 		CollisionManager::GetInstance()->RemoveCollider(collider);
 	}
 
-	if (position.x <= -100.0f) {
-		position.x = -100.0f;
-	}
-	if (position.x >= 100.0f) {
-		position.x = 100.0f;
-	}
-	if (position.z <= -120.0f) {
-		position.z = -120.0f;
-	}
-	if (position.z >= 342.0f) {
-		position.z = 342.0f;
-	}
+	//if (position.x <= -100.0f) {
+	//	position.x = -100.0f;
+	//}
+	//if (position.x >= 100.0f) {
+	//	position.x = 100.0f;
+	//}
+	//if (position.z <= -120.0f) {
+	//	position.z = -120.0f;
+	//}
+	//if (position.z >= 342.0f) {
+	//	position.z = 342.0f;
+	//}
 
 
 	FbxObject3d::Update();
@@ -201,6 +244,8 @@ void Enemy::Draw(ID3D12GraphicsCommandList* cmdList)
 void Enemy::OnCollision(const CollisionInfo& info)
 {
 	damage = true;
+	ParticleManager::GetInstance()->CreateParticle(
+		position, 10, { 1,0,0,1 });
 }
 
 Enemy* Enemy::Appearance(FbxModel* model1, FbxModel* model2)
@@ -225,11 +270,12 @@ Enemy* Enemy::Appearance(FbxModel* model1, FbxModel* model2)
 			ene->status.HP = 4;
 			ene->status.speed = 0.2f;
 			ene->position = { 0,0,-150 };
-			ene->scale = { 0.5f,0.5f,0.5f };
+			ene->scale = { 0.1f,0.1f,0.1f };
 			ene->alive = true;
 		}
 
 		popTime = 0;
+		ene->myNumber = rand() % RAND_MAX;
 		ene->PlayAnimation();
 	}
 	else {
@@ -459,6 +505,7 @@ void Enemy::Damage()
 	model->ambient.x = 1.0f;
 	count += 1.0f / 20.0f;
 	if (count >= 1.0f) {
+		status.HP -= 1;
 		model->ambient.x = defalt_ambient[0].x;
 		damage = false;
 		count = 0.0f;

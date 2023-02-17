@@ -3,10 +3,10 @@
 
 #include "baseObject.h"
 #include "Model.h"
-#include "..\includes.h"
-#include "..\pipelineSet.h"
-#include "..\PMD\PMDmodel.h"
-#include "..\Collision\CollisionInfo.h"
+#include "includes.h"
+#include "pipelineSet.h"
+#include "PMD\PMDmodel.h"
+#include "Collision\CollisionInfo.h"
 
 //3Dオブジェクト用頂点データ
 struct  Vertex {
@@ -87,14 +87,13 @@ public:
 	Model* model = nullptr;
 
 public:
-	void SetPosition(XMFLOAT3 position) {
+	inline void SetPosition(XMFLOAT3 position) {
 		this->position = position;
 	}
-	void SetMatRot(XMMATRIX rot) { 
+	inline void SetMatRot(XMMATRIX rot) { 
 		this->matRot = rot;
 		useRotMat = true;
 	}
-
 	/// <summary>
 	/// モデル取得
 	/// </summary>

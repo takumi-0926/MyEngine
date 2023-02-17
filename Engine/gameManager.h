@@ -35,6 +35,7 @@
 
 #include "ParticleManager.h"
 #include "SceneEffect/SceneEffect.h"
+#include "BillboardObject.h"
 
 using namespace std;
 using namespace DirectX;
@@ -42,7 +43,7 @@ using namespace Microsoft::WRL;
 
 #define	ENEM_NUM	1000
 #define P_HP		 100
-
+#define GATE_MAX      10
 enum Scene{
 	TITLE,
 	GAME,
@@ -51,10 +52,17 @@ enum Scene{
 enum GameMode {
 	NASI,
 	START,
+	POSE,
+	WEAPONSELECT,
 	SET,
 	CLEAR,
 	OVER,
 };
+enum GameLocation {
+	BaseCamp,
+	BaseStage,
+};
+
 enum SpriteName {
 
 };
@@ -71,34 +79,43 @@ struct JsonData;
 class CollisionManager;
 class GameManager {
 private://メンバ変数(初期化)
-	Input*	 input;
-	Audio*   audio;
-	Wrapper*  dx12;
-	DebugText debugText;
+	Input*	 input;		 //インプット
+	Audio*   audio;		 //オーディオ
+	Wrapper*  dx12;		 //DirectX
+	DebugText debugText; //デバッグテキスト
+
+	//プレイヤー / エネミー
+	Player*		  _player = nullptr;
+	PMDmodel* modelPlayer = nullptr;
+	vector<Enemy*> _enemy;
+	FbxModel* golem[3] = {};
+	FbxModel* wolf[3] = {};
+
+	//ステージ
+	map<string, Model*> stageModels;
+	vector<Stage*> stages;
+	vector<Stage*> baseCamp;
+	JsonData* stageData;
+	JsonData* baseCampData;
+	Object3Ds* skyDome = nullptr;
+	Model* skyDomeModel = nullptr;
+	int UseStage = 0;
+
+	//防衛施設
+	DefCannon* cannon[6] = {};
+	Model* bulletModel = nullptr;
 
 	std::shared_ptr<PMDmodel>   pmdModel;
 	std::shared_ptr<PMDobject> pmdObject;
-	Player*		   _player = nullptr;
-	vector<Enemy*> _enemy;
-	PMDmodel* modelPlayer = nullptr;
-
 	Stage* stage;
-	vector<Stage*> stages;
-	map<string, Model*> stageModels;
-	JsonData* jsonData;
 
-	Object3Ds* skyDome = nullptr;
 	HitBox* HitBox = {};
-	DefCannon* cannon[6] = {};
-	Model* bulletModel = nullptr;
-	FbxModel* golem[3] = {};
-	FbxModel* wolf[3] = {};
-	Model* skyDomeModel = nullptr;
 
 	//衝突マネージャー
 	CollisionManager* collisionManager = nullptr;
 	ParticleManager* particlemanager = nullptr;
 	SceneEffect* sceneEffect = nullptr;
+	BillboardObject* Bottom = nullptr;
 
 	//ライト
 	Light* light = nullptr;
@@ -106,18 +123,31 @@ private://メンバ変数(初期化)
 	float circleShadowAtten[3] = { 0.5f,0.8f,0.0f };
 	float circleShadowFacterAnlge[2] = { 0.0f,0.5f };
 	float testPos[3] = { 1,0.0f,0 };
-	Object3Ds* lightTest = nullptr;
 
+	//テクスチャエフェクト
 	Fade* fade = nullptr;//シーン切り替え時
 	Fade* clear = nullptr;//クリア時
 	Fade* failed = nullptr;//ゲームオーバー時
 	Fade* start = nullptr;//スタート時
-	Fade* gateBreak = nullptr;
+	Fade* gateBreak_red = nullptr;
+	Fade* gateBreak_yellow = nullptr;
+	Fade* gateBreak_green = nullptr;
+	int gateHP = GATE_MAX;
+
+	//画面UI
+	Sprite* weaponSelect = nullptr;
+	Sprite* weaponSlot[3] ={};
+	int SlotCount = 0;
+	int WeaponCount = 0;
+	int UseFoundation = 0;
+	bool WeaponSelectDo = false;
 	bool result = false;
+	
 
 	DebugText* text = nullptr;
 	Sprite* BreakBar = nullptr;
 	Sprite* BreakGage[15] = {};
+	Sprite* Pose = nullptr;
 private://メンバ変数(ゲームシーン)
 	vector<Sqhere> sqhere;
 	Model* modelPlane = nullptr;
@@ -193,7 +223,6 @@ private://メンバ変数(ゲームシーン)
 	Obj* test[NUM_OBJ];
 	int	_idx_obj = 0;
 
-	int gateHP = 10;
 	int playerHp = P_HP;
 	int reception = 600;
 
@@ -219,6 +248,7 @@ private://メンバ変数(ゲームシーン)
 
 	int SetNum = 0;
 
+	bool pose = false;//ポーズフラグ
 public://メンバ関数
 	//コンストラクタ
 	GameManager();
@@ -246,7 +276,7 @@ public://メンバ関数
 	/// </summary>
 	/// <param name="pos">移動させる座標</param>
 	/// <returns>移動後の座標</returns>
-	XMFLOAT3 MoveBefore(XMFLOAT3 pos)
+	inline XMFLOAT3 MoveBefore(XMFLOAT3 pos)
 	{
 		XMMATRIX matRot = XMMatrixIdentity();
 
@@ -266,7 +296,7 @@ public://メンバ関数
 
 		return pos;
 	}
-	XMFLOAT3 MoveAfter(XMFLOAT3 pos)
+	inline XMFLOAT3 MoveAfter(XMFLOAT3 pos)
 	{
 		XMMATRIX matRot = XMMatrixIdentity();
 
@@ -286,7 +316,7 @@ public://メンバ関数
 
 		return pos;
 	}
-	XMFLOAT3 MoveLeft(XMFLOAT3 pos)
+	inline XMFLOAT3 MoveLeft(XMFLOAT3 pos)
 	{
 		XMMATRIX matRot = XMMatrixIdentity();
 
@@ -306,7 +336,7 @@ public://メンバ関数
 
 		return pos;
 	}
-	XMFLOAT3 MoveRight(XMFLOAT3 pos)
+	inline XMFLOAT3 MoveRight(XMFLOAT3 pos)
 	{
 		XMMATRIX matRot = XMMatrixIdentity();
 
@@ -333,7 +363,7 @@ public://メンバ関数
 	/// <param name="forward">進行方向ベクトル</param>
 	/// <param name="upward">上ベクトル</param>
 	/// <returns>回転行列（クォータニオン）</returns>
-	XMMATRIX LookAtRotation(XMFLOAT3 forward, XMFLOAT3 upward) {
+	inline XMMATRIX LookAtRotation(XMFLOAT3 forward, XMFLOAT3 upward) {
 		Vector3 z = Vector3(forward.x, forward.y, forward.z);//進行方向ベクトル（前方向）
 		Vector3 up = Vector3(upward.x, upward.y, upward.z);  //上方向
 		XMMATRIX rot;//回転行列
@@ -389,14 +419,14 @@ public://メンバ関数
 	/// <param name="pos1"></param>
 	/// <param name="pos2"></param>
 	/// <returns></returns>
-	bool samePoint(XMFLOAT3 pos1, XMFLOAT3 pos2) {
+	inline bool samePoint(XMFLOAT3 pos1, XMFLOAT3 pos2) {
 		if (pos1.x != pos2.x) { return false; }
 		if (pos1.y != pos2.y) { return false; }
 		if (pos1.z != pos2.z) { return false; }
 		return true;
 	}
 
-	void Shake3D(XMFLOAT3& base) {
+	inline void Shake3D(XMFLOAT3& base) {
 		//リセット
 		if (shakeTime <= 1.0f) {
 			shakeTime = 20.0f;
@@ -424,6 +454,14 @@ public://メンバ関数
 
 		//シェイクタイム減算
 		shakeTime -= 1.0f;
+	}
 
+	inline float distance(XMFLOAT3 pos1, XMFLOAT3 pos2)
+	{
+		float distance;
+		float x = abs(pos1.x - pos2.x);
+		float z = abs(pos1.z - pos2.z);
+		distance = std::sqrt(x * 2 + z * 2);
+		return distance;
 	}
 };

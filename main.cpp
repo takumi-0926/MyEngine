@@ -9,6 +9,8 @@
 
 #include "object/object3D.h"
 #include "object/object2d.h"
+#include "BillboardObject.h"
+
 #include "object/Model.h"
 
 #include "Sprite/sprite.h"
@@ -75,6 +77,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			return 1;
 		}
 		//object2d::StaticInitialize(dx12->GetDevice());
+
+		BillboardObject::StaticInitialize(dx12->GetDevice());
 	}
 
 	if (!ParticleManager::StaticInitialize(dx12->GetDevice(), app->window_width, app->window_height)) {
@@ -149,9 +153,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		
 		dx12->PostRun();
 
-		if (input.Push(DIK_ESCAPE)) {
-			break;
-		}
+		//if (input.Push(DIK_ESCAPE)) {
+		//	break;
+		//}
 	}
 
 #pragma region Œãˆ—

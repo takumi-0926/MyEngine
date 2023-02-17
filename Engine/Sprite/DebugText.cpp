@@ -47,7 +47,7 @@ void DebugText::Print(const std::string & text, float x, float y, float scale = 
 		spriteDatas[spriteIndex]->SetPos({ x + fontWidth * scale * i, y });
 		spriteDatas[spriteIndex]->SetTextureRect({ (float)fontIndexX * fontWidth, (float)fontIndexY * fontHeight }, { (float)fontWidth, (float)fontHeight });
 		spriteDatas[spriteIndex]->SetSize({ fontWidth * scale, fontHeight * scale });
-
+		spriteDatas[spriteIndex]->Update();
 		// 文字を１つ進める
 		spriteIndex++;
 	}

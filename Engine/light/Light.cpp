@@ -71,7 +71,9 @@ void Light::TarnsferConstBuffer()
 				constMap->dirRights[i].lightv = -dirLights[i].GetLightDir();
 				constMap->dirRights[i].lightcolor = dirLights[i].GetLightColor();
 			}
-			else { constMap->dirRights[i].active = 0; }
+			else { 
+				constMap->dirRights[i].active = 0; 
+			}
 		}
 		// “_ŒõŒ¹
 		for (int i = 0; i < PointLightNum; i++) {
@@ -129,6 +131,7 @@ void Light::SetCircleShadowActive(int index, bool active)
 {
 	assert(0 <= index && index < CircleShadowNum);
 	circleShadows[index].SetActive(active);
+	dirty = true;
 }
 void Light::SetCircleShadowCasterPos(int index, const XMFLOAT3& casterPos)
 {
@@ -166,6 +169,7 @@ void Light::SetPointLightActive(int index, bool active)
 	assert(0 <= index && index < PointLightNum);
 
 	pointLights[index].SetActive(active);
+	dirty = true;
 }
 void Light::SetPointLightPos(int index, const XMFLOAT3& lightpos)
 {
@@ -194,6 +198,7 @@ void Light::SetDirLightActive(int index, bool active)
 	assert(0 <= index && index < DirLightNum);
 
 	dirLights[index].SetActive(active);
+	dirty = true;
 }
 void Light::SetDirLightDir(int index, const XMVECTOR& lightdir)
 {

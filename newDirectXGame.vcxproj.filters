@@ -31,9 +31,6 @@
     <Filter Include="ソース ファイル\Camera">
       <UniqueIdentifier>{f64619b9-4f0a-4c2c-81b6-04f86e4e4f5f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Imgui">
-      <UniqueIdentifier>{9dd29758-0ad1-4693-ba99-e55b54a35df9}</UniqueIdentifier>
-    </Filter>
     <Filter Include="ソース ファイル\SceneEffect">
       <UniqueIdentifier>{02476233-ff3d-4801-a4fa-3899102d7021}</UniqueIdentifier>
     </Filter>
@@ -108,6 +105,15 @@
     <FxCompile Include="Resources\shaders\ParticleVS.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
+    <FxCompile Include="Resources\shaders\BillboradVertexShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\shaders\BillboradPixelShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\shaders\BillboradGeometryShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\shaders\BasicShaderHeader.hlsli">
@@ -132,6 +138,9 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="Resources\shaders\Particle.hlsli">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\BillboradShaderHeader.hlsli">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>
@@ -174,30 +183,6 @@
     </ClInclude>
     <ClInclude Include="Application\stageObject.h">
       <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="External\imgui\imconfig.h">
-      <Filter>Imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="External\imgui\imgui.h">
-      <Filter>Imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="External\imgui\imgui_impl_dx12.h">
-      <Filter>Imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="External\imgui\imgui_impl_win32.h">
-      <Filter>Imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="External\imgui\imgui_internal.h">
-      <Filter>Imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="External\imgui\imstb_rectpack.h">
-      <Filter>Imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="External\imgui\imstb_textedit.h">
-      <Filter>Imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="External\imgui\imstb_truetype.h">
-      <Filter>Imgui</Filter>
     </ClInclude>
     <ClInclude Include="Engine\SceneEffect\SceneEffect.h">
       <Filter>ソース ファイル\SceneEffect</Filter>
@@ -349,6 +334,9 @@
     <ClInclude Include="Engine\JsonLoader.h">
       <Filter>ソース ファイル\Json</Filter>
     </ClInclude>
+    <ClInclude Include="Application\BillboardObject.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application\enemy.cpp">
@@ -429,27 +417,6 @@
     <ClCompile Include="Application\stageObject.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="External\imgui\imgui.cpp">
-      <Filter>Imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="External\imgui\imgui_demo.cpp">
-      <Filter>Imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="External\imgui\imgui_draw.cpp">
-      <Filter>Imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="External\imgui\imgui_impl_dx12.cpp">
-      <Filter>Imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="External\imgui\imgui_impl_win32.cpp">
-      <Filter>Imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="External\imgui\imgui_tables.cpp">
-      <Filter>Imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="External\imgui\imgui_widgets.cpp">
-      <Filter>Imgui</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\SceneEffect\SceneEffectManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -512,6 +479,9 @@
     </ClCompile>
     <ClCompile Include="Engine\JsonLoader.cpp">
       <Filter>ソース ファイル\Json</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\BillboardObject.cpp">
+      <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

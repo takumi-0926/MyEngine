@@ -1,7 +1,7 @@
-# Blender 3.3.1 MTL File: 'None'
+# Blender 3.3.1 MTL File: 'stageData.blend'
 # www.blender.org
 
-newmtl Material.005
+newmtl Material.020
 Ns 96.078453
 Ka 1.000000 1.000000 1.000000
 Ks 0.500000 0.500000 0.500000
@@ -11,7 +11,7 @@ d 1.000000
 illum 2
 map_Kd texture.jpg
 
-newmtl None.003
+newmtl None.015
 Ns 0.000000
 Ka 1.000000 1.000000 1.000000
 Ks 0.800000 0.800000 0.800000

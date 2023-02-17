@@ -24,7 +24,7 @@ class DefCannon : public Object3Ds {
 
 	std::vector<Bullet*> bullet;
 	float count = 0.0f;
-	bool isAlive = true;
+	bool isAlive = false;
 	int mode = 0;
 
 	XMVECTOR shotVec = {};
@@ -54,9 +54,11 @@ public:
 	/// <returns>回転行列（クォータニオン）</returns>
 	XMMATRIX LookAtRotation(XMFLOAT3 forward, XMFLOAT3 upward);
 
-	void SetMode(int mode) { this->mode = mode; }
-	void SetShotVec(const XMVECTOR& vec) { this->shotVec = vec; }
+	inline void SetMode(int mode) { this->mode = mode; }
+	inline void SetShotVec(const XMVECTOR& vec) { this->shotVec = vec; }
 
-	bool GetAlive() { return isAlive; }
+	inline bool GetAlive() { return isAlive; }
+	inline void SetAlive(bool flg) { this->isAlive = flg; }
+
 public:
 };

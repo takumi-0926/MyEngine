@@ -309,31 +309,6 @@ bool Sprite::loadTexture(UINT texNumber, const wchar_t* fileName)
 	return true;
 }
 
-void Sprite::PreDraw(ID3D12GraphicsCommandList* _cmdList)
-{
-	// PreDrawとPostDrawがペアで呼ばれていなければエラー
-	assert(Sprite::cmdList == nullptr);
-
-	//状態確認
-	//assert(pipelineset._pipelinestate == nullptr);
-	//assert(pipelineset._rootsignature == nullptr);
-
-	// コマンドリストをセット
-	Sprite::cmdList = _cmdList;
-
-	// パイプラインステートの設定
-	cmdList->SetPipelineState(pipelineset._pipelinestate.Get());
-	// ルートシグネチャの設定
-	cmdList->SetGraphicsRootSignature(pipelineset._rootsignature.Get());
-	// プリミティブ形状を設定
-	cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
-}
-
-void Sprite::PostDraw()
-{
-	// コマンドリストを解除
-	Sprite::cmdList = nullptr;
-}
 
 Sprite* Sprite::Create(UINT texNumber, XMFLOAT2 position, XMFLOAT4 color, XMFLOAT2 anchorpoint, bool isFlipX, bool isFlipY)
 {
@@ -396,6 +371,20 @@ void Sprite::TransVertex()
 	vertices[LT].pos = { left,	top,		0.0f };
 	vertices[RB].pos = { right,	bottom,	0.0f };
 	vertices[RT].pos = { right,	top,		0.0f };
+
+	if (spritecommon._texBuff[texNumber]) {
+		D3D12_RESOURCE_DESC resDesc = spritecommon._texBuff[texNumber]->GetDesc();
+
+		float tex_left = texBase.x / resDesc.Width;
+		float tex_right = (texBase.x + texSize.x) / resDesc.Width;
+		float tex_top = texBase.y / resDesc.Height;
+		float tex_bottom = (texBase.y + texSize.y) / resDesc.Height;
+
+		vertices[LB].uv = { tex_left,tex_bottom };
+		vertices[LT].uv = { tex_left,tex_top };
+		vertices[RB].uv = { tex_right,tex_bottom };
+		vertices[RT].uv = { tex_right,tex_top };
+	}
 
 	VertexPosUv* vertMap = nullptr;
 	result = _vertbuff->Map(0, nullptr, (void**)&vertMap);
@@ -478,6 +467,32 @@ void Sprite::Update()
 	constBuff->Unmap(0, nullptr);
 }
 
+void Sprite::PreDraw(ID3D12GraphicsCommandList* _cmdList)
+{
+	// PreDrawとPostDrawがペアで呼ばれていなければエラー
+	assert(Sprite::cmdList == nullptr);
+
+	//状態確認
+	//assert(pipelineset._pipelinestate == nullptr);
+	//assert(pipelineset._rootsignature == nullptr);
+
+	// コマンドリストをセット
+	Sprite::cmdList = _cmdList;
+
+	// パイプラインステートの設定
+	cmdList->SetPipelineState(pipelineset._pipelinestate.Get());
+	// ルートシグネチャの設定
+	cmdList->SetGraphicsRootSignature(pipelineset._rootsignature.Get());
+	// プリミティブ形状を設定
+	cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+}
+
+void Sprite::PostDraw()
+{
+	// コマンドリストを解除
+	Sprite::cmdList = nullptr;
+}
+
 void Sprite::Draw()
 {
 	// 頂点バッファの設定
@@ -501,5 +516,4 @@ void Sprite::SetTextureRect(XMFLOAT2 texBase, XMFLOAT2 texSize)
 
 	// 頂点バッファへのデータ転送
 	TransVertex();
-
 }
