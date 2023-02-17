@@ -248,7 +248,15 @@ public: // メンバ関数
 	/// </summary>
 	/// <param name="emitter">生成場所</param>
 	/// <param name="num">生成数</param>
-	void CreateParticle(XMFLOAT3 emitter,int num, XMFLOAT4 color);
+	void CreateParticle(
+		int life,
+		XMFLOAT3 emitter,
+		float velocity,
+		float accel,
+		int num,
+		float scale,
+		XMFLOAT4 color
+		);
 
 	/// <summary>
 	/// パーティクルの追加

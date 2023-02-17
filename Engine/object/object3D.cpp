@@ -5,6 +5,7 @@
 #include "Collision\CollisionManager.h"
 
 Wrapper* Object3Ds::dx12 = nullptr;
+Camera* Object3Ds::camera = nullptr;
 
 Object3Ds::~Object3Ds()
 {
@@ -88,22 +89,26 @@ bool Object3Ds::Initialize()
 void Object3Ds::Update()
 {
 	HRESULT result;
-
-	UpdateWorldMatrix();
-
 	//const XMMATRIX& matView = dx12->Camera()->GetViewMatrix();
 	//const XMMATRIX& matProjection = dx12->Camera()->GetProjectionMatrix();
-	const XMMATRIX& matViewProjection = dx12->Camera()->GetViewProjectionMatrix();
-	const XMFLOAT3& cameraPos = dx12->Camera()->GetEye();
 
-	// 定数バッファへデータ転送(OBJ)
-	ConstBufferDataB0* constMap = nullptr;
-	result = constBuffB0->Map(0, nullptr, (void**)&constMap);
-	if (FAILED(result)) { assert(0); }
-	constMap->viewproj = matViewProjection;
-	constMap->world = matWorld;
-	constMap->cameraPos = cameraPos;
-	constBuffB0->Unmap(0, nullptr);
+	if (!useWorldMat) {
+		const XMMATRIX& matViewProjection = dx12->Camera()->GetViewProjectionMatrix();
+		const XMFLOAT3& cameraPos = dx12->Camera()->GetEye();
+
+		UpdateWorldMatrix();
+
+		// 定数バッファへデータ転送(OBJ)
+		ConstBufferDataB0* constMap = nullptr;
+		result = constBuffB0->Map(0, nullptr, (void**)&constMap);
+		if (FAILED(result)) { assert(0); }
+		constMap->viewproj = matViewProjection;
+		constMap->cameraPos = cameraPos;
+		if (!useWorldMat) {
+			constMap->world = matWorld;
+		}
+		constBuffB0->Unmap(0, nullptr);
+	}
 
 	if (collider) {
 		collider->Update();

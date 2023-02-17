@@ -12,6 +12,11 @@
 #include <DirectXMath.h>
 #include <string>
 
+enum MotionType {
+	WalkMotion = 0,
+	AttackMotion,
+};
+
 class FbxObject3d {
 protected:
 	template <class T> using ComPtr = Microsoft::WRL::ComPtr<T>;
@@ -34,6 +39,16 @@ public:
 		XMMATRIX bones[MAX_BONES];
 	};
 
+	//アニメーション保存用構造体
+	struct AnimationInfelno {
+		const char* Name;	//名前
+		FbxTime startTime;	//開始時間
+		FbxTime endTime;	//終了時間
+		FbxTakeInfo* info;	//
+		FbxAnimStack* stack;//
+	};
+	vector<AnimationInfelno> animas;
+
 public:
 	virtual void Initialize();
 
@@ -44,20 +59,25 @@ public:
 	//行列の更新
 	void UpdateWorldMatrix();
 
-	void SetModel(FbxModel* model) { this->model = model; }
+	void SetModel(FbxModel* model) {
+		this->model = model;
+		LoadAnima();
+	}
 
-	void PlayAnimation();
+	void PlayAnimation(int playNum);
+	void LoadAnima();
 
 public:
 	static void SetDevice(ID3D12Device* device) { FbxObject3d::device = device; }
-	static void SetCamera(Camera* camera) { 
-		FbxObject3d::camera = camera; }
+	static void SetCamera(Camera* camera) {
+		FbxObject3d::camera = camera;
+	}
 	void SetPosition(XMFLOAT3 pos) { this->position = pos; }
 	void SetScale(XMFLOAT3 scale) { this->scale = scale; }
 	static void CreateGraphicsPipeline();
 
 	void SetCollider(BaseCollider* collider);
-	virtual void OnCollision(const CollisionInfo& info){}
+	virtual void OnCollision(const CollisionInfo& info) {}
 
 	/// <summary>
 	/// ワールド行列取得
@@ -91,13 +111,16 @@ protected:
 
 	FbxTime frameTime;
 
-	FbxTime startTime;
-
-	FbxTime endTime;
+	//FbxTime startTime;	//開始時間
+	//FbxTime endTime;	//終了時間
 
 	FbxTime currentTime;
 
 	bool isPlay = false;
+
+	bool changePlay = false;
+
+	int nowPlayMotion = MotionType::WalkMotion;
 
 	ComPtr<ID3D12Resource> constBufferTransform;
 
@@ -110,4 +133,6 @@ protected:
 
 public:
 	XMFLOAT3 GetPosition() { return position; }
+	//FbxTime GetCurrentTime() { return currentTime; }
+
 };

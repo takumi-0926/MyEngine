@@ -48,7 +48,7 @@ private:
 	D3D12_GPU_DESCRIPTOR_HANDLE			_heapHandle;
 	//深度バッファ
 	ComPtr<ID3D12DescriptorHeap>		_dsvHeap = nullptr;
-	ComPtr<ID3D12DescriptorHeap>		_depthSRVHaep = nullptr;
+	ComPtr<ID3D12DescriptorHeap>		_depthSRVHaep = nullptr;	//深度テクスチャ
 	ComPtr<ID3D12Resource>				_depthBuffer = nullptr;
 	//シーンを構成するバッファまわり
 	ConstBufferDataB0_1*				_mappedSceneData;

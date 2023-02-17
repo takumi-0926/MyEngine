@@ -16,7 +16,7 @@ public:
 		Object3Ds* _object,
 		FbxObject3d* _fbx,
 		PMDobject* pmd,
-		BaseCollider* _collider, 
+		BaseCollider* _collider,
 		const DirectX::XMVECTOR& _inter) {
 		this->object = _object;
 		this->collider = _collider;

@@ -8,6 +8,14 @@
 
 #include "FBX/FbxObject3d.h"
 
+#include "Weapon.h"
+#include "ParticleManager.h"
+
+enum Activity {
+	wolf = 0,
+	golem,
+};
+
 class PMDmodel;
 class StageObject;
 class DefCannon;
@@ -35,9 +43,16 @@ public:
 	float damegeCount = 0.0f;
 
 	unsigned short myNumber = 0;
+	int registrationNumber = 0;
+
+	float particleOffset = 0.0f;
 	//地面判定用
 	bool OnGround = true;
 	XMVECTOR fallV;
+
+	float shadowOffset = 0.0f;
+
+	int followBoneNum = 0;
 
 	float alpha = 1.0f;
 	vector<XMFLOAT3> defalt_ambient;
@@ -45,6 +60,11 @@ public:
 	XMFLOAT3 attackPos;
 	XMFLOAT3 oldPos;
 	XMFLOAT3 RetreatPos = { 1.0f,20.0f,-150.0f };
+
+	FbxModel* modelType[2] = {};
+	Weapon* weapon = nullptr;
+	ParticleManager* particle = nullptr;
+
 private:
 	XMFLOAT3 VectorToXMFloat(XMVECTOR vec);
 	float	 objectDistance(XMFLOAT3 pos1, XMFLOAT3 pos2);	//建物との直線距離を計算
@@ -54,7 +74,7 @@ private:
 	void moveReset();
 public:
 	Enemy();		//コンストラクタ
-	static Enemy* Create(FbxModel* model);//インスタンス生成
+	static Enemy* Create(FbxModel* model1, FbxModel* model2);//インスタンス生成
 	void Initialize()override;
 	void Update() override;
 	void moveUpdate(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos);
@@ -116,11 +136,15 @@ public:
 		model->alpha = this->alpha;
 		model->Update();
 	}
+	inline void SetFollowBoneNum(int num) { this->followBoneNum = num; }
+
+	void CreateWeapon(Model* model);
+	void Particle();
 
 	/// <summary>
 	/// 出現処理
 	/// </summary>
-	static Enemy* Appearance(FbxModel* model1, FbxModel* model2);
+	void Appearance();
 
 	/// <summary>
 	/// 移動時処理
@@ -141,4 +165,6 @@ public:
 	/// 被ダメージ時処理
 	/// </summary>
 	void Damage();
+
+	void ChangeAnimation(int num);
 };

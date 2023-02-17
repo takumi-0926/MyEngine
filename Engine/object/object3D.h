@@ -19,10 +19,12 @@ class Wrapper;
 class BaseCollider;
 class Object3Ds : public BaseObject
 {
-	static Wrapper* dx12;
 protected: // メンバ変数
+	static Wrapper* dx12;
 
 	const char* name = nullptr;
+
+	static Camera* camera;
 
 	BaseCollider* collider = nullptr;
 public:
@@ -76,6 +78,7 @@ public:
 	XMFLOAT3 rotation = { 0,0,0 };
 	//回転行列の使用先
 	bool useRotMat = false;
+	bool useWorldMat = false;
 	// ローカル座標
 	XMFLOAT3 position = { 0,0,0 };
 	// ローカルワールド変換行列
@@ -94,6 +97,14 @@ public:
 		this->matRot = rot;
 		useRotMat = true;
 	}
+	inline void SetMatWorld(XMMATRIX rot) {
+		this->matWorld = rot;
+		useWorldMat = true;
+	}
+	static void SetCamera(Camera* camera) {
+		Object3Ds::camera = camera;
+	}
+
 	/// <summary>
 	/// モデル取得
 	/// </summary>
