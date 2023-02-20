@@ -55,19 +55,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			assert(0);
 			return 1;
 		}
-		//imgui
-		if (ImGui::CreateContext() == nullptr) {
-			assert(0);
-			return false;
-		}
-		bool blnResult = ImGui_ImplWin32_Init(app->_hwnd());
-		blnResult = ImGui_ImplDX12_Init(
-			dx12->GetDevice(),
-			3,
-			DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
-			dx12->GetHeapImgui().Get(),
-			dx12->GetHeapImgui()->GetCPUDescriptorHandleForHeapStart(),
-			dx12->GetHeapImgui()->GetGPUDescriptorHandleForHeapStart());
+		////imgui
+		//if (ImGui::CreateContext() == nullptr) {
+		//	assert(0);
+		//	return false;
+		//}
+		//bool blnResult = ImGui_ImplWin32_Init(app->_hwnd());
+		//blnResult = ImGui_ImplDX12_Init(
+		//	dx12->GetDevice(),
+		//	3,
+		//	DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
+		//	dx12->GetHeapImgui().Get(),
+		//	dx12->GetHeapImgui()->GetCPUDescriptorHandleForHeapStart(),
+		//	dx12->GetHeapImgui()->GetGPUDescriptorHandleForHeapStart());
 	}
 
 	Object3Ds obj3d;
@@ -94,8 +94,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		}
 
 		//Sprite::loadTexture(100, L"Resources/white1x1.png");
-		//postEffect = new PostEffect();
-		//postEffect->Initialize();
 	}
 
 	//Fbx初期化
@@ -111,6 +109,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		assert(0);
 		return 1;
 	}
+
+	postEffect = new PostEffect();
+	postEffect->Initialize();
 
 
 	//ゲームループ
@@ -128,28 +129,29 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		}
 
 		//ImGui
-		ImGui_ImplDX12_NewFrame();
-		ImGui_ImplWin32_NewFrame();
-		ImGui::NewFrame();
+		//ImGui_ImplDX12_NewFrame();
+		//ImGui_ImplWin32_NewFrame();
+		//ImGui::NewFrame();
 
 		input.Update();
 
 		gameScene.Update();
 
-		//postEffect->PreDrawScene(dx12->CommandList().Get());
-		//postEffect->PostDrawScene(dx12->CommandList().Get());
+		//レンダーテクスチャに描画
+		postEffect->PreDrawScene(dx12->CommandList().Get());
+		gameScene.Draw();
+		postEffect->PostDrawScene(dx12->CommandList().Get());
 
 		dx12->PreRun();
+		
+		//ポストエフェクトを描画
+		postEffect->Draw(dx12->CommandList().Get());
 
-		gameScene.Draw();
-
-		//postEffect->Draw(dx12->CommandList().Get());
-
-		ImGui::Render();
-		dx12->CommandList()->SetDescriptorHeaps(
-			1,
-			dx12->GetHeapImgui().GetAddressOf());
-		ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), dx12->CommandList().Get());
+		//ImGui::Render();
+		//dx12->CommandList()->SetDescriptorHeaps(
+		//	1,
+		//	dx12->GetHeapImgui().GetAddressOf());
+		//ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), dx12->CommandList().Get());
 		
 		dx12->PostRun();
 

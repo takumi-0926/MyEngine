@@ -1,13 +1,15 @@
 #include "PostEffect.h"
 #include "application.h"
-#include <d3dx12.h>
+//#include <d3dx12.h>
 #include <d3dcompiler.h>
-
 #pragma comment(lib,"d3dcompiler.lib")
 
-using namespace DirectX;
+//using namespace DirectX;
+//
+const float PostEffect::clearColor[4] = { 0.5f,0.5f,0.5f,0.5f };
 
-const float PostEffect::clearColor[4] = { 0.2f,0.2f,0.2f,0.0f };
+//頂点数
+const int VertNum = 4;
 
 PostEffect::PostEffect()
 	:Sprite(
@@ -23,90 +25,104 @@ PostEffect::PostEffect()
 
 void PostEffect::Initialize()
 {
+	//Sprite::Initalize();
+
 	HRESULT result;
+	
+		CD3DX12_HEAP_PROPERTIES vertProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+		CD3DX12_RESOURCE_DESC VertDesc = CD3DX12_RESOURCE_DESC::Buffer(sizeof(VertexPosUv) * VertNum);
+	
+		//頂点バッファを作成
+		result = device->CreateCommittedResource(
+			&vertProperties,
+			D3D12_HEAP_FLAG_NONE,
+			&VertDesc,
+			D3D12_RESOURCE_STATE_GENERIC_READ,
+			nullptr,
+			IID_PPV_ARGS(_vertbuff.ReleaseAndGetAddressOf()));
+	//
+	//	////指定番号の画像が読み込み済みなら
+	//	//if (spritecommon._texBuff[texNumber]) {
+	//	//	D3D12_RESOURCE_DESC resDesc = spritecommon._texBuff[texNumber]->GetDesc();
+	//
+	//	//	size = { (float)resDesc.Width,(float)resDesc.Height };
+	//	//}
+	
+		//頂点バッファにデータを転送
+		VertexPosUv vertices[VertNum] = {
+			{{-1.0f,-1.0f,0.0f},{0.0f,1.0f}},
+			{{-1.0f,+1.0f,0.0f},{0.0f,0.0f}},
+			{{+1.0f,-1.0f,0.0f},{1.0f,1.0f}},
+			{{+1.0f,+1.0f,0.0f},{1.0f,0.0f}},
+		};
+		VertexPosUv* vertMap = nullptr;
+		result = _vertbuff->Map(0, nullptr, (void**)&vertMap);
+		if (SUCCEEDED(result)) {
+			memcpy(vertMap, vertices, sizeof(vertices));
+			_vertbuff->Unmap(0, nullptr);
+		}
+	
+		//頂点バッファビューの作成
+		vbView.BufferLocation = _vertbuff->GetGPUVirtualAddress();
+		vbView.SizeInBytes = sizeof(VertexPosUv) * 4;
+		vbView.StrideInBytes = sizeof(VertexPosUv);
+	
+		CD3DX12_HEAP_PROPERTIES constProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+		CD3DX12_RESOURCE_DESC constDesc = CD3DX12_RESOURCE_DESC::Buffer((sizeof(ConstBufferData) + 0xff) & ~0xff);
+	
+		//定数バッファの生成
+		result = device->CreateCommittedResource(
+			&constProperties,
+			D3D12_HEAP_FLAG_NONE,
+			&constDesc,
+			D3D12_RESOURCE_STATE_GENERIC_READ,
+			nullptr,
+			IID_PPV_ARGS(constBuff.ReleaseAndGetAddressOf()));
+		assert(SUCCEEDED(result));
+	//
+	//	////定数バッファにデータを転送
+	//	//ConstBufferData* constMap = nullptr;
+	//	//result = constBuff->Map(0, nullptr, (void**)&constMap);
+	//	//constMap->color = this->color;
+	//	////constMap->mat = spritecommon.matProjection;
+	//	//constMap->mat = XMMatrixIdentity();
+	//	//constBuff->Unmap(0, nullptr);
 
-	auto properties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
-	auto desc = CD3DX12_RESOURCE_DESC::Buffer(sizeof(VertexPosUv) * 4);
-
-	//頂点バッファを作成
-	result = device->CreateCommittedResource(
-		&properties,
-		D3D12_HEAP_FLAG_NONE,
-		&desc,
-		D3D12_RESOURCE_STATE_GENERIC_READ,
-		nullptr,
-		IID_PPV_ARGS(_vertbuff.ReleaseAndGetAddressOf()));
-
-	//指定番号の画像が読み込み済みなら
-	if (spritecommon._texBuff[texNumber]) {
-		D3D12_RESOURCE_DESC resDesc = spritecommon._texBuff[texNumber]->GetDesc();
-
-		size = { (float)resDesc.Width,(float)resDesc.Height };
-	}
-
-	//頂点バッファにデータを転送
-	VertexPosUv vertices[4] = {
-		{{-1.0f,-1.0f,0.0f},{0.0f,1.0f}},
-		{{-1.0f,+1.0f,0.0f},{0.0f,0.0f}},
-		{{+1.0f,-1.0f,0.0f},{1.0f,1.0f}},
-		{{+1.0f,+1.0f,0.0f},{1.0f,0.0f}},
-	};
-
-	VertexPosUv* vertMap = nullptr;
-	result = _vertbuff->Map(0, nullptr, (void**)&vertMap);
-	if (SUCCEEDED(result)) {
-		memcpy(vertMap, vertices, sizeof(vertices));
-		_vertbuff->Unmap(0, nullptr);
-	}
-
-	//頂点バッファビューの作成
-	vbView.BufferLocation = _vertbuff->GetGPUVirtualAddress();
-	vbView.SizeInBytes = sizeof(VertexPosUv) * 4;
-	vbView.StrideInBytes = sizeof(VertexPosUv);
-
-	properties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
-	desc = CD3DX12_RESOURCE_DESC::Buffer((sizeof(ConstBufferData) + 0xff) & ~0xff);
-
-	//定数バッファの生成
-	result = device->CreateCommittedResource(
-		&properties,
-		D3D12_HEAP_FLAG_NONE,
-		&desc,
-		D3D12_RESOURCE_STATE_GENERIC_READ,
-		nullptr,
-		IID_PPV_ARGS(constBuff.ReleaseAndGetAddressOf()));
-	assert(SUCCEEDED(result));
-
-	//定数バッファにデータを転送
-	ConstBufferData* constMap = nullptr;
-	result = constBuff->Map(0, nullptr, (void**)&constMap);
-	constMap->color = color;
-	//constMap->mat = spritecommon.matProjection;
-	constMap->mat = XMMatrixIdentity();
-	constBuff->Unmap(0, nullptr);
 
 	//テクスチャリソースの設定
 	CD3DX12_RESOURCE_DESC texresDesc = CD3DX12_RESOURCE_DESC::Tex2D(
-		DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
+		DXGI_FORMAT_R8G8B8A8_UNORM,
 		Application::window_width,
 		(UINT)Application::window_height,
 		1, 0, 1, 0, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET
 	);
 
-	properties = CD3DX12_HEAP_PROPERTIES(D3D12_CPU_PAGE_PROPERTY_WRITE_BACK, D3D12_MEMORY_POOL_L0);
-	auto value = CD3DX12_CLEAR_VALUE(DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, clearColor);
-
 	//バッファ生成
 	result = device->CreateCommittedResource(
-		&properties,
+		&CD3DX12_HEAP_PROPERTIES(
+			D3D12_CPU_PAGE_PROPERTY_WRITE_BACK,D3D12_MEMORY_POOL_L0),
 		D3D12_HEAP_FLAG_NONE,
 		&texresDesc,
 		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
-		&value,
+		&CD3DX12_CLEAR_VALUE(DXGI_FORMAT_R8G8B8A8_UNORM, clearColor),
 		IID_PPV_ARGS(&texBuff)
 	);
 	assert(SUCCEEDED(result));
 
+	//auto texProperties = CD3DX12_HEAP_PROPERTIES(D3D12_CPU_PAGE_PROPERTY_WRITE_BACK, D3D12_MEMORY_POOL_L0);
+	//auto texValue = CD3DX12_CLEAR_VALUE(DXGI_FORMAT_R8G8B8A8_UNORM, clearColor);
+
+	////バッファ生成
+	//result = device->CreateCommittedResource(
+	//	&texProperties,
+	//	D3D12_HEAP_FLAG_NONE,
+	//	&texresDesc,
+	//	D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+	//	&texValue,
+	//	IID_PPV_ARGS(&texBuff)
+	//);
+	//assert(SUCCEEDED(result));
+//
 	//画素数
 	const UINT pixelCount = Application::window_width * Application::window_height;
 	//一行分のデータサイズ
@@ -123,7 +139,7 @@ void PostEffect::Initialize()
 		0, nullptr, img, rowPitch, depthPitch);
 	assert(SUCCEEDED(result));
 	delete[] img;
-
+//
 	//SRVデスクリプタヒープ設定
 	D3D12_DESCRIPTOR_HEAP_DESC srvDescHeap = {};
 	srvDescHeap.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
@@ -131,12 +147,12 @@ void PostEffect::Initialize()
 	srvDescHeap.NumDescriptors = 1;
 
 	result = device->CreateDescriptorHeap(
-		&srvDescHeap, IID_PPV_ARGS(&descHeapSRV));
+		&srvDescHeap, IID_PPV_ARGS(descHeapSRV.ReleaseAndGetAddressOf()));
 	assert(SUCCEEDED(result));
 
 	//SRV設定
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
-	srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+	srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 	srvDesc.Texture2D.MipLevels = 1;
@@ -156,6 +172,7 @@ void PostEffect::Initialize()
 		&rtvDescHeap, IID_PPV_ARGS(&descHeapRTV));
 	assert(SUCCEEDED(result));
 
+	//レンダーターゲットビューの生成
 	device->CreateRenderTargetView(
 		texBuff.Get(),
 		nullptr,
@@ -171,15 +188,15 @@ void PostEffect::Initialize()
 			1, 0,
 			D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL);
 
-	properties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
-	value = CD3DX12_CLEAR_VALUE(DXGI_FORMAT_D32_FLOAT, 1.0f, 0);
+	auto depthProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
+	auto depthValue = CD3DX12_CLEAR_VALUE(DXGI_FORMAT_D32_FLOAT, 1.0f, 0);
 
 	result = device->CreateCommittedResource(
-		&properties,
+		&depthProperties,
 		D3D12_HEAP_FLAG_NONE,
 		&depthResDesc,
 		D3D12_RESOURCE_STATE_DEPTH_WRITE,
-		&value,
+		&depthValue,
 		IID_PPV_ARGS(&depthBuff));
 	assert(SUCCEEDED(result));
 
@@ -193,6 +210,7 @@ void PostEffect::Initialize()
 		IID_PPV_ARGS(&descHeapDSV));
 	assert(SUCCEEDED(result));
 
+	//デプスステンシルビューの作成
 	D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
 	dsvDesc.Format = DXGI_FORMAT_D32_FLOAT;
 	dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
@@ -201,11 +219,26 @@ void PostEffect::Initialize()
 		depthBuff.Get(),
 		&dsvDesc,
 		descHeapDSV->GetCPUDescriptorHandleForHeapStart());
-
-	CreateGraphicsPipeline();
+//
+//	CreateGraphicsPipeline();
 }
 
 void PostEffect::Draw(ID3D12GraphicsCommandList* cmdList) {
+	matWorld = XMMatrixIdentity();
+
+	matWorld *= XMMatrixRotationZ(XMConvertToRadians(rotation));
+
+	matWorld *= XMMatrixTranslation(position.x, position.y, 0);
+
+	ConstBufferData* constMap = nullptr;
+
+	this->color.w = this->alpha;
+
+	HRESULT result = constBuff->Map(0, nullptr, (void**)&constMap);
+	//constMap->mat = matWorld * spritecommon.matProjection;
+	constMap->mat = XMMatrixIdentity();
+	constMap->color = this->color;
+	constBuff->Unmap(0, nullptr);
 
 	// パイプラインステートの設定
 	cmdList->SetPipelineState(pipelineset._pipelinestate.Get());
@@ -217,7 +250,8 @@ void PostEffect::Draw(ID3D12GraphicsCommandList* cmdList) {
 	// 頂点バッファの設定
 	cmdList->IASetVertexBuffers(0, 1, &this->vbView);
 
-	ID3D12DescriptorHeap* ppHeaps[] = { descHeapSRV.Get() };
+	//ID3D12DescriptorHeap* ppHeaps[] = { spritecommon._descHeap.Get() };
+	ID3D12DescriptorHeap* ppHeaps[] = { descHeapSRV.Get()};
 	// デスクリプタヒープをセット
 	cmdList->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
 	// 定数バッファビューをセット
@@ -227,27 +261,57 @@ void PostEffect::Draw(ID3D12GraphicsCommandList* cmdList) {
 	cmdList->SetGraphicsRootDescriptorTable(1, descHeapSRV->GetGPUDescriptorHandleForHeapStart());
 	// 描画コマンド
 	cmdList->DrawInstanced(4, 1, 0, 0);
+
+
+
+	//// 頂点バッファの設定
+	//cmdList->IASetVertexBuffers(0, 1, &this->vbView);
+
+	//ID3D12DescriptorHeap* ppHeaps[] = { descHeapSRV.Get() };
+	//// デスクリプタヒープをセット
+	//cmdList->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
+	//// 定数バッファビューをセット
+	//cmdList->SetGraphicsRootConstantBufferView(0, this->constBuff->GetGPUVirtualAddress());
+	//// シェーダリソースビューをセット
+	////cmdList->SetGraphicsRootDescriptorTable(1, CD3DX12_GPU_DESCRIPTOR_HANDLE(spritecommon._descHeap->GetGPUDescriptorHandleForHeapStart(), this->texNumber, descriptorHandleIncrementSize));
+	//// 描画コマンド
+	//cmdList->DrawInstanced(4, 1, 0, 0);
 }
 
 void PostEffect::PreDrawScene(ID3D12GraphicsCommandList* cmdList)
 {
-	CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(texBuff.Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET);
+	//リソースバリアの変更
+	CD3DX12_RESOURCE_BARRIER barrier = 
+		CD3DX12_RESOURCE_BARRIER::Transition(
+			texBuff.Get(),
+			D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, 
+			D3D12_RESOURCE_STATE_RENDER_TARGET);
 	cmdList->ResourceBarrier(1, &barrier);
 
+	//RTV用デスクリプタヒープのハンドル取得
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvH =
 		descHeapRTV->GetCPUDescriptorHandleForHeapStart();
 
+	//DSV用デスクリプタヒープのハンドル取得
 	D3D12_CPU_DESCRIPTOR_HANDLE dsvH =
 		descHeapDSV->GetCPUDescriptorHandleForHeapStart();
 
+	//レンダターゲットのセット
 	cmdList->OMSetRenderTargets(1, &rtvH, false, &dsvH);
 
 	//ビューポート
-	CD3DX12_VIEWPORT viewport = CD3DX12_VIEWPORT(0.0f, 0.0f, Application::window_width, Application::window_height);
+	CD3DX12_VIEWPORT viewport = 
+		CD3DX12_VIEWPORT(
+			0.0f, 0.0f, 
+			Application::window_width, 
+			Application::window_height);
 	cmdList->RSSetViewports(1, &viewport);
 
 	//シザリング
-	CD3DX12_RECT rect = CD3DX12_RECT(0, 0, Application::window_width, Application::window_height);
+	CD3DX12_RECT rect = 
+		CD3DX12_RECT(0, 0, 
+			Application::window_width, 
+			Application::window_height);
 	cmdList->RSSetScissorRects(1, &rect);
 
 	//画面クリア
@@ -269,7 +333,11 @@ void PostEffect::PreDrawScene(ID3D12GraphicsCommandList* cmdList)
 void PostEffect::PostDrawScene(ID3D12GraphicsCommandList* cmdList)
 {
 	//リソースバリア変更（描画 -> シェーダーリソース）
-	CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(texBuff.Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+	CD3DX12_RESOURCE_BARRIER barrier = 
+		CD3DX12_RESOURCE_BARRIER::Transition(
+			texBuff.Get(),
+			D3D12_RESOURCE_STATE_RENDER_TARGET, 
+			D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 	cmdList->ResourceBarrier(1, &barrier);
 }
 
@@ -279,9 +347,6 @@ void PostEffect::CreateGraphicsPipeline()
 	ComPtr<ID3DBlob> vsBlob; // 頂点シェーダオブジェクト
 	ComPtr<ID3DBlob> psBlob;	// ピクセルシェーダオブジェクト
 	ComPtr<ID3DBlob> errorBlob; // エラーオブジェクト
-
-	//LoadHlsl("Resources/shaders/SpriteVertexShader.hlsl",
-	//	&vsBlob, "main", "vs_5_0");
 
 	// 頂点シェーダの読み込みとコンパイル
 	result = D3DCompileFromFile(
@@ -381,7 +446,7 @@ void PostEffect::CreateGraphicsPipeline()
 	gpipeline.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 
 	gpipeline.NumRenderTargets = 1;	// 描画対象は1つ
-	gpipeline.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB; // 0～255指定のRGBA
+	gpipeline.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM; // 0～255指定のRGBA
 	gpipeline.SampleDesc.Count = 1; // 1ピクセルにつき1回サンプリング
 
 	// デスクリプタレンジ
@@ -398,7 +463,8 @@ void PostEffect::CreateGraphicsPipeline()
 
 	// ルートシグネチャの設定
 	CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDesc;
-	rootSignatureDesc.Init_1_0(_countof(rootparams), rootparams, 1, &samplerDesc, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+	rootSignatureDesc.Init_1_0(_countof(rootparams), rootparams, 1, 
+		&samplerDesc, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 
 	ComPtr<ID3DBlob> rootSigBlob;
 

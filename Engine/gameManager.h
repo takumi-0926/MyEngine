@@ -238,7 +238,7 @@ private://メンバ変数(ゲームシーン)
 	float DamegeAlpha = 1.0f;
 	float popHp = 0;
 
-	static const int debugTextTexNumber = 100;
+	static const int debugTextTexNumber = 99;
 
 	XMFLOAT3 afterEye;
 	XMFLOAT3 setObjectPos;

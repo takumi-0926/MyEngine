@@ -372,57 +372,57 @@ void GameManager::Update()
 	static bool blnChk = false;
 	static int radio = 0;
 	static float eneSpeed = 0.0f;
-	{
-		ImGui::Begin("Rendering Test Menu");
-		ImGui::SetWindowSize(ImVec2(400, 500), ImGuiCond_::ImGuiCond_FirstUseEver);
-		//imguiのUIコントロール
-		ImGui::Text("PlayerPosition : %.2f %.2f", _player->model->position.x, _player->model->position.z);
-		ImGui::Text("ClearResultPos : %.2f %.2f", clear->Pos().x, clear->Pos().y);
-		ImGui::Text("ClearResultPos : %.2f %.2f", protEnemy[0]->weapon->position.x, protEnemy[0]->weapon->position.z);
-		ImGui::Text("ClearResultPos : %.2f %.2f", protEnemy[0]->GetPosition().x, protEnemy[0]->GetPosition().z);
-		ImGui::Checkbox("EnemyPop", &blnChk);
-		ImGui::Checkbox("test", &_player->model->a);
-		ImGui::RadioButton("Game Camera", &radio, 0);
-		ImGui::SameLine();
-		ImGui::RadioButton("Debug Camera", &radio, 1);
-		ImGui::SameLine();
-		ImGui::RadioButton("Set Camera", &radio, 2);
-		int nSlider = 0;
-		ImGui::SliderFloat("Enemy Speed", &eneSpeed, 0.05f, 1.0f);
-		static float col3[3] = {};
-		ImGui::ColorPicker3("ColorPicker3", col3, ImGuiColorEditFlags_::ImGuiColorEditFlags_InputRGB);
-		static float col4[4] = {};
-		ImGui::ColorPicker4("ColorPicker4", col4, ImGuiColorEditFlags_::ImGuiColorEditFlags_PickerHueWheel | ImGuiColorEditFlags_::ImGuiColorEditFlags_AlphaBar);
+	//{
+	//	ImGui::Begin("Rendering Test Menu");
+	//	ImGui::SetWindowSize(ImVec2(400, 500), ImGuiCond_::ImGuiCond_FirstUseEver);
+	//	//imguiのUIコントロール
+	//	ImGui::Text("PlayerPosition : %.2f %.2f", _player->model->position.x, _player->model->position.z);
+	//	ImGui::Text("ClearResultPos : %.2f %.2f", clear->Pos().x, clear->Pos().y);
+	//	ImGui::Text("ClearResultPos : %.2f %.2f", protEnemy[0]->weapon->position.x, protEnemy[0]->weapon->position.z);
+	//	ImGui::Text("ClearResultPos : %.2f %.2f", protEnemy[0]->GetPosition().x, protEnemy[0]->GetPosition().z);
+	//	ImGui::Checkbox("EnemyPop", &blnChk);
+	//	ImGui::Checkbox("test", &_player->model->a);
+	//	ImGui::RadioButton("Game Camera", &radio, 0);
+	//	ImGui::SameLine();
+	//	ImGui::RadioButton("Debug Camera", &radio, 1);
+	//	ImGui::SameLine();
+	//	ImGui::RadioButton("Set Camera", &radio, 2);
+	//	int nSlider = 0;
+	//	ImGui::SliderFloat("Enemy Speed", &eneSpeed, 0.05f, 1.0f);
+	//	static float col3[3] = {};
+	//	ImGui::ColorPicker3("ColorPicker3", col3, ImGuiColorEditFlags_::ImGuiColorEditFlags_InputRGB);
+	//	static float col4[4] = {};
+	//	ImGui::ColorPicker4("ColorPicker4", col4, ImGuiColorEditFlags_::ImGuiColorEditFlags_PickerHueWheel | ImGuiColorEditFlags_::ImGuiColorEditFlags_AlphaBar);
 
-		ImGui::InputFloat3("circleShadowDir", circleShadowDir);
-		ImGui::InputFloat3("circleShadowAtten", circleShadowAtten);
-		ImGui::InputFloat2("circleShadowFactorAngle", circleShadowFacterAnlge);
-		ImGui::InputFloat3("DebugCameraEye", debugCameraPos);
-		ImGui::InputFloat3("DebugWeaponPos", testPos);
-		ImGui::InputInt3("DebugBoneNum", testNum);
+	//	ImGui::InputFloat3("circleShadowDir", circleShadowDir);
+	//	ImGui::InputFloat3("circleShadowAtten", circleShadowAtten);
+	//	ImGui::InputFloat2("circleShadowFactorAngle", circleShadowFacterAnlge);
+	//	ImGui::InputFloat3("DebugCameraEye", debugCameraPos);
+	//	ImGui::InputFloat3("DebugWeaponPos", testPos);
+	//	ImGui::InputInt3("DebugBoneNum", testNum);
 
-		ImGui::End();
+	//	ImGui::End();
 
-		ImGui::Begin("Particle");
-		ImGui::SetWindowSize(ImVec2(400, 500), ImGuiCond_::ImGuiCond_FirstUseEver);
-		ImGui::ColorPicker4("ColorPicker4", particleColor, ImGuiColorEditFlags_::ImGuiColorEditFlags_PickerHueWheel | ImGuiColorEditFlags_::ImGuiColorEditFlags_AlphaBar);
-		ImGui::End();
+	//	ImGui::Begin("Particle");
+	//	ImGui::SetWindowSize(ImVec2(400, 500), ImGuiCond_::ImGuiCond_FirstUseEver);
+	//	ImGui::ColorPicker4("ColorPicker4", particleColor, ImGuiColorEditFlags_::ImGuiColorEditFlags_PickerHueWheel | ImGuiColorEditFlags_::ImGuiColorEditFlags_AlphaBar);
+	//	ImGui::End();
 
-		//カメラ切り替え
-		static bool isCamera = false;
-		if (radio == 0 && isCamera == false) {
-			Wrapper::SetCamera(mainCamera);
-			FbxObject3d::SetCamera(dx12->Camera());
+	//	//カメラ切り替え
+	//	static bool isCamera = false;
+	//	if (radio == 0 && isCamera == false) {
+	//		Wrapper::SetCamera(mainCamera);
+	//		FbxObject3d::SetCamera(dx12->Camera());
 
-			isCamera = true;
-		}
-		else if (radio == 1 && isCamera == true) {
-			Wrapper::SetCamera(camera);
-			FbxObject3d::SetCamera(dx12->Camera());
+	//		isCamera = true;
+	//	}
+	//	else if (radio == 1 && isCamera == true) {
+	//		Wrapper::SetCamera(camera);
+	//		FbxObject3d::SetCamera(dx12->Camera());
 
-			isCamera = false;
-		}
-	}
+	//		isCamera = false;
+	//	}
+	//}
 
 	//ライト
 	light->SetPointLightPos(0, XMFLOAT3(_player->model->position.x, _player->model->position.y + 20.0f, _player->model->position.z));
@@ -1157,23 +1157,23 @@ void GameManager::Draw()
 		Sprite::PreDraw(cmdList);
 		if (GameModeNum != GameMode::POSE) {
 
-			hp->Draw();
+		//	hp->Draw();
 
-			HpBer->Draw();
+		//	HpBer->Draw();
 
-			BreakBar->Draw();
-			for (int i = 0; i < repelCount; i++) {
-				BreakGage[i]->Draw();
-			}
+		//	BreakBar->Draw();
+		//	for (int i = 0; i < repelCount; i++) {
+		//		BreakGage[i]->Draw();
+		//	}
 
-			if (GameModeNum == GameMode::WEAPONSELECT) {
-				weaponSelect->Draw();
-				for (int i = 0; i < 3; i++) { weaponSlot[i]->Draw(); }
-			}
+		//	if (GameModeNum == GameMode::WEAPONSELECT) {
+		//		weaponSelect->Draw();
+		//		for (int i = 0; i < 3; i++) { weaponSlot[i]->Draw(); }
+		//	}
 		}
-		if (GameModeNum == GameMode::POSE) {
-			Pose->Draw();
-		}
+		//if (GameModeNum == GameMode::POSE) {
+		//	Pose->Draw();
+		//}
 
 		Sprite::PostDraw();
 	}
@@ -1185,27 +1185,27 @@ void GameManager::Draw()
 
 	//フェード用画像描画
 	Sprite::PreDraw(cmdList);
-	if (fade->GetFadeIn() || fade->GetFadeOut() || fade->GethalfFade()) {
-		fade->Draw();
-	}
-	if (clear->GetClear()) {
-		clear->Draw();
-	}
-	else if (failed->GetFailed()) {
-		failed->Draw();
-	}
-	start->Draw();
-	if (SceneNum == GAME) {
-		if ((GATE_MAX - 3) <= gateHP) {
-			gateBreak_green->Draw();
-		}
-		else if ((GATE_MAX - 6) <= gateHP) {
-			gateBreak_yellow->Draw();
-		}
-		else if ((GATE_MAX - 9) <= gateHP) {
-			gateBreak_red->Draw();
-		}
-	}
+	//if (fade->GetFadeIn() || fade->GetFadeOut() || fade->GethalfFade()) {
+	//	fade->Draw();
+	//}
+	//if (clear->GetClear()) {
+	//	clear->Draw();
+	//}
+	//else if (failed->GetFailed()) {
+	//	failed->Draw();
+	//}
+	//start->Draw();
+	//if (SceneNum == GAME) {
+	//	if ((GATE_MAX - 3) <= gateHP) {
+	//		gateBreak_green->Draw();
+	//	}
+	//	else if ((GATE_MAX - 6) <= gateHP) {
+	//		gateBreak_yellow->Draw();
+	//	}
+	//	else if ((GATE_MAX - 9) <= gateHP) {
+	//		gateBreak_red->Draw();
+	//	}
+	//}
 	Sprite::PostDraw();
 }
 

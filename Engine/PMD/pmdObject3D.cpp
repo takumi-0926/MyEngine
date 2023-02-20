@@ -195,7 +195,7 @@ HRESULT PMDobject::CreateGraphicsPipelinePMD()
 
 	//レンダターゲットの設定
 	gpipeline.NumRenderTargets = 1;//今は1つ
-	gpipeline.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;//0～1に正規化されたRGBA
+	gpipeline.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;//0～1に正規化されたRGBA
 
 	//深度ステンシル
 	gpipeline.DepthStencilState.DepthEnable = true;//使う

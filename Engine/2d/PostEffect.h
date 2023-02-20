@@ -1,4 +1,4 @@
-#pragma once
+//#pragma once
 #include "Sprite\sprite.h"
 class PostEffect :
     public Sprite
@@ -44,7 +44,7 @@ public:
     /// </summary>
     /// <param name="cmdList"></param>
     void Draw(ID3D12GraphicsCommandList* cmdList);
-
+//
     /// <summary>
     /// ÉVÅ[ÉìëO
     /// </summary>

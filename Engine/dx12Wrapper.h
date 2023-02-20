@@ -151,25 +151,7 @@ public:
 		_cmdList->SetDescriptorHeaps(1, sceneheaps);
 		_cmdList->SetGraphicsRootDescriptorTable(0, _descHeap->GetGPUDescriptorHandleForHeapStart());
 	}
-	void SceneUpdate() {
-		HRESULT result;
-		_mappedSceneData = nullptr;//マップ先を示すポインタ
-		result = _sceneConstBuff->Map(0, nullptr, (void**)&_mappedSceneData);//マップ
-
-		const XMMATRIX& matViewProjection = camera->GetViewProjectionMatrix();
-		const XMFLOAT3& cameraPos = camera->GetEye();
-		const XMFLOAT4 planeVec(0, 1, 0, 0);
-		const XMFLOAT3 lightVec(1, -1, 1);
-
-		_mappedSceneData->viewproj = matViewProjection;
-		_mappedSceneData->shadow = XMMatrixShadow(
-			XMLoadFloat4(&planeVec),
-			-XMLoadFloat3(&lightVec));
-
-		_mappedSceneData->cameraPos = cameraPos;
-
-		_sceneConstBuff->Unmap(0, nullptr);
-	}
+	void SceneUpdate();
 
 	ID3D12Device* GetDevice() { return _dev.Get(); }
 	ComPtr<IDXGISwapChain4> SwapChain();

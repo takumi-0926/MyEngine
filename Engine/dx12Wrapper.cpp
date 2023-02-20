@@ -78,6 +78,10 @@ bool Wrapper::Init(HWND _hwnd, SIZE _ret) {
 		assert(0);
 		return false;
 	}
+	if (FAILED(CreateSceneView())) {
+		assert(0);
+		return false;
+	}
 	if (FAILED(InitializeRenderHeap())) {
 		assert(0);
 		return false;
@@ -87,10 +91,6 @@ bool Wrapper::Init(HWND _hwnd, SIZE _ret) {
 		return false;
 	}
 	if (FAILED(InitializeFence())) {
-		assert(0);
-		return false;
-	}
-	if (FAILED(CreateSceneView())) {
 		assert(0);
 		return false;
 	}
@@ -314,7 +314,7 @@ HRESULT Wrapper::InitializeRenderHeap()
 
 	//SRGBレンダターゲットビュー設定
 	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc = {};
-	rtvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+	rtvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
 
 	for (uint32_t i = 0; i < swcDesc.BufferCount; ++i) {
@@ -385,6 +385,12 @@ HRESULT Wrapper::InitializeDescHeap() {
 }
 
 HRESULT Wrapper::InitializeDepthBuff(SIZE ret) {
+
+	//深度テクスチャ用
+	D3D12_RESOURCE_DESC resdesc = CD3DX12_RESOURCE_DESC::Tex2D(DXGI_FORMAT_R32_TYPELESS, ret.cx, ret.cy);
+	resdesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
+
+	//通常の深度バッファ
 	D3D12_RESOURCE_DESC depthResDesc = {};
 	depthResDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;//2次元のテクスチャデータ
 	depthResDesc.Width = ret.cx;//幅と高さはレンダターゲットと同じ
@@ -408,7 +414,7 @@ HRESULT Wrapper::InitializeDepthBuff(SIZE ret) {
 	auto result = _dev->CreateCommittedResource(
 		&depthHeapProp,
 		D3D12_HEAP_FLAG_NONE,
-		&depthResDesc,
+		&resdesc,
 		D3D12_RESOURCE_STATE_DEPTH_WRITE,//深度書き込み用
 		&depthClearValue,
 		IID_PPV_ARGS(_depthBuffer.ReleaseAndGetAddressOf()));
@@ -437,6 +443,29 @@ HRESULT Wrapper::InitializeDepthBuff(SIZE ret) {
 		_depthBuffer.Get(),
 		&dsvDesc,
 		_dsvHeap->GetCPUDescriptorHandleForHeapStart());
+
+	//深度テクスチャ用ヒープ作成
+	D3D12_DESCRIPTOR_HEAP_DESC texHeapdesc = {};
+	texHeapdesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+	texHeapdesc.NodeMask = 0;
+	texHeapdesc.NumDescriptors = 1;
+	texHeapdesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+	result = _dev->CreateDescriptorHeap(&texHeapdesc, IID_PPV_ARGS(&_depthSRVHaep));
+	if (FAILED(result)) {
+		assert(0);
+		return result;
+	}
+
+	D3D12_SHADER_RESOURCE_VIEW_DESC texResdesc = {};
+	texResdesc.Format = DXGI_FORMAT_R32_FLOAT;
+	texResdesc.Texture2D.MipLevels = 1;
+	texResdesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	texResdesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	auto handle = _depthSRVHaep->GetCPUDescriptorHandleForHeapStart();
+
+	//深度テクスチャリソースを作成
+	_dev->CreateShaderResourceView(
+		_depthBuffer.Get(), &texResdesc, handle);
 
 	return result;
 }
@@ -509,6 +538,27 @@ ComPtr<ID3D12DescriptorHeap> Wrapper::CreateDescriptorHeapForImgui()
 		&desc, IID_PPV_ARGS(ret.ReleaseAndGetAddressOf()));
 
 	return ret;
+}
+
+void Wrapper::SceneUpdate()
+{
+	HRESULT result;
+	_mappedSceneData = nullptr;//マップ先を示すポインタ
+	result = _sceneConstBuff->Map(0, nullptr, (void**)&_mappedSceneData);//マップ
+
+	const XMMATRIX& matViewProjection = camera->GetViewProjectionMatrix();
+	const XMFLOAT3& cameraPos = camera->GetEye();
+	const XMFLOAT4 planeVec(0, 1, 0, 0);
+	const XMFLOAT3 lightVec(1, -1, 1);
+
+	_mappedSceneData->viewproj = matViewProjection;
+	_mappedSceneData->shadow = XMMatrixShadow(
+		XMLoadFloat4(&planeVec),
+		-XMLoadFloat3(&lightVec));
+
+	_mappedSceneData->cameraPos = cameraPos;
+
+	_sceneConstBuff->Unmap(0, nullptr);
 }
 
 ComPtr<IDXGISwapChain4> Wrapper::SwapChain() {
