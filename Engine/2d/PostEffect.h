@@ -10,8 +10,9 @@ private:
     //SRV用デスクリプタヒープ
     ComPtr<ID3D12DescriptorHeap> descHeapSRV;
 
-    //テクスチャバッファ
+    //深度テクスチャバッファ
     ComPtr<ID3D12Resource> depthBuff;
+    ComPtr<ID3D12DescriptorHeap>depthHaepSRV;	//深度テクスチャ
 
     //RTV用デスクリプタヒープ
     ComPtr<ID3D12DescriptorHeap> descHeapRTV;

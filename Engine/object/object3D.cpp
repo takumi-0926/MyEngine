@@ -98,11 +98,22 @@ void Object3Ds::Update()
 
 		UpdateWorldMatrix();
 
+		const XMFLOAT4 light(1, -1, 1, 0);
+		XMVECTOR lightVec = XMLoadFloat4(&light);
+
+		XMVECTOR eye = XMLoadFloat3(&camera->GetEye());
+		XMVECTOR terget = XMLoadFloat3(&camera->GetTarget());
+		XMVECTOR up = XMLoadFloat3(&camera->GetUp());
+
+		auto lightPos = terget + XMVector3Normalize(lightVec) * XMVector3Length(XMVectorSubtract(terget, eye)).m128_f32[0];
+
 		// 定数バッファへデータ転送(OBJ)
 		ConstBufferDataB0* constMap = nullptr;
 		result = constBuffB0->Map(0, nullptr, (void**)&constMap);
 		if (FAILED(result)) { assert(0); }
 		constMap->viewproj = matViewProjection;
+		constMap->lightCamera = XMMatrixLookAtLH(
+			lightPos, terget, up) * XMMatrixOrthographicLH(40, 40, 1.0f, 100.0f);
 		constMap->cameraPos = cameraPos;
 		if (!useWorldMat) {
 			constMap->world = matWorld;

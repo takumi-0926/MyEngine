@@ -139,13 +139,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		//レンダーテクスチャに描画
 		postEffect->PreDrawScene(dx12->CommandList().Get());
-		gameScene.Draw();
+		gameScene.MainDraw();
 		postEffect->PostDrawScene(dx12->CommandList().Get());
 
 		dx12->PreRun();
 		
 		//ポストエフェクトを描画
 		postEffect->Draw(dx12->CommandList().Get());
+
+		//スプライト描画
+		gameScene.SubDraw();
 
 		//ImGui::Render();
 		//dx12->CommandList()->SetDescriptorHeaps(

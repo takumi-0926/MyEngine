@@ -20,6 +20,9 @@ XMFLOAT3 Wrapper::up = { 0,1,0 };
 Light* Wrapper::light = { nullptr };
 int Wrapper::lightNum = 0;
 
+//ライトデプス値
+constexpr uint32_t shadow_difinition = 1024;
+
 //@brief コンソール画面にフォーマット付き文字列を表示
 //@param formatフォーマット（%dとか%fとかの）
 //@param 可変長引数
@@ -423,9 +426,23 @@ HRESULT Wrapper::InitializeDepthBuff(SIZE ret) {
 		return result;
 	}
 
+	resdesc.Width = shadow_difinition;
+	resdesc.Height = shadow_difinition;
+	result = _dev->CreateCommittedResource(
+		&depthHeapProp,
+		D3D12_HEAP_FLAG_NONE,
+		&resdesc,
+		D3D12_RESOURCE_STATE_DEPTH_WRITE,//深度書き込み用
+		&depthClearValue,
+		IID_PPV_ARGS(_lightDepthBuffer.ReleaseAndGetAddressOf()));
+	if (FAILED(result)) {
+		assert(0);
+		return result;
+	}
+
 	//深度のためのディスクリプタヒープ
 	D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc = {};
-	dsvHeapDesc.NumDescriptors = 1;
+	dsvHeapDesc.NumDescriptors = 2;
 	dsvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
 	result = _dev->CreateDescriptorHeap(&dsvHeapDesc, IID_PPV_ARGS(_dsvHeap.ReleaseAndGetAddressOf()));
 	if (FAILED(result)) {
@@ -439,18 +456,26 @@ HRESULT Wrapper::InitializeDepthBuff(SIZE ret) {
 	dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
 	dsvDesc.Flags = D3D12_DSV_FLAG_NONE;
 
+	auto handle = _dsvHeap->GetCPUDescriptorHandleForHeapStart();
 	_dev->CreateDepthStencilView(
 		_depthBuffer.Get(),
 		&dsvDesc,
-		_dsvHeap->GetCPUDescriptorHandleForHeapStart());
+		handle);
+
+	handle.ptr += _dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
+
+	_dev->CreateDepthStencilView(
+		_lightDepthBuffer.Get(),
+		&dsvDesc,
+		handle);
 
 	//深度テクスチャ用ヒープ作成
 	D3D12_DESCRIPTOR_HEAP_DESC texHeapdesc = {};
 	texHeapdesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 	texHeapdesc.NodeMask = 0;
-	texHeapdesc.NumDescriptors = 1;
+	texHeapdesc.NumDescriptors = 2;
 	texHeapdesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-	result = _dev->CreateDescriptorHeap(&texHeapdesc, IID_PPV_ARGS(&_depthSRVHaep));
+	result = _dev->CreateDescriptorHeap(&texHeapdesc, IID_PPV_ARGS(&_depthHaepSRV));
 	if (FAILED(result)) {
 		assert(0);
 		return result;
@@ -461,12 +486,18 @@ HRESULT Wrapper::InitializeDepthBuff(SIZE ret) {
 	texResdesc.Texture2D.MipLevels = 1;
 	texResdesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	texResdesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-	auto handle = _depthSRVHaep->GetCPUDescriptorHandleForHeapStart();
+	auto handle = _depthHaepSRV->GetCPUDescriptorHandleForHeapStart();
 
 	//深度テクスチャリソースを作成
 	_dev->CreateShaderResourceView(
 		_depthBuffer.Get(), &texResdesc, handle);
 
+	handle.ptr += _dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+
+	//ライトデプス
+	_dev->CreateShaderResourceView(
+		_lightDepthBuffer.Get(), &texResdesc, handle
+	);
 	return result;
 }
 
@@ -549,12 +580,22 @@ void Wrapper::SceneUpdate()
 	const XMMATRIX& matViewProjection = camera->GetViewProjectionMatrix();
 	const XMFLOAT3& cameraPos = camera->GetEye();
 	const XMFLOAT4 planeVec(0, 1, 0, 0);
-	const XMFLOAT3 lightVec(1, -1, 1);
+	const XMFLOAT4 light(1, -1, 1, 0);
+	XMVECTOR lightVec = XMLoadFloat4(&light);
+
+	XMVECTOR eye = XMLoadFloat3(&camera->GetEye());
+	XMVECTOR terget = XMLoadFloat3(&camera->GetTarget());
+	XMVECTOR up = XMLoadFloat3(&camera->GetUp());
+
+	auto lightPos = terget + XMVector3Normalize(lightVec) * XMVector3Length(XMVectorSubtract(terget, eye)).m128_f32[0];
 
 	_mappedSceneData->viewproj = matViewProjection;
 	_mappedSceneData->shadow = XMMatrixShadow(
 		XMLoadFloat4(&planeVec),
-		-XMLoadFloat3(&lightVec));
+		-lightVec);
+
+	_mappedSceneData->lightCamera = XMMatrixLookAtLH(
+		lightPos, terget, up) * XMMatrixOrthographicLH(40, 40, 1.0f, 100.0f);
 
 	_mappedSceneData->cameraPos = cameraPos;
 

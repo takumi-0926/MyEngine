@@ -219,8 +219,30 @@ void PostEffect::Initialize()
 		depthBuff.Get(),
 		&dsvDesc,
 		descHeapDSV->GetCPUDescriptorHandleForHeapStart());
-//
-//	CreateGraphicsPipeline();
+
+	//深度テクスチャ用ヒープ作成
+	D3D12_DESCRIPTOR_HEAP_DESC texHeapdesc = {};
+	texHeapdesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+	texHeapdesc.NodeMask = 0;
+	texHeapdesc.NumDescriptors = 1;
+	texHeapdesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+	result = device->CreateDescriptorHeap(&texHeapdesc, IID_PPV_ARGS(&depthHaepSRV));
+	if (FAILED(result)) {
+		assert(0);
+	}
+
+	D3D12_SHADER_RESOURCE_VIEW_DESC texResdesc = {};
+	texResdesc.Format = DXGI_FORMAT_R32_FLOAT;
+	texResdesc.Texture2D.MipLevels = 1;
+	texResdesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	texResdesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	auto handle = depthHaepSRV->GetCPUDescriptorHandleForHeapStart();
+
+	//深度テクスチャリソースを作成
+	device->CreateShaderResourceView(
+		depthBuff.Get(), &texResdesc, handle);
+
+	CreateGraphicsPipeline();
 }
 
 void PostEffect::Draw(ID3D12GraphicsCommandList* cmdList) {
@@ -241,9 +263,9 @@ void PostEffect::Draw(ID3D12GraphicsCommandList* cmdList) {
 	constBuff->Unmap(0, nullptr);
 
 	// パイプラインステートの設定
-	cmdList->SetPipelineState(pipelineset._pipelinestate.Get());
+	cmdList->SetPipelineState(pipelineState.Get());
 	// ルートシグネチャの設定
-	cmdList->SetGraphicsRootSignature(pipelineset._rootsignature.Get());
+	cmdList->SetGraphicsRootSignature(rootSignature.Get());
 	// プリミティブ形状を設定
 	cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 
@@ -259,6 +281,14 @@ void PostEffect::Draw(ID3D12GraphicsCommandList* cmdList) {
 	// シェーダリソースビューをセット
 	//cmdList->SetGraphicsRootDescriptorTable(1, CD3DX12_GPU_DESCRIPTOR_HANDLE(spritecommon._descHeap->GetGPUDescriptorHandleForHeapStart(), this->texNumber, descriptorHandleIncrementSize));
 	cmdList->SetGraphicsRootDescriptorTable(1, descHeapSRV->GetGPUDescriptorHandleForHeapStart());
+	
+	cmdList->SetDescriptorHeaps(1, depthHaepSRV.GetAddressOf());
+	cmdList->SetGraphicsRootDescriptorTable(
+		2, depthHaepSRV->GetGPUDescriptorHandleForHeapStart());
+
+	// デスクリプタヒープをセット
+	cmdList->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
+
 	// 描画コマンド
 	cmdList->DrawInstanced(4, 1, 0, 0);
 
@@ -450,13 +480,15 @@ void PostEffect::CreateGraphicsPipeline()
 	gpipeline.SampleDesc.Count = 1; // 1ピクセルにつき1回サンプリング
 
 	// デスクリプタレンジ
-	CD3DX12_DESCRIPTOR_RANGE descRangeSRV;
-	descRangeSRV.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0); // t0 レジスタ
+	CD3DX12_DESCRIPTOR_RANGE descRangeSRV[2] = {};
+	descRangeSRV[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0); // t0 レジスタ
+	descRangeSRV[1].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 1); // t1 レジスタ
 
 	// ルートパラメータ
-	CD3DX12_ROOT_PARAMETER rootparams[2] = {};
+	CD3DX12_ROOT_PARAMETER rootparams[3] = {};
 	rootparams[0].InitAsConstantBufferView(0, 0, D3D12_SHADER_VISIBILITY_ALL);
-	rootparams[1].InitAsDescriptorTable(1, &descRangeSRV, D3D12_SHADER_VISIBILITY_ALL);
+	rootparams[1].InitAsDescriptorTable(1, &descRangeSRV[0], D3D12_SHADER_VISIBILITY_ALL);
+	rootparams[2].InitAsDescriptorTable(1, &descRangeSRV[1], D3D12_SHADER_VISIBILITY_ALL);
 
 	// スタティックサンプラー
 	CD3DX12_STATIC_SAMPLER_DESC samplerDesc = CD3DX12_STATIC_SAMPLER_DESC(0, D3D12_FILTER_MIN_MAG_MIP_POINT); // s0 レジスタ
@@ -480,15 +512,15 @@ void PostEffect::CreateGraphicsPipeline()
 		0,
 		rootSigBlob->GetBufferPointer(),
 		rootSigBlob->GetBufferSize(),
-		IID_PPV_ARGS(&pipelineset._rootsignature));
+		IID_PPV_ARGS(&rootSignature));
 	assert(SUCCEEDED(result));
 
 	//パイプラインにルートシグネチャをセット
-	gpipeline.pRootSignature = pipelineset._rootsignature.Get();
+	gpipeline.pRootSignature = rootSignature.Get();
 
 	// グラフィックスパイプラインの生成
 	result = device->CreateGraphicsPipelineState(
 		&gpipeline,
-		IID_PPV_ARGS(&pipelineset._pipelinestate));
+		IID_PPV_ARGS(&pipelineState));
 	assert(SUCCEEDED(result));
 }

@@ -270,7 +270,8 @@ public://ƒƒ“ƒoŠÖ”
 	void GameUpdate();
 	void EndUpdate();
 	//•`‰æ
-	void Draw();
+	void MainDraw();
+	void SubDraw();
 
 	void TitleDraw();
 	void GameDraw();

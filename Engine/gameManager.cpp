@@ -1082,7 +1082,7 @@ void GameManager::EndUpdate() {
 	}
 }
 
-void GameManager::Draw()
+void GameManager::MainDraw()
 {
 	// コマンドリストの取得
 	ID3D12GraphicsCommandList* cmdList = dx12->CommandList().Get();
@@ -1105,6 +1105,29 @@ void GameManager::Draw()
 		dx12->ClearDepthBuffer();
 
 		Bottom->Draw(cmdList);
+
+		Sprite::PreDraw(cmdList);
+		if (GameModeNum != GameMode::POSE) {
+
+			//hp->Draw();
+			//HpBer->Draw();
+
+
+		//	BreakBar->Draw();
+		//	for (int i = 0; i < repelCount; i++) {
+		//		BreakGage[i]->Draw();
+		//	}
+
+		//	if (GameModeNum == GameMode::WEAPONSELECT) {
+		//		weaponSelect->Draw();
+		//		for (int i = 0; i < 3; i++) { weaponSlot[i]->Draw(); }
+		//	}
+		}
+		if (GameModeNum == GameMode::POSE) {
+			Pose->Draw();
+		}
+
+		Sprite::PostDraw();
 
 		BaseObject::PreDraw(cmdList);
 
@@ -1154,28 +1177,6 @@ void GameManager::Draw()
 		ParticleManager::PostDraw();
 
 
-		Sprite::PreDraw(cmdList);
-		if (GameModeNum != GameMode::POSE) {
-
-		//	hp->Draw();
-
-		//	HpBer->Draw();
-
-		//	BreakBar->Draw();
-		//	for (int i = 0; i < repelCount; i++) {
-		//		BreakGage[i]->Draw();
-		//	}
-
-		//	if (GameModeNum == GameMode::WEAPONSELECT) {
-		//		weaponSelect->Draw();
-		//		for (int i = 0; i < 3; i++) { weaponSlot[i]->Draw(); }
-		//	}
-		}
-		//if (GameModeNum == GameMode::POSE) {
-		//	Pose->Draw();
-		//}
-
-		Sprite::PostDraw();
 	}
 	else if (SceneNum == END) {
 		Sprite::PreDraw(cmdList);
@@ -1206,6 +1207,133 @@ void GameManager::Draw()
 	//		gateBreak_red->Draw();
 	//	}
 	//}
+	Sprite::PostDraw();
+}
+void GameManager::SubDraw()
+{
+	// コマンドリストの取得
+	ID3D12GraphicsCommandList* cmdList = dx12->CommandList().Get();
+
+	if (SceneNum == TITLE) {
+		Sprite::PreDraw(cmdList);
+		Title->Draw();
+		debugText.DrawAll(cmdList);
+		Sprite::PostDraw();
+
+		//BaseObject::PreDraw(cmdList);
+		//BaseObject::PostDraw();
+
+	}
+	else if (SceneNum == GAME) {
+		Sprite::PreDraw(cmdList);
+		Sprite::PostDraw();
+
+		//深度バッファクリア
+		dx12->ClearDepthBuffer();
+
+		Bottom->Draw(cmdList);
+
+		Sprite::PreDraw(cmdList);
+		if (GameModeNum != GameMode::POSE) {
+
+			hp->Draw();
+			HpBer->Draw();
+
+
+			BreakBar->Draw();
+			for (int i = 0; i < repelCount; i++) {
+				BreakGage[i]->Draw();
+			}
+
+			if (GameModeNum == GameMode::WEAPONSELECT) {
+				weaponSelect->Draw();
+				for (int i = 0; i < 3; i++) { weaponSlot[i]->Draw(); }
+			}
+		}
+		if (GameModeNum == GameMode::POSE) {
+			Pose->Draw();
+		}
+
+		Sprite::PostDraw();
+
+		//BaseObject::PreDraw(cmdList);
+
+		////プレイヤー描画
+		//if (GameModeNum != GameMode::SET) {
+		//	_player->Draw();
+		//}
+		//skyDome->Draw();
+
+		//if (UseStage == GameLocation::BaseCamp) {
+		//	//ベースキャンプ描画
+		//	for (auto& object : baseCamp) {
+		//		object->Draw();
+		//	}
+
+		//	moveGuide->Draw();
+		//}
+		////ステージ描画
+		//else if (UseStage == GameLocation::BaseStage) {
+		//	for (auto& object : stages) {
+		//		object->Draw();
+		//	}
+		//	//防衛施設描画
+		//	for (int i = 0; i < 6; i++) {
+		//		if (!defense_facilities[i]->GetAlive()) { continue; }
+		//		defense_facilities[i]->Draw();
+		//	}
+
+		//	//敵描画
+		//	for (int i = 0; i < _enemy.size(); i++) {
+		//		_enemy[i]->Draw(cmdList);
+		//	}
+		//}
+
+		//BaseObject::PostDraw();
+
+		//// 3Dオブジェクト描画前処理
+		//ParticleManager::PreDraw(cmdList);
+		//// 3Dオブクジェクトの描画
+		//particlemanager->Draw();
+
+		//for (int i = 0; i < _enemy.size(); i++) {
+		//	_enemy[i]->particle->Draw();
+		//}
+
+		//// 3Dオブジェクト描画後処理
+		//ParticleManager::PostDraw();
+
+
+	}
+	else if (SceneNum == END) {
+		Sprite::PreDraw(cmdList);
+		End->Draw();
+		Sprite::PostDraw();
+	}
+
+	//フェード用画像描画
+	Sprite::PreDraw(cmdList);
+	if (fade->GetFadeIn() || fade->GetFadeOut() || fade->GethalfFade()) {
+		fade->Draw();
+	}
+	if (clear->GetClear()) {
+		clear->Draw();
+	}
+	else if (failed->GetFailed()) {
+		failed->Draw();
+	}
+	start->Draw();
+	if (SceneNum == GAME) {
+		if ((GATE_MAX - 3) <= gateHP) {
+			gateBreak_green->Draw();
+		}
+		else if ((GATE_MAX - 6) <= gateHP) {
+			gateBreak_yellow->Draw();
+		}
+		else if ((GATE_MAX - 9) <= gateHP) {
+			gateBreak_red->Draw();
+		}
+	}
 	Sprite::PostDraw();
 }
 

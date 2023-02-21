@@ -26,6 +26,7 @@ protected:
 		//XMMATRIX proj;
 		XMMATRIX viewproj;
 		XMMATRIX world;
+		XMMATRIX lightCamera;
 		XMFLOAT3 cameraPos;
 	};
 	// 定数バッファ用データ構造体B0

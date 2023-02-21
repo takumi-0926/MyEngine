@@ -25,6 +25,7 @@ private:
 		//XMMATRIX mat;	// ３Ｄ変換行列
 		XMMATRIX viewproj;
 		XMMATRIX shadow;
+		XMMATRIX lightCamera;
 		XMFLOAT3 cameraPos;
 	};
 
@@ -48,8 +49,9 @@ private:
 	D3D12_GPU_DESCRIPTOR_HANDLE			_heapHandle;
 	//深度バッファ
 	ComPtr<ID3D12DescriptorHeap>		_dsvHeap = nullptr;
-	ComPtr<ID3D12DescriptorHeap>		_depthSRVHaep = nullptr;	//深度テクスチャ
+	ComPtr<ID3D12DescriptorHeap>		_depthHaepSRV = nullptr;	//深度テクスチャ
 	ComPtr<ID3D12Resource>				_depthBuffer = nullptr;
+	ComPtr<ID3D12Resource>				_lightDepthBuffer = nullptr;
 	//シーンを構成するバッファまわり
 	ConstBufferDataB0_1*				_mappedSceneData;
 	ComPtr<ID3D12Resource>				_sceneConstBuff = nullptr;

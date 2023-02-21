@@ -8,6 +8,7 @@ Texture2D<float4> spa : register(t2);
 cbuffer cbuff0 : register(b0) {
 	matrix viewproj;  //ビュー
 	matrix shadow;//シャドウ（影）
+	matrix lightCamera;
 	float3 cameraPos; // カメラ座標（ワールド座標）
 }
 
