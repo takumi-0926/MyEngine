@@ -132,6 +132,40 @@ void Wrapper::PreRun()
 	// シザリング矩形の設定
 	CD3DX12_RECT rect = CD3DX12_RECT(0, 0, Application::window_width, Application::window_height);
 	_cmdList->RSSetScissorRects(1, &rect);
+
+	//深度SRV
+	_cmdList->SetDescriptorHeaps(1, _depthHaepSRV.GetAddressOf());
+
+	//auto handle = _depthHaepSRV->GetGPUDescriptorHandleForHeapStart();
+
+	//handle.ptr += _dev->GetDescriptorHandleIncrementSize(
+	//	D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV
+	//);
+
+	//_cmdList->SetGraphicsRootDescriptorTable(3, handle);
+}
+
+void Wrapper::PreRunShadow()
+{	//バックバッファのインデックスを取得
+	auto bbIdx = SwapChain()->GetCurrentBackBufferIndex();
+
+	////リソースバリア（Present⇔レンダターゲット）状態の変更
+	//CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(_backBuffer[bbIdx].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+	//_cmdList->ResourceBarrier(1, &barrier);
+
+	//描画先を指定
+	auto handle = _dsvHeap->GetCPUDescriptorHandleForHeapStart();
+	handle.ptr += _dev->GetDescriptorHandleIncrementSize(
+		D3D12_DESCRIPTOR_HEAP_TYPE_DSV
+	);
+	_cmdList->OMSetRenderTargets(0, nullptr, false, &handle);
+
+	// ビューポートの設定
+	CD3DX12_VIEWPORT viewport = CD3DX12_VIEWPORT(0.0f, 0.0f, Application::window_width, Application::window_height);
+	_cmdList->RSSetViewports(1, &viewport);
+	// シザリング矩形の設定
+	CD3DX12_RECT rect = CD3DX12_RECT(0, 0, Application::window_width, Application::window_height);
+	_cmdList->RSSetScissorRects(1, &rect);
 }
 
 void Wrapper::PostRun() {
@@ -486,17 +520,17 @@ HRESULT Wrapper::InitializeDepthBuff(SIZE ret) {
 	texResdesc.Texture2D.MipLevels = 1;
 	texResdesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	texResdesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-	auto handle = _depthHaepSRV->GetCPUDescriptorHandleForHeapStart();
+	auto handle02 = _depthHaepSRV->GetCPUDescriptorHandleForHeapStart();
 
 	//深度テクスチャリソースを作成
 	_dev->CreateShaderResourceView(
-		_depthBuffer.Get(), &texResdesc, handle);
+		_depthBuffer.Get(), &texResdesc, handle02);
 
-	handle.ptr += _dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	handle02.ptr += _dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
 	//ライトデプス
 	_dev->CreateShaderResourceView(
-		_lightDepthBuffer.Get(), &texResdesc, handle
+		_lightDepthBuffer.Get(), &texResdesc, handle02
 	);
 	return result;
 }

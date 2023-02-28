@@ -117,6 +117,8 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 		return false;
 	}
 
+	LoadTitleResources();
+
 	//カメラをセット
 	camera = new DebugCamera(Application::window_width, Application::window_height, input);
 	mainCamera = new Camera(Application::window_width, Application::window_height);
@@ -328,7 +330,7 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	moveGuide = Object3Ds::Create(guideModels[0]);
 	moveGuide->SetPosition(XMFLOAT3(555.0f, 3.0f, 10.0f));
 	moveGuide->scale = XMFLOAT3(5, 5, 5);
-	
+
 	//ヒットボックス-----------------
 	HitBox::CreatePipeline(dx12);
 	HitBox::CreateTransform();
@@ -436,34 +438,32 @@ void GameManager::Update()
 	GameUpdate();
 	EndUpdate();
 }
+
 void GameManager::TitleUpdate()
 {
 	//タイトル更新
-	if (SceneNum == TITLE) {
+	if (SceneNum != TITLE)return;
 
-		if (resetFlag == false) {
-			//Initalize(dx12, audio, input);
-			resetFlag = true;
-		}
+	//if(directInput->IsButtonPush(directInput->DownButton))
 
-		if (input->Trigger(DIK_SPACE) || directInput->IsButtonPush(DirectInput::ButtonKind::ButtonA)) {
-			Title->Update();
-			fade->SetFadeIn(true);
-			start->SetFadeIn(true);
-		}
-		//フェードイン
-		if (fade->GetFadeIn()) {
-			fade->FadeIn();
-			if (!fade->GetFadeIn()) {
-				SceneNum = GAME;
-				fade->SetFadeIn(false);
-				fade->SetFadeOut(true);
-			}
-		}
 
-		debugText.Print("hello", 100.0f, 100.0f, 8.0f);
 
+	if (input->Trigger(DIK_SPACE) || directInput->IsButtonPush(DirectInput::ButtonKind::DownButton)) {
+		Title->Update();
+		fade->SetFadeIn(true);
+		start->SetFadeIn(true);
 	}
+	//フェードイン
+	if (fade->GetFadeIn()) {
+		fade->FadeIn();
+		if (!fade->GetFadeIn()) {
+			SceneNum = GAME;
+			fade->SetFadeIn(false);
+			fade->SetFadeOut(true);
+		}
+	}
+
+	debugText.Print("hello", 100.0f, 100.0f, 8.0f);
 }
 void GameManager::GameUpdate() {
 	//ゲーム
@@ -881,7 +881,7 @@ void GameManager::GameUpdate() {
 			//パーティクル生成
 			static float createTime = 0.2f;
 			if (createTime <= 0.0f) {
-				particlemanager->CreateParticle(30,_player->model->position, 0.01f,0.005f,10,5.0f, XMFLOAT4(particleColor));
+				particlemanager->CreateParticle(30, _player->model->position, 0.01f, 0.005f, 10, 5.0f, XMFLOAT4(particleColor));
 				createTime = 0.2f;
 			}
 			createTime -= 1.0f / 60.0f;
@@ -1133,6 +1133,7 @@ void GameManager::MainDraw()
 
 		//プレイヤー描画
 		if (GameModeNum != GameMode::SET) {
+			_player->preDraw();
 			_player->Draw();
 		}
 		skyDome->Draw();
@@ -1218,6 +1219,12 @@ void GameManager::SubDraw()
 		Sprite::PreDraw(cmdList);
 		Title->Draw();
 		debugText.DrawAll(cmdList);
+
+		for (int i = 0; i < 5; i++)
+		{
+			TitleResources[i].get()->Draw();
+		}
+
 		Sprite::PostDraw();
 
 		//BaseObject::PreDraw(cmdList);
@@ -1336,6 +1343,21 @@ void GameManager::SubDraw()
 	}
 	Sprite::PostDraw();
 }
+void GameManager::shadowDraw(bool isShadow)
+{
+	// コマンドリストの取得
+	ID3D12GraphicsCommandList* cmdList = dx12->CommandList().Get();
+
+	BaseObject::PreDraw(cmdList);
+
+	//プレイヤー描画
+	if (GameModeNum != GameMode::SET) {
+		_player->preDrawLight();
+		_player->Draw(true);
+	}
+
+	BaseObject::PostDraw();
+}
 
 XMFLOAT3 GameManager::moveCamera(XMFLOAT3 pos1, XMFLOAT3 pos2, float pct)
 {
@@ -1344,4 +1366,25 @@ XMFLOAT3 GameManager::moveCamera(XMFLOAT3 pos1, XMFLOAT3 pos2, float pct)
 	pos.y = pos1.y + ((pos2.y - pos1.y) * pct);
 	pos.z = pos1.z + ((pos2.z - pos1.z) * pct);
 	return pos;
+}
+
+void GameManager::LoadTitleResources()
+{
+	if (!Sprite::loadTexture(SpriteName::Title_UI, L"Resources/Title_UI_01.png")) { assert(0); }
+	if (!Sprite::loadTexture(SpriteName::Start_Title_UI_01, L"Resources/Title_UI_Start_low.png")) { assert(0); }
+	if (!Sprite::loadTexture(SpriteName::Start_Title_UI_02, L"Resources/Title_UI_Start_high.png")) { assert(0); }
+	if (!Sprite::loadTexture(SpriteName::Option_TItle_UI_01, L"Resources/Title_UI_Option_low.png")) { assert(0); }
+	if (!Sprite::loadTexture(SpriteName::Option_TItle_UI_02, L"Resources/Title_UI_Option_high.png")) { assert(0); }
+
+	TitleResources[0].reset(Sprite::Create(Title_UI, { 36.0f,32.0f }));
+	TitleResources[1].reset(Sprite::Create(Start_Title_UI_01, { 36.0f,32.0f }));
+	TitleResources[2].reset(Sprite::Create(Start_Title_UI_02, { 36.0f,32.0f }));
+	TitleResources[3].reset(Sprite::Create(Option_TItle_UI_01, { 36.0f,32.0f }));
+	TitleResources[4].reset(Sprite::Create(Option_TItle_UI_02, { 36.0f,32.0f }));
+}
+void GameManager::LoadGameResources()
+{
+}
+void GameManager::LoadAnotherResourecs()
+{
 }

@@ -6,7 +6,7 @@ SamplerState smp : register(s0);
 
 float4 main(VSOutput input) : SV_TARGET
 {
-	float dep = pow(depth.Sample(smp, input.uv), 20);
+	float dep = pow(abs(depth.Sample(smp, input.uv)), 20);
 
 	//return float4(dep, dep, dep, 1);
 

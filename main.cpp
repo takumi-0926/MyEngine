@@ -137,6 +137,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		gameScene.Update();
 
+		//影
+		dx12->PreRunShadow();
+		gameScene.shadowDraw();
+		//dx12->PostRun();
+
 		//レンダーテクスチャに描画
 		postEffect->PreDrawScene(dx12->CommandList().Get());
 		gameScene.MainDraw();

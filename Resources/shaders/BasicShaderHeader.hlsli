@@ -4,6 +4,7 @@ SamplerState smp : register(s0);
 Texture2D<float4> sph : register(t1);
 Texture2D<float4> spa : register(t2);
 
+Texture2D<float> lightDepthTex : register(t4);
 //定数バッファ
 cbuffer cbuff0 : register(b0) {
 	matrix viewproj;  //ビュー
@@ -30,5 +31,6 @@ struct Output {
 	float4 normal : NORMAL;//法線ベクトル
 	float2 uv : TEXCOORD;//UV値
 	uint instNo : SV_InstanceID;
+	float4 tpos : TPOS;
 };
 

@@ -141,7 +141,7 @@ public:
 	/// <summary>
 	/// •`‰æˆ—
 	/// </summary>
-	void Draw()override;
+	void Draw(bool isShadow = false)override;
 
 public:
 	void SetInput(const Input& input) { this->input = input; }

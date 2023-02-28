@@ -101,6 +101,7 @@ public:
 	bool Init(HWND _hwnd, SIZE _ret);
 
 	void PreRun();
+	void PreRunShadow();
 	void PostRun();
 
 	//Œãˆ—

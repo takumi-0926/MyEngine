@@ -375,7 +375,7 @@ void PMDmodel::UpdateWorldMatrix()
 	matWorld *= matRot; // ワールド行列に回転を反映
 	matWorld *= matTrans; // ワールド行列に平行移動を反映
 }
-void PMDmodel::Draw(ID3D12GraphicsCommandList* cmdList)
+void PMDmodel::Draw(ID3D12GraphicsCommandList* cmdList, bool isShadow)
 {
 	// nullptrチェック
 	assert(dx12->GetDevice());
@@ -394,14 +394,19 @@ void PMDmodel::Draw(ID3D12GraphicsCommandList* cmdList)
 	unsigned int idxOffset = 0;
 	auto cbvsrvIncSize = dx12->GetDevice()->GetDescriptorHandleIncrementSize(
 		D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) * 4;
-	for (auto& m : materials) {
+	if (isShadow) {
+		cmdList->DrawIndexedInstanced(indicesnum, 1, 0, 0, 0);
+	}
+	else {
+		for (auto& m : materials) {
 
-		cmdList->SetGraphicsRootDescriptorTable(2, heapHandle);
-		cmdList->DrawIndexedInstanced(m.indicesNum, 2, idxOffset, 0, 0);
+			cmdList->SetGraphicsRootDescriptorTable(2, heapHandle);
+			cmdList->DrawIndexedInstanced(m.indicesNum, 2, idxOffset, 0, 0);
 
-		//ヒープポインターとインデックスを次に進める
-		heapHandle.ptr += cbvsrvIncSize;
-		idxOffset += m.indicesNum;
+			//ヒープポインターとインデックスを次に進める
+			heapHandle.ptr += cbvsrvIncSize;
+			idxOffset += m.indicesNum;
+		}
 	}
 }
 
@@ -550,7 +555,6 @@ HRESULT PMDmodel::LoadPMDFile(const char* path)
 	//vbView.StrideInBytes = pmdvertex_size;
 
 	//*頂点インデックス関連*------------------------------
-	uint32_t indicesnum;
 	fread(&indicesnum, sizeof(indicesnum), 1, fp);
 	std::vector<unsigned short> indices(indicesnum);// 頂点インデックス配列	
 	fread(indices.data(), indices.size() * sizeof(indices[0]), 1, fp);
@@ -1583,9 +1587,9 @@ void PMDmodel::SolveCCOIK(const PMDIK& ik)
 			auto rot = XMMatrixRotationAxis(cross, angle);
 
 			//原点中心ではなく
-			auto mat = 
-				XMMatrixTranslationFromVector(-pos) 
-				* rot 
+			auto mat =
+				XMMatrixTranslationFromVector(-pos)
+				* rot
 				* XMMatrixTranslationFromVector(pos);
 
 			//回転行列

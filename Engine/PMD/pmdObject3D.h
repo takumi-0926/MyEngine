@@ -37,6 +37,7 @@ private: // エイリアス
 	//3Dオブジェクト用
 	static ComPtr<ID3D12RootSignature>	_rootsignature;
 	static ComPtr<ID3D12PipelineState>	_pipelinestate;
+	static ComPtr<ID3D12PipelineState>	_plsShadow;
 
 	// デスクリプタサイズ
 	UINT descriptorHandleIncrementSize;
@@ -70,7 +71,9 @@ public:
 	//更新
 	virtual void Update();
 	//描画
-	virtual void Draw();
+	void preDraw();
+	void preDrawLight();
+	virtual void Draw(bool isShadow = false);
 
 	void SetModel(PMDmodel* _model);
 	//void SetScale(XMFLOAT3 _scale)  { this->scale =  _scale; }

@@ -5,6 +5,7 @@
 
 ComPtr<ID3D12RootSignature> PMDobject::_rootsignature;
 ComPtr<ID3D12PipelineState> PMDobject::_pipelinestate;
+ComPtr<ID3D12PipelineState> PMDobject::_plsShadow;
 Wrapper* PMDobject::dx12 = nullptr;
 
 PMDobject::PMDobject()
@@ -72,19 +73,30 @@ void PMDobject::Update()
 	model->Update();
 }
 
-void PMDobject::Draw()
+void PMDobject::preDraw()
 {
 	// パイプラインステートの設定
 	cmdList->SetPipelineState(_pipelinestate.Get());
 	// ルートシグネチャの設定
 	cmdList->SetGraphicsRootSignature(_rootsignature.Get());
+}
 
+void PMDobject::preDrawLight()
+{
+	// パイプラインステートの設定
+	cmdList->SetPipelineState(_plsShadow.Get());
+	// ルートシグネチャの設定
+	cmdList->SetGraphicsRootSignature(_rootsignature.Get());
+}
+
+void PMDobject::Draw(bool isShadow)
+{
 	cmdList->IASetVertexBuffers(0, 1, &model->vbView);
 	cmdList->IASetIndexBuffer(&model->ibView);
 
 	dx12->SceneDraw();
 	//モデル描画
-	model->Draw(cmdList.Get());
+	model->Draw(cmdList.Get(),isShadow);
 }
 
 HRESULT PMDobject::CreateGraphicsPipelinePMD()
@@ -229,7 +241,44 @@ HRESULT PMDobject::CreateGraphicsPipelinePMD()
 	//グラフィックスパイプラインステートオブジェクトの生成
 	//ID3D12PipelineState* _pipelinestate = nullptr;
 	result = device->CreateGraphicsPipelineState(&gpipeline, IID_PPV_ARGS(_pipelinestate.ReleaseAndGetAddressOf()));
-	if (FAILED(result)) { return result; }
+	//if (FAILED(result)) { 
+	//	assert(0);
+	//	return result; 
+	//}
+
+	result = D3DCompileFromFile(//VS
+		L"Resources/shaders/shadowShader.hlsl",//シェーダー名
+		nullptr,
+		D3D_COMPILE_STANDARD_FILE_INCLUDE,
+		"shadowVS", "vs_5_0",//関数、対象シェーダー
+		0,
+		0,
+		&vsBlob, &errorBlob);
+	if (FAILED(result)) {
+		if (result == HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND)) {
+			::OutputDebugStringA("ファイルが見当たりません");
+			return 0;//exit()
+		}
+		else {
+			string errstr;
+			errstr.resize(errorBlob->GetBufferSize());
+			copy_n((char*)errorBlob->GetBufferPointer(),
+				errorBlob->GetBufferSize(),
+				errstr.begin());
+			errstr += "\n";
+			::OutputDebugStringA(errstr.c_str());//データを表示
+		}
+	}
+
+	gpipeline.VS = CD3DX12_SHADER_BYTECODE(vsBlob.Get());
+	gpipeline.PS.BytecodeLength = 0;
+	gpipeline.PS.pShaderBytecode = nullptr;
+	gpipeline.NumRenderTargets = 0;
+	gpipeline.RTVFormats[0] = DXGI_FORMAT_UNKNOWN;
+
+	result = device->CreateGraphicsPipelineState(
+		&gpipeline, IID_PPV_ARGS(_plsShadow.ReleaseAndGetAddressOf())
+	);
 
 	return S_OK;
 }
@@ -237,27 +286,29 @@ HRESULT PMDobject::CreateGraphicsPipelinePMD()
 HRESULT PMDobject::CreateRootSignaturePMD()
 {
 	//レンジ
-	CD3DX12_DESCRIPTOR_RANGE  descTblRanges[4] = {};//テクスチャと定数の２つ
+	CD3DX12_DESCRIPTOR_RANGE  descTblRanges[5] = {};//テクスチャと定数の２つ
 	descTblRanges[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0);//定数[b0](ビュープロジェクション用)
 	descTblRanges[1].Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 1);//定数[b1](ワールド、ボーン用)
 	descTblRanges[2].Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 2);//定数[b2](マテリアル用)
 	descTblRanges[3].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 3, 0);//テクスチャ４つ(基本とsphとspaとトゥーン)
+	descTblRanges[4].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 4);//
 
 	//ルートパラメータ
-	CD3DX12_ROOT_PARAMETER rootParams[3] = {};
+	CD3DX12_ROOT_PARAMETER rootParams[4] = {};
 	rootParams[0].InitAsConstantBufferView(0, 0, D3D12_SHADER_VISIBILITY_ALL);
 	rootParams[1].InitAsConstantBufferView(1, 0, D3D12_SHADER_VISIBILITY_ALL);
 
 	rootParams[0].InitAsDescriptorTable(1, &descTblRanges[0]);//ビュープロジェクション変換
 	rootParams[1].InitAsDescriptorTable(1, &descTblRanges[1]);//ワールド・ボーン変換
 	rootParams[2].InitAsDescriptorTable(2, &descTblRanges[2]);//マテリアル周り
+	rootParams[3].InitAsDescriptorTable(1, &descTblRanges[4]);//
 
 	CD3DX12_STATIC_SAMPLER_DESC samplerDescs[2] = {};
 	samplerDescs[0].Init(0);
 	samplerDescs[1].Init(1, D3D12_FILTER_ANISOTROPIC, D3D12_TEXTURE_ADDRESS_MODE_CLAMP, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
 
 	CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc = {};
-	rootSignatureDesc.Init(3, rootParams, 2, samplerDescs, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+	rootSignatureDesc.Init(4, rootParams, 2, samplerDescs, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 
 	ComPtr<ID3DBlob> rootSigBlob = nullptr;
 	ComPtr<ID3DBlob> errorBlob = nullptr;

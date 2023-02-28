@@ -769,7 +769,7 @@ void ParticleManager::CreateParticle(
 		acc.x = float(cos(rand() % 360) * md_acc);
 		acc.z = float(sin(rand() % 360) * md_acc);
 
-		Add(30, emitter, vel, acc, scale, 1.0f, color, { 1,0,0,0.2f });
+		Add(30, emitter, vel, acc, scale, 1.0f, color, color);
 	}
 }
 

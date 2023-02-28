@@ -273,7 +273,7 @@ void Player::Update()
 	PMDobject::Update();
 }
 
-void Player::Draw()
+void Player::Draw(bool isShadow)
 {
-	PMDobject::Draw();
+	PMDobject::Draw(isShadow);
 }

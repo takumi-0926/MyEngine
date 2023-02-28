@@ -196,6 +196,8 @@ private:
 
 	DWORD _startTime;
 
+	uint32_t indicesnum;
+
 private:
 
 	ComPtr<ID3D12Resource> LoadTextureFromFile(string& texPath);
@@ -254,7 +256,7 @@ public:
 	void Update();
 	void UpdateWorldMatrix();
 
-	void Draw(ID3D12GraphicsCommandList* cmdList);
+	void Draw(ID3D12GraphicsCommandList* cmdList, bool isShadow = false);
 
 	void playAnimation();
 

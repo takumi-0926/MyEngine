@@ -67,7 +67,11 @@ enum GameLocation {
 };
 
 enum SpriteName {
-
+	Title_UI = 19,		//
+	Start_Title_UI_01,	//
+	Start_Title_UI_02,	//
+	Option_TItle_UI_01,	//
+	Option_TItle_UI_02,	//
 };
 
 enum modelName {
@@ -135,6 +139,7 @@ private://メンバ変数(初期化)
 	//画面UI
 	Sprite* weaponSelect = nullptr;
 	Sprite* weaponSlot[3] = {};
+	unique_ptr<Sprite> TitleResources[5] = {};
 	int SlotCount = 0;
 	int WeaponCount = 0;
 	int UseFoundation = 0;
@@ -263,6 +268,10 @@ public://メンバ関数
 
 	//初期化
 	bool Initalize(Wrapper* dx12, Audio* audio, Input* input);
+	void LoadTitleResources();//タイトルリソース読み込み
+	void LoadGameResources();//ゲーム内リソース読み込み
+	void LoadAnotherResourecs();//その他リソース読み込み
+
 	//更新
 	void Update();
 
@@ -272,6 +281,7 @@ public://メンバ関数
 	//描画
 	void MainDraw();
 	void SubDraw();
+	void shadowDraw(bool isShadow = false);
 
 	void TitleDraw();
 	void GameDraw();
