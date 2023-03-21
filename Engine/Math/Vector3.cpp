@@ -38,7 +38,6 @@ Vector3 Vector3::cross(const Vector3& v) const
 				   x * v.y - y * v.x);
 }
 
-
 Vector3 Vector3::operator+() const
 {
 	return *this;
@@ -108,4 +107,9 @@ const Vector3 operator/(const Vector3& v, float s)
 {
 	Vector3 temp(v);
 	return temp /= s;
+}
+
+const Vector3 lerp(const Vector3& strat, const Vector3& end, const float t)
+{
+	return strat * (1.0f - t) + end * t;
 }

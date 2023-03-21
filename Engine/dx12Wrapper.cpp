@@ -132,17 +132,6 @@ void Wrapper::PreRun()
 	// シザリング矩形の設定
 	CD3DX12_RECT rect = CD3DX12_RECT(0, 0, Application::window_width, Application::window_height);
 	_cmdList->RSSetScissorRects(1, &rect);
-
-	//深度SRV
-	_cmdList->SetDescriptorHeaps(1, _depthHaepSRV.GetAddressOf());
-
-	//auto handle = _depthHaepSRV->GetGPUDescriptorHandleForHeapStart();
-
-	//handle.ptr += _dev->GetDescriptorHandleIncrementSize(
-	//	D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV
-	//);
-
-	//_cmdList->SetGraphicsRootDescriptorTable(3, handle);
 }
 
 void Wrapper::PreRunShadow()
@@ -166,6 +155,18 @@ void Wrapper::PreRunShadow()
 	// シザリング矩形の設定
 	CD3DX12_RECT rect = CD3DX12_RECT(0, 0, Application::window_width, Application::window_height);
 	_cmdList->RSSetScissorRects(1, &rect);
+
+	//深度SRV
+	_cmdList->SetDescriptorHeaps(1, _depthHaepSRV.GetAddressOf());
+
+	auto handle02 = _depthHaepSRV->GetGPUDescriptorHandleForHeapStart();
+
+	//handle02.ptr += _dev->GetDescriptorHandleIncrementSize(
+	//	D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV
+	//);
+
+	//_cmdList->SetGraphicsRootDescriptorTable(4, handle02);
+
 }
 
 void Wrapper::PostRun() {
@@ -351,7 +352,7 @@ HRESULT Wrapper::InitializeRenderHeap()
 
 	//SRGBレンダターゲットビュー設定
 	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc = {};
-	rtvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	rtvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
 	rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
 
 	for (uint32_t i = 0; i < swcDesc.BufferCount; ++i) {

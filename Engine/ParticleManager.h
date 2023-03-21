@@ -6,6 +6,8 @@
 #include <DirectXMath.h>
 #include <d3dx12.h>
 #include <forward_list>
+#include <Math/Vector3.h>
+#include <Math/Quaternion.h>
 
 /// <summary>
 /// 3Dオブジェクト
@@ -60,11 +62,11 @@ public: // サブクラス
 
 		float e_scale = 0.0f;
 
-		XMFLOAT4 color = {0,0,0,1};
+		XMFLOAT4 color = { 0,0,0,1 };
 
-		XMFLOAT4 s_color = {0,0,0,1};
+		XMFLOAT4 s_color = { 0,0,0,1 };
 
-		XMFLOAT4 e_color = {0,0,0,1};
+		XMFLOAT4 e_color = { 0,0,0,1 };
 	};
 
 private: // 定数
@@ -255,8 +257,9 @@ public: // メンバ関数
 		float accel,
 		int num,
 		float scale,
-		XMFLOAT4 color
-		);
+		XMFLOAT4 color,
+		const int mode = 0
+	);
 
 	/// <summary>
 	/// パーティクルの追加
@@ -266,8 +269,8 @@ public: // メンバ関数
 	/// <param name="life">生存時間<param>
 	/// <param name="life">生存時間<param>
 	void Add(
-		int life, 
-		XMFLOAT3 position, 
+		int life,
+		XMFLOAT3 position,
 		XMFLOAT3 velocity,
 		XMFLOAT3 accel,
 		float start_scale,
@@ -275,9 +278,19 @@ public: // メンバ関数
 		XMFLOAT4 start_color,
 		XMFLOAT4 eed_color);
 
+	/// <summary>
+/// 
+/// </summary>
+/// <param name="forward"></param>
+/// <param name="upward"></param>
+/// <returns></returns>
+	DirectX::XMVECTOR CreateQuaternion(XMFLOAT3 forward, XMFLOAT3 upward);
+
 private: // メンバ変数
 	ComPtr<ID3D12Resource> constBuff; // 定数バッファ
 	// ローカルスケール
 	XMFLOAT3 scale = { 1,1,1 };
+
+private:
 };
 

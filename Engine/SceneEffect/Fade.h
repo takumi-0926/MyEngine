@@ -28,6 +28,9 @@ private:
 	bool slideOut = false;
 	float waitTime = 1.0f;
 
+	bool upIn = true;
+	bool downOut = false;
+
 	//シェイク関係
 	float shakeTime = 20.0f;//シェイク時間
 	XMFLOAT2 BasePos;//シェイク元座標
@@ -61,6 +64,9 @@ public:
 	void SlideIn();
 	void SlideOut();
 
+	void UpIn();
+	void DownOut();
+
 	//シェイク
 	void Shake();
 public:
@@ -73,10 +79,14 @@ public:
 	bool GetFailed() { return failed; }
 	bool GetSlideOut() { return slideOut; }
 	bool GetShake() { return slideOut; }
+	bool GetUpIn() { return upIn; }
+	bool GetDownOut() { return downOut; }
 	void SetFadeIn(bool _flag) { this->fadeIn = _flag; }
 	void SetFadeOut(bool _flag) { this->fadeOut = _flag; }
 	void SethalfFade(bool _flag) { this->halffade = _flag; }
 	void SetClear(bool _flag) { this->clear = _flag; }
 	void SetFailed(bool _flag) { this->failed = _flag; }
 	void SetShake(bool _flag) { this->shake = _flag; }
+	void SetUpIn(bool _flag) { this->upIn = _flag; }
+	void SetDownOut(bool _flag) { this->downOut = _flag; }
 };

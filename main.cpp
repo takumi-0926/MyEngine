@@ -33,7 +33,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Application *app = nullptr;
 	Wrapper *dx12 = nullptr;
 	Audio audio;
-	Input input;
+	//Input input;
 	PostEffect *postEffect = nullptr;
 
 	//基本初期化
@@ -45,29 +45,31 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		dx12 = new Wrapper();
 		dx12->Init(app->_hwnd(), app->GetWindowSize());
 
+		Input::GetInstance()->Initalize(app);
+
 		//音声初期化
 		if (!audio.Initalize()) {
 			assert(0);
 			return 1;
 		}
 		//キーボード初期化
-		if (!input.Initalize(app)) {
-			assert(0);
-			return 1;
-		}
-		////imgui
-		//if (ImGui::CreateContext() == nullptr) {
+		//if (!input.Initalize(app)) {
 		//	assert(0);
-		//	return false;
+		//	return 1;
 		//}
-		//bool blnResult = ImGui_ImplWin32_Init(app->_hwnd());
-		//blnResult = ImGui_ImplDX12_Init(
-		//	dx12->GetDevice(),
-		//	3,
-		//	DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
-		//	dx12->GetHeapImgui().Get(),
-		//	dx12->GetHeapImgui()->GetCPUDescriptorHandleForHeapStart(),
-		//	dx12->GetHeapImgui()->GetGPUDescriptorHandleForHeapStart());
+		//imgui
+		if (ImGui::CreateContext() == nullptr) {
+			assert(0);
+			return false;
+		}
+		bool blnResult = ImGui_ImplWin32_Init(app->_hwnd());
+		blnResult = ImGui_ImplDX12_Init(
+			dx12->GetDevice(),
+			3,
+			DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
+			dx12->GetHeapImgui().Get(),
+			dx12->GetHeapImgui()->GetCPUDescriptorHandleForHeapStart(),
+			dx12->GetHeapImgui()->GetGPUDescriptorHandleForHeapStart());
 	}
 
 	Object3Ds obj3d;
@@ -105,7 +107,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	GameManager gameScene;
 	//ゲームシーン初期化
-	if (!gameScene.Initalize(dx12, &audio, &input)) {
+	if (!gameScene.Initalize(dx12, &audio, Input::GetInstance())) {
 		assert(0);
 		return 1;
 	}
@@ -129,11 +131,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		}
 
 		//ImGui
-		//ImGui_ImplDX12_NewFrame();
-		//ImGui_ImplWin32_NewFrame();
-		//ImGui::NewFrame();
+		ImGui_ImplDX12_NewFrame();
+		ImGui_ImplWin32_NewFrame();
+		ImGui::NewFrame();
 
-		input.Update();
+		//input.Update();
+		Input::GetInstance()->Update();
 
 		gameScene.Update();
 
@@ -155,15 +158,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//スプライト描画
 		gameScene.SubDraw();
 
-		//ImGui::Render();
-		//dx12->CommandList()->SetDescriptorHeaps(
-		//	1,
-		//	dx12->GetHeapImgui().GetAddressOf());
-		//ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), dx12->CommandList().Get());
+		ImGui::Render();
+		dx12->CommandList()->SetDescriptorHeaps(
+			1,
+			dx12->GetHeapImgui().GetAddressOf());
+		ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), dx12->CommandList().Get());
 		
 		dx12->PostRun();
 
 		//if (input.Push(DIK_ESCAPE)) {
+		//	break;
+		//}
+		//if (Input::GetInstance()->Trigger(DIK_SPACE)) {
 		//	break;
 		//}
 	}

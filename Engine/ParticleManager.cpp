@@ -743,33 +743,105 @@ void ParticleManager::Draw()
 
 void ParticleManager::CreateParticle(
 	int life,
-	XMFLOAT3 emitter, 
+	XMFLOAT3 emitter,
 	float velocity,
 	float accel,
 	int num,
 	float scale,
-	XMFLOAT4 color)
+	XMFLOAT4 color,
+	const int mode
+)
 {
-	for (int i = 0; i < num; i++)
-	{
-		const XMFLOAT3 md_pos = emitter;
-		XMFLOAT3 pos{};
-		pos.x = (float)rand() / RAND_MAX * md_pos.x - md_pos.x / 2.0f;
-		pos.y = (float)rand() / RAND_MAX * md_pos.y - md_pos.y / 2.0f;
-		pos.z = (float)rand() / RAND_MAX * md_pos.z - md_pos.z / 2.0f;
-		const float md_vel = velocity;
-		XMFLOAT3 vel{};
-		vel.x = (float)rand() / RAND_MAX * md_vel - md_vel / 2.0f;
-		vel.y = (float)rand() / RAND_MAX * md_vel - md_vel / 2.0f;
-		vel.z = (float)rand() / RAND_MAX * md_vel - md_vel / 2.0f;
+	if (mode == 0) {
+		for (int i = 0; i < num; i++)
+		{
+			const XMFLOAT3 md_pos = emitter;
+			XMFLOAT3 pos{};
+			pos.x = (float)rand() / RAND_MAX * md_pos.x - md_pos.x / 2.0f;
+			pos.y = (float)rand() / RAND_MAX * md_pos.y - md_pos.y / 2.0f;
+			pos.z = (float)rand() / RAND_MAX * md_pos.z - md_pos.z / 2.0f;
+			const float md_vel = velocity;
+			XMFLOAT3 vel{};
+			vel.x = (float)rand() / RAND_MAX * md_vel - md_vel / 2.0f;
+			vel.y = (float)rand() / RAND_MAX * md_vel - md_vel / 2.0f;
+			vel.z = (float)rand() / RAND_MAX * md_vel - md_vel / 2.0f;
 
-		XMFLOAT3 acc{};
-		const float md_acc = accel;
-		acc.y = float(sin(rand() % 360) * md_acc);
-		acc.x = float(cos(rand() % 360) * md_acc);
-		acc.z = float(sin(rand() % 360) * md_acc);
+			XMFLOAT3 acc{};
+			const float md_acc = accel;
+			acc.y = float(sin(rand() % 360) * md_acc);
+			acc.x = float(cos(rand() % 360) * md_acc);
+			acc.z = float(sin(rand() % 360) * md_acc);
 
-		Add(30, emitter, vel, acc, scale, 1.0f, color, color);
+			Add(life, emitter, vel, acc, scale, 1.0f, color, color);
+		}
+	}
+	else if (mode == 1) {
+		for (int i = 0; i < num; i++)
+		{
+			static float a = 0.0;
+
+			const XMFLOAT3 md_pos = emitter;
+			XMFLOAT3 pos{};
+			pos.x = (float)rand() / RAND_MAX * md_pos.x - md_pos.x / 2.0f;
+			pos.y = (float)rand() / RAND_MAX * md_pos.y - md_pos.y / 2.0f;
+			pos.z = (float)rand() / RAND_MAX * md_pos.z - md_pos.z / 2.0f;
+			const float md_vel = velocity;
+			XMFLOAT3 vel{};
+			vel.x = float(sin(360) * md_vel - md_vel / 2);
+			vel.y = float(sin(360) * md_vel - md_vel /2);
+			vel.z = float(sin(360) * md_vel - md_vel/2);
+
+			XMFLOAT3 acc{};
+			const float md_acc = accel;
+			acc.z = float(sin(i) * md_acc);
+			acc.x = float(cos(i) * md_acc);
+			acc.y = float(md_acc / 3) * float(sin(a));
+
+			//XMVECTOR b = {};
+			//b = XMLoadFloat3(&acc);
+			//b += CreateQuaternion(XMFLOAT3({1,0,0 }), XMFLOAT3({ 0, 1, 0 }));
+			//XMStoreFloat3(&acc,b);
+			Add(life, emitter, vel, acc, scale, 0.0f, color, color);
+		}
+	}
+	else if (mode == 2) {
+		for (int i = 0; i < num; i++)
+		{
+			static float a = 60.0;
+
+			const float md_pos = 10.0f;
+			XMFLOAT3 pos{};
+			pos.x = (float)rand() / RAND_MAX  * md_pos - md_pos / 2.0f + emitter.x;
+			//pos.y = (float)rand() / RAND_MAX * md_pos.y - md_pos.y / 2.0f;
+			pos.z = (float)rand() / RAND_MAX * md_pos - md_pos / 2.0f + emitter.z;
+			
+			const float md_vel = velocity;
+			XMFLOAT3 vel{};
+			//vel.x = float(sin(360) * md_vel - md_vel / 2);
+			//vel.y = float(sin(360) * md_vel - md_vel / 2);
+			//vel.z = float(sin(360) * md_vel - md_vel / 2);
+
+			XMFLOAT3 acc{};
+			const float md_acc = accel;
+			//acc.y = float(sin(i) * md_acc);
+			//acc.x = float(cos(i) * md_acc);
+			//acc.z = float(md_acc / 3) * float(sin(a));
+
+			//XMVECTOR b = {};
+			//b = XMLoadFloat3(&acc);
+			//b += CreateQuaternion(XMFLOAT3({ 0,0,1 }), XMFLOAT3({ 0, 1, 0 }));
+			//XMStoreFloat3(&acc, b);
+			Vector3 v = { 0,0,1 };
+			Vector3 _v = { 1,0,0 };
+			static Vector3 angle = v.cross(Vector3(1, 0, 0));
+			static float w = 
+				float(sqrt((v.length() * v.length()) 
+					* (_v.length() * _v.length())) + _v.dot(v));
+			Add(life, pos, vel, acc, scale, 0.0f, color, color);
+		}
+	}
+	else if (mode == 3) {
+
 	}
 }
 
@@ -791,10 +863,37 @@ void ParticleManager::Add(
 	p.velocity = velocity;
 	p.accel = accel;
 	p.num_frame = life;
-	p.scale = 100.0f;
+	p.scale = 1.0f;
 	p.s_scale = start_scale;
 	p.e_scale = end_scale;
 	p.color = { 0,0,0,1 };
 	p.s_color = start_color;
 	p.e_color = end_color;
+}
+
+XMVECTOR ParticleManager::CreateQuaternion(XMFLOAT3 forward, XMFLOAT3 upward)
+{
+	Vector3 z = Vector3(forward.x, forward.y, forward.z);//進行方向ベクトル（前方向）
+	Vector3 up = Vector3(upward.x, upward.y, upward.z);  //上方向
+	Vector3 _z = { 0.0f,0.0f,1.0f };//Z方向単位ベクトル
+	Vector3 cross = {};
+	Quaternion q = quaternion(0, 0, 0, 1);//回転クォータニオン
+
+	cross = z.cross(_z);
+	q.x = cross.x;
+	q.y = cross.y;
+	q.z = cross.z;
+	q.w = float(sqrt((z.length() * z.length()) * (_z.length() * _z.length())) + z.dot(_z));
+
+	//単位クォータニオン化
+	q = normalize(q);
+	q = conjugate(q);
+
+	//任意軸回転
+	XMVECTOR _q = { q.x,q.y,q.z,q.w };
+
+	XMMATRIX rot;//回転行列
+	rot = XMMatrixRotationQuaternion(_q);
+
+	return _q;
 }

@@ -62,6 +62,17 @@ public:
 	// 描画
 	virtual void Draw(ID3D12GraphicsCommandList* cmdList);
 
+	/// <summary>
+	/// 描画前処理
+	/// </summary>
+	/// <param name="cmdList">描画コマンドリスト</param>
+	static void PreDraw(ID3D12GraphicsCommandList* cmdList);
+
+	/// <summary>
+	/// 描画後処理
+	/// </summary>
+	static void PostDraw();
+
 	//行列の更新
 	void UpdateWorldMatrix();
 
@@ -73,6 +84,10 @@ public:
 	/// インデックスバッファの生成
 	/// </summary>
 	void CreateIndexBuffers();
+
+	static void CreateModel();
+
+	void CreateObject(XMFLOAT3 pos,float scale = 1.0f);
 
 private:
 	static Wrapper* dx12;
@@ -142,26 +157,16 @@ private:
 public:
 	ComPtr<ID3D12Resource> constBuffB0; // 定数バッファ(OBJ)
 
-	// ローカル座標
-	DirectX::XMFLOAT3 position = { 0,0,0 };
-	// 色
-	DirectX::XMFLOAT4 color = { 1,1,1,1 };
 	// ローカルスケール
 	float scale = 10.0f;
-	// X,Y,Z軸回りのローカル回転角
-	DirectX::XMFLOAT3 rotation = { 0,0,0 };
 	//テクスチャ番号
 	UINT texNumber = 0;
 	//サイズ
 	DirectX::XMFLOAT2 size = { 100.0f,100.0f };
-	//アンカーポイント
-	DirectX::XMFLOAT2 anchorpoint = { 0.0f,0.5f };
 	//非表示
 	bool isInvisible = false;
 
 public:
 	void SetEye(XMFLOAT3 eye);
 	void SetTarget(XMFLOAT3 target);
-
-	inline void SetPosition(XMFLOAT3 pos) { this->position = pos; }
 };

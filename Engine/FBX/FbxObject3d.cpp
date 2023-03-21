@@ -153,6 +153,12 @@ void FbxObject3d::PlayAnimation(int playNum)
 	isPlay = true;
 }
 
+void FbxObject3d::StopAnimation()
+{
+	nowPlayMotion = -1;
+	isPlay = false;
+}
+
 void FbxObject3d::LoadAnima()
 {
 	FbxScene* fbxScene;

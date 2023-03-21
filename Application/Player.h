@@ -1,6 +1,6 @@
 #pragma once
 #include "PMD/pmdObject3D.h"
-#include "Input/input.h"
+//#include "Input/input.h"
 
 enum action {
 	Wait = 0,
@@ -11,7 +11,7 @@ enum action {
 	Avoid,
 };
 
-class Input;
+//class Input;
 class Player : public PMDobject {
 	template <class T> using ComPtr = Microsoft::WRL::ComPtr<T>;
 	using XMFLOAT2 = DirectX::XMFLOAT2;
@@ -19,7 +19,7 @@ class Player : public PMDobject {
 	using XMFLOAT4 = DirectX::XMFLOAT4;
 	using XMMATRIX = DirectX::XMMATRIX;
 
-	Input input;
+	//Input input;
 
 private:
 	/// <summary>
@@ -53,67 +53,67 @@ private:
 	/// </summary>
 	/// <param name="pos">移動させる座標</param>
 	/// <returns>移動後の座標</returns>
-	XMFLOAT3 MoveBefore(XMFLOAT3 pos);
-	XMFLOAT3 MoveAfter(XMFLOAT3 pos)
-	{
-		XMMATRIX matRot = XMMatrixIdentity();
+	//XMFLOAT3 MoveBefore(XMFLOAT3 pos);
+	//XMFLOAT3 MoveAfter(XMFLOAT3 pos)
+	//{
+	//	XMMATRIX matRot = XMMatrixIdentity();
 
-		//Z方向ベクトル
-		Zv = { 0.0f,0.0f,0.5f,0.0f };
+	//	//Z方向ベクトル
+	//	Zv = { 0.0f,0.0f,0.5f,0.0f };
 
-		//弾角度回転
-		matRot = XMMatrixRotationY(XMConvertToRadians(angleHorizonal));
+	//	//弾角度回転
+	//	matRot = XMMatrixRotationY(XMConvertToRadians(angleHorizonal));
 
-		//Z方向ベクトルを回転
-		Zv = XMVector3TransformNormal(Zv, matRot);
+	//	//Z方向ベクトルを回転
+	//	Zv = XMVector3TransformNormal(Zv, matRot);
 
-		//加算
-		pos.x += Zv.m128_f32[0] * directInput->getLeftY() * speed;
-		pos.y += Zv.m128_f32[1] * directInput->getLeftY() * speed;
-		pos.z += Zv.m128_f32[2] * directInput->getLeftY() * speed;
+	//	//加算
+	//	pos.x += Zv.m128_f32[0] * directInput->getLeftY() * speed;
+	//	pos.y += Zv.m128_f32[1] * directInput->getLeftY() * speed;
+	//	pos.z += Zv.m128_f32[2] * directInput->getLeftY() * speed;
 
-		return pos;
-	}
-	XMFLOAT3 MoveLeft(XMFLOAT3 pos)
-	{
-		XMMATRIX matRot = XMMatrixIdentity();
+	//	return pos;
+	//}
+	//XMFLOAT3 MoveLeft(XMFLOAT3 pos)
+	//{
+	//	XMMATRIX matRot = XMMatrixIdentity();
 
-		//X方向ベクトル
-		Xv = { 0.5f,0.0f,0.0f,0.0f };
+	//	//X方向ベクトル
+	//	Xv = { 0.5f,0.0f,0.0f,0.0f };
 
-		//角度回転
-		matRot = XMMatrixRotationY(XMConvertToRadians(angleHorizonal));
+	//	//角度回転
+	//	matRot = XMMatrixRotationY(XMConvertToRadians(angleHorizonal));
 
-		//X方向ベクトルを回転
-		Xv = XMVector3TransformNormal(Xv, matRot);
+	//	//X方向ベクトルを回転
+	//	Xv = XMVector3TransformNormal(Xv, matRot);
 
-		//加算
-		pos.x -= Xv.m128_f32[0] * directInput->getLeftX() * speed;
-		pos.y -= Xv.m128_f32[1] * directInput->getLeftX() * speed;
-		pos.z -= Xv.m128_f32[2] * directInput->getLeftX() * speed;
+	//	//加算
+	//	pos.x -= Xv.m128_f32[0] * directInput->getLeftX() * speed;
+	//	pos.y -= Xv.m128_f32[1] * directInput->getLeftX() * speed;
+	//	pos.z -= Xv.m128_f32[2] * directInput->getLeftX() * speed;
 
-		return pos;
-	}
-	XMFLOAT3 MoveRight(XMFLOAT3 pos)
-	{
-		XMMATRIX matRot = XMMatrixIdentity();
+	//	return pos;
+	//}
+	//XMFLOAT3 MoveRight(XMFLOAT3 pos)
+	//{
+	//	XMMATRIX matRot = XMMatrixIdentity();
 
-		//X方向ベクトル
-		Xv = { 0.5f,0.0f,0.0f,0.0f };
+	//	//X方向ベクトル
+	//	Xv = { 0.5f,0.0f,0.0f,0.0f };
 
-		//角度回転
-		matRot = XMMatrixRotationY(XMConvertToRadians(angleHorizonal));
+	//	//角度回転
+	//	matRot = XMMatrixRotationY(XMConvertToRadians(angleHorizonal));
 
-		//X方向ベクトルを回転
-		Xv = XMVector3TransformNormal(Xv, matRot);
+	//	//X方向ベクトルを回転
+	//	Xv = XMVector3TransformNormal(Xv, matRot);
 
-		//加算
-		pos.x -= Xv.m128_f32[0] * directInput->getLeftX() * speed;
-		pos.y -= Xv.m128_f32[1] * directInput->getLeftX() * speed;
-		pos.z -= Xv.m128_f32[2] * directInput->getLeftX() * speed;
+	//	//加算
+	//	pos.x -= Xv.m128_f32[0] * directInput->getLeftX() * speed;
+	//	pos.y -= Xv.m128_f32[1] * directInput->getLeftX() * speed;
+	//	pos.z -= Xv.m128_f32[2] * directInput->getLeftX() * speed;
 
-		return pos;
-	}
+	//	return pos;
+	//}
 
 	/// <summary>
 	/// 進行方向に回転
@@ -144,7 +144,7 @@ public:
 	void Draw(bool isShadow = false)override;
 
 public:
-	void SetInput(const Input& input) { this->input = input; }
+	//void SetInput(const Input& input) { this->input = input; }
 	void SetAction(int num) { this->Action = num; }
 	void SetMoveVec(DirectX::XMFLOAT3 vec) { this->moveVec = vec; }
 	void SetAvoidVec(DirectX::XMFLOAT3 vec) { this->avoidVec = vec; }

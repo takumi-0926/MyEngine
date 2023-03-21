@@ -96,6 +96,41 @@ void Fade::SlideOut()
 	}
 }
 
+void Fade::UpIn()
+{	
+	if (GetUpIn()) { 
+		return; 
+	}
+
+	static float teu = 0.0f;
+	SetSize(XMFLOAT2(teu, 44.0f));
+	Update();
+	teu += 20.0f;
+	if (teu >= 440.0f) {
+		teu = 440.0f;
+		SetDownOut(true);
+		SetUpIn(false);
+		SetAnchorPoint({ 1.0f,0.0f });
+	}
+}
+
+void Fade::DownOut()
+{
+	if (GetDownOut()) {
+		return;
+	}
+
+	static float teu = 440.0f;
+	SetSize(XMFLOAT2(teu, 44.0f));
+	Update();
+	teu -= 20.0f;
+	if (teu <= 0.0f) {
+		teu = 0.0f;
+		SetDownOut(false);
+		SetAnchorPoint({ 0.0f,0.0f });
+	}
+}
+
 void Fade::Shake()
 {
 	//ƒŠƒZƒbƒg

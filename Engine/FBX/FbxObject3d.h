@@ -65,6 +65,7 @@ public:
 	}
 
 	void PlayAnimation(int playNum);
+	void StopAnimation();
 	void LoadAnima();
 
 public:

@@ -45,7 +45,7 @@ Quaternion& operator * (float s, const Quaternion& q);
 Quaternion& operator / (const Quaternion& q, float s);
 
 Quaternion slerp(const Quaternion& q1, const Quaternion& q2, float t);
-Quaternion lerp(const Quaternion& q1, const Quaternion& q2, float t);
+Quaternion Qlerp(const Quaternion& q1, const Quaternion& q2, float t);
 Matrix4 rotate(const Quaternion& q);
 Quaternion quaternion(const Matrix4& m);
 Vector3 getAxis(const Quaternion& q);

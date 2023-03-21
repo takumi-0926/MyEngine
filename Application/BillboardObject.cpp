@@ -75,6 +75,8 @@ bool BillboardObject::StaticInitialize(ID3D12Device* _device)
 	// パイプライン初期化
 	InitializeGraphicsPipeline();
 
+	CreateModel();
+
 	return true;
 }
 
@@ -404,13 +406,11 @@ void BillboardObject::Update()
 	BillboardVertex* vertMap = nullptr;
 	result = vertBuff->Map(0, nullptr, (void**)&vertMap);
 	if (SUCCEEDED(result)) {
-		//for (std::forward_list<Object>::iterator it = objects.begin(); it != objects.end(); it++) {
-		//	vertMap->pos = it->position;
-		//	//vertMap->scale = it->scale;
-		//	vertMap++;
-		//}
-		vertMap->pos = position;
-		vertMap->scale = scale;
+		for (std::forward_list<Object>::iterator it = objects.begin(); it != objects.end(); it++) {
+			vertMap->pos = it->position;
+			vertMap->scale = it->scale;
+			vertMap++;
+		}
 		vertBuff->Unmap(0, nullptr);
 	}
 
@@ -427,10 +427,31 @@ void BillboardObject::Update()
 }
 void BillboardObject::Draw(ID3D12GraphicsCommandList* _cmdList)
 {
+	// 頂点バッファをセット
+	_cmdList->IASetVertexBuffers(0, 1, &vbView);
+	// インデックスバッファをセット
+	//cmdList->IASetIndexBuffer(&ibView);
+
+	// デスクリプタヒープの配列
+	ID3D12DescriptorHeap* ppHeaps[] = { descHeap.Get() };
+	_cmdList->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
+
+	// 定数バッファビューをセット
+	_cmdList->SetGraphicsRootConstantBufferView(0, constBuffB0->GetGPUVirtualAddress());
+	// シェーダリソースビューをセット
+	_cmdList->SetGraphicsRootDescriptorTable(1, CD3DX12_GPU_DESCRIPTOR_HANDLE(descHeap->GetGPUDescriptorHandleForHeapStart(), this->texNumber, descriptorHandleIncrementSize));
+	// 描画コマンド
+	//cmdList->DrawIndexedInstanced((UINT)std::distance(objects.begin(), objects.end()), 1, 0, 0, 0);
+	_cmdList->DrawInstanced((UINT)std::distance(objects.begin(), objects.end()), 1, 0, 0);
+}
+
+void BillboardObject::PreDraw(ID3D12GraphicsCommandList* cmdList)
+{
+	assert(BillboardObject::cmdList == nullptr);
 	// nullptrチェック
 	assert(device);
 	//assert(BillboardObject::cmdList);
-	BillboardObject::cmdList = _cmdList;
+	BillboardObject::cmdList = cmdList;
 
 	// パイプラインステートの設定
 	cmdList->SetPipelineState(pipelinestate.Get());
@@ -439,23 +460,10 @@ void BillboardObject::Draw(ID3D12GraphicsCommandList* _cmdList)
 	// プリミティブ形状を設定
 	//cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 	cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
-	// 頂点バッファをセット
-	cmdList->IASetVertexBuffers(0, 1, &this->vbView);
-	// インデックスバッファをセット
-	//cmdList->IASetIndexBuffer(&ibView);
+}
 
-	// デスクリプタヒープの配列
-	ID3D12DescriptorHeap* ppHeaps[] = { descHeap.Get() };
-	cmdList->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
-
-	// 定数バッファビューをセット
-	cmdList->SetGraphicsRootConstantBufferView(0, constBuffB0->GetGPUVirtualAddress());
-	// シェーダリソースビューをセット
-	cmdList->SetGraphicsRootDescriptorTable(1, CD3DX12_GPU_DESCRIPTOR_HANDLE(descHeap->GetGPUDescriptorHandleForHeapStart(), this->texNumber, descriptorHandleIncrementSize));
-	// 描画コマンド
-	//cmdList->DrawIndexedInstanced((UINT)std::distance(objects.begin(), objects.end()), 1, 0, 0, 0);
-	cmdList->DrawInstanced(_countof(vertices), 1, 0, 0);
-
+void BillboardObject::PostDraw()
+{
 	BillboardObject::cmdList = nullptr;
 }
 
@@ -604,6 +612,49 @@ void BillboardObject::CreateIndexBuffers()
 	ibView.BufferLocation = indexBuff->GetGPUVirtualAddress();
 	ibView.Format = DXGI_FORMAT_R16_UINT;
 	ibView.SizeInBytes = sizeIB;
+}
+
+void BillboardObject::CreateModel()
+{
+	HRESULT result = S_FALSE;
+
+	// 頂点バッファ生成
+	CD3DX12_HEAP_PROPERTIES properties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+	CD3DX12_RESOURCE_DESC desc = CD3DX12_RESOURCE_DESC::Buffer(sizeof(vertices));
+	result = device->CreateCommittedResource(
+		&properties,
+		D3D12_HEAP_FLAG_NONE,
+		&desc,
+		D3D12_RESOURCE_STATE_GENERIC_READ,
+		nullptr,
+		IID_PPV_ARGS(&vertBuff));
+	if (FAILED(result)) {
+		assert(0);
+		return;
+	}
+
+	// 頂点バッファへのデータ転送
+	BillboardVertex* vertMap = nullptr;
+	result = vertBuff->Map(0, nullptr, (void**)&vertMap);
+	if (SUCCEEDED(result)) {
+		memcpy(vertMap, vertices, sizeof(vertices));
+		vertBuff->Unmap(0, nullptr);
+	}
+
+	// 頂点バッファビューの作成
+	vbView.BufferLocation = vertBuff->GetGPUVirtualAddress();
+	vbView.SizeInBytes = sizeof(vertices);
+	vbView.StrideInBytes = sizeof(vertices[0]);
+}
+
+void BillboardObject::CreateObject(XMFLOAT3 pos, float scale)
+{
+	objects.emplace_front();
+
+	Object& b = objects.front();
+
+	b.position = pos;
+	b.scale = scale;
 }
 
 void BillboardObject::SetEye(XMFLOAT3 eye)

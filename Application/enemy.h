@@ -15,6 +15,10 @@ enum Activity {
 	wolf = 0,
 	golem,
 };
+enum AttackType {
+	Type01,
+	Type02,
+};
 
 class PMDmodel;
 class StageObject;
@@ -28,6 +32,12 @@ class Enemy : public FbxObject3d {
 		XMFLOAT3 scale;	//大きさ
 	};
 
+	struct Jump {
+		Vector3 pos;
+		Vector3 p1;
+		Vector3 p2;
+		Vector3 p3;
+	}jump;
 public:
 	Status status;//28
 	bool alive = false;	//生存判定
@@ -37,8 +47,12 @@ public:
 	bool damage = false;
 
 	int actionPattern = 0;//行動パターン
+	int attackPattern = 0;//攻撃パターン
 	float attackTime = 0.0f;
+	float jumpTime = 0.0f;
+	float maxTime = 1.0f;
 	int mode = 0;
+
 
 	float damegeCount = 0.0f;
 
@@ -155,6 +169,7 @@ public:
 	/// 攻撃時処理
 	/// </summary>
 	void Attack(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos);
+	void JumpAttack(XMFLOAT3& targetPosition);
 
 	/// <summary>
 	/// 退却時処理

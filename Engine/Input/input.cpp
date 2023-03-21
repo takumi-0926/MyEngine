@@ -1,6 +1,11 @@
 #include "input.h"
 #include <cassert>
 
+Input* Input::GetInstance()
+{
+	static Input instance;
+	return &instance;
+}
 bool Input::Initalize(Application* App)
 {
 	this->App = App;

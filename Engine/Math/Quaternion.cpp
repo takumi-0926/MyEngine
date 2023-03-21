@@ -171,7 +171,7 @@ Quaternion slerp(const Quaternion& q1, const Quaternion& q2, float t)
 	return reQ3;
 }
 
-Quaternion lerp(const Quaternion& q1, const Quaternion& q2, float t)
+Quaternion Qlerp(const Quaternion& q1, const Quaternion& q2, float t)
 {
 	float cos = dot(q1, q2);
 	Quaternion t2 = q2;

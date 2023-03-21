@@ -95,26 +95,26 @@ void Player::Avoid() {
 
 	avoidTime += 1.0f;
 }
-XMFLOAT3 Player::MoveBefore(XMFLOAT3 pos)
-{
-	XMMATRIX matRot = XMMatrixIdentity();
-
-	//Z•ûŒüƒxƒNƒgƒ‹
-	Zv = { 0.0f,0.0f,0.5f,0.0f };
-
-	//Šp“x‰ñ“]
-	matRot = XMMatrixRotationY(XMConvertToRadians(angleHorizonal));
-
-	//Z•ûŒüƒxƒNƒgƒ‹‚ð‰ñ“]
-	Zv = XMVector3TransformNormal(Zv, matRot);
-
-	//‰ÁŽZ
-	pos.x += Zv.m128_f32[0] * directInput->getLeftY() * speed;
-	pos.y += Zv.m128_f32[1] * directInput->getLeftY() * speed;
-	pos.z += Zv.m128_f32[2] * directInput->getLeftY() * speed;
-
-	return pos;
-}
+//XMFLOAT3 Player::MoveBefore(XMFLOAT3 pos)
+//{
+//	XMMATRIX matRot = XMMatrixIdentity();
+//
+//	//Z•ûŒüƒxƒNƒgƒ‹
+//	Zv = { 0.0f,0.0f,0.5f,0.0f };
+//
+//	//Šp“x‰ñ“]
+//	matRot = XMMatrixRotationY(XMConvertToRadians(angleHorizonal));
+//
+//	//Z•ûŒüƒxƒNƒgƒ‹‚ð‰ñ“]
+//	Zv = XMVector3TransformNormal(Zv, matRot);
+//
+//	//‰ÁŽZ
+//	pos.x += Zv.m128_f32[0] * directInput->getLeftY() * speed;
+//	pos.y += Zv.m128_f32[1] * directInput->getLeftY() * speed;
+//	pos.z += Zv.m128_f32[2] * directInput->getLeftY() * speed;
+//
+//	return pos;
+//}
 
 void Player::Update()
 {

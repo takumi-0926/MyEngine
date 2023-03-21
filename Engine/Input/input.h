@@ -25,6 +25,16 @@ public:
 
 private:
 	Application* App = nullptr;
+
+	// privateなコンストラクタ（シングルトンパターン）
+	Input() = default;
+	// privateなデストラクタ（シングルトンパターン）
+	~Input() = default;
+	// コピーコンストラクタを禁止（シングルトンパターン）
+	Input(const Input & obj) = delete;
+	// コピー代入演算子を禁止（シングルトンパターン）
+	void operator=(const Input & obj) = delete;
+
 public:
 	struct MouseMove {
 		LONG lX;
@@ -47,6 +57,8 @@ private:
 	DIMOUSESTATE2 mouseStatePre = {};
 
 public:
+	static Input* GetInstance();
+
 	//初期化
 	bool Initalize(Application* App);
 

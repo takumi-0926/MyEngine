@@ -50,11 +50,13 @@ using namespace Microsoft::WRL;
 enum Scene {
 	TITLE,
 	GAME,
-	END
+	END,
+	DebugTest
 };
 enum GameMode {
 	NASI,
 	START,
+	Preparation,
 	POSE,
 	WEAPONSELECT,
 	SET,
@@ -68,10 +70,14 @@ enum GameLocation {
 
 enum SpriteName {
 	Title_UI = 19,		//
-	Start_Title_UI_01,	//
-	Start_Title_UI_02,	//
-	Option_TItle_UI_01,	//
-	Option_TItle_UI_02,	//
+	Title_UI_High,		//
+	Title_UI_Low,		//
+	Start_TItle_UI,		//
+	Option_TItle_UI,	//
+	Numbers,
+	Start_UI_01,
+	Start_UI_02,
+	Start_UI_03,
 };
 
 enum modelName {
@@ -139,13 +145,34 @@ private://メンバ変数(初期化)
 	//画面UI
 	Sprite* weaponSelect = nullptr;
 	Sprite* weaponSlot[3] = {};
-	unique_ptr<Sprite> TitleResources[5] = {};
+
+	//タイトル周り変数
+	unique_ptr<Sprite> TitleResources[2] = {};
+	unique_ptr<Sprite> TitleResources_Start[3] = {};
+	unique_ptr<Sprite> TitleResources_Option[3] = {};
+	int TitleWave = 0;
+	int TitleHierarchy = 0;
+	bool titleStart = 0;
+	bool titleOption = 0;
+
+	//カウントUI周り変数
+	unique_ptr<Sprite> One_Numbers[10] = {};//0～9の数字スプライト
+	unique_ptr<Sprite> Ten_Numbers[10] = {};//0～9の数字スプライト
+	unique_ptr<Sprite> Start_UI_01 = {};
+	unique_ptr<Sprite> Start_UI_02 = {};
+	unique_ptr<Fade> Start_UI_03 = {};
+	float calculationTime = 60.0f;//計算用
+	int startTime = 0;//開始カウント
+	int one_place = 0;//一の位
+	int tens_place = 0;//十の位
+
 	int SlotCount = 0;
 	int WeaponCount = 0;
 	int UseFoundation = 0;
 	bool WeaponSelectDo = false;
 	bool result = false;
 
+	bool keyFlag = false;
 	//ゲーム内ガイドオブジェクト
 	Object3Ds* moveGuide = nullptr;
 	Model* guideModels[GUIDE_MODEL_NUM] = {};
@@ -157,11 +184,19 @@ private://メンバ変数(初期化)
 	float testPos[3] = { 1,0.0f,0 };
 	int testNum[3] = { 0,0,0 };
 	float debugCameraPos[3] = { 0,0,0 };
+	float debugPointLightPos[3] = { 0,0,0 };
+	Object3Ds* debugFilde = nullptr;
+	Model* debugFildeModel = nullptr;
+	Object3Ds* debugCharacter = nullptr;
+	Model* debugCharacterModel = nullptr;
+
+
 
 	DebugText* text = nullptr;
 	Sprite* BreakBar = nullptr;
 	Sprite* BreakGage[15] = {};
 	Sprite* Pose = nullptr;
+
 private://メンバ変数(ゲームシーン)
 	vector<Sqhere> sqhere;
 	Model* modelPlane = nullptr;
@@ -278,6 +313,11 @@ public://メンバ関数
 	void TitleUpdate();
 	void GameUpdate();
 	void EndUpdate();
+	void DebugTestUpdate();
+
+	void PlayerUpdate();
+	void EnemyUpdate();
+
 	//描画
 	void MainDraw();
 	void SubDraw();
@@ -297,7 +337,7 @@ public://メンバ関数
 		XMMATRIX matRot = XMMatrixIdentity();
 
 		//Z方向ベクトル
-		Zv = { 0.0f,0.0f,0.5f,0.0f };
+		Zv = { 0.0f,0.0f,1.0f,0.0f };
 
 		//角度回転
 		matRot = XMMatrixRotationY(XMConvertToRadians(angleHorizonal));
@@ -317,7 +357,7 @@ public://メンバ関数
 		XMMATRIX matRot = XMMatrixIdentity();
 
 		//Z方向ベクトル
-		Zv = { 0.0f,0.0f,0.5f,0.0f };
+		Zv = { 0.0f,0.0f,1.0f,0.0f };
 
 		//弾角度回転
 		matRot = XMMatrixRotationY(XMConvertToRadians(angleHorizonal));
@@ -337,7 +377,7 @@ public://メンバ関数
 		XMMATRIX matRot = XMMatrixIdentity();
 
 		//X方向ベクトル
-		Xv = { 0.5f,0.0f,0.0f,0.0f };
+		Xv = { 1.0f,0.0f,0.0f,0.0f };
 
 		//角度回転
 		matRot = XMMatrixRotationY(XMConvertToRadians(angleHorizonal));
@@ -357,7 +397,7 @@ public://メンバ関数
 		XMMATRIX matRot = XMMatrixIdentity();
 
 		//X方向ベクトル
-		Xv = { 0.5f,0.0f,0.0f,0.0f };
+		Xv = { 1.0f,0.0f,0.0f,0.0f };
 
 		//角度回転
 		matRot = XMMatrixRotationY(XMConvertToRadians(angleHorizonal));
@@ -422,6 +462,38 @@ public://メンバ関数
 	}
 
 	/// <summary>
+	/// クォータニオン作成
+	/// </summary>
+	/// <param name="v1"></param>
+	/// <param name="v2"></param>
+	/// <returns></returns>
+	inline XMVECTOR CreateQuaternion(XMFLOAT3 forward, XMFLOAT3 upward) {
+		Vector3 z = Vector3(forward.x, forward.y, forward.z);//進行方向ベクトル（前方向）
+		Vector3 up = Vector3(upward.x, upward.y, upward.z);  //上方向
+		Vector3 _z = { 0.0f,0.0f,1.0f };//Z方向単位ベクトル
+		Vector3 cross = {};
+		Quaternion q = quaternion(0, 0, 0, 1);//回転クォータニオン
+
+		cross = z.cross(_z);
+		q.x = cross.x;
+		q.y = cross.y;
+		q.z = cross.z;
+		q.w = sqrt((z.length() * z.length())* (_z.length() * _z.length())) + z.dot(_z);
+
+		//単位クォータニオン化
+		q = normalize(q);
+		q = conjugate(q);
+
+		//任意軸回転
+		XMVECTOR _q = { q.x,q.y,q.z,q.w };
+
+		XMMATRIX rot;//回転行列
+		rot = XMMatrixRotationQuaternion(_q);
+
+		return _q;
+	}
+
+	/// <summary>
 	/// カメラの移動（指定した場所まで）
 	/// </summary>
 	/// <param name="pos1">元の位置</param>
@@ -480,4 +552,7 @@ public://メンバ関数
 		distance = std::sqrt(x * 2 + z * 2);
 		return distance;
 	}
+
 };
+
+XMFLOAT3 add(const XMFLOAT3& v1, const XMFLOAT3& v2);
