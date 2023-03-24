@@ -149,6 +149,8 @@ void LoadHlsls::createPipeline(ID3D12Device* _dev, int Number)
 
 	gpipeline.SampleDesc.Count = 1; // 1ピクセルにつき1回サンプリング
 
+	gpipeline.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB; // 0～255指定のRGBA
+
 	//2Dオブジェクト用
 	if (Number == ShaderNo::TWO) {
 		gpipeline.VS = CD3DX12_SHADER_BYTECODE(vsBlob.at(ShaderNo::TWO).Get());
@@ -168,7 +170,6 @@ void LoadHlsls::createPipeline(ID3D12Device* _dev, int Number)
 		gpipeline.BlendState.RenderTarget[0] = blenddesc;
 
 		gpipeline.NumRenderTargets = 1;	// 描画対象は1つ
-		gpipeline.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM; // 0～255指定のRGBA
 
 		// 図形の形状設定（三角形）
 		gpipeline.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
@@ -211,7 +212,6 @@ void LoadHlsls::createPipeline(ID3D12Device* _dev, int Number)
 		gpipeline.BlendState.RenderTarget[0] = blenddesc;
 
 		gpipeline.NumRenderTargets = 1;	// 描画対象は1つ
-		gpipeline.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM; // 0～255指定のRGBA
 
 		// 図形の形状設定（三角形）
 		gpipeline.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
@@ -261,7 +261,6 @@ void LoadHlsls::createPipeline(ID3D12Device* _dev, int Number)
 		gpipeline.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 
 		gpipeline.NumRenderTargets = 1;    // 描画対象は1つ
-		gpipeline.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM; // 0～255指定のRGBA
 		gpipeline.SampleDesc.Count = 1; // 1ピクセルにつき1回サンプリング
 
 		// デスクリプタレンジ
@@ -299,7 +298,6 @@ void LoadHlsls::createPipeline(ID3D12Device* _dev, int Number)
 
 		//レンダターゲットの設定
 		gpipeline.NumRenderTargets = 1;//今は1つ
-		gpipeline.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;//0～1に正規化されたRGBA
 
 		//深度ステンシル
 		gpipeline.DepthStencilState.DepthEnable = true;//使う
@@ -371,7 +369,6 @@ void LoadHlsls::createPipeline(ID3D12Device* _dev, int Number)
 		gpipeline.BlendState.RenderTarget[0] = blenddesc;
 
 		gpipeline.NumRenderTargets = 1;	// 描画対象は1つ
-		gpipeline.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM; // 0～255指定のRGBA
 
 		// 図形の形状設定（三角形）
 		gpipeline.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
@@ -414,7 +411,6 @@ void LoadHlsls::createPipeline(ID3D12Device* _dev, int Number)
 		gpipeline.BlendState.RenderTarget[0] = blenddesc;
 
 		gpipeline.NumRenderTargets = 1;	// 描画対象は1つ
-		gpipeline.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM; // 0～255指定のRGBA
 
 		// 図形の形状設定（三角形）
 		gpipeline.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
@@ -457,7 +453,6 @@ void LoadHlsls::createPipeline(ID3D12Device* _dev, int Number)
 		gpipeline.BlendState.RenderTarget[0] = blenddesc;
 
 		gpipeline.NumRenderTargets = 1;	// 描画対象は1つ
-		gpipeline.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM; // 0～255指定のRGBA
 
 		// 図形の形状設定（三角形）
 		gpipeline.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
@@ -500,7 +495,6 @@ void LoadHlsls::createPipeline(ID3D12Device* _dev, int Number)
 		gpipeline.BlendState.RenderTarget[0] = blenddesc;
 
 		gpipeline.NumRenderTargets = 1;	// 描画対象は1つ
-		gpipeline.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM; // 0～255指定のRGBA
 
 		// 図形の形状設定（三角形）
 		gpipeline.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
@@ -543,7 +537,6 @@ void LoadHlsls::createPipeline(ID3D12Device* _dev, int Number)
 		gpipeline.BlendState.RenderTarget[0] = blenddesc;
 
 		gpipeline.NumRenderTargets = 1;	// 描画対象は1つ
-		gpipeline.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM; // 0～255指定のRGBA
 
 		// 図形の形状設定（三角形）
 		gpipeline.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;

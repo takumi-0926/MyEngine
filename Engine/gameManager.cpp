@@ -59,10 +59,6 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 		assert(0);
 		return false;
 	}
-	if (!Sprite::loadTexture(5, L"Resources/Damege.png")) {
-		assert(0);
-		return false;
-	}
 	if (!Sprite::loadTexture(6, L"Resources/start.png")) {
 		assert(0);
 		return false;
@@ -87,15 +83,15 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 		assert(0);
 		return false;
 	}
-	if (!Sprite::loadTexture(12, L"Resources/GateUI_red.dds")) {
+	if (!Sprite::loadTexture(12, L"Resources/GateUI_red.png")) {
 		assert(0);
 		return false;
 	}
-	if (!Sprite::loadTexture(13, L"Resources/GateUI_yellow.dds")) {
+	if (!Sprite::loadTexture(13, L"Resources/GateUI_yellow.png")) {
 		assert(0);
 		return false;
 	}
-	if (!Sprite::loadTexture(14, L"Resources/GateUI.dds")) {
+	if (!Sprite::loadTexture(14, L"Resources/GateUI.png")) {
 		assert(0);
 		return false;
 	}
@@ -162,6 +158,8 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	FbxObject3d::CreateGraphicsPipeline();
 
 	Object3Ds::SetCamera(dx12->Camera());
+
+	testModel =FbxLoader::GetInstance()->LoadModelFromFile("testModel");
 
 	//基本オブジェクト--------------
 	defenceModel = Model::CreateFromOBJ("KSR-29");
@@ -352,7 +350,6 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 
 	//入力及び音声
 	input->Update();
-	audio->Load();
 
 	SceneNum = TITLE;
 
@@ -382,62 +379,62 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 void GameManager::Update()
 {
 	//imgui
-	static bool blnChk = false;
-	static int radio = 0;
-	static float eneSpeed = 0.0f;
-	{
-		ImGui::Begin("Rendering Test Menu");
-		ImGui::SetWindowSize(ImVec2(400, 500), ImGuiCond_::ImGuiCond_FirstUseEver);
-		//imguiのUIコントロール
-		ImGui::Text("PlayerPosition : %.2f %.2f", _player->model->position.x, _player->model->position.z);
-		ImGui::Text("ClearResultPos : %.2f %.2f", clear->Pos().x, clear->Pos().y);
-		ImGui::Text("ClearResultPos : %.2f %.2f", protEnemy[0]->weapon->position.x, protEnemy[0]->weapon->position.z);
-		ImGui::Text("ClearResultPos : %.2f %.2f", protEnemy[0]->GetPosition().x, protEnemy[0]->GetPosition().z);
-		ImGui::Checkbox("EnemyPop", &blnChk);
-		ImGui::Checkbox("test", &_player->model->a);
-		ImGui::RadioButton("Game Mode", &radio, 0);
-		ImGui::SameLine();
-		ImGui::RadioButton("Debug Mode", &radio, 1);
-		ImGui::SameLine();
-		ImGui::RadioButton("Set Camera", &radio, 2);
-		int nSlider = 0;
-		ImGui::SliderFloat("Enemy Speed", &eneSpeed, 0.05f, 1.0f);
-		static float col3[3] = {};
-		ImGui::ColorPicker3("ColorPicker3", col3, ImGuiColorEditFlags_::ImGuiColorEditFlags_InputRGB);
-		static float col4[4] = {};
-		ImGui::ColorPicker4("ColorPicker4", col4, ImGuiColorEditFlags_::ImGuiColorEditFlags_PickerHueWheel | ImGuiColorEditFlags_::ImGuiColorEditFlags_AlphaBar);
+	//static bool blnChk = false;
+	//static int radio = 0;
+	//static float eneSpeed = 0.0f;
+	//{
+	//	ImGui::Begin("Rendering Test Menu");
+	//	ImGui::SetWindowSize(ImVec2(400, 500), ImGuiCond_::ImGuiCond_FirstUseEver);
+	//	//imguiのUIコントロール
+	//	ImGui::Text("PlayerPosition : %.2f %.2f", _player->model->position.x, _player->model->position.z);
+	//	ImGui::Text("ClearResultPos : %.2f %.2f", clear->Pos().x, clear->Pos().y);
+	//	ImGui::Text("ClearResultPos : %.2f %.2f", protEnemy[0]->weapon->position.x, protEnemy[0]->weapon->position.z);
+	//	ImGui::Text("ClearResultPos : %.2f %.2f", protEnemy[0]->GetPosition().x, protEnemy[0]->GetPosition().z);
+	//	ImGui::Checkbox("EnemyPop", &blnChk);
+	//	ImGui::Checkbox("test", &_player->model->a);
+	//	ImGui::RadioButton("Game Mode", &radio, 0);
+	//	ImGui::SameLine();
+	//	ImGui::RadioButton("Debug Mode", &radio, 1);
+	//	ImGui::SameLine();
+	//	ImGui::RadioButton("Set Camera", &radio, 2);
+	//	int nSlider = 0;
+	//	ImGui::SliderFloat("Enemy Speed", &eneSpeed, 0.05f, 1.0f);
+	//	static float col3[3] = {};
+	//	ImGui::ColorPicker3("ColorPicker3", col3, ImGuiColorEditFlags_::ImGuiColorEditFlags_InputRGB);
+	//	static float col4[4] = {};
+	//	ImGui::ColorPicker4("ColorPicker4", col4, ImGuiColorEditFlags_::ImGuiColorEditFlags_PickerHueWheel | ImGuiColorEditFlags_::ImGuiColorEditFlags_AlphaBar);
 
-		ImGui::InputFloat3("circleShadowDir", circleShadowDir);
-		ImGui::InputFloat3("circleShadowAtten", circleShadowAtten);
-		ImGui::InputFloat2("circleShadowFactorAngle", circleShadowFacterAnlge);
-		ImGui::InputFloat3("DebugCameraEye", debugCameraPos);
-		ImGui::InputFloat3("DebugWeaponPos", testPos);
-		ImGui::InputFloat3("Pos", debugPointLightPos);
-		ImGui::InputInt3("DebugBoneNum", testNum);
+	//	ImGui::InputFloat3("circleShadowDir", circleShadowDir);
+	//	ImGui::InputFloat3("circleShadowAtten", circleShadowAtten);
+	//	ImGui::InputFloat2("circleShadowFactorAngle", circleShadowFacterAnlge);
+	//	ImGui::InputFloat3("DebugCameraEye", debugCameraPos);
+	//	ImGui::InputFloat3("DebugWeaponPos", testPos);
+	//	ImGui::InputFloat3("Pos", debugPointLightPos);
+	//	ImGui::InputInt3("DebugBoneNum", testNum);
 
-		ImGui::End();
+	//	ImGui::End();
 
-		ImGui::Begin("Particle");
-		ImGui::SetWindowSize(ImVec2(400, 500), ImGuiCond_::ImGuiCond_FirstUseEver);
-		ImGui::ColorPicker4("ColorPicker4", particleColor, ImGuiColorEditFlags_::ImGuiColorEditFlags_PickerHueWheel | ImGuiColorEditFlags_::ImGuiColorEditFlags_AlphaBar);
-		ImGui::End();
+	//	ImGui::Begin("Particle");
+	//	ImGui::SetWindowSize(ImVec2(400, 500), ImGuiCond_::ImGuiCond_FirstUseEver);
+	//	ImGui::ColorPicker4("ColorPicker4", particleColor, ImGuiColorEditFlags_::ImGuiColorEditFlags_PickerHueWheel | ImGuiColorEditFlags_::ImGuiColorEditFlags_AlphaBar);
+	//	ImGui::End();
 
-		//カメラ切り替え
-		static bool isCamera = false;
-		if (radio == 0 && isCamera == false) {
-			Wrapper::SetCamera(mainCamera);
-			FbxObject3d::SetCamera(dx12->Camera());
+	//	//カメラ切り替え
+	//	static bool isCamera = false;
+	//	if (radio == 0 && isCamera == false) {
+	//		Wrapper::SetCamera(mainCamera);
+	//		FbxObject3d::SetCamera(dx12->Camera());
 
-			isCamera = true;
-		}
-		else if (radio == 1 && isCamera == true) {
-			Wrapper::SetCamera(camera);
-			FbxObject3d::SetCamera(dx12->Camera());
-			SceneNum = Scene::DebugTest;
+	//		isCamera = true;
+	//	}
+	//	else if (radio == 1 && isCamera == true) {
+	//		Wrapper::SetCamera(camera);
+	//		FbxObject3d::SetCamera(dx12->Camera());
+	//		SceneNum = Scene::DebugTest;
 
-			isCamera = false;
-		}
-	}
+	//		isCamera = false;
+	//	}
+	//}
 
 	//ライト
 	light->SetPointLightPos(0, XMFLOAT3(debugPointLightPos));
@@ -565,7 +562,7 @@ void GameManager::GameUpdate() {
 				start->FadeOut();
 				if (!start->GetFadeOut()) {
 					Start_UI_03.get()->SetFadeIn(true);
-					GameModeNum = GameMode::Preparation;
+					GameModeNum = GameMode::NASI;
 				}
 			}
 			start->Update();
@@ -943,6 +940,7 @@ void GameManager::DebugTestUpdate()
 		debugFilde->Update();
 		debugCharacter->Update();
 		light->Update();
+		testModel->Update();
 
 		static float createTime = 0.2f;
 		if (createTime <= 0.0f) {
@@ -1300,7 +1298,8 @@ void GameManager::MainDraw()
 
 		BaseObject::PreDraw(cmdList);
 		debugFilde->Draw();
-		debugCharacter->Draw();
+		//debugCharacter->Draw();
+		testModel->Draw(cmdList);
 		BaseObject::PostDraw();
 
 		// 3Dオブジェクト描画前処理

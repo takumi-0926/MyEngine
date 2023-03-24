@@ -364,7 +364,7 @@ bool ParticleManager::InitializeGraphicsPipeline()
 
 
 	gpipeline.NumRenderTargets = 1;	// 描画対象は1つ
-	gpipeline.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM; // 0～255指定のRGBA
+	gpipeline.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB; // 0～255指定のRGBA
 	gpipeline.SampleDesc.Count = 1; // 1ピクセルにつき1回サンプリング
 
 	// デスクリプタレンジ
@@ -795,7 +795,7 @@ void ParticleManager::CreateParticle(
 			const float md_acc = accel;
 			acc.z = float(sin(i) * md_acc);
 			acc.x = float(cos(i) * md_acc);
-			acc.y = float(md_acc / 3) * float(sin(a));
+			acc.y = float(md_acc / 3);
 
 			//XMVECTOR b = {};
 			//b = XMLoadFloat3(&acc);

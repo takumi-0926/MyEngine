@@ -189,7 +189,7 @@ private://ƒƒ“ƒo•Ï”(‰Šú‰»)
 	Model* debugFildeModel = nullptr;
 	Object3Ds* debugCharacter = nullptr;
 	Model* debugCharacterModel = nullptr;
-
+	FbxModel* testModel = nullptr;
 
 
 	DebugText* text = nullptr;
