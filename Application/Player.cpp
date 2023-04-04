@@ -49,7 +49,7 @@ XMMATRIX Player::LookAtRotation(XMFLOAT3 forward, XMFLOAT3 upward)
 	return rot;
 }
 
-Player* Player::Create(PMDmodel* _model)
+Player* Player::Create(FbxModel* model)
 {
 	//インスタンス生成
 	Player* instance = new Player();
@@ -58,27 +58,124 @@ Player* Player::Create(PMDmodel* _model)
 	}
 
 	//初期化
-	if (!instance->Initialize(_model)) {
-		delete instance;
-		assert(0);
-	}
+	instance->Initialize();
+
+	instance->SetModel(model);
 
 	return instance;
 }
 
-bool Player::Initialize(PMDmodel* _model)
+void Player::Initialize()
 {
-	if (!PMDobject::Initialize(_model)) {
-		assert(0);
-		return false;
-	}
+	FbxObject3d::Initialize();
 
 	//コライダー追加
 	float radius = 3.0f;
 	SetCollider(new SphereCollider(XMVECTOR({ 0,radius,0,0 }), radius));
 	collider->SetAttribute(COLLISION_ATTR_ALLIES);
+}
 
-	return true;
+void Player::actionExecution(int num)
+{
+	XMFLOAT3 v = { (directInput->getLeftX()),0.0f,-(directInput->getLeftY()) };
+
+	//待機状態
+	if (num == action::Wait) {
+
+	}
+	//移動状態
+	else if (num == action::Walk || num == action::Dash) {
+
+		//左移動
+		if (Input::GetInstance()->Push(DIK_A) || directInput->leftStickX() < 0.0f) {
+			SetPosition((MoveLeft(GetPosition())));
+		}
+		//右移動
+		if (Input::GetInstance()->Push(DIK_D) || directInput->leftStickX() > 0.0f) {
+			SetPosition((MoveRight(GetPosition())));
+		}
+		//下移動
+		if (Input::GetInstance()->Push(DIK_W) || directInput->leftStickY() < 0.0f) {
+			SetPosition((MoveBefore(GetPosition())));
+		}
+		//上移動
+		if (Input::GetInstance()->Push(DIK_S) || directInput->leftStickY() > 0.0f) {
+			SetPosition((MoveAfter(GetPosition())));
+		}
+		XMMATRIX matRot = XMMatrixIdentity();
+		//角度回転
+		matRot = XMMatrixRotationY(XMConvertToRadians(angleHorizonal));
+
+		XMVECTOR _v({ v.x, v.y, v.z, 0 });
+		_v = XMVector3TransformNormal(_v, matRot);
+		v.x = _v.m128_f32[0];
+		v.y = _v.m128_f32[1];
+		v.z = _v.m128_f32[2];
+
+		SetMatRot(LookAtRotation(v, XMFLOAT3(0.0f, 1.0f, 0.0f)));
+	}
+	//攻撃状態
+	else if (num == action::Attack) {
+		if (playEnd) {
+			Action = -1;
+		}
+	}
+	playEnd = false;
+}
+
+void Player::moveUpdate()
+{
+	//攻撃状態の時はスキップ（変更しない）
+	if (Action == action::Attack) {
+		actionExecution(Action);
+		return;
+	}
+
+	if (directInput->leftStickX() < 0.0f || directInput->leftStickX() > 0.0f || directInput->leftStickY() < 0.0f || directInput->leftStickY() > 0.0f) {
+
+		//走りとダッシュの切り替え
+		if (directInput->getTriggerZ() != 0) {
+			speed = 2.0f;
+			ChangeAnimation(action::Dash);
+			Action = action::Dash;
+		}
+		else {
+			speed = 1.0f;
+			ChangeAnimation(action::Walk);
+			Action = action::Walk;
+		}
+	}
+	else {
+		ChangeAnimation(action::Wait);
+		Action = action::Wait;
+	}
+	if (directInput->IsButtonPush(DirectInput::ButtonKind::ButtonX) || Input::GetInstance()->Push(DIK_X)) {
+		ChangeAnimation(action::Attack);
+		Action = action::Attack;
+	}
+
+	float angleH = 150.0f;
+	float angleV = 60.0f;
+
+	if (directInput->rightStickX() >= 0.5f || directInput->rightStickX() <= -0.5f) {
+		angleHorizonal +=
+			XMConvertToRadians(angleH * directInput->getRightX());
+	}
+	if (directInput->rightStickY() >= 0.5f || directInput->rightStickY() <= -0.5f) {
+		angleVertical +=
+			XMConvertToRadians(angleV * directInput->getRightY());
+		//制限角度
+		if (angleVertical >= 60) {
+			angleVertical = 60;
+		}
+		//制限角度
+		if (angleVertical <= -60) {
+			angleVertical = -60;
+		}
+	}
+
+	//行動実行
+	actionExecution(Action);
 }
 
 void Player::Avoid() {
@@ -89,9 +186,9 @@ void Player::Avoid() {
 
 	XMVECTOR vec = XMLoadFloat3(&avoidVec);
 	vec = XMVector3Normalize(vec);
-	model->position.x += -vec.m128_f32[0] * avoidSpeed;
-	model->position.y += -vec.m128_f32[1] * avoidSpeed;
-	model->position.z += -vec.m128_f32[2] * avoidSpeed;
+	position.x += -vec.m128_f32[0] * avoidSpeed;
+	position.y += -vec.m128_f32[1] * avoidSpeed;
+	position.z += -vec.m128_f32[2] * avoidSpeed;
 
 	avoidTime += 1.0f;
 }
@@ -118,75 +215,7 @@ void Player::Avoid() {
 
 void Player::Update()
 {
-	//if (model->position.x <= -100.0f) {
-	//	model->position.x = -100.0f;
-	//}
-	//if (model->position.x >= 100.0f) {
-	//	model->position.x = 100.0f;
-	//}
-	//if (model->position.z <= -100.0f) {
-	//	model->position.z = -100.0f;
-	//}
-	//if (model->position.z >= 322.0f) {
-	//	model->position.z = 322.0f;
-	//}
-
-	//移動
-	//{
-	//	//移動ベクトル
-	//	XMFLOAT3 v = { (directInput->getLeftX()),0.0f,-(directInput->getLeftY()) };
-
-	//	if (model->oldVmdNumber != vmdData::ATTACK) { model->oldVmdNumber = model->vmdNumber; }
-	//	else if (model->oldVmdNumber != vmdData::DAMAGE) { model->oldVmdNumber = model->vmdNumber; }
-	//	if (directInput->leftStickX() < 0.0f || directInput->leftStickX() > 0.0f || directInput->leftStickY() < 0.0f || directInput->leftStickY() > 0.0f) {
-	//		model->vmdNumber = vmdData::WALK;
-	//		if (GetAction() == action::Avoid) { model->vmdNumber = vmdData::AVOID; }
-	//		if (directInput->getTriggerZ() != 0) {
-	//			speed = 2.0f;
-	//		}
-	//		else { speed = 1.0f; }
-	//		//左移動
-	//		if (input.Push(DIK_A) || directInput->leftStickX() < 0.0f) {
-	//			model->position = (MoveLeft(model->position));
-	//		}
-	//		//右移動
-	//		if (input.Push(DIK_D) || directInput->leftStickX() > 0.0f) {
-	//			model->position = (MoveRight(model->position));
-	//		}
-	//		//下移動
-	//		if (input.Push(DIK_W) || directInput->leftStickY() < 0.0f) {
-	//			model->position = (MoveBefore(model->position));
-	//		}
-	//		//上移動
-	//		if (input.Push(DIK_S) || directInput->leftStickY() > 0.0f) {
-	//			model->position = (MoveAfter(model->position));
-	//		}
-	//		XMMATRIX matRot = XMMatrixIdentity();
-	//		//角度回転
-	//		matRot = XMMatrixRotationY(XMConvertToRadians(angleHorizonal));
-
-	//		XMVECTOR _v({ v.x, v.y, v.z, 0 });
-	//		_v = XMVector3TransformNormal(_v, matRot);
-	//		v.x = _v.m128_f32[0];
-	//		v.y = _v.m128_f32[1];
-	//		v.z = _v.m128_f32[2];
-
-	//		model->SetMatRot(LookAtRotation(v, XMFLOAT3(0.0f, 1.0f, 0.0f)));
-	//		if (directInput->IsButtonPush(DirectInput::ButtonKind::Button02) || input.Push(DIK_Z)) {
-	//			model->vmdNumber = vmdData::AVOID;
-	//			SetAction(action::Avoid);
-	//			SetAvoidVec(v);
-	//		}
-
-	//	}
-	//	else if (directInput->IsButtonPush(DirectInput::ButtonKind::Button01) || input.Push(DIK_X)) {
-	//		model->vmdNumber = vmdData::ATTACK;
-	//	}
-	//	else {
-	//		model->vmdNumber = vmdData::WAIT;
-	//	}
-	//}
-
+	moveUpdate();
 	//回避行動
 	if (Action == action::Avoid) { Avoid(); }
 
@@ -197,9 +226,9 @@ void Player::Update()
 
 		fallV.m128_f32[1] = max(fallV.m128_f32[1] + fallAcc, fallVYMin);
 
-		model->position.x += fallV.m128_f32[0];
-		model->position.y += fallV.m128_f32[1];
-		model->position.z += fallV.m128_f32[2];
+		position.x += fallV.m128_f32[0];
+		position.y += fallV.m128_f32[1];
+		position.z += fallV.m128_f32[2];
 	}
 
 	//球コライダー生成
@@ -236,10 +265,10 @@ void Player::Update()
 
 	CollisionManager::GetInstance()->QuerySqhere(*sqhereCollider, &callBack, COLLISION_ATTR_LANDSHAPE);
 
-	model->position.x += callBack.move.m128_f32[0];
-	model->position.y += callBack.move.m128_f32[1];
-	model->position.z += callBack.move.m128_f32[2];
-	model->UpdateWorldMatrix();
+	position.x += callBack.move.m128_f32[0];
+	position.y += callBack.move.m128_f32[1];
+	position.z += callBack.move.m128_f32[2];
+	UpdateWorldMatrix();
 	collider->Update();
 
 	//落下判定用レイ
@@ -256,7 +285,7 @@ void Player::Update()
 		if (CollisionManager::GetInstance()->Raycast(ray, COLLISION_ATTR_LANDSHAPE, &raycastHit, sqhereCollider->GetRadius() * 2.0f + adsDistance))
 		{
 			OnGround = true;
-			model->position.y -= (raycastHit.distance - sqhereCollider->GetRadius() * 2.0f);
+			position.y -= (raycastHit.distance - sqhereCollider->GetRadius() * 2.0f);
 		}
 		else {
 			OnGround = false;
@@ -266,14 +295,14 @@ void Player::Update()
 	else if (fallV.m128_f32[1] <= 0.0f) {
 		if (CollisionManager::GetInstance()->Raycast(ray, COLLISION_ATTR_LANDSHAPE, &raycastHit, sqhereCollider->GetRadius() * 2.0f)) {
 			OnGround = true;
-			model->position.y -= (raycastHit.distance - sqhereCollider->GetRadius() * 2.0f);
+			position.y -= (raycastHit.distance - sqhereCollider->GetRadius() * 2.0f);
 		}
 	}
 	//移動
-	PMDobject::Update();
+	FbxObject3d::Update();
 }
 
-void Player::Draw(bool isShadow)
+void Player::Draw(ID3D12GraphicsCommandList* cmdList)
 {
-	PMDobject::Draw(isShadow);
+	FbxObject3d::Draw(cmdList);
 }

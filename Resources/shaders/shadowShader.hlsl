@@ -1,15 +1,18 @@
-#include "BasicShaderHeader.hlsli"
+#include "ObjShaderHeader.hlsli"
 
 float4 shadowVS(
-	float4 pos : POSITION,
-	float2 uv : TEXCOORD,
-	min16uint2 boneno : BONE_NO,
-	min16uint weight : WEIGHT) : SV_POSITION
+	float4 pos : POSITION, float3 normal : NORMAL, float2 uv : TEXCOORD) : SV_POSITION
 {
-	float fweight = float(weight) / 100.0f;
-	matrix conBone = bones[boneno.x] * fweight + bones[boneno.y] * (1.0f - fweight);
-
-	pos = mul(world, mul(conBone, pos));
-
+	//// 法線にワールド行列によるスケーリング・回転を適用
+	//float4 wnormal = normalize(mul(world, float4(normal, 0)));
+	float4 wpos = mul(world, pos);
+	//
+	//VSOutput output; // ピクセルシェーダーに渡す値
+	//output.svpos = mul(mul(viewproj, world), pos);
+	////output.svpos = mul(mul(lightCamera, world), pos);
+	//
+	pos = mul(world, pos);
+	//output.normal = wnormal.xyz;
+	//output.uv = uv;
 	return mul(lightCamera, pos);
 }

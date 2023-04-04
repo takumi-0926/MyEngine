@@ -6,6 +6,7 @@
 #pragma comment(lib,"dxgi.lib")
 
 Camera* Wrapper::camera;
+Camera* Wrapper::depthCamera;
 // ビュー行列
 XMMATRIX Wrapper::matView{};
 // 射影行列
@@ -155,18 +156,6 @@ void Wrapper::PreRunShadow()
 	// シザリング矩形の設定
 	CD3DX12_RECT rect = CD3DX12_RECT(0, 0, Application::window_width, Application::window_height);
 	_cmdList->RSSetScissorRects(1, &rect);
-
-	//深度SRV
-	_cmdList->SetDescriptorHeaps(1, _depthHaepSRV.GetAddressOf());
-
-	auto handle02 = _depthHaepSRV->GetGPUDescriptorHandleForHeapStart();
-
-	//handle02.ptr += _dev->GetDescriptorHandleIncrementSize(
-	//	D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV
-	//);
-
-	//_cmdList->SetGraphicsRootDescriptorTable(4, handle02);
-
 }
 
 void Wrapper::PostRun() {
@@ -531,8 +520,8 @@ HRESULT Wrapper::InitializeDepthBuff(SIZE ret) {
 
 	//ライトデプス
 	_dev->CreateShaderResourceView(
-		_lightDepthBuffer.Get(), &texResdesc, handle02
-	);
+		_lightDepthBuffer.Get(), &texResdesc, handle02);
+
 	return result;
 }
 
@@ -608,33 +597,36 @@ ComPtr<ID3D12DescriptorHeap> Wrapper::CreateDescriptorHeapForImgui()
 
 void Wrapper::SceneUpdate()
 {
-	HRESULT result;
-	_mappedSceneData = nullptr;//マップ先を示すポインタ
-	result = _sceneConstBuff->Map(0, nullptr, (void**)&_mappedSceneData);//マップ
+	//HRESULT result;
+	//_mappedSceneData = nullptr;//マップ先を示すポインタ
+	//result = _sceneConstBuff->Map(0, nullptr, (void**)&_mappedSceneData);//マップ
 
-	const XMMATRIX& matViewProjection = camera->GetViewProjectionMatrix();
-	const XMFLOAT3& cameraPos = camera->GetEye();
-	const XMFLOAT4 planeVec(0, 1, 0, 0);
-	const XMFLOAT4 light(1, -1, 1, 0);
-	XMVECTOR lightVec = XMLoadFloat4(&light);
+	//const XMMATRIX& matViewProjection = camera->GetViewProjectionMatrix();
+	//const XMFLOAT3& cameraPos = camera->GetEye();
+	//const XMFLOAT4 planeVec(0, 1, 0, 0);
+	//const XMFLOAT4 light(1, -1, 1, 0);
+	////ライト方向ベクトル
+	//XMVECTOR lightVec = XMLoadFloat4(&light);
 
-	XMVECTOR eye = XMLoadFloat3(&camera->GetEye());
-	XMVECTOR terget = XMLoadFloat3(&camera->GetTarget());
-	XMVECTOR up = XMLoadFloat3(&camera->GetUp());
+	//XMVECTOR eye = XMLoadFloat3(&cameraPos);
+	//XMVECTOR terget = XMLoadFloat3(&camera->GetTarget());
+	//XMVECTOR up = XMLoadFloat3(&camera->GetUp());
 
-	auto lightPos = terget + XMVector3Normalize(lightVec) * XMVector3Length(XMVectorSubtract(terget, eye)).m128_f32[0];
+	////カメラから注視点までのベクトルをライト方向ベクトルに乗算してライト位置を決定
+	//auto lightPos = terget + XMVector3Normalize(lightVec) * XMVector3Length(XMVectorSubtract(terget, eye)).m128_f32[0];
 
-	_mappedSceneData->viewproj = matViewProjection;
-	_mappedSceneData->shadow = XMMatrixShadow(
-		XMLoadFloat4(&planeVec),
-		-lightVec);
+	////通常カメラのビュー行列
+	//_mappedSceneData->viewproj = matViewProjection;
+	////ライト方向からのビュー行列
+	//_mappedSceneData->lightCamera = XMMatrixLookAtLH(lightPos, terget, up) * XMMatrixOrthographicLH(40, 40, 1.0f, 100.0f);
 
-	_mappedSceneData->lightCamera = XMMatrixLookAtLH(
-		lightPos, terget, up) * XMMatrixOrthographicLH(40, 40, 1.0f, 100.0f);
+	//_mappedSceneData->shadow = XMMatrixShadow(
+	//	XMLoadFloat4(&planeVec),
+	//	-lightVec);
 
-	_mappedSceneData->cameraPos = cameraPos;
+	//_mappedSceneData->cameraPos = cameraPos;
 
-	_sceneConstBuff->Unmap(0, nullptr);
+	//_sceneConstBuff->Unmap(0, nullptr);
 }
 
 ComPtr<IDXGISwapChain4> Wrapper::SwapChain() {
@@ -649,4 +641,18 @@ void Wrapper::DrawLight(ID3D12GraphicsCommandList* cmdlist)
 {
 	assert(cmdlist);
 	light->Draw(cmdlist, 3);
+}
+
+void Wrapper::DrawDepth()
+{
+	//深度SRV
+	_cmdList->SetDescriptorHeaps(1, _depthHaepSRV.GetAddressOf());
+
+	auto handle = _depthHaepSRV->GetGPUDescriptorHandleForHeapStart();
+
+	handle.ptr += _dev->GetDescriptorHandleIncrementSize(
+		D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV
+	);
+
+	_cmdList->SetGraphicsRootDescriptorTable(4, handle);
 }

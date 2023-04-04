@@ -61,5 +61,7 @@ VSOutput main(VSInput input)
 	//入力値をそのまま次のステージに渡す
 	output.uv = input.uv;
 
+	output.tpos = mul(lightCamera, skinned.pos);
+
 	return output;
 }

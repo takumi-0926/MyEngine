@@ -137,12 +137,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		//input.Update();
 		Input::GetInstance()->Update();
-
+		Object3Ds::SetDx12(dx12);
 		gameScene.Update();
 
 		//影
 		dx12->PreRunShadow();
-		gameScene.shadowDraw();
+		gameScene.ShadowDraw();
 		//dx12->PostRun();
 
 		//レンダーテクスチャに描画
@@ -156,7 +156,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		postEffect->Draw(dx12->CommandList().Get());
 
 		//スプライト描画
-		gameScene.SubDraw();
+		//gameScene.SubDraw();
 
 		ImGui::Render();
 		dx12->CommandList()->SetDescriptorHeaps(

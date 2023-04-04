@@ -1,5 +1,7 @@
 #pragma once
 #include "PMD/pmdObject3D.h"
+#include "FBX/FbxObject3d.h"
+#include"Input/input.h"
 //#include "Input/input.h"
 
 enum action {
@@ -12,7 +14,7 @@ enum action {
 };
 
 //class Input;
-class Player : public PMDobject {
+class Player : public FbxObject3d {
 	template <class T> using ComPtr = Microsoft::WRL::ComPtr<T>;
 	using XMFLOAT2 = DirectX::XMFLOAT2;
 	using XMFLOAT3 = DirectX::XMFLOAT3;
@@ -46,7 +48,95 @@ private:
 	XMVECTOR fallV;
 
 private:
+	void actionExecution(int num);
+	void moveUpdate();
 	void Avoid();
+
+	/// <summary>
+/// 移動
+/// </summary>
+/// <param name="pos">移動させる座標</param>
+/// <returns>移動後の座標</returns>
+	inline XMFLOAT3 MoveBefore(XMFLOAT3 pos)
+	{
+		XMMATRIX matRot = XMMatrixIdentity();
+
+		//Z方向ベクトル
+		Zv = { 0.0f,0.0f,1.0f,0.0f };
+
+		//角度回転
+		matRot = XMMatrixRotationY(XMConvertToRadians(angleHorizonal));
+
+		//Z方向ベクトルを回転
+		Zv = XMVector3TransformNormal(Zv, matRot);
+
+		//加算
+		pos.x += Zv.m128_f32[0] * directInput->getLeftY() * speed;
+		pos.y += Zv.m128_f32[1] * directInput->getLeftY() * speed;
+		pos.z += Zv.m128_f32[2] * directInput->getLeftY() * speed;
+
+		return pos;
+	}
+	inline XMFLOAT3 MoveAfter(XMFLOAT3 pos)
+	{
+		XMMATRIX matRot = XMMatrixIdentity();
+
+		//Z方向ベクトル
+		Zv = { 0.0f,0.0f,1.0f,0.0f };
+
+		//弾角度回転
+		matRot = XMMatrixRotationY(XMConvertToRadians(angleHorizonal));
+
+		//Z方向ベクトルを回転
+		Zv = XMVector3TransformNormal(Zv, matRot);
+
+		//加算
+		pos.x += Zv.m128_f32[0] * directInput->getLeftY() * speed;
+		pos.y += Zv.m128_f32[1] * directInput->getLeftY() * speed;
+		pos.z += Zv.m128_f32[2] * directInput->getLeftY() * speed;
+
+		return pos;
+	}
+	inline XMFLOAT3 MoveLeft(XMFLOAT3 pos)
+	{
+		XMMATRIX matRot = XMMatrixIdentity();
+
+		//X方向ベクトル
+		Xv = { 1.0f,0.0f,0.0f,0.0f };
+
+		//角度回転
+		matRot = XMMatrixRotationY(XMConvertToRadians(angleHorizonal));
+
+		//X方向ベクトルを回転
+		Xv = XMVector3TransformNormal(Xv, matRot);
+
+		//加算
+		pos.x -= Xv.m128_f32[0] * directInput->getLeftX() * speed;
+		pos.y -= Xv.m128_f32[1] * directInput->getLeftX() * speed;
+		pos.z -= Xv.m128_f32[2] * directInput->getLeftX() * speed;
+
+		return pos;
+	}
+	inline XMFLOAT3 MoveRight(XMFLOAT3 pos)
+	{
+		XMMATRIX matRot = XMMatrixIdentity();
+
+		//X方向ベクトル
+		Xv = { 1.0f,0.0f,0.0f,0.0f };
+
+		//角度回転
+		matRot = XMMatrixRotationY(XMConvertToRadians(angleHorizonal));
+
+		//X方向ベクトルを回転
+		Xv = XMVector3TransformNormal(Xv, matRot);
+
+		//加算
+		pos.x -= Xv.m128_f32[0] * directInput->getLeftX() * speed;
+		pos.y -= Xv.m128_f32[1] * directInput->getLeftX() * speed;
+		pos.z -= Xv.m128_f32[2] * directInput->getLeftX() * speed;
+
+		return pos;
+	}
 
 	/// <summary>
 	/// 移動
@@ -129,11 +219,11 @@ public:
 	/// </summary>
 	/// <param name="_model"></param>
 	/// <returns></returns>
-	static Player* Create(PMDmodel* _model);
+	static Player* Create(FbxModel* model);
 	/// <summary>
 	/// 初期化
 	/// </summary>
-	bool Initialize(PMDmodel* _model)override;
+	void Initialize()override;
 	/// <summary>
 	/// 更新処理
 	/// </summary>
@@ -141,7 +231,7 @@ public:
 	/// <summary>
 	/// 描画処理
 	/// </summary>
-	void Draw(bool isShadow = false)override;
+	void Draw(ID3D12GraphicsCommandList* cmdList)override;
 
 public:
 	//void SetInput(const Input& input) { this->input = input; }
@@ -150,4 +240,7 @@ public:
 	void SetAvoidVec(DirectX::XMFLOAT3 vec) { this->avoidVec = vec; }
 
 	int GetAction() { return Action; }
+
+	inline float GetAngleVertical() { return angleVertical; }
+	inline float GetAngleHorizonal() { return angleHorizonal; }
 };

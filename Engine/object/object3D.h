@@ -26,6 +26,11 @@ protected: // メンバ変数
 
 	static Camera* camera;
 
+	//3Dオブジェクト用
+	static ComPtr<ID3D12RootSignature>	_rootsignature;
+	static ComPtr<ID3D12PipelineState>	_pipelinestate;
+	static ComPtr<ID3D12PipelineState>	_plsShadow;
+
 	BaseCollider* collider = nullptr;
 public:
 	/// <summary>
@@ -53,6 +58,7 @@ public:
 	virtual void Update();
 	// 描画
 	virtual void Draw();
+	virtual void ShadowDraw();
 
 	//行列の更新
 	void UpdateWorldMatrix();
@@ -64,7 +70,7 @@ public:
 	const XMMATRIX GetMatWorld() { return matWorld; }
 
 	void SetCollider(BaseCollider* collider);
-
+	void SetColliderInvisible(bool flag);
 	virtual void OnCollision(const CollisionInfo& info) {}
 public:
 	ComPtr<ID3D12Resource> constBuffB0; // 定数バッファ(OBJ)
@@ -103,6 +109,9 @@ public:
 	}
 	static void SetCamera(Camera* camera) {
 		Object3Ds::camera = camera;
+	}
+	static void SetDx12(Wrapper* dx12) {
+		Object3Ds::dx12 = dx12;
 	}
 
 	/// <summary>

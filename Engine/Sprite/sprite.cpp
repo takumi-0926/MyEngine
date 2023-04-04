@@ -53,11 +53,6 @@ bool Sprite::staticInitalize(ID3D12Device* _dev, SIZE ret)
 	ComPtr<ID3DBlob> psBlob;	// ピクセルシェーダオブジェクト
 	ComPtr<ID3DBlob> errorBlob; // エラーオブジェクト
 
-	//パイプライン生成
-	LoadHlsls::LoadHlsl_VS(ShaderNo::OBJ, L"Resources/shaders/OBJVertexShader.hlsl", "main", "vs_5_0");
-	LoadHlsls::LoadHlsl_PS(ShaderNo::OBJ, L"Resources/shaders/OBJPixelShader.hlsl", "main", "ps_5_0");
-	LoadHlsls::createPipeline(device, ShaderNo::OBJ);
-
 	//LoadHlsl("Resources/shaders/SpriteVertexShader.hlsl",
 	//	&vsBlob, "main", "vs_5_0");
 

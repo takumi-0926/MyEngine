@@ -24,8 +24,8 @@ private:
 		//XMFLOAT4 color;	// 色 (RGBA)
 		//XMMATRIX mat;	// ３Ｄ変換行列
 		XMMATRIX viewproj;
-		XMMATRIX shadow;
 		XMMATRIX lightCamera;
+		XMMATRIX shadow;
 		XMFLOAT3 cameraPos;
 	};
 
@@ -64,6 +64,7 @@ private:
 	static Light* light;
 
 	static Camera* camera;
+	static Camera* depthCamera;;
 	// ビュー行列
 	static XMMATRIX matView;
 	// 射影行列
@@ -94,7 +95,25 @@ private:
 			0.1f, 1000.0f
 		);
 	}
+	static void InitalizeLightCamera(int window_width, int window_height) {
+		// ビュー行列の生成
+		matView = XMMatrixLookAtLH(
+			XMLoadFloat3(&eye),
+			XMLoadFloat3(&target),
+			XMLoadFloat3(&up));
 
+		// 平行投影による射影行列の生成
+		matProjection = XMMatrixOrthographicOffCenterLH(
+			0, float(window_width),
+			float(window_height), 0,
+			0, 1);
+		// 透視投影による射影行列の生成
+		//matProjection = XMMatrixPerspectiveFovLH(
+		//	XMConvertToRadians(60.0f),
+		//	(float)window_width / window_height,
+		//	0.1f, 1000.0f
+		//);
+	}
 public:
 	~Wrapper();
 
@@ -147,7 +166,7 @@ public:
 	}
 
 	void DrawLight(ID3D12GraphicsCommandList* cmdlist);
-
+	void DrawDepth();
 	void SceneDraw() {
 		//現在のシーン(ビュープロジェクション)をセット
 		ID3D12DescriptorHeap* sceneheaps[] = { _descHeap.Get() };

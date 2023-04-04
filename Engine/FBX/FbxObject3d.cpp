@@ -14,6 +14,7 @@ ID3D12Device* FbxObject3d::device = nullptr;
 Camera* FbxObject3d::camera = nullptr;
 ComPtr<ID3D12RootSignature> FbxObject3d::rootsignature;
 ComPtr<ID3D12PipelineState> FbxObject3d::pipelinestate;
+ComPtr<ID3D12PipelineState> FbxObject3d::pipelineshadow;
 
 void FbxObject3d::Initialize()
 {
@@ -58,10 +59,23 @@ void FbxObject3d::Update()
 
 	HRESULT result;
 
+	//ライトカメラ
+	auto light = XMFLOAT4(1, -1, 0, 0);
+	XMVECTOR lightVec = XMLoadFloat4(&light);
+
+	auto Eye = XMFLOAT3(25, 30, 0);
+	XMVECTOR eye = XMLoadFloat3(&Eye);
+	auto Target = XMFLOAT3(0, 0, 0);
+	XMVECTOR terget = XMLoadFloat3(&Target);
+	XMVECTOR up = XMLoadFloat3(&camera->GetUp());
+
+	XMVECTOR lightPos = eye;
+
 	ConstBufferDetaTransform* constMap = nullptr;
 	result = constBufferTransform->Map(0, nullptr, (void**)&constMap);
 	if (SUCCEEDED(result)) {
 		constMap->viewproj = matViewProjection;
+		constMap->lightCamera = XMMatrixLookAtLH(lightPos, terget, up) * XMMatrixOrthographicLH(1280, 720, 1.0f, 150.0f);
 		constMap->world = modelTransform * matWorld;
 		constMap->cameraPos = cameraPos;
 		constBufferTransform->Unmap(0, nullptr);
@@ -91,6 +105,7 @@ void FbxObject3d::Update()
 		if (currentTime > animas[nowPlayMotion].endTime)
 		{
 			currentTime = animas[nowPlayMotion].startTime;
+			playEnd = true;
 		}
 	}
 }
@@ -101,9 +116,34 @@ void FbxObject3d::Draw(ID3D12GraphicsCommandList* cmdList)
 		return;
 	}
 
-	cmdList->SetPipelineState(LoadHlsls::pipeline.at(ShaderNo::FBX)._pipelinestate.Get());
+	cmdList->SetPipelineState(pipelinestate.Get());
 
-	cmdList->SetGraphicsRootSignature(LoadHlsls::pipeline.at(ShaderNo::FBX)._rootsignature.Get());
+	cmdList->SetGraphicsRootSignature(rootsignature.Get());
+
+	cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	cmdList->SetGraphicsRootConstantBufferView(
+		0, constBufferTransform->GetGPUVirtualAddress()
+	);
+
+	cmdList->SetGraphicsRootConstantBufferView(
+		3, constBuffSkin->GetGPUVirtualAddress()
+	);
+
+	//dx12->DrawDepth(cmdList.Get());
+
+	model->Draw(cmdList);
+}
+
+void FbxObject3d::ShadowDraw(ID3D12GraphicsCommandList* cmdList)
+{
+	if (model == nullptr) {
+		return;
+	}
+
+	cmdList->SetPipelineState(pipelineshadow.Get());
+
+	cmdList->SetGraphicsRootSignature(rootsignature.Get());
 
 	cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
@@ -116,6 +156,7 @@ void FbxObject3d::Draw(ID3D12GraphicsCommandList* cmdList)
 	);
 
 	model->Draw(cmdList);
+
 }
 
 void FbxObject3d::UpdateWorldMatrix()
@@ -151,6 +192,14 @@ void FbxObject3d::PlayAnimation(int playNum)
 	currentTime = animas[nowPlayMotion].startTime;
 
 	isPlay = true;
+}
+
+void FbxObject3d::ChangeAnimation(int num)
+{
+	if (nowPlayMotion != num) {
+		PlayAnimation(num);
+		nowPlayMotion = num;
+	}
 }
 
 void FbxObject3d::StopAnimation()
@@ -191,9 +240,233 @@ void FbxObject3d::LoadAnima()
 void FbxObject3d::CreateGraphicsPipeline()
 {
 	//パイプライン生成
-	LoadHlsls::LoadHlsl_VS(ShaderNo::FBX, L"Resources/shaders/FBXVS.hlsl", "main", "vs_5_0");
-	LoadHlsls::LoadHlsl_PS(ShaderNo::FBX, L"Resources/shaders/FBXPS.hlsl", "main", "ps_5_0");
-	LoadHlsls::createPipeline(device, ShaderNo::FBX);
+	//LoadHlsls::LoadHlsl_VS(ShaderNo::FBX, , "main", "vs_5_0");
+	//LoadHlsls::LoadHlsl_PS(ShaderNo::FBX, L"Resources/shaders/FBXPS.hlsl", "main", "ps_5_0");
+	//LoadHlsls::createPipeline(device, ShaderNo::FBX);
+
+	HRESULT result;
+	ComPtr<ID3DBlob> vsBlob;
+	ComPtr<ID3DBlob> psBlob;
+	ComPtr<ID3DBlob> errorBlob; // エラーオブジェクト
+
+	ComPtr<ID3DBlob> rootSigBlob;
+	//PipelineSet pipelineset;
+	// グラフィックスパイプラインの流れを設定
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC gpipeline{};
+
+	//シェーダー読み込み----------------------------------------
+	{
+		//指定(namePath)のhlslファイルをロード
+		result = D3DCompileFromFile(
+			L"Resources/shaders/FBXVS.hlsl",
+			nullptr,
+			D3D_COMPILE_STANDARD_FILE_INCLUDE,
+			"main", "vs_5_0",
+			D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION,
+			0,
+			&vsBlob, &errorBlob);
+		//読み込み成功チェック
+		if (FAILED(result)) {
+			if (result == HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND)) {
+				::OutputDebugStringA("ファイルが見当たりません");
+			}
+			else {
+				string errstr;
+				errstr.resize(errorBlob->GetBufferSize());
+				copy_n((char*)errorBlob->GetBufferPointer(),
+					errorBlob->GetBufferSize(),
+					errstr.begin());
+				errstr += "\n";
+				::OutputDebugStringA(errstr.c_str());//データを表示
+			}
+		}
+		//指定(namePath)のhlslファイルをロード
+		result = D3DCompileFromFile(
+			L"Resources/shaders/FBXPS.hlsl",
+			nullptr,
+			D3D_COMPILE_STANDARD_FILE_INCLUDE,
+			"main", "ps_5_0",
+			D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION,
+			0,
+			&psBlob, &errorBlob);
+		//読み込み成功チェック
+		if (FAILED(result)) {
+			if (result == HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND)) {
+				::OutputDebugStringA("ファイルが見当たりません");
+			}
+			else {
+				string errstr;
+				errstr.resize(errorBlob->GetBufferSize());
+				copy_n((char*)errorBlob->GetBufferPointer(),
+					errorBlob->GetBufferSize(),
+					errstr.begin());
+				errstr += "\n";
+				::OutputDebugStringA(errstr.c_str());//データを表示
+			}
+		}
+	}
+
+	//パイプライン生成------------------------------------------------------------
+#pragma region
+		// 頂点レイアウト
+	D3D12_INPUT_ELEMENT_DESC inputLayout[] = {
+		{ // xy座標(1行で書いたほうが見やすい)
+			"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
+			D3D12_APPEND_ALIGNED_ELEMENT,
+			D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0
+		},
+		{ // 法線ベクトル(1行で書いたほうが見やすい)
+			"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
+			D3D12_APPEND_ALIGNED_ELEMENT,
+			D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0
+		},
+		{ // uv座標(1行で書いたほうが見やすい)
+			"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0,
+			D3D12_APPEND_ALIGNED_ELEMENT,
+			D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0
+		},
+		{ // 法線ベクトル(1行で書いたほうが見やすい)
+			"BONEINDICES", 0, DXGI_FORMAT_R32G32B32A32_UINT, 0,
+			D3D12_APPEND_ALIGNED_ELEMENT,
+			D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0
+		},
+		{ // 法線ベクトル(1行で書いたほうが見やすい)
+			"BONEWEIGHTS", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0,
+			D3D12_APPEND_ALIGNED_ELEMENT,
+			D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0
+		},
+		{//ボーン番号
+			"BONE_NO",0,DXGI_FORMAT_R16G16_UINT,0,
+			D3D12_APPEND_ALIGNED_ELEMENT,
+			D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,0
+		},
+		{//ウェイト
+			"WEIGHT",0,DXGI_FORMAT_R8_UINT,0,
+			D3D12_APPEND_ALIGNED_ELEMENT,
+			D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,0
+		},
+	};
+	// レンダーターゲットのブレンド設定
+	D3D12_RENDER_TARGET_BLEND_DESC blenddesc{};
+	// ルートシグネチャの設定
+	CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDesc{};
+	CD3DX12_ROOT_SIGNATURE_DESC _rootSignatureDesc = {};
+
+
+	gpipeline.VS = CD3DX12_SHADER_BYTECODE(vsBlob.Get());
+	gpipeline.PS = CD3DX12_SHADER_BYTECODE(psBlob.Get());
+	// サンプルマスク
+	gpipeline.SampleMask = D3D12_DEFAULT_SAMPLE_MASK; // 標準設定
+	// ラスタライザステート
+	gpipeline.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
+	// デプスステンシルステート
+	gpipeline.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
+
+	// 深度バッファのフォーマット
+	gpipeline.DSVFormat = DXGI_FORMAT_D32_FLOAT;
+
+	// 頂点レイアウトの設定
+	gpipeline.InputLayout.pInputElementDescs = inputLayout;
+	gpipeline.InputLayout.NumElements = _countof(inputLayout);
+
+	gpipeline.SampleDesc.Count = 1; // 1ピクセルにつき1回サンプリング
+
+	gpipeline.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB; // 0～255指定のRGBA
+
+	blenddesc.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;    // RBGA全てのチャンネルを描画
+	blenddesc.BlendEnable = true;
+	blenddesc.BlendOp = D3D12_BLEND_OP_ADD;
+	blenddesc.SrcBlend = D3D12_BLEND_SRC_ALPHA;
+	blenddesc.DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
+
+	blenddesc.BlendOpAlpha = D3D12_BLEND_OP_ADD;
+	blenddesc.SrcBlendAlpha = D3D12_BLEND_ONE;
+	blenddesc.DestBlendAlpha = D3D12_BLEND_ZERO;
+
+	// ブレンドステートの設定
+	gpipeline.BlendState.RenderTarget[0] = blenddesc;
+
+	// 頂点レイアウトの設定
+	gpipeline.InputLayout.pInputElementDescs = inputLayout;
+	gpipeline.InputLayout.NumElements = _countof(inputLayout);
+
+	// 図形の形状設定（三角形）
+	gpipeline.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+
+	gpipeline.NumRenderTargets = 1;    // 描画対象は1つ
+	gpipeline.SampleDesc.Count = 1; // 1ピクセルにつき1回サンプリング
+
+	// デスクリプタレンジ
+	CD3DX12_DESCRIPTOR_RANGE descRangeSRV[2] = {};
+	descRangeSRV[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0); // t0 レジスタ
+	descRangeSRV[1].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 1); // t1 レジスタ
+
+	// ルートパラメータ
+	CD3DX12_ROOT_PARAMETER rootparams[5] = {};
+	// CBV（座標変換行列用）
+	rootparams[0].InitAsConstantBufferView(0, 0, D3D12_SHADER_VISIBILITY_ALL);
+	rootparams[1].InitAsConstantBufferView(1, 0, D3D12_SHADER_VISIBILITY_ALL);
+	// SRV（テクスチャ）
+	rootparams[2].InitAsDescriptorTable(1, &descRangeSRV[0], D3D12_SHADER_VISIBILITY_ALL);
+	//CBV（スキニング）
+	rootparams[3].InitAsConstantBufferView(3, 0, D3D12_SHADER_VISIBILITY_ALL);
+	//シャドウマップ
+	rootparams[4].InitAsDescriptorTable(1, &descRangeSRV[1]);//
+
+	// スタティックサンプラー
+	CD3DX12_STATIC_SAMPLER_DESC samplerDescs[2] = {};
+	samplerDescs[0].Init(0);
+	samplerDescs[1].Init(1, D3D12_FILTER_ANISOTROPIC, D3D12_TEXTURE_ADDRESS_MODE_CLAMP, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
+
+	rootSignatureDesc.Init_1_0(_countof(rootparams), rootparams, 2, samplerDescs, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+
+	// バージョン自動判定のシリアライズ
+	result = D3DX12SerializeVersionedRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1_0, &rootSigBlob, &errorBlob);
+
+	// ルートシグネチャの生成
+	result = device->CreateRootSignature(0, rootSigBlob->GetBufferPointer(), rootSigBlob->GetBufferSize(), IID_PPV_ARGS(rootsignature.ReleaseAndGetAddressOf()));
+	if (FAILED(result)) { assert(0); }
+
+	gpipeline.pRootSignature = rootsignature.Get();
+
+	// グラフィックスパイプラインの生成
+	result = device->CreateGraphicsPipelineState(&gpipeline, IID_PPV_ARGS(pipelinestate.ReleaseAndGetAddressOf()));
+#pragma endregion
+	//シャドウマップ用頂点シェーダー読み込み--------------------------------------
+#pragma region
+	result = D3DCompileFromFile(//VS
+		L"Resources/shaders/FbxShadowShader.hlsl",//シェーダー名
+		nullptr,
+		D3D_COMPILE_STANDARD_FILE_INCLUDE,
+		"shadowVS", "vs_5_0",//関数、対象シェーダー
+		0,
+		0,
+		&vsBlob, &errorBlob);
+	if (FAILED(result)) {
+		if (result == HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND)) {
+			::OutputDebugStringA("ファイルが見当たりません");
+			return;//exit()
+		}
+		else {
+			string errstr;
+			errstr.resize(errorBlob->GetBufferSize());
+			copy_n((char*)errorBlob->GetBufferPointer(),
+				errorBlob->GetBufferSize(),
+				errstr.begin());
+			errstr += "\n";
+			::OutputDebugStringA(errstr.c_str());//データを表示
+		}
+	}
+
+	gpipeline.VS = CD3DX12_SHADER_BYTECODE(vsBlob.Get());
+	gpipeline.PS.BytecodeLength = 0;
+	gpipeline.PS.pShaderBytecode = nullptr;
+	gpipeline.RTVFormats[0] = DXGI_FORMAT_UNKNOWN;
+
+	result = device->CreateGraphicsPipelineState(
+		&gpipeline, IID_PPV_ARGS(pipelineshadow.ReleaseAndGetAddressOf())
+	);
+#pragma endregion
 }
 
 void FbxObject3d::SetCollider(BaseCollider* collider)

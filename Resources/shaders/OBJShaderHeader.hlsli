@@ -12,8 +12,8 @@ cbuffer cbuff0 : register(b0)
 	//matrix proj; // プロジェクション行列
 	matrix viewproj; // プロジェクション行列
 	matrix world; // ワールド行列
-	matrix lightCamera;
 	float3 cameraPos; // カメラ座標（ワールド座標）
+	matrix lightCamera;
 };
 
 cbuffer cbuff1 : register(b1) {
@@ -60,4 +60,5 @@ struct VSOutput
 	float4 worldpos : POSITION; // ワールド座標
 	float3 normal :NORMAL; // 法線
 	float2 uv  :TEXCOORD; // uv値
+	float4 tpos : TPOS;
 };

@@ -65,7 +65,8 @@ void DebugCamera::Update()
 		matRot = matRotNew * matRot;
 
 		// 注視点から視点へのベクトルと、上方向ベクトル
-		XMVECTOR vTargetEye = { 0.0f, 0.0f, -distance, 1.0f };
+		//XMVECTOR vTargetEye = { 0.0f, 0.0f, distance, 1.0f };
+		XMVECTOR vTargetEye = { 50.0f, 50.0f, distance, 1.0f };
 		XMVECTOR vUp = { 0.0f, 1.0f, 0.0f, 0.0f };
 
 		// ベクトルを回転

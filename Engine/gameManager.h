@@ -190,7 +190,7 @@ private://ƒƒ“ƒo•Ï”(‰Šú‰»)
 	Object3Ds* debugCharacter = nullptr;
 	Model* debugCharacterModel = nullptr;
 	FbxModel* testModel = nullptr;
-
+	FbxObject3d* testObject = nullptr;
 
 	DebugText* text = nullptr;
 	Sprite* BreakBar = nullptr;
@@ -321,7 +321,7 @@ public://ƒƒ“ƒoŠÖ”
 	//•`‰æ
 	void MainDraw();
 	void SubDraw();
-	void shadowDraw(bool isShadow = false);
+	void ShadowDraw(bool isShadow = false);
 
 	void TitleDraw();
 	void GameDraw();

@@ -4,6 +4,7 @@ cbuffer cbuff0 : register(b0) {
 	matrix viewproj;
 	matrix world;
 	float3 cameraPos;
+	matrix lightCamera;
 }
 
 cbuffer cbuff1 : register(b1) {
@@ -27,6 +28,7 @@ struct VSInput {
 
 struct VSOutput {
 	float4 svpos : SV_POSITION;
+	float4 tpos : TPOS;
 	float3 normal : NORMAL;
 	float2 uv : TEXCOORD;
 };

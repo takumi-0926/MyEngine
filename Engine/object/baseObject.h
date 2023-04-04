@@ -26,8 +26,8 @@ protected:
 		//XMMATRIX proj;
 		XMMATRIX viewproj;
 		XMMATRIX world;
-		XMMATRIX lightCamera;
 		XMFLOAT3 cameraPos;
+		XMMATRIX lightCamera;
 	};
 	// 定数バッファ用データ構造体B0
 	struct ConstBufferDataB0_1

@@ -2,6 +2,7 @@
 
 Texture2D<float4> tex : register(t0);  // 0番スロットに設定されたテクスチャ
 SamplerState smp : register(s0);      // 0番スロットに設定されたサンプラー
+Texture2D<float> lightDepthTex : register(t1);
 
 float4 main(VSOutput input) : SV_TARGET
 {
@@ -30,9 +31,21 @@ float4 main(VSOutput input) : SV_TARGET
 	//シェーディングによる色
 	float4 shadecolor = float4(lightcolor * ambient, m_alpha);
 
-
 	//頂点から視点への方向ベクトル
 	float3 eyedir = normalize(cameraPos - input.worldpos.xyz);
+
+	//シャドウマップ
+	float shadowWeight = 1.0f;
+	//範囲を0～1に
+	float3 posFromLightUV = input.tpos.xyz / input.tpos.w;
+	float2 shadowUV = (posFromLightUV + float2(1.0f, -1.0f)) * float2(0.5f, -0.5f);
+
+	float depthFromLight = lightDepthTex.Sample(smp, shadowUV);
+
+	//深度値を比較
+	if (depthFromLight < posFromLightUV.z - 0.001f) {
+		shadowWeight = 0.5f;
+	}
 
 	//平行光源
 	for (int i = 0; i < DIRLIGHT_NUM; i++) {
@@ -102,6 +115,7 @@ float4 main(VSOutput input) : SV_TARGET
 	float4 toonCol = tex.Sample(smp, float2(2.0f, 0.0f));
 
 	//シェーディングによる色で描画
-	return shadecolor * texcolor/* * toonCol*/;
+	//return shadecolor * texcolor/* * toonCol*/;
+	return float4(shadecolor.xyz * texcolor.xyz * shadowWeight,shadecolor.w * texcolor.w)/* * toonCol*/;
 
 }

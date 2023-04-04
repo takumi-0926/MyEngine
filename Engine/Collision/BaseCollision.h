@@ -67,6 +67,10 @@ public:
 	inline void SetMyNumber(unsigned short myNumber) {
 		this->MyNumber = myNumber;
 	}
+	inline void SetInvisible(bool flag) {
+		this->invisible = flag;
+	}
+
 protected:
 	Object3Ds* object3d = nullptr;
 
@@ -80,4 +84,7 @@ protected:
 	unsigned short attribute = 0b1111111111111111;
 
 	unsigned short MyNumber = 0b1111111111111111;
+
+	//“–‚½‚è”»’è—LŒø‰»
+	bool invisible = true;
 };

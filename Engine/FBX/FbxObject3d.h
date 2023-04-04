@@ -31,6 +31,7 @@ public:
 		XMMATRIX viewproj;
 		XMMATRIX world;
 		XMFLOAT3 cameraPos;
+		XMMATRIX lightCamera;
 	};
 
 	static const int MAX_BONES = 256;
@@ -55,6 +56,7 @@ public:
 	virtual void Update();
 
 	virtual void Draw(ID3D12GraphicsCommandList* cmdList);
+	virtual void ShadowDraw(ID3D12GraphicsCommandList* cmdList);
 
 	//çsóÒÇÃçXêV
 	void UpdateWorldMatrix();
@@ -64,7 +66,8 @@ public:
 		LoadAnima();
 	}
 
-	void PlayAnimation(int playNum);
+	void PlayAnimation(int playNum = 0);
+	void ChangeAnimation(int num);
 	void StopAnimation();
 	void LoadAnima();
 
@@ -92,8 +95,8 @@ private:
 	static Camera* camera;
 
 	static ComPtr<ID3D12RootSignature> rootsignature;
-
 	static ComPtr<ID3D12PipelineState> pipelinestate;
+	static ComPtr<ID3D12PipelineState> pipelineshadow;
 
 protected:
 	XMFLOAT3 scale = { 1,1,1 };
@@ -120,6 +123,7 @@ protected:
 	bool isPlay = false;
 
 	bool changePlay = false;
+	bool playEnd = false;
 
 	int nowPlayMotion = MotionType::WalkMotion;
 
@@ -135,5 +139,9 @@ protected:
 public:
 	XMFLOAT3 GetPosition() { return position; }
 	//FbxTime GetCurrentTime() { return currentTime; }
+	inline void SetMatRot(XMMATRIX rot) { 
+		this->matRot = rot; 
+		this->useRotMat = true;
+	}
 
 };

@@ -24,11 +24,13 @@ void CollisionManager::CheckAllCollision()
 		{
 			BaseCollider* colA = *itA;
 			BaseCollider* colB = *itB;
+			if (!colA->invisible) { continue; }
+			if (!colB->invisible) { continue; }
 
 			if (colA->GetShapeType() == COLLISIONSHAPE_SQHERE &&
 				colB->GetShapeType() == COLLISIONSHAPE_SQHERE) {
-				Sqhere* SphereA = dynamic_cast<Sqhere*>(colA);
 				Sqhere* SphereB = dynamic_cast<Sqhere*>(colB);
+				Sqhere* SphereA = dynamic_cast<Sqhere*>(colA);
 
 				DirectX::XMVECTOR inter;
 				if (Collision::CheckSqhere2Sqhere(*SphereA, *SphereB)) {
@@ -98,6 +100,7 @@ bool CollisionManager::Raycast(
 
 		//‘®«‚ª‡‚í‚È‚©‚Á‚½‚ç”ò‚Î‚·
 		if (!(colA->attribute & attribute)) { continue; }
+		if (!colA->invisible) { continue; }
 
 		//ƒŒƒC‚Æ‹…
 		if (colA->GetShapeType() == COLLISIONSHAPE_SQHERE) {
@@ -159,6 +162,7 @@ void CollisionManager::QuerySqhere(const Sqhere& sphere, QueryCallBack* callBack
 				continue;
 			}
 		}
+		if (!col->invisible) { continue; }
 
 		//‹…‚Ìê‡
 		if (col->GetShapeType() == COLLISIONSHAPE_SQHERE) {

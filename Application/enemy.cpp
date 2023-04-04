@@ -258,7 +258,7 @@ void Enemy::Draw(ID3D12GraphicsCommandList* cmdList)
 
 	FbxObject3d::Draw(cmdList);
 
-	weapon->Draw();
+	//weapon->Draw();
 }
 
 void Enemy::OnCollision(const CollisionInfo& info)
@@ -282,7 +282,7 @@ void Enemy::Appearance()
 	//static float popTime = 0;
 	//三体まで
 	//if (popTime >= 10.0f) {
-	int r = 1;
+	int r = rand() % 10;
 	//if (r % 2 == 1) { ene = Enemy::Create(model2); }
 	//if (r % 2 != 1) { ene = Enemy::Create(model1); }
 	if (r % 2 == 1) {
@@ -291,7 +291,6 @@ void Enemy::Appearance()
 		//weapon->SetFollowingObjectBoneMatrix(model->GetBones()[23].fbxCluster->GetLink()->EvaluateGlobalTransform());
 		status.HP = 2;
 		status.speed = 1.0f;
-		position.y = 0;
 		scale = { 0.5f,0.5f,0.5f };
 		shadowOffset = 1.0f;
 		particleOffset = 10.0f;
@@ -301,11 +300,11 @@ void Enemy::Appearance()
 		SetModel(modelType[Activity::golem]);
 		status.HP = 4;
 		status.speed = 0.4f;
-		//position = { 0,0,-150 };
 		scale = { 0.1f,0.1f,0.1f };
 		shadowOffset = 1.5f;
 		particleOffset = 40.0f;
 	}
+	position = XMFLOAT3(0, 20, -70);
 
 	alive = true;
 
@@ -505,25 +504,25 @@ void Enemy::Attack(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 		}
 
 		//攻撃開始（突進）
-		if (this->attackTime >= 3.0f) {
-			if (this->attackHit == true) {
-				this->position.x += this->vectol.m128_f32[0] / 25;
-				this->position.y += this->vectol.m128_f32[1] / 25;
-				this->position.z += this->vectol.m128_f32[2] / 25;
-				this->attackOnMove = true;
-			}
-			else {
-				move(Normalize(objectVector(this->position, this->attackPos)));
-				this->matRot = LookAtRotation(
-					VectorToXMFloat(Normalize(objectVector(this->position, this->attackPos))),
-					XMFLOAT3(0.0f, 1.0f, 0.0f));
-			}
-		}
-		else if (this->attackTime >= 1.0f) {
-			this->position.x -= this->vectol.m128_f32[0] / 100;
-			this->position.y -= this->vectol.m128_f32[1] / 100;
-			this->position.z -= this->vectol.m128_f32[2] / 100;
-		}
+		//if (this->attackTime >= 3.0f) {
+		//	if (this->attackHit == true) {
+		//		this->position.x += this->vectol.m128_f32[0] / 25;
+		//		this->position.y += this->vectol.m128_f32[1] / 25;
+		//		this->position.z += this->vectol.m128_f32[2] / 25;
+		//		this->attackOnMove = true;
+		//	}
+		//	else {
+		//		move(Normalize(objectVector(this->position, this->attackPos)));
+		//		this->matRot = LookAtRotation(
+		//			VectorToXMFloat(Normalize(objectVector(this->position, this->attackPos))),
+		//			XMFLOAT3(0.0f, 1.0f, 0.0f));
+		//	}
+		//}
+		//else if (this->attackTime >= 1.0f) {
+		//	this->position.x -= this->vectol.m128_f32[0] / 100;
+		//	this->position.y -= this->vectol.m128_f32[1] / 100;
+		//	this->position.z -= this->vectol.m128_f32[2] / 100;
+		//}
 
 		//移動処理移行時の初期化
 		if (attackTime >= 5.0f && this->attackOnMove == true) {
@@ -577,7 +576,7 @@ void Enemy::JumpAttack(XMFLOAT3& targetPosition)
 		}
 
 		//移動処理移行時の初期化
-		if (this->attackTime >= 4.0f) {
+		if (this->attackTime >= 3.5f) {
 			moveReset();
 			this->attackTime = 0.0f;
 			actionPattern = MoveMode::move;
@@ -593,6 +592,7 @@ void Enemy::JumpAttack(XMFLOAT3& targetPosition)
 void Enemy::Retreat()
 {
 	if (actionPattern != MoveMode::retreat)return;
+	ChangeAnimation(MotionType::WalkMotion);
 
 	move(Normalize(objectVector(position, RetreatPos)));
 
