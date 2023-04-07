@@ -1,6 +1,9 @@
 #pragma once
 #include "PMD/pmdObject3D.h"
 #include "FBX/FbxObject3d.h"
+#include "Weapon.h"
+#include "hitBox.h"
+
 #include"Input/input.h"
 //#include "Input/input.h"
 
@@ -36,6 +39,8 @@ private:
 	DirectX::XMFLOAT3 avoidVec = {};
 	XMVECTOR Zv, Xv, Yv;
 
+	Weapon* weapon = nullptr;
+
 	float avoidSpeed = 1.0f;
 	int Action = 0;
 
@@ -46,6 +51,8 @@ private:
 	//地面判定用
 	bool OnGround = true;
 	XMVECTOR fallV;
+
+	int followBoneNum = 0;
 
 private:
 	void actionExecution(int num);
@@ -139,73 +146,6 @@ private:
 	}
 
 	/// <summary>
-	/// 移動
-	/// </summary>
-	/// <param name="pos">移動させる座標</param>
-	/// <returns>移動後の座標</returns>
-	//XMFLOAT3 MoveBefore(XMFLOAT3 pos);
-	//XMFLOAT3 MoveAfter(XMFLOAT3 pos)
-	//{
-	//	XMMATRIX matRot = XMMatrixIdentity();
-
-	//	//Z方向ベクトル
-	//	Zv = { 0.0f,0.0f,0.5f,0.0f };
-
-	//	//弾角度回転
-	//	matRot = XMMatrixRotationY(XMConvertToRadians(angleHorizonal));
-
-	//	//Z方向ベクトルを回転
-	//	Zv = XMVector3TransformNormal(Zv, matRot);
-
-	//	//加算
-	//	pos.x += Zv.m128_f32[0] * directInput->getLeftY() * speed;
-	//	pos.y += Zv.m128_f32[1] * directInput->getLeftY() * speed;
-	//	pos.z += Zv.m128_f32[2] * directInput->getLeftY() * speed;
-
-	//	return pos;
-	//}
-	//XMFLOAT3 MoveLeft(XMFLOAT3 pos)
-	//{
-	//	XMMATRIX matRot = XMMatrixIdentity();
-
-	//	//X方向ベクトル
-	//	Xv = { 0.5f,0.0f,0.0f,0.0f };
-
-	//	//角度回転
-	//	matRot = XMMatrixRotationY(XMConvertToRadians(angleHorizonal));
-
-	//	//X方向ベクトルを回転
-	//	Xv = XMVector3TransformNormal(Xv, matRot);
-
-	//	//加算
-	//	pos.x -= Xv.m128_f32[0] * directInput->getLeftX() * speed;
-	//	pos.y -= Xv.m128_f32[1] * directInput->getLeftX() * speed;
-	//	pos.z -= Xv.m128_f32[2] * directInput->getLeftX() * speed;
-
-	//	return pos;
-	//}
-	//XMFLOAT3 MoveRight(XMFLOAT3 pos)
-	//{
-	//	XMMATRIX matRot = XMMatrixIdentity();
-
-	//	//X方向ベクトル
-	//	Xv = { 0.5f,0.0f,0.0f,0.0f };
-
-	//	//角度回転
-	//	matRot = XMMatrixRotationY(XMConvertToRadians(angleHorizonal));
-
-	//	//X方向ベクトルを回転
-	//	Xv = XMVector3TransformNormal(Xv, matRot);
-
-	//	//加算
-	//	pos.x -= Xv.m128_f32[0] * directInput->getLeftX() * speed;
-	//	pos.y -= Xv.m128_f32[1] * directInput->getLeftX() * speed;
-	//	pos.z -= Xv.m128_f32[2] * directInput->getLeftX() * speed;
-
-	//	return pos;
-	//}
-
-	/// <summary>
 	/// 進行方向に回転
 	/// </summary>
 	/// <param name="forward">進行方向ベクトル</param>
@@ -232,6 +172,8 @@ public:
 	/// 描画処理
 	/// </summary>
 	void Draw(ID3D12GraphicsCommandList* cmdList)override;
+
+	void CreateWeapon(Model* model);
 
 public:
 	//void SetInput(const Input& input) { this->input = input; }

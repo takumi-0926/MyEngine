@@ -131,7 +131,14 @@ void Player::moveUpdate()
 		return;
 	}
 
-	if (directInput->leftStickX() < 0.0f || directInput->leftStickX() > 0.0f || directInput->leftStickY() < 0.0f || directInput->leftStickY() > 0.0f) {
+	if (directInput->IsButtonPush(DirectInput::ButtonKind::ButtonX) || Input::GetInstance()->Push(DIK_X)) {
+		ChangeAnimation(action::Attack);
+		Action = action::Attack;
+
+		//武器の当たり判定有効化
+		weapon->SetColliderInvisible(false);
+	}
+	else if (directInput->leftStickX() < 0.0f || directInput->leftStickX() > 0.0f || directInput->leftStickY() < 0.0f || directInput->leftStickY() > 0.0f) {
 
 		//走りとダッシュの切り替え
 		if (directInput->getTriggerZ() != 0) {
@@ -148,10 +155,6 @@ void Player::moveUpdate()
 	else {
 		ChangeAnimation(action::Wait);
 		Action = action::Wait;
-	}
-	if (directInput->IsButtonPush(DirectInput::ButtonKind::ButtonX) || Input::GetInstance()->Push(DIK_X)) {
-		ChangeAnimation(action::Attack);
-		Action = action::Attack;
 	}
 
 	float angleH = 150.0f;
@@ -192,30 +195,19 @@ void Player::Avoid() {
 
 	avoidTime += 1.0f;
 }
-//XMFLOAT3 Player::MoveBefore(XMFLOAT3 pos)
-//{
-//	XMMATRIX matRot = XMMatrixIdentity();
-//
-//	//Z方向ベクトル
-//	Zv = { 0.0f,0.0f,0.5f,0.0f };
-//
-//	//角度回転
-//	matRot = XMMatrixRotationY(XMConvertToRadians(angleHorizonal));
-//
-//	//Z方向ベクトルを回転
-//	Zv = XMVector3TransformNormal(Zv, matRot);
-//
-//	//加算
-//	pos.x += Zv.m128_f32[0] * directInput->getLeftY() * speed;
-//	pos.y += Zv.m128_f32[1] * directInput->getLeftY() * speed;
-//	pos.z += Zv.m128_f32[2] * directInput->getLeftY() * speed;
-//
-//	return pos;
-//}
+void Player::CreateWeapon(Model* model)
+{
+	weapon = Weapon::Create(model);
+	followBoneNum = 21;
+}
 
 void Player::Update()
 {
 	moveUpdate();
+
+	weapon->SetFollowingObjectBoneMatrix(model->GetBones()[followBoneNum].fbxCluster->GetLink()->EvaluateGlobalTransform(currentTime));
+	weapon->Update();
+
 	//回避行動
 	if (Action == action::Avoid) { Avoid(); }
 
@@ -305,4 +297,5 @@ void Player::Update()
 void Player::Draw(ID3D12GraphicsCommandList* cmdList)
 {
 	FbxObject3d::Draw(cmdList);
+	weapon->Draw();
 }

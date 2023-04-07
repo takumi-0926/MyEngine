@@ -45,11 +45,17 @@ private:
 	vector<ComPtr<ID3D12Resource>>      _backBuffer;
 	ComPtr<ID3D12DescriptorHeap>		_rtvHeaps = nullptr;		//レンダヒープ
 	ComPtr<ID3D12DescriptorHeap>		_descHeap = nullptr;		//汎用ヒープ
-	D3D12_CPU_DESCRIPTOR_HANDLE			heapHandle;
-	D3D12_GPU_DESCRIPTOR_HANDLE			_heapHandle;
+	/// <summary>
+	/// 0 : シーン
+	/// 1 : 通常深度
+	/// 2 : ライト深度
+	/// 3 : imGui
+	/// 4 : 
+	/// </summary>
+	D3D12_CPU_DESCRIPTOR_HANDLE			heapHandle_CPU;
+	D3D12_GPU_DESCRIPTOR_HANDLE			heapHandle_GPU;
 	//深度バッファ
 	ComPtr<ID3D12DescriptorHeap>		_dsvHeap = nullptr;
-	ComPtr<ID3D12DescriptorHeap>		_depthHaepSRV = nullptr;	//深度テクスチャ
 	ComPtr<ID3D12Resource>				_depthBuffer = nullptr;
 	ComPtr<ID3D12Resource>				_lightDepthBuffer = nullptr;
 	//シーンを構成するバッファまわり
@@ -178,10 +184,9 @@ public:
 	ID3D12Device* GetDevice() { return _dev.Get(); }
 	ComPtr<IDXGISwapChain4> SwapChain();
 	ComPtr<ID3D12GraphicsCommandList> CommandList();
-	ID3D12DescriptorHeap* GetDescHeap() { return _descHeap.Get(); }
+	ComPtr<ID3D12DescriptorHeap> GetDescHeap() { return _descHeap.Get(); }
 	ComPtr<ID3D12DescriptorHeap> GetHeapImgui() { return _heapForImgui.Get(); }
 	Camera* Camera() { return camera; }
-
 	static int lightNum;
 
 };

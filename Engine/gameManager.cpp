@@ -125,6 +125,9 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	camera->Update();
 
 	Wrapper::SetCamera(mainCamera);
+	FbxObject3d::SetCamera(dx12->Camera());
+	Object3Ds::SetCamera(dx12->Camera());
+
 	dx12->SceneUpdate();
 
 	//光源
@@ -154,12 +157,6 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	Bottom->Update();
 
 	Bottom->CreateObject(XMFLOAT3(540, 0, 199));
-
-	FbxObject3d::SetDevice(dx12->GetDevice());
-	FbxObject3d::SetCamera(dx12->Camera());
-	FbxObject3d::CreateGraphicsPipeline();
-
-	Object3Ds::SetCamera(dx12->Camera());
 
 	testModel = FbxLoader::GetInstance()->LoadModelFromFile("testModel");
 	testObject = new FbxObject3d;
@@ -257,17 +254,18 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	skyDome->position = { 0,350,0 };
 
 	//MMDオブジェクト----------------
-	modelPlayer = PMDmodel::CreateFromPMD("Resources/Model/初音ミク.pmd");
-	modelPlayer->LoadVMDFile(vmdData::WAIT, "Resources/vmd/marieru_stand.vmd");
-	modelPlayer->LoadVMDFile(vmdData::WALK, "Resources/vmd/Rick式走りモーション02.vmd");
-	modelPlayer->LoadVMDFile(vmdData::ATTACK, "Resources/vmd/attack.vmd");
-	modelPlayer->LoadVMDFile(vmdData::DAMAGE, "Resources/vmd/腹部ダメージモーション.vmd");
-	modelPlayer->LoadVMDFile(vmdData::AVOID, "Resources/vmd/Rick式走りモーション05.vmd");
+	//modelPlayer = PMDmodel::CreateFromPMD("Resources/Model/初音ミク.pmd");
+	//modelPlayer->LoadVMDFile(vmdData::WAIT, "Resources/vmd/marieru_stand.vmd");
+	//modelPlayer->LoadVMDFile(vmdData::WALK, "Resources/vmd/Rick式走りモーション02.vmd");
+	//modelPlayer->LoadVMDFile(vmdData::ATTACK, "Resources/vmd/attack.vmd");
+	//modelPlayer->LoadVMDFile(vmdData::DAMAGE, "Resources/vmd/腹部ダメージモーション.vmd");
+	//modelPlayer->LoadVMDFile(vmdData::AVOID, "Resources/vmd/Rick式走りモーション05.vmd");
 
 	//プレイヤー---------------------
 	_player = Player::Create(testModel);
+	_player->CreateWeapon(Model::CreateFromOBJ("weapon"));
 	_player->SetScale({ 0.2f, 0.2f, 0.2f });
-	_player->SetPosition({ 0.0f, 0.0f, 0.0f });
+	_player->SetPosition(XMFLOAT3(0.0f, 0.0f, 100.0f));
 	_player->PlayAnimation();
 
 	//エネミー-----------------------
@@ -275,7 +273,7 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	{
 		protEnemy[i] = Enemy::Create(wolf[i], golem[i]);
 		//武器生成
-		protEnemy[i]->CreateWeapon(Model::CreateFromOBJ("weapon"));
+		//protEnemy[i]->CreateWeapon(Model::CreateFromOBJ("weapon"));
 		//パーティクル生成
 		protEnemy[i]->Particle();
 	}
@@ -347,10 +345,6 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	moveGuide->scale = XMFLOAT3(5, 5, 5);
 
 	//ヒットボックス-----------------
-	HitBox::CreatePipeline(dx12);
-	HitBox::CreateTransform();
-	HitBox::CreateHitBox(_player->GetPosition(), defenceModel);
-	HitBox::hitBox[0]->scale = XMFLOAT3(5, 10, 5);
 	triangle[0].p0 = XMVectorSet(stages[66]->position.x - 100.0f, stages[66]->position.y, stages[66]->position.z, 1);
 	triangle[0].p1 = XMVectorSet(stages[66]->position.x - 100.0f, stages[66]->position.y + 120.0f, stages[66]->position.z, 1);
 	triangle[0].p2 = XMVectorSet(stages[66]->position.x + 100.0f, stages[66]->position.y, stages[66]->position.z, 1);
@@ -396,7 +390,7 @@ void GameManager::Update()
 		//imguiのUIコントロール
 		ImGui::Text("PlayerPosition : %.2f %.2f", _player->GetPosition().x, _player->GetPosition().z);
 		ImGui::Text("ClearResultPos : %.2f %.2f", clear->Pos().x, clear->Pos().y);
-		ImGui::Text("ClearResultPos : %.2f %.2f", protEnemy[0]->weapon->position.x, protEnemy[0]->weapon->position.z);
+		//ImGui::Text("ClearResultPos : %.2f %.2f", protEnemy[0]->weapon->position.x, protEnemy[0]->weapon->position.z);
 		ImGui::Text("ClearResultPos : %.2f %.2f", protEnemy[0]->GetPosition().x, protEnemy[0]->GetPosition().z);
 		ImGui::Checkbox("EnemyPop", &blnChk);
 		ImGui::RadioButton("Game Mode", &radio, 0);
@@ -425,6 +419,8 @@ void GameManager::Update()
 		ImGui::SetWindowSize(ImVec2(400, 500), ImGuiCond_::ImGuiCond_FirstUseEver);
 		ImGui::ColorPicker4("ColorPicker4", particleColor, ImGuiColorEditFlags_::ImGuiColorEditFlags_PickerHueWheel | ImGuiColorEditFlags_::ImGuiColorEditFlags_AlphaBar);
 		ImGui::End();
+
+		Object3Ds::UpdateImgui();
 
 		//カメラ切り替え
 		static bool isCamera = false;
@@ -541,7 +537,8 @@ void GameManager::GameUpdate() {
 		//ゲームスタート時処理
 		if (GameModeNum == GameMode::START) {
 
-			_player->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
+			_player->SetPosition(XMFLOAT3(0.0f, 0.0f, 100.0f));
+			_player->Update();
 
 			//カメラの移動先の作成
 			static float step = 0;
@@ -610,35 +607,35 @@ void GameManager::GameUpdate() {
 			PlayerUpdate();
 
 			//当たり判定（プレイヤー / 敵 / 最終関門）
-			{
-				for (int i = 0; i < sqhere.size(); i++) {
-					for (int j = 0; j < HitBox::_hit.size(); j++) {
-						bool Hhit = Collision::CheckSqhere2Sqhere(sqhere[i], HitBox::_hit[j]);
-						XMVECTOR inter;
-						bool Ghit = Collision::CheckSqhere2Triangle(sqhere[i], triangle[0], &inter);
+			//{
+			//	for (int i = 0; i < sqhere.size(); i++) {
+			//		for (int j = 0; j < HitBox::_hit.size(); j++) {
+			//			bool Hhit = Collision::CheckSqhere2Sqhere(sqhere[i], HitBox::_hit[j]);
+			//			XMVECTOR inter;
+			//			bool Ghit = Collision::CheckSqhere2Triangle(sqhere[i], triangle[0], &inter);
 
-						//ゲート攻撃
-						if (Ghit == true && reception <= 0 && _enemy[i]->attackHit == true) {
-							if (_enemy[i]->mode != 3) { continue; }
-							Hhit = false;
-							_enemy[i]->attackHit = false;
-							gateHP -= 1;
-							shake = true;
-							reception = 600;
-						}
+			//			//ゲート攻撃
+			//			if (Ghit == true && reception <= 0 && _enemy[i]->attackHit == true) {
+			//				if (_enemy[i]->mode != 3) { continue; }
+			//				Hhit = false;
+			//				_enemy[i]->attackHit = false;
+			//				gateHP -= 1;
+			//				shake = true;
+			//				reception = 600;
+			//			}
 
-						//エネミーからのダメージ
-						if (Hhit == true && _enemy[i]->attackHit == true) {
-							_enemy[i]->attackHit = false;
-							popHp += 10;
-							//_player->model->vmdNumber = vmdData::DAMAGE;
-						}
-						//ゲームオーバー条件				
-						//if (gateHP <= 0 || playerHp <= 0) { SceneChange = true; }
-						reception--;
-					}
-				}
-			}
+			//			//エネミーからのダメージ
+			//			if (Hhit == true && _enemy[i]->attackHit == true) {
+			//				_enemy[i]->attackHit = false;
+			//				popHp += 10;
+			//				//_player->model->vmdNumber = vmdData::DAMAGE;
+			//			}
+			//			//ゲームオーバー条件				
+			//			//if (gateHP <= 0 || playerHp <= 0) { SceneChange = true; }
+			//			reception--;
+			//		}
+			//	}
+			//}
 
 			//更新処理(ゲーム)
 			{
@@ -999,83 +996,33 @@ void GameManager::PlayerUpdate()
 	{
 		//移動ベクトル
 		XMFLOAT3 v = { (directInput->getLeftX()),0.0f,-(directInput->getLeftY()) };
-		HitBox::hitBox[0]->position = XMFLOAT3(
-			_player->GetPosition().x,
-			_player->GetPosition().y + 10.0f,
-			_player->GetPosition().z);
+		//HitBox::hitBox[0]->position = XMFLOAT3(
+		//	_player->GetPosition().x,
+		//	_player->GetPosition().y + 10.0f,
+		//	_player->GetPosition().z);
 
-		//if (_player->model->oldVmdNumber != vmdData::ATTACK) { _player->model->oldVmdNumber = _player->model->vmdNumber; }
-		//else if (_player->model->oldVmdNumber != vmdData::DAMAGE) { _player->model->oldVmdNumber = _player->model->vmdNumber; }
-		//if (directInput->leftStickX() < 0.0f || directInput->leftStickX() > 0.0f || directInput->leftStickY() < 0.0f || directInput->leftStickY() > 0.0f) {
-		////	_player->model->vmdNumber = vmdData::WALK;
-		////	if (_player->GetAction() == action::Avoid) { _player->model->vmdNumber = vmdData::AVOID; }
-		////	HitBox::hitBox[0]->scale = XMFLOAT3(5, 10, 5);
-		////	HitBox::_hit[0].radius = 5;
-
-		//	if (directInput->getTriggerZ() != 0) {
-		//		speed = 2.0f;
-		//	}
-		//	else { speed = 1.0f; }
-		//	//左移動
-		//	if (input->Push(DIK_A) || directInput->leftStickX() < 0.0f) {
-		//		_player->SetPosition((MoveLeft(_player->GetPosition())));
-		//		for (int i = 0; i < HitBox::GetHit().size(); i++) { HitBox::GetHit()[i]->position = MoveLeft(HitBox::GetHit()[i]->position); }
-		//	}
-		//	//右移動
-		//	if (input->Push(DIK_D) || directInput->leftStickX() > 0.0f) {
-		//		_player->SetPosition((MoveRight(_player->GetPosition())));
-		//		for (int i = 0; i < HitBox::GetHit().size(); i++) { HitBox::GetHit()[i]->position = MoveRight(HitBox::GetHit()[i]->position); }
-		//	}
-		//	//下移動
-		//	if (input->Push(DIK_W) || directInput->leftStickY() < 0.0f) {
-		//		_player->SetPosition((MoveBefore(_player->GetPosition())));
-		//		for (int i = 0; i < HitBox::GetHit().size(); i++) { HitBox::GetHit()[i]->position = MoveBefore(HitBox::GetHit()[i]->position); }
-		//	}
-		//	//上移動
-		//	if (input->Push(DIK_S) || directInput->leftStickY() > 0.0f) {
-		//		_player->SetPosition((MoveAfter(_player->GetPosition())));
-		//		for (int i = 0; i < HitBox::GetHit().size(); i++) { HitBox::GetHit()[i]->position = MoveAfter(HitBox::GetHit()[i]->position); }
-		//	}
-		//	XMMATRIX matRot = XMMatrixIdentity();
-		//	//角度回転
-		//	matRot = XMMatrixRotationY(XMConvertToRadians(angleHorizonal));
-
-		//	XMVECTOR _v({ v.x, v.y, v.z, 0 });
-		//	_v = XMVector3TransformNormal(_v, matRot);
-		//	v.x = _v.m128_f32[0];
-		//	v.y = _v.m128_f32[1];
-		//	v.z = _v.m128_f32[2];
-
-		//	_player->SetMatRot(LookAtRotation(v, XMFLOAT3(0.0f, 1.0f, 0.0f)));
-		//	//if (directInput->IsButtonPush(DirectInput::ButtonKind::ButtonA) || input->Push(DIK_Z)) {
-		//	//	_player->model->vmdNumber = vmdData::AVOID;
-		//	//	_player->SetAction(action::Avoid);
-		//	//	_player->SetAvoidVec(v);
-		//	//}
-
-		//}
 		if (directInput->IsButtonPush(DirectInput::ButtonKind::ButtonX) || input->Push(DIK_X)) {
 			//_player->model->vmdNumber = vmdData::ATTACK;
-			HitBox::hitBox[0]->scale = XMFLOAT3(10, 10, 10);
-			HitBox::_hit[0].radius = 10;
+			//HitBox::hitBox[0]->scale = XMFLOAT3(10, 10, 10);
+			//HitBox::_hit[0].radius = 10;
 			for (int i = 0; i < sqhere.size(); i++)
 			{
-				bool Ahit = Collision::CheckSqhere2Sqhere(sqhere[i], HitBox::_hit[0]);
+				//bool Ahit = Collision::CheckSqhere2Sqhere(sqhere[i], HitBox::_hit[0]);
 
-				if (Ahit != true) { continue; }
-				_enemy[i]->damage = true;
-				if (_enemy[i]->damage != true)continue;
-				_enemy[i]->status.HP -= 1;
-				//体力がなくなっていれば
-				if (_enemy[i]->status.HP <= 0) {
-					repelCount += 1;
-				}
+				//if (Ahit != true) { continue; }
+				//_enemy[i]->damage = true;
+				//if (_enemy[i]->damage != true)continue;
+				//_enemy[i]->status.HP -= 1;
+				////体力がなくなっていれば
+				//if (_enemy[i]->status.HP <= 0) {
+				//	repelCount += 1;
+				//}
 			}
 		}
 		else {
 			//_player->model->vmdNumber = vmdData::WAIT;
-			HitBox::hitBox[0]->scale = XMFLOAT3(5, 10, 5);
-			HitBox::_hit[0].radius = 5;
+			//HitBox::hitBox[0]->scale = XMFLOAT3(5, 10, 5);
+			//HitBox::_hit[0].radius = 5;
 		}
 	}
 
@@ -1196,16 +1143,6 @@ void GameManager::EnemyUpdate()
 
 				break;
 			}
-			//三体まで
-			//if (_enemy.size() <= 2) {
-			//	if (useModel >= 3) { useModel = 0; }
-			//	ene = Enemy::Appearance(golem[useModel], wolf[useModel]);
-			//	if (ene != nullptr) {
-			//		//格納
-			//		_enemy.push_back(ene);
-			//		useModel += 1;
-			//	}
-			//}
 		}
 	}
 	//エネミー関係の制御
@@ -1219,12 +1156,6 @@ void GameManager::EnemyUpdate()
 			//protEnemy[i]->alive = false;
 		}
 	}
-
-	//for (int i = 0; i < _enemy.size(); i++) {
-	//	_enemy[i]->SetFollowBoneNum(testNum[i]);
-	//	_enemy[i]->Update();
-	//	//_enemy[i]->weapon->SetPosition(XMFLOAT3(testPos[0], testPos[1], testPos[2]));
-	//}
 }
 
 void GameManager::MainDraw()

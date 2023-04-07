@@ -62,7 +62,7 @@ public:
 
 	//行列の更新
 	void UpdateWorldMatrix();
-
+	static void UpdateImgui();
 	/// <summary>
 	/// ワールド行列取得
 	/// </summary>
@@ -92,6 +92,8 @@ public:
 	XMMATRIX matRot = {};
 	XMMATRIX matTrans = {};
 	XMMATRIX matWorld = {};
+
+	static float shadowCameraSite[2];
 
 	Model* model = nullptr;
 

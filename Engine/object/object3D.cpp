@@ -11,6 +11,9 @@ ComPtr<ID3D12RootSignature> Object3Ds::_rootsignature;
 ComPtr<ID3D12PipelineState> Object3Ds::_pipelinestate;
 ComPtr<ID3D12PipelineState> Object3Ds::_plsShadow;
 
+//ImGui確認用
+float Object3Ds::shadowCameraSite[2] = {160.0f,160.0f};
+
 Object3Ds::~Object3Ds()
 {
 	if (collider) {
@@ -30,8 +33,8 @@ bool Object3Ds::StaticInitialize(ID3D12Device* _device)
 	Object3Ds::device = _device;
 
 	//パイプライン生成
-	//LoadHlsls::LoadHlsl_VS(ShaderNo::OBJ, , "main", "vs_5_0");
-	//LoadHlsls::LoadHlsl_PS(ShaderNo::OBJ, L"Resources/shaders/OBJPixelShader.hlsl", , "ps_5_0");
+	//LoadHlsls::LoadHlsl_VS(ShaderNo::OBJ, L"Resources/shaders/OBJVertexShader.hlsl", "main", "vs_5_0");
+	//LoadHlsls::LoadHlsl_PS(ShaderNo::OBJ, L"Resources/shaders/OBJPixelShader.hlsl", "main", "ps_5_0");
 	//LoadHlsls::createPipeline(device.Get(), ShaderNo::OBJ);
 
 	HRESULT result;
@@ -233,6 +236,7 @@ bool Object3Ds::StaticInitialize(ID3D12Device* _device)
 	gpipeline.VS = CD3DX12_SHADER_BYTECODE(vsBlob.Get());
 	gpipeline.PS.BytecodeLength = 0;
 	gpipeline.PS.pShaderBytecode = nullptr;
+	gpipeline.NumRenderTargets = 0;	// 描画対象は1つ
 	gpipeline.RTVFormats[0] = DXGI_FORMAT_UNKNOWN;
 
 	result = device->CreateGraphicsPipelineState(
@@ -310,7 +314,7 @@ void Object3Ds::Update()
 		auto light = XMFLOAT4(1, -1, 0, 0);
 		XMVECTOR lightVec = XMLoadFloat4(&light);
 
-		auto Eye = XMFLOAT3(50, 100, 0);
+		auto Eye = XMFLOAT3(25, 30, 0);
 		XMVECTOR eye = XMLoadFloat3(&Eye);
 		auto Target = XMFLOAT3(0, 0, 0);
 		XMVECTOR terget = XMLoadFloat3(&Target);
@@ -323,7 +327,7 @@ void Object3Ds::Update()
 		result = constBuffB0->Map(0, nullptr, (void**)&constMap);
 		if (FAILED(result)) { assert(0); }
 		constMap->viewproj = matViewProjection;
-		constMap->lightCamera = XMMatrixLookAtLH(lightPos, terget, up) * XMMatrixOrthographicLH(1280, 720, 1.0f, 200.0f);
+		constMap->lightCamera = XMMatrixLookAtLH(lightPos, terget, up) * XMMatrixOrthographicLH(shadowCameraSite[0], shadowCameraSite[1], 1.0f, 100.0f);
 		constMap->cameraPos = cameraPos;
 		if (!useWorldMat) {
 			constMap->world = matWorld;
@@ -405,6 +409,20 @@ void Object3Ds::UpdateWorldMatrix()
 	matWorld *= matScale;// ワールド行列に	スケーリングを反映
 	matWorld *= matRot;	 // ワールド行列に	回転        を反映
 	matWorld *= matTrans;// ワールド行列に	平行移動    を反映
+}
+
+void Object3Ds::UpdateImgui()
+{
+	//深度テクスチャID取得
+	auto HeapGPUHandle = dx12->GetDescHeap()->GetGPUDescriptorHandleForHeapStart();
+	//HeapGPUHandle.ptr += device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	ImTextureID texID = ImTextureID(HeapGPUHandle.ptr += device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) * 2);
+
+	ImGui::Begin("ShadowCameraTest");
+	ImGui::SetWindowSize(ImVec2(400, 500), ImGuiCond_::ImGuiCond_FirstUseEver);
+	ImGui::InputFloat2("cameraSite", shadowCameraSite);
+	ImGui::Image(texID, ImVec2(shadowCameraSite[0], shadowCameraSite[1]));
+	ImGui::End();
 }
 
 void Object3Ds::SetCollider(BaseCollider* collider)

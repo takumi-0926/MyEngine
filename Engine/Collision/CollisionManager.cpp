@@ -27,6 +27,9 @@ void CollisionManager::CheckAllCollision()
 			if (!colA->invisible) { continue; }
 			if (!colB->invisible) { continue; }
 
+			//“–‚½‚è”»’è‘®«‚ª“¯‚¶ê‡‚ÍƒXƒ‹[
+			if ((colA->attribute & colB->attribute)) { continue; }
+
 			if (colA->GetShapeType() == COLLISIONSHAPE_SQHERE &&
 				colB->GetShapeType() == COLLISIONSHAPE_SQHERE) {
 				Sqhere* SphereB = dynamic_cast<Sqhere*>(colB);

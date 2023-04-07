@@ -367,7 +367,7 @@ HRESULT Wrapper::InitializeDescHeap() {
 	//ディスクリプタヒープ生成(汎用)
 	heapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;//どんなビューを作るのか()
 	heapDesc.NodeMask = 0;
-	heapDesc.NumDescriptors = 1024;//全体のヒープ領域数(1：シーン、2：PMD平行移動、3～：PMDマテリアル)
+	heapDesc.NumDescriptors = 1024;//全体のヒープ領域数(1：シーン、2：深度テクスチャ、3～：PMDマテリアル)
 	heapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;//特に指定なし
 
 	DXGI_SWAP_CHAIN_DESC swcDesc = {};
@@ -384,7 +384,8 @@ HRESULT Wrapper::InitializeDescHeap() {
 	}
 
 	//先頭アドレスの設定
-	heapHandle = _descHeap->GetCPUDescriptorHandleForHeapStart();
+	heapHandle_CPU = _descHeap->GetCPUDescriptorHandleForHeapStart();
+	heapHandle_GPU = _descHeap->GetGPUDescriptorHandleForHeapStart();
 	//_backBuffer.resize(swcDesc.BufferCount);
 
 	////SRGBレンダターゲットビュー設定
@@ -494,33 +495,32 @@ HRESULT Wrapper::InitializeDepthBuff(SIZE ret) {
 		handle);
 
 	//深度テクスチャ用ヒープ作成
-	D3D12_DESCRIPTOR_HEAP_DESC texHeapdesc = {};
-	texHeapdesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-	texHeapdesc.NodeMask = 0;
-	texHeapdesc.NumDescriptors = 2;
-	texHeapdesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-	result = _dev->CreateDescriptorHeap(&texHeapdesc, IID_PPV_ARGS(&_depthHaepSRV));
-	if (FAILED(result)) {
-		assert(0);
-		return result;
-	}
+	//D3D12_DESCRIPTOR_HEAP_DESC texHeapdesc = {};
+	//texHeapdesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+	//texHeapdesc.NodeMask = 0;
+	//texHeapdesc.NumDescriptors = 2;
+	//texHeapdesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+	//result = _dev->CreateDescriptorHeap(&texHeapdesc, IID_PPV_ARGS(&_depthHaepSRV));
+	//if (FAILED(result)) {
+	//	assert(0);
+	//	return result;
+	//}
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC texResdesc = {};
 	texResdesc.Format = DXGI_FORMAT_R32_FLOAT;
 	texResdesc.Texture2D.MipLevels = 1;
 	texResdesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	texResdesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-	auto handle02 = _depthHaepSRV->GetCPUDescriptorHandleForHeapStart();
 
 	//深度テクスチャリソースを作成
 	_dev->CreateShaderResourceView(
-		_depthBuffer.Get(), &texResdesc, handle02);
+		_depthBuffer.Get(), &texResdesc, heapHandle_CPU);
 
-	handle02.ptr += _dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	heapHandle_CPU.ptr += _dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
 	//ライトデプス
 	_dev->CreateShaderResourceView(
-		_lightDepthBuffer.Get(), &texResdesc, handle02);
+		_lightDepthBuffer.Get(), &texResdesc, heapHandle_CPU);
 
 	return result;
 }
@@ -570,12 +570,12 @@ HRESULT Wrapper::CreateSceneView()
 	cbvDesc.BufferLocation = _sceneConstBuff->GetGPUVirtualAddress();
 	cbvDesc.SizeInBytes = UINT(_sceneConstBuff->GetDesc().Width);
 	//定数バッファビューの作成
-	_dev->CreateConstantBufferView(&cbvDesc, heapHandle);
+	_dev->CreateConstantBufferView(&cbvDesc, heapHandle_CPU);
 
 	auto inc = _dev->GetDescriptorHandleIncrementSize(
 		D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
-	heapHandle.ptr += inc;
+	heapHandle_CPU.ptr += inc;
 	return result;
 }
 
@@ -646,13 +646,9 @@ void Wrapper::DrawLight(ID3D12GraphicsCommandList* cmdlist)
 void Wrapper::DrawDepth()
 {
 	//深度SRV
-	_cmdList->SetDescriptorHeaps(1, _depthHaepSRV.GetAddressOf());
+	_cmdList->SetDescriptorHeaps(1, _descHeap.GetAddressOf());
+	heapHandle_GPU = _descHeap->GetGPUDescriptorHandleForHeapStart();
+	heapHandle_GPU.ptr += _dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) * 2;
 
-	auto handle = _depthHaepSRV->GetGPUDescriptorHandleForHeapStart();
-
-	handle.ptr += _dev->GetDescriptorHandleIncrementSize(
-		D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV
-	);
-
-	_cmdList->SetGraphicsRootDescriptorTable(4, handle);
+	_cmdList->SetGraphicsRootDescriptorTable(4, heapHandle_GPU);
 }

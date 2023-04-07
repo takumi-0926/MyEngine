@@ -51,6 +51,8 @@ public:
 	vector<AnimationInfelno> animas;
 
 public:
+	static void staticInitialize(ID3D12Device* _device);
+
 	virtual void Initialize();
 
 	virtual void Update();
@@ -135,6 +137,8 @@ protected:
 	bool useRotMat = false;
 
 	BaseCollider* collider = nullptr;
+
+	static float shadowCameraSite[2];
 
 public:
 	XMFLOAT3 GetPosition() { return position; }

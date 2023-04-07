@@ -54,12 +54,12 @@ void Bullet::Update()
 	}
 	else {
 		this->position = this->status.basePos;
+		CollisionManager::GetInstance()->RemoveCollider(collider);
 		return;
 	}
 	count += 1.0f / 60.0f;
 	if (count >= 3.0f) {
 		status.isAlive = false;
-		CollisionManager::GetInstance()->RemoveCollider(collider);
 		count = 0;
 	}
 }
@@ -71,7 +71,6 @@ void Bullet::Draw()
 void Bullet::OnCollision(const CollisionInfo& info)
 {
 	status.isAlive = false;
-	CollisionManager::GetInstance()->RemoveCollider(collider);
 }
 
 XMMATRIX Bullet::LookAtRotation(XMVECTOR forward, XMFLOAT3 upward)

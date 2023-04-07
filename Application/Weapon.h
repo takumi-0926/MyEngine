@@ -19,11 +19,13 @@ public:
 	//インスタンス生成
 	static Weapon* Create(Model* model);
 	//初期化
-	//bool Initialize()override;
+	bool Initialize()override;
 	//更新
 	void Update() override;
 	//描画
 	void Draw() override;
+
+	void OnCollision(const CollisionInfo& info)override;
 
 public:
 	//セッター

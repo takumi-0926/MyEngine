@@ -16,6 +16,12 @@ ComPtr<ID3D12RootSignature> FbxObject3d::rootsignature;
 ComPtr<ID3D12PipelineState> FbxObject3d::pipelinestate;
 ComPtr<ID3D12PipelineState> FbxObject3d::pipelineshadow;
 
+void FbxObject3d::staticInitialize(ID3D12Device* _device)
+{
+	FbxObject3d::SetDevice(_device);
+	FbxObject3d::CreateGraphicsPipeline();
+}
+
 void FbxObject3d::Initialize()
 {
 	HRESULT result;
@@ -75,7 +81,7 @@ void FbxObject3d::Update()
 	result = constBufferTransform->Map(0, nullptr, (void**)&constMap);
 	if (SUCCEEDED(result)) {
 		constMap->viewproj = matViewProjection;
-		constMap->lightCamera = XMMatrixLookAtLH(lightPos, terget, up) * XMMatrixOrthographicLH(1280, 720, 1.0f, 150.0f);
+		constMap->lightCamera = XMMatrixLookAtLH(lightPos, terget, up) * XMMatrixOrthographicLH(160, 160, 1.0f, 100.0f);
 		constMap->world = modelTransform * matWorld;
 		constMap->cameraPos = cameraPos;
 		constBufferTransform->Unmap(0, nullptr);
@@ -461,6 +467,7 @@ void FbxObject3d::CreateGraphicsPipeline()
 	gpipeline.VS = CD3DX12_SHADER_BYTECODE(vsBlob.Get());
 	gpipeline.PS.BytecodeLength = 0;
 	gpipeline.PS.pShaderBytecode = nullptr;
+	gpipeline.NumRenderTargets = 0;	// •`‰æ‘ÎÛ‚Í0‚Â
 	gpipeline.RTVFormats[0] = DXGI_FORMAT_UNKNOWN;
 
 	result = device->CreateGraphicsPipelineState(

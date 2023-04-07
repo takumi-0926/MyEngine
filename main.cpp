@@ -63,13 +63,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			return false;
 		}
 		bool blnResult = ImGui_ImplWin32_Init(app->_hwnd());
+		auto ImguiCPU = dx12->GetDescHeap()->GetCPUDescriptorHandleForHeapStart();
+		ImguiCPU.ptr += dx12->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) * 3;
+		auto ImguiGPU = dx12->GetDescHeap()->GetGPUDescriptorHandleForHeapStart();
+		ImguiGPU.ptr += dx12->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) * 3;
+
 		blnResult = ImGui_ImplDX12_Init(
 			dx12->GetDevice(),
 			3,
 			DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
-			dx12->GetHeapImgui().Get(),
-			dx12->GetHeapImgui()->GetCPUDescriptorHandleForHeapStart(),
-			dx12->GetHeapImgui()->GetGPUDescriptorHandleForHeapStart());
+			dx12->GetDescHeap().Get(),
+			ImguiCPU,
+			ImguiGPU);
 	}
 
 	Object3Ds obj3d;
@@ -78,10 +83,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			assert(0);
 			return 1;
 		}
-		//object2d::StaticInitialize(dx12->GetDevice());
 
 		BillboardObject::StaticInitialize(dx12->GetDevice());
 	}
+
+	//Fbx初期化
+	FbxLoader::GetInstance()->Initialize(dx12->GetDevice());
+	FbxObject3d::staticInitialize(dx12->GetDevice());
 
 	if (!ParticleManager::StaticInitialize(dx12->GetDevice(), app->window_width, app->window_height)) {
 		assert(0);
@@ -97,9 +105,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		//Sprite::loadTexture(100, L"Resources/white1x1.png");
 	}
-
-	//Fbx初期化
-	FbxLoader::GetInstance()->Initialize(dx12->GetDevice());
 
 	PMDobject::StaticInitialize(dx12);
 
@@ -156,12 +161,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		postEffect->Draw(dx12->CommandList().Get());
 
 		//スプライト描画
-		//gameScene.SubDraw();
+		gameScene.SubDraw();
 
 		ImGui::Render();
 		dx12->CommandList()->SetDescriptorHeaps(
 			1,
-			dx12->GetHeapImgui().GetAddressOf());
+			dx12->GetDescHeap().GetAddressOf());
 		ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), dx12->CommandList().Get());
 		
 		dx12->PostRun();

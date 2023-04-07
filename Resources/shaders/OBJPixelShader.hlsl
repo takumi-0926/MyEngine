@@ -37,15 +37,29 @@ float4 main(VSOutput input) : SV_TARGET
 	//シャドウマップ
 	float shadowWeight = 1.0f;
 	//範囲を0～1に
-	float3 posFromLightUV = input.tpos.xyz / input.tpos.w;
-	float2 shadowUV = (posFromLightUV + float2(1.0f, -1.0f)) * float2(0.5f, -0.5f);
+	float3 posFromLightUV = input.tpos.z / input.tpos.w;
+	float2 shadowUV;
+	shadowUV.x = (1.0f + posFromLightUV.x) * 0.5f;
+	shadowUV.y = (1.0f - posFromLightUV.y) * 0.5f;
 
-	float depthFromLight = lightDepthTex.Sample(smp, shadowUV);
+	float depthFromLight = lightDepthTex.Sample(smp, shadowUV).x;
 
 	//深度値を比較
-	if (depthFromLight < posFromLightUV.z - 0.001f) {
-		shadowWeight = 0.5f;
+	if (depthFromLight - 0.005f < posFromLightUV.z ) {
+		shadecolor.xyz *= 0.5f;
 	}
+
+	float2 uv = input.uv.xy;
+	float fogWeight = 0.0f;
+
+	float constant_fog_scale = 1.0f;
+	float CONSTANT_FOG_ATTENUATION_RATE = 0.1f;
+
+	const float3 sgColor = shadecolor.rgb;
+	const float3 fogColor = 0.8f;
+
+	fogWeight += constant_fog_scale * max(0.0f, 1.0f - exp(-CONSTANT_FOG_ATTENUATION_RATE * input.svpos.z));
+	float4 outputfogcolor = float4(lerp(sgColor, fogColor, fogWeight),1);
 
 	//平行光源
 	for (int i = 0; i < DIRLIGHT_NUM; i++) {
@@ -115,7 +129,7 @@ float4 main(VSOutput input) : SV_TARGET
 	float4 toonCol = tex.Sample(smp, float2(2.0f, 0.0f));
 
 	//シェーディングによる色で描画
-	//return shadecolor * texcolor/* * toonCol*/;
-	return float4(shadecolor.xyz * texcolor.xyz * shadowWeight,shadecolor.w * texcolor.w)/* * toonCol*/;
+	return outputfogcolor * texcolor/* * toonCol*/;
+	return float4(shadecolor.xyz * texcolor.xyz * shadowWeight,shadecolor.w * texcolor.w) /* * toonCol*/;
 
 }

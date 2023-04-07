@@ -131,9 +131,9 @@ void Enemy::Update() {
 	particle->Update();
 
 
-	weapon->SetFollowingObjectBoneMatrix(model->GetBones()[followBoneNum].fbxCluster->GetLink()->EvaluateGlobalTransform(currentTime));
+	//weapon->SetFollowingObjectBoneMatrix(model->GetBones()[followBoneNum].fbxCluster->GetLink()->EvaluateGlobalTransform(currentTime));
 	//weapon->SetPosition(position);
-	weapon->Update();
+	//weapon->Update();
 
 	//—Ž‰ºˆ—
 	if (!OnGround) {
@@ -320,7 +320,6 @@ void Enemy::Appearance()
 
 void Enemy::Move(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 {
-	static int d = 21;
 	int objectNo = 0;
 
 	if (actionPattern != MoveMode::move)return;
@@ -357,6 +356,8 @@ void Enemy::Move(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 			}
 		}
 
+		static int d = 21;
+
 		//ˆÚ“®‚©‚çUŒ‚‚Ö
 		if (objectDistance(this->position, bPos[objectNo]->position) <= d) {
 			actionPattern = MoveMode::attack;
@@ -387,8 +388,10 @@ void Enemy::Move(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 			VectorToXMFloat(Normalize(objectVector(this->position, gPos))),
 			XMFLOAT3(0.0f, 1.0f, 0.0f));
 
+		static int dd = 8;
+
 		//ˆÚ“®‚©‚çUŒ‚‚Ö
-		if (objectDistance(this->position, gPos) <= d) {
+		if (objectDistance(this->position, gPos) <= dd) {
 			actionPattern = MoveMode::attack;
 			this->attackOnMove = false;
 		}

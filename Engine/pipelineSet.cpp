@@ -217,25 +217,22 @@ void LoadHlsls::createPipeline(ID3D12Device* _dev, int Number)
 		gpipeline.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 
 		// デスクリプタレンジ
-		CD3DX12_DESCRIPTOR_RANGE descRangeSRV[2]{};
-		descRangeSRV[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0); // t0 レジスタ
-		descRangeSRV[1].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 4); //t1
+		CD3DX12_DESCRIPTOR_RANGE descRangeSRV{};
+		descRangeSRV.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0); // t0 レジスタ
 
 		// ルートパラメータ
-		CD3DX12_ROOT_PARAMETER rootparams[5]{};
+		CD3DX12_ROOT_PARAMETER rootparams[4]{};
 		rootparams[0].InitAsConstantBufferView(0, 0, D3D12_SHADER_VISIBILITY_ALL);
 		rootparams[1].InitAsConstantBufferView(1, 0, D3D12_SHADER_VISIBILITY_ALL);
-		rootparams[2].InitAsDescriptorTable(1, &descRangeSRV[0], D3D12_SHADER_VISIBILITY_ALL);
+		rootparams[2].InitAsDescriptorTable(1, &descRangeSRV, D3D12_SHADER_VISIBILITY_ALL);
 		rootparams[3].InitAsConstantBufferView(2, 0, D3D12_SHADER_VISIBILITY_ALL);
-		rootparams[4].InitAsDescriptorTable(1, &descRangeSRV[1]);//
 
 		// スタティックサンプラー
-		CD3DX12_STATIC_SAMPLER_DESC samplerDescs[2] = {};
-		samplerDescs[0].Init(0);
-		samplerDescs[1].Init(1, D3D12_FILTER_ANISOTROPIC, D3D12_TEXTURE_ADDRESS_MODE_CLAMP, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
+		CD3DX12_STATIC_SAMPLER_DESC samplerDescs = {};
+		samplerDescs.Init(0);
 
 
-		rootSignatureDesc.Init_1_0(_countof(rootparams), rootparams, 2, samplerDescs, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+		rootSignatureDesc.Init_1_0(_countof(rootparams), rootparams, 1, &samplerDescs, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 
 		// バージョン自動判定のシリアライズ
 		result = D3DX12SerializeVersionedRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1_0, &rootSigBlob, &errorBlob);

@@ -13,6 +13,23 @@
 class BaseCollider {
 public:
 	friend class CollisionManager;
+protected:
+	Object3Ds* object3d = nullptr;
+
+	FbxObject3d* fbxObject = nullptr;
+
+	PMDobject* pmdObject = nullptr;
+
+	//形状タイプ
+	CollisionShapeType shapeType = SHAPE_UNKNOWN;
+	//当たり判定属性
+	unsigned short attribute = 0b1111111111111111;
+
+	unsigned short MyNumber = 0b1111111111111111;
+
+	//当たり判定有効化
+	bool invisible = true;
+
 public:
 	BaseCollider() = default;
 	//仮想デストラクタ
@@ -70,21 +87,4 @@ public:
 	inline void SetInvisible(bool flag) {
 		this->invisible = flag;
 	}
-
-protected:
-	Object3Ds* object3d = nullptr;
-
-	FbxObject3d* fbxObject = nullptr;
-
-	PMDobject* pmdObject = nullptr;
-
-	//形状タイプ
-	CollisionShapeType shapeType = SHAPE_UNKNOWN;
-	//当たり判定属性
-	unsigned short attribute = 0b1111111111111111;
-
-	unsigned short MyNumber = 0b1111111111111111;
-
-	//当たり判定有効化
-	bool invisible = true;
 };
