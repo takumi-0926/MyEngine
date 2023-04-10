@@ -8,6 +8,8 @@
 #include "PMD\PMDmodel.h"
 #include "Collision\CollisionInfo.h"
 
+#include "DebugImgui.h"
+
 //3Dオブジェクト用頂点データ
 struct  Vertex {
 	DirectX::XMFLOAT3 pos;
@@ -19,6 +21,7 @@ class Wrapper;
 class BaseCollider;
 class Object3Ds : public BaseObject
 {
+	friend DebugImgui;
 protected: // メンバ変数
 	static Wrapper* dx12;
 
@@ -93,7 +96,7 @@ public:
 	XMMATRIX matTrans = {};
 	XMMATRIX matWorld = {};
 
-	static float shadowCameraSite[2];
+	//static float shadowCameraSite[2];
 
 	Model* model = nullptr;
 

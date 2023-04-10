@@ -4,6 +4,8 @@
 #include "Collision\BaseCollision.h"
 #include "Collision\CollisionManager.h"
 
+#include "DebugImgui.h"
+
 #include <d3dcompiler.h>
 #pragma comment(lib,"d3dcompiler.lib")
 
@@ -69,9 +71,9 @@ void FbxObject3d::Update()
 	auto light = XMFLOAT4(1, -1, 0, 0);
 	XMVECTOR lightVec = XMLoadFloat4(&light);
 
-	auto Eye = XMFLOAT3(25, 30, 0);
+	auto Eye = XMFLOAT3(DebugImgui::shadowlightPos[0], DebugImgui::shadowlightPos[1], DebugImgui::shadowlightPos[2]);
 	XMVECTOR eye = XMLoadFloat3(&Eye);
-	auto Target = XMFLOAT3(0, 0, 0);
+	auto Target = XMFLOAT3(DebugImgui::shadowlightTarget[0], DebugImgui::shadowlightTarget[1], DebugImgui::shadowlightTarget[2]);
 	XMVECTOR terget = XMLoadFloat3(&Target);
 	XMVECTOR up = XMLoadFloat3(&camera->GetUp());
 
@@ -81,7 +83,7 @@ void FbxObject3d::Update()
 	result = constBufferTransform->Map(0, nullptr, (void**)&constMap);
 	if (SUCCEEDED(result)) {
 		constMap->viewproj = matViewProjection;
-		constMap->lightCamera = XMMatrixLookAtLH(lightPos, terget, up) * XMMatrixOrthographicLH(160, 160, 1.0f, 100.0f);
+		constMap->lightCamera = XMMatrixLookAtLH(lightPos, terget, up) * XMMatrixOrthographicLH(DebugImgui::shadowCameraSite[0], DebugImgui::shadowCameraSite[1], 1.0f, 100.0f);
 		constMap->world = modelTransform * matWorld;
 		constMap->cameraPos = cameraPos;
 		constBufferTransform->Unmap(0, nullptr);

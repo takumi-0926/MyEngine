@@ -377,8 +377,8 @@ bool BillboardObject::Initialize()
 	//	{{1.0f,0.0f,0.0f},10.0f}
 	//};
 	//std::copy(std::begin(vertices), std::end(vertices), verticesSphere);
-	vertices->pos = { 0.0f,0.0f,0.0f };
-	vertices->scale = 100.0f;
+	//vertices->pos = { 0.0f,0.0f,0.0f };
+	//vertices->scale = 100.0f;
 	//unsigned short indicesSphere[] = {
 	//	0,1,2,
 	//	2,1,3,
@@ -387,7 +387,7 @@ bool BillboardObject::Initialize()
 	//	indices.push_back(indicesSphere[i]);
 	//}
 
-	CreateVertexBuffers();
+	//CreateVertexBuffers();
 	//CreateIndexBuffers();
 
 	return true;

@@ -291,7 +291,6 @@ void Enemy::Appearance()
 		//weapon->SetFollowingObjectBoneMatrix(model->GetBones()[23].fbxCluster->GetLink()->EvaluateGlobalTransform());
 		status.HP = 2;
 		status.speed = 1.0f;
-		scale = { 0.5f,0.5f,0.5f };
 		shadowOffset = 1.0f;
 		particleOffset = 10.0f;
 	}
@@ -300,7 +299,6 @@ void Enemy::Appearance()
 		SetModel(modelType[Activity::golem]);
 		status.HP = 4;
 		status.speed = 0.4f;
-		scale = { 0.1f,0.1f,0.1f };
 		shadowOffset = 1.5f;
 		particleOffset = 40.0f;
 	}

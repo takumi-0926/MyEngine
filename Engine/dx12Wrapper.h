@@ -122,7 +122,7 @@ private:
 	}
 public:
 	~Wrapper();
-
+	static Wrapper* GetInstance();
 	bool Init(HWND _hwnd, SIZE _ret);
 
 	void PreRun();
@@ -155,6 +155,14 @@ public:
 	void ClearDepthBuffer() {
 		// 深度ステンシルビュー用デスクリプタヒープのハンドルを取得
 		CD3DX12_CPU_DESCRIPTOR_HANDLE dsvH = CD3DX12_CPU_DESCRIPTOR_HANDLE(_dsvHeap->GetCPUDescriptorHandleForHeapStart());
+		// 深度バッファのクリア
+		_cmdList->ClearDepthStencilView(dsvH, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+	}
+
+	void ClearDepthShadow() {
+		// 深度ステンシルビュー用デスクリプタヒープのハンドルを取得
+		CD3DX12_CPU_DESCRIPTOR_HANDLE dsvH = CD3DX12_CPU_DESCRIPTOR_HANDLE(_dsvHeap->GetCPUDescriptorHandleForHeapStart());
+		dsvH.ptr += _dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
 		// 深度バッファのクリア
 		_cmdList->ClearDepthStencilView(dsvH, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 	}

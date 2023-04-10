@@ -8,6 +8,8 @@
 #include "Player.h"
 #include "JsonLoader.h"
 
+#include"DebugImgui.h"
+
 #include "Collision\MeshCollider.h"
 #include "Collision\SphereCollider.h"
 #include "Collision\CollisionManager.h"
@@ -156,7 +158,7 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	Bottom = BillboardObject::Create(0);
 	Bottom->Update();
 
-	Bottom->CreateObject(XMFLOAT3(540, 0, 199));
+	Bottom->CreateObject(XMFLOAT3(0, 10, 0), 5);
 
 	testModel = FbxLoader::GetInstance()->LoadModelFromFile("testModel");
 	testObject = new FbxObject3d;
@@ -264,7 +266,7 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	//プレイヤー---------------------
 	_player = Player::Create(testModel);
 	_player->CreateWeapon(Model::CreateFromOBJ("weapon"));
-	_player->SetScale({ 0.2f, 0.2f, 0.2f });
+	_player->SetScale({ 1.0f, 1.0f, 1.0f });
 	_player->SetPosition(XMFLOAT3(0.0f, 0.0f, 100.0f));
 	_player->PlayAnimation();
 
@@ -420,7 +422,7 @@ void GameManager::Update()
 		ImGui::ColorPicker4("ColorPicker4", particleColor, ImGuiColorEditFlags_::ImGuiColorEditFlags_PickerHueWheel | ImGuiColorEditFlags_::ImGuiColorEditFlags_AlphaBar);
 		ImGui::End();
 
-		Object3Ds::UpdateImgui();
+		DebugImgui::UpdateImgui(dx12);
 
 		//カメラ切り替え
 		static bool isCamera = false;
@@ -839,6 +841,7 @@ void GameManager::GameUpdate() {
 			_target.z = setObjectPos.z - direction.z * distanceFromPlayerToCamera;
 			_target.y += cameraHeight / 3.0f;
 			setCamera->SetTarget(_target);
+			Wrapper::SetCamera(setCamera);
 
 			if (input->Trigger(DIK_F) || directInput->IsButtonPush(DirectInput::ButtonKind::ButtonX)) {
 				Wrapper::SetCamera(mainCamera);
@@ -1216,11 +1219,11 @@ void GameManager::MainDraw()
 
 		BaseObject::PostDraw();
 
-		//BillboardObject::PreDraw(cmdList);
+		BillboardObject::PreDraw(cmdList);
 
-		//Bottom->Draw(cmdList);
+		Bottom->Draw(cmdList);
 
-		//BillboardObject::PostDraw();
+		BillboardObject::PostDraw();
 
 		// 3Dオブジェクト描画前処理
 		ParticleManager::PreDraw(cmdList);
@@ -1241,16 +1244,12 @@ void GameManager::MainDraw()
 	}
 
 	else if (SceneNum == Scene::DebugTest) {
-		Sprite::PreDraw(cmdList);
-		Sprite::PostDraw();
 
 		//深度バッファクリア
 		dx12->ClearDepthBuffer();
 
 		BaseObject::PreDraw(cmdList);
 		debugFilde->Draw();
-		//debugCharacter->Draw();
-		//testModel->Draw(cmdList);
 		testObject->Draw(cmdList);
 		BaseObject::PostDraw();
 
@@ -1295,9 +1294,6 @@ void GameManager::SubDraw()
 	else if (SceneNum == GAME) {
 		Sprite::PreDraw(cmdList);
 		Sprite::PostDraw();
-
-		//深度バッファクリア
-		dx12->ClearDepthBuffer();
 
 		BillboardObject::PreDraw(cmdList);
 
@@ -1377,13 +1373,11 @@ void GameManager::ShadowDraw(bool isShadow)
 	ID3D12GraphicsCommandList* cmdList = dx12->CommandList().Get();
 
 	//深度バッファクリア
-	dx12->ClearDepthBuffer();
+	dx12->ClearDepthShadow();
+
+	BaseObject::PreDraw(cmdList);
 
 	if (SceneNum == GAME) {
-
-
-		BaseObject::PreDraw(cmdList);
-
 		//プレイヤー描画
 		if (GameModeNum != GameMode::SET) {
 			_player->ShadowDraw(cmdList);
@@ -1411,28 +1405,14 @@ void GameManager::ShadowDraw(bool isShadow)
 				_enemy[i]->ShadowDraw(cmdList);
 			}
 		}
-
-		BaseObject::PostDraw();
-
-		//BillboardObject::PreDraw(cmdList);
-
-		//Bottom->Draw(cmdList);
-
-		//BillboardObject::PostDraw();
 	}
 
 	else if (SceneNum == Scene::DebugTest) {
-		Sprite::PreDraw(cmdList);
-		Sprite::PostDraw();
 
-		//深度バッファクリア
-		dx12->ClearDepthBuffer();
-
-		BaseObject::PreDraw(cmdList);
 		debugFilde->ShadowDraw();
 		testObject->ShadowDraw(cmdList);
-		BaseObject::PostDraw();
 	}
+	BaseObject::PostDraw();
 }
 
 XMFLOAT3 GameManager::moveCamera(XMFLOAT3 pos1, XMFLOAT3 pos2, float pct)

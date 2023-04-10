@@ -138,8 +138,6 @@ protected:
 
 	BaseCollider* collider = nullptr;
 
-	static float shadowCameraSite[2];
-
 public:
 	XMFLOAT3 GetPosition() { return position; }
 	//FbxTime GetCurrentTime() { return currentTime; }

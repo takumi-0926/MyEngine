@@ -51,6 +51,12 @@ Wrapper::~Wrapper()
 	debug = false;
 }
 
+Wrapper* Wrapper::GetInstance()
+{
+	Wrapper* instance = new Wrapper();
+	return instance;
+}
+
 bool Wrapper::Init(HWND _hwnd, SIZE _ret) {
 #ifdef _DEBUG
 	//エラーチェック//
