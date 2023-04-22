@@ -29,10 +29,7 @@ public:
 
 public:
 	//セッター
-	inline void SetFollowingObjectBoneMatrix(const FbxAMatrix& matrix) {
-		FollowingObjectBoneMatrix = XMMatrixIdentity();
-		FbxLoader::ConvertMatrixFormFbx(&FollowingObjectBoneMatrix, matrix);
-		useWorldMat = true;
-		FollowFlag = true;
-	}
+	void SetFollowingObjectBoneMatrix(const FbxAMatrix& matrix, const XMMATRIX& parent);
+
+	inline XMFLOAT3 GetPos() { return position; }
 };

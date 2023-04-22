@@ -83,7 +83,7 @@ void FbxObject3d::Update()
 	result = constBufferTransform->Map(0, nullptr, (void**)&constMap);
 	if (SUCCEEDED(result)) {
 		constMap->viewproj = matViewProjection;
-		constMap->lightCamera = XMMatrixLookAtLH(lightPos, terget, up) * XMMatrixOrthographicLH(DebugImgui::shadowCameraSite[0], DebugImgui::shadowCameraSite[1], 1.0f, 100.0f);
+		constMap->lightCamera = XMMatrixLookAtLH(lightPos, terget, up) * XMMatrixOrthographicLH(DebugImgui::shadowCameraSite[0], DebugImgui::shadowCameraSite[1], DebugImgui::shadowlightLange[0], DebugImgui::shadowlightLange[1]);
 		constMap->world = modelTransform * matWorld;
 		constMap->cameraPos = cameraPos;
 		constBufferTransform->Unmap(0, nullptr);
@@ -112,8 +112,10 @@ void FbxObject3d::Update()
 		currentTime += frameTime;
 		if (currentTime > animas[nowPlayMotion].endTime)
 		{
-			currentTime = animas[nowPlayMotion].startTime;
-			playEnd = true;
+			if (!isLoop) {
+				currentTime = animas[nowPlayMotion].startTime;
+				playEnd = true;
+			}
 		}
 	}
 }
@@ -137,8 +139,6 @@ void FbxObject3d::Draw(ID3D12GraphicsCommandList* cmdList)
 	cmdList->SetGraphicsRootConstantBufferView(
 		3, constBuffSkin->GetGPUVirtualAddress()
 	);
-
-	//dx12->DrawDepth(cmdList.Get());
 
 	model->Draw(cmdList);
 }
@@ -164,7 +164,6 @@ void FbxObject3d::ShadowDraw(ID3D12GraphicsCommandList* cmdList)
 	);
 
 	model->Draw(cmdList);
-
 }
 
 void FbxObject3d::UpdateWorldMatrix()
@@ -186,8 +185,6 @@ void FbxObject3d::UpdateWorldMatrix()
 
 void FbxObject3d::PlayAnimation(int playNum)
 {
-	//if (isPlay) { return; }
-
 	nowPlayMotion = playNum;
 	FbxScene* fbxScene = model->GetFbxScene();
 
@@ -202,11 +199,12 @@ void FbxObject3d::PlayAnimation(int playNum)
 	isPlay = true;
 }
 
-void FbxObject3d::ChangeAnimation(int num)
+void FbxObject3d::ChangeAnimation(int num, bool flag)
 {
 	if (nowPlayMotion != num) {
 		PlayAnimation(num);
 		nowPlayMotion = num;
+		isLoop = flag;
 	}
 }
 
@@ -226,8 +224,6 @@ void FbxObject3d::LoadAnima()
 	int AnimaStackNum = fbxScene->GetSrcObjectCount<FbxAnimStack>();
 
 	for (int i = 0; i < AnimaStackNum; i++) {
-		//FbxAnimStack* animStack;
-		//animStack = fbxScene->GetSrcObject<FbxAnimStack>(i);
 
 		AnimationInfelno instance;
 

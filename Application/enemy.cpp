@@ -293,16 +293,18 @@ void Enemy::Appearance()
 		status.speed = 1.0f;
 		shadowOffset = 1.0f;
 		particleOffset = 10.0f;
+		scale = XMFLOAT3(0.3f, 0.3f, 0.3f);
 	}
 	else if (r % 2 != 1) {
 		mode = Activity::golem;
 		SetModel(modelType[Activity::golem]);
 		status.HP = 4;
-		status.speed = 0.4f;
+		status.speed = 0.6f;
 		shadowOffset = 1.5f;
 		particleOffset = 40.0f;
+		scale = XMFLOAT3(0.15f, 0.15f, 0.15f);
 	}
-	position = XMFLOAT3(0, 20, -70);
+	position = XMFLOAT3(0, 0, -135);
 
 	alive = true;
 
@@ -372,11 +374,11 @@ void Enemy::Move(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 		//移動から攻撃へ
 		if (objectDistance(this->position, pPos) <= 21) {
 			actionPattern = MoveMode::attack;
-			attackPattern = AttackType::Type02;
+			attackPattern = MotionType::AttackMotion_02;
 		}
 		if (objectDistance(this->position, pPos) <= 15) {
 			actionPattern = MoveMode::attack;
-			attackPattern = AttackType::Type01;
+			attackPattern = MotionType::AttackMotion_01;
 		}
 	}
 	//パターン3
@@ -402,7 +404,7 @@ void Enemy::Attack(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 	int objectNo = 0;
 
 	if (actionPattern != MoveMode::attack)return;
-	ChangeAnimation(MotionType::AttackMotion);
+	//ChangeAnimation(MotionType::AttackMotion);
 
 	//攻撃処理
 	if (this->mode == -1) {
@@ -452,7 +454,8 @@ void Enemy::Attack(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 	}
 	if (this->mode == Activity::wolf) {
 
-		if (attackPattern == AttackType::Type01) {
+		//突進攻撃
+		if (attackPattern == MotionType::AttackMotion_01) {
 
 			//攻撃時の情報取得
 			if (this->startAttack == false) {
@@ -471,7 +474,7 @@ void Enemy::Attack(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 					XMFLOAT3(position),
 					0.01f, 0.02f, 8, 2.0f, { 0.2f,0.2f,0.8f,1 }, 2);
 
-				ChangeAnimation(MotionType::AttackMotion);
+				ChangeAnimation(AttackType_Wolf::Type01_Walk);
 			}
 			else { StopAnimation(); }
 			//else if (this->attackTime >= 1.0f) {
@@ -491,7 +494,8 @@ void Enemy::Attack(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 
 			this->attackTime += 1.0f / 60.0f;
 		}
-		else if (attackPattern == AttackType::Type02) {
+		//ジャンプ攻撃
+		else if (attackPattern == MotionType::AttackMotion_02) {
 			JumpAttack(pPos);
 		}
 	}
@@ -503,6 +507,8 @@ void Enemy::Attack(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 			this->attackPos = this->position;
 			this->startAttack = true;
 		}
+
+		ChangeAnimation(MotionType::AttackMotion_01);
 
 		//攻撃開始（突進）
 		//if (this->attackTime >= 3.0f) {
@@ -539,7 +545,6 @@ void Enemy::Attack(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 
 void Enemy::JumpAttack(XMFLOAT3& targetPosition)
 {
-	StopAnimation();
 	attackTime += 1.0f / 60.0f;
 	if (!startAttack) {
 		startAttack = true;
@@ -551,6 +556,9 @@ void Enemy::JumpAttack(XMFLOAT3& targetPosition)
 	static bool p = false;
 
 	if (attackTime >= 1.0f) {
+
+		ChangeAnimation(AttackType_Wolf::Type02_JumpAttack);
+
 		//ベジエ曲線によるジャンプ
 		Vector3 a = lerp(jump.p1, jump.p2, jumpTime);
 		Vector3 b = lerp(jump.p2, jump.p3, jumpTime);
@@ -587,7 +595,10 @@ void Enemy::JumpAttack(XMFLOAT3& targetPosition)
 			jumpTime = 0.0f;
 		}
 	}
-	else { StopAnimation(); }
+	else {
+		StopAnimation();
+		ChangeAnimation(AttackType_Wolf::Type02_JumpWait, true);
+	}
 }
 
 void Enemy::Retreat()
@@ -627,14 +638,6 @@ void Enemy::Damage()
 		0.0001f, 0.05f, 5, 8.0f, { 1,0,0,1 });
 
 	if (status.HP <= 0) { actionPattern = MoveMode::retreat; }
-}
-
-void Enemy::ChangeAnimation(int num)
-{
-	if (nowPlayMotion != num) {
-		PlayAnimation(num);
-		nowPlayMotion = num;
-	}
 }
 
 void Enemy::moveUpdate(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)

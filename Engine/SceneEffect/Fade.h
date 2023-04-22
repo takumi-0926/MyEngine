@@ -52,6 +52,8 @@ public:
 		XMFLOAT2 anchorpoint = { 0.0f,0.0f },
 		bool isFlipX = false, bool isFlipY = false);
 
+	void Reset();
+
 	void Update()override;
 	void Draw()override;
 

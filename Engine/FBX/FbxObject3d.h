@@ -12,11 +12,6 @@
 #include <DirectXMath.h>
 #include <string>
 
-enum MotionType {
-	WalkMotion = 0,
-	AttackMotion,
-};
-
 class FbxObject3d {
 protected:
 	template <class T> using ComPtr = Microsoft::WRL::ComPtr<T>;
@@ -69,7 +64,7 @@ public:
 	}
 
 	void PlayAnimation(int playNum = 0);
-	void ChangeAnimation(int num);
+	void ChangeAnimation(int num, bool flag = false);
 	void StopAnimation();
 	void LoadAnima();
 
@@ -123,11 +118,12 @@ protected:
 	FbxTime currentTime;
 
 	bool isPlay = false;
+	bool isLoop = false;
 
 	bool changePlay = false;
 	bool playEnd = false;
 
-	int nowPlayMotion = MotionType::WalkMotion;
+	int nowPlayMotion = 0;
 
 	ComPtr<ID3D12Resource> constBufferTransform;
 

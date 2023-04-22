@@ -118,7 +118,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	}
 
 	postEffect = new PostEffect();
-	postEffect->Initialize();
+	postEffect->Initialize(dx12->GetDescHeap().Get());
 
 
 	//ゲームループ
@@ -158,7 +158,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		dx12->PreRun();
 		
 		//ポストエフェクトを描画
-		postEffect->Draw(dx12->CommandList().Get());
+		postEffect->Draw(dx12->CommandList().Get(), dx12->GetDescHeap().Get());
 
 		//スプライト描画
 		gameScene.SubDraw();
@@ -170,13 +170,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), dx12->CommandList().Get());
 		
 		dx12->PostRun();
-
-		//if (input.Push(DIK_ESCAPE)) {
-		//	break;
-		//}
-		//if (Input::GetInstance()->Trigger(DIK_SPACE)) {
-		//	break;
-		//}
 	}
 
 #pragma region 後処理

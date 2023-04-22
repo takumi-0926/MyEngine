@@ -47,6 +47,12 @@ Fade* Fade::Create(UINT texNumber, XMFLOAT2 position, XMFLOAT4 color, XMFLOAT2 a
 	return sprite;
 }
 
+void Fade::Reset()
+{
+	_alpha = 0.0f;
+	SetAlpha(_alpha);
+}
+
 void Fade::Update()
 {
 	if (shake) { Shake(); }

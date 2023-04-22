@@ -12,6 +12,7 @@ public:
 	static float shadowCameraSite[2];
 	static float shadowlightPos[3];
 	static float shadowlightTarget[3];
+	static float shadowlightLange[2];
 
 	static void UpdateImgui(Wrapper* dx12);
 };

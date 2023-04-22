@@ -327,7 +327,7 @@ void Object3Ds::Update()
 		result = constBuffB0->Map(0, nullptr, (void**)&constMap);
 		if (FAILED(result)) { assert(0); }
 		constMap->viewproj = matViewProjection;
-		constMap->lightCamera = XMMatrixLookAtLH(lightPos, terget, up) * XMMatrixOrthographicLH(DebugImgui::shadowCameraSite[0], DebugImgui::shadowCameraSite[1], 1.0f, 100.0f);
+		constMap->lightCamera = XMMatrixLookAtLH(lightPos, terget, up) * XMMatrixOrthographicLH(DebugImgui::shadowCameraSite[0], DebugImgui::shadowCameraSite[1], DebugImgui::shadowlightLange[0], DebugImgui::shadowlightLange[1]);
 		constMap->cameraPos = cameraPos;
 		if (!useWorldMat) {
 			constMap->world = matWorld;

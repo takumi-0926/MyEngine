@@ -7,9 +7,6 @@ private:
     //テクスチャバッファ
     ComPtr<ID3D12Resource> texBuff;
 
-    //SRV用デスクリプタヒープ
-    ComPtr<ID3D12DescriptorHeap> descHeapSRV;
-
     //深度テクスチャバッファ
     ComPtr<ID3D12Resource> depthBuff;
     ComPtr<ID3D12DescriptorHeap>depthHaepSRV;	//深度テクスチャ
@@ -26,6 +23,9 @@ private:
     //ルートシグネチャ
     ComPtr<ID3D12RootSignature> rootSignature;
 
+    D3D12_CPU_DESCRIPTOR_HANDLE			heapHandle_CPU;
+    D3D12_GPU_DESCRIPTOR_HANDLE			heapHandle_GPU;
+
     //クリアカラー
     static const float clearColor[4];
 
@@ -38,13 +38,13 @@ public:
     /// <summary>
     /// 初期化
     /// </summary>
-    void Initialize();
+    void Initialize(ID3D12DescriptorHeap* heap);
 
     /// <summary>
     /// 描画コマンド
     /// </summary>
     /// <param name="cmdList"></param>
-    void Draw(ID3D12GraphicsCommandList* cmdList);
+    void Draw(ID3D12GraphicsCommandList* cmdList, ID3D12DescriptorHeap* heap);
 //
     /// <summary>
     /// シーン前

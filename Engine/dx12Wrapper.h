@@ -50,8 +50,10 @@ private:
 	/// 1 : 通常深度
 	/// 2 : ライト深度
 	/// 3 : imGui
-	/// 4 : 
+	/// 4 : ポストエフェクト
+	/// 5 : 
 	/// </summary>
+
 	D3D12_CPU_DESCRIPTOR_HANDLE			heapHandle_CPU;
 	D3D12_GPU_DESCRIPTOR_HANDLE			heapHandle_GPU;
 	//深度バッファ

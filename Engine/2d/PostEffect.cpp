@@ -1,5 +1,6 @@
 #include "PostEffect.h"
 #include "application.h"
+#include "dx12Wrapper.h"
 //#include <d3dx12.h>
 #include <d3dcompiler.h>
 #pragma comment(lib,"d3dcompiler.lib")
@@ -23,9 +24,12 @@ PostEffect::PostEffect()
 {
 }
 
-void PostEffect::Initialize()
+void PostEffect::Initialize(ID3D12DescriptorHeap* heap)
 {
 	//Sprite::Initalize();
+
+	heapHandle_CPU = heap->GetCPUDescriptorHandleForHeapStart();
+	heapHandle_GPU = heap->GetGPUDescriptorHandleForHeapStart();
 
 	HRESULT result;
 	
@@ -140,15 +144,15 @@ void PostEffect::Initialize()
 	assert(SUCCEEDED(result));
 	delete[] img;
 //
-	//SRVデスクリプタヒープ設定
-	D3D12_DESCRIPTOR_HEAP_DESC srvDescHeap = {};
-	srvDescHeap.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-	srvDescHeap.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-	srvDescHeap.NumDescriptors = 1;
+	////SRVデスクリプタヒープ設定
+	//D3D12_DESCRIPTOR_HEAP_DESC srvDescHeap = {};
+	//srvDescHeap.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+	//srvDescHeap.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+	//srvDescHeap.NumDescriptors = 1;
 
-	result = device->CreateDescriptorHeap(
-		&srvDescHeap, IID_PPV_ARGS(descHeapSRV.ReleaseAndGetAddressOf()));
-	assert(SUCCEEDED(result));
+	//result = device->CreateDescriptorHeap(
+	//	&srvDescHeap, IID_PPV_ARGS(descHeapSRV.ReleaseAndGetAddressOf()));
+	//assert(SUCCEEDED(result));
 
 	//SRV設定
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
@@ -157,11 +161,13 @@ void PostEffect::Initialize()
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 	srvDesc.Texture2D.MipLevels = 1;
 
+	auto handle = heapHandle_CPU;
+	handle.ptr += device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) * 4;
 	//SRV作成
 	device->CreateShaderResourceView(
 		texBuff.Get(),
 		&srvDesc,
-		descHeapSRV->GetCPUDescriptorHandleForHeapStart());
+		handle);
 
 	//RTVデスクリプタヒープ設定
 	D3D12_DESCRIPTOR_HEAP_DESC rtvDescHeap = {};
@@ -236,16 +242,16 @@ void PostEffect::Initialize()
 	texResdesc.Texture2D.MipLevels = 1;
 	texResdesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	texResdesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-	auto handle = depthHaepSRV->GetCPUDescriptorHandleForHeapStart();
+	auto depthHandle = depthHaepSRV->GetCPUDescriptorHandleForHeapStart();
 
 	//深度テクスチャリソースを作成
 	device->CreateShaderResourceView(
-		depthBuff.Get(), &texResdesc, handle);
+		depthBuff.Get(), &texResdesc, depthHandle);
 
 	CreateGraphicsPipeline();
 }
 
-void PostEffect::Draw(ID3D12GraphicsCommandList* cmdList) {
+void PostEffect::Draw(ID3D12GraphicsCommandList* cmdList, ID3D12DescriptorHeap* heap) {
 	matWorld = XMMatrixIdentity();
 
 	matWorld *= XMMatrixRotationZ(XMConvertToRadians(rotation));
@@ -273,14 +279,17 @@ void PostEffect::Draw(ID3D12GraphicsCommandList* cmdList) {
 	cmdList->IASetVertexBuffers(0, 1, &this->vbView);
 
 	//ID3D12DescriptorHeap* ppHeaps[] = { spritecommon._descHeap.Get() };
-	ID3D12DescriptorHeap* ppHeaps[] = { descHeapSRV.Get()};
+	ID3D12DescriptorHeap* ppHeaps[] = { heap};
 	// デスクリプタヒープをセット
 	cmdList->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
 	// 定数バッファビューをセット
 	cmdList->SetGraphicsRootConstantBufferView(0, this->constBuff->GetGPUVirtualAddress());
 	// シェーダリソースビューをセット
 	//cmdList->SetGraphicsRootDescriptorTable(1, CD3DX12_GPU_DESCRIPTOR_HANDLE(spritecommon._descHeap->GetGPUDescriptorHandleForHeapStart(), this->texNumber, descriptorHandleIncrementSize));
-	cmdList->SetGraphicsRootDescriptorTable(1, descHeapSRV->GetGPUDescriptorHandleForHeapStart());
+	auto handle = heap->GetGPUDescriptorHandleForHeapStart();
+	handle.ptr += device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) * 4;
+
+	cmdList->SetGraphicsRootDescriptorTable(1, handle);
 	
 	cmdList->SetDescriptorHeaps(1, depthHaepSRV.GetAddressOf());
 	cmdList->SetGraphicsRootDescriptorTable(

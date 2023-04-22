@@ -57,11 +57,12 @@ VSOutput main(VSInput input)
 
 	//ワールド法線を次のステージに渡す
 	output.normal = wnormal.xyz;
+	//output.normal = skinned.normal;
 
 	//入力値をそのまま次のステージに渡す
 	output.uv = input.uv;
 
-	output.tpos = mul(lightCamera, skinned.pos);
+	output.tpos = mul(mul(lightCamera, world), skinned.pos);
 
 	return output;
 }

@@ -111,10 +111,10 @@ private://メンバ変数(初期化)
 	//ステージ
 	int UseStage = 0;//ゲーム中のステージ識別用変数
 	map<string, Model*> stageModels;//ステージで使用するモデルの格納先
+	vector<Stage*>		titleStages;//ステージ情報
 	vector<Stage*>			 stages;//ステージ情報
 	vector<Stage*>		   baseCamp;//ベースキャンプ情報
 	JsonData* stageData;//ステージ構成保存用
-	JsonData* baseCampData;//ベースキャンプ構成保存用
 	Object3Ds* skyDome = nullptr;//背景オブジェクト
 	Model* skyDomeModel = nullptr;//背景モデル
 
@@ -127,6 +127,11 @@ private://メンバ変数(初期化)
 	ParticleManager* particlemanager = nullptr;
 	SceneEffect* sceneEffect = nullptr;
 	BillboardObject* Bottom = nullptr;
+
+	//コリジョン
+	vector<Sqhere> sqhere;
+	Sqhere weaponCollider;
+	Sqhere playerCollider;
 
 	//ライト
 	Light* light = nullptr;
@@ -198,7 +203,6 @@ private://メンバ変数(初期化)
 	Sprite* Pose = nullptr;
 
 private://メンバ変数(ゲームシーン)
-	vector<Sqhere> sqhere;
 	Model* modelPlane = nullptr;
 	Model* modelBox = nullptr;
 	Model* modelPyramid = nullptr;
@@ -222,6 +226,7 @@ private://メンバ変数(ゲームシーン)
 	vector<Object3Ds> block;
 	DebugCamera* camera = nullptr;
 	Camera* mainCamera = nullptr;
+	Camera* titleCamera = nullptr;
 	Camera* setCamera = nullptr;
 
 
@@ -326,6 +331,9 @@ public://メンバ関数
 	void TitleDraw();
 	void GameDraw();
 	void EndDraw();
+
+	void TitleReset();
+	void GameReset();
 
 	/// <summary>
 	/// 移動

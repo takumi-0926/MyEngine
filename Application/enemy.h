@@ -15,9 +15,16 @@ enum Activity {
 	wolf = 0,
 	golem,
 };
-enum AttackType {
-	Type01,
-	Type02,
+enum AttackType_Wolf {
+	Type01_Walk,
+	Type02_JumpWait,
+	Type02_JumpAttack,
+	Type03_ChargeAttack,
+};
+enum MotionType {
+	WalkMotion = 0,
+	AttackMotion_01,
+	AttackMotion_02,
 };
 
 class PMDmodel;
@@ -39,6 +46,10 @@ class Enemy : public FbxObject3d {
 		Vector3 p3;
 	}jump;
 public:
+	//地面判定用
+	bool OnGround = true;
+	XMVECTOR fallV;
+
 	Status status;//28
 	bool alive = false;	//生存判定
 	bool startAttack = false;
@@ -60,9 +71,6 @@ public:
 	int registrationNumber = 0;
 
 	float particleOffset = 0.0f;
-	//地面判定用
-	bool OnGround = true;
-	XMVECTOR fallV;
 
 	float shadowOffset = 0.0f;
 
@@ -180,6 +188,4 @@ public:
 	/// 被ダメージ時処理
 	/// </summary>
 	void Damage();
-
-	void ChangeAnimation(int num);
 };

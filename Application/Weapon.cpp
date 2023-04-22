@@ -1,5 +1,7 @@
 #include "Weapon.h"
 
+#include "Math/Vector3.h"
+
 #include "Collision/MeshCollider.h"
 #include <Collision/CollisionAttribute.h>
 
@@ -51,7 +53,7 @@ bool Weapon::Initialize()
 
 void Weapon::Update()
 {
-	Object3Ds::Update();
+	//Object3Ds::Update();
 
 	const XMMATRIX& matViewProjection = camera->GetViewProjectionMatrix();
 	const XMFLOAT3& cameraPos = camera->GetEye();
@@ -69,6 +71,7 @@ void Weapon::Update()
 	matWorld *= matScale;// ワールド行列に	スケーリングを反映
 	matWorld *= matRot;	 // ワールド行列に	回転        を反映
 	matWorld *= matTrans;// ワールド行列に	平行移動    を反映
+	
 	matWorld *= FollowingObjectBoneMatrix;
 
 	ConstBufferDataB0* constMap = nullptr;
@@ -89,4 +92,41 @@ void Weapon::Draw()
 
 void Weapon::OnCollision(const CollisionInfo& info)
 {
+}
+
+void Weapon::SetFollowingObjectBoneMatrix(const FbxAMatrix& matrix, const XMMATRIX& parent)
+{
+	XMMATRIX ret = {};
+	FollowingObjectBoneMatrix = XMMatrixIdentity();
+	FbxLoader::ConvertMatrixFormFbx(&ret, matrix);
+
+	//スケールを抽出
+	XMFLOAT3 dotScale = {};
+	Vector3 Vec[3] = {
+		{
+			ret.r[0].m128_f32[0],
+			ret.r[0].m128_f32[1],
+			ret.r[0].m128_f32[2]
+		},
+		{
+			ret.r[1].m128_f32[0],
+			ret.r[1].m128_f32[1],
+			ret.r[1].m128_f32[2]
+		},
+		{
+			ret.r[2].m128_f32[0],
+			ret.r[2].m128_f32[1],
+			ret.r[2].m128_f32[2]
+		}
+	};
+	dotScale.x = Vec[0].length();
+	dotScale.y = Vec[1].length();
+	dotScale.z = Vec[2].length();
+
+	ret.r[0] = ret.r[0] / dotScale.x;
+	ret.r[1] = ret.r[1] / dotScale.y;
+	ret.r[2] = ret.r[2] / dotScale.z;
+
+	FollowingObjectBoneMatrix = ret * parent;
+	FollowFlag = true;
 }

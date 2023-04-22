@@ -23,7 +23,6 @@ float4 main(VSOutput input) : SV_TARGET
 	//return float4(texcolor.rgb, texcolor.a * m_alpha);
 	//return float4(1, 1, 1, 1);
 
-
 	//光沢度
 	const float shininess = 4.0f;
 	//環境反射光
@@ -37,16 +36,19 @@ float4 main(VSOutput input) : SV_TARGET
 	//シャドウマップ
 	float shadowWeight = 1.0f;
 	//範囲を0～1に
-	float3 posFromLightUV = input.tpos.z / input.tpos.w;
+	float3 posFromLightUV = input.tpos.xyz / input.tpos.w;
 	float2 shadowUV;
-	shadowUV.x = (1.0f + posFromLightUV.x) * 0.5f;
-	shadowUV.y = (1.0f - posFromLightUV.y) * 0.5f;
+	shadowUV.x = (1.0f + input.tpos.x * posFromLightUV) * 0.5f;
+	shadowUV.y = (1.0f - input.tpos.y * posFromLightUV) * 0.5f;
 
 	float depthFromLight = lightDepthTex.Sample(smp, shadowUV).x;
 
 	//深度値を比較
-	if (depthFromLight - 0.005f < posFromLightUV.z ) {
-		shadecolor.xyz *= 0.5f;
+	if (shadowUV.x >= 0 && shadowUV.x <= 1.0f && shadowUV.y >= 0 && shadowUV.y <= 1.0f) {
+		if (depthFromLight + 0.005f < input.tpos.z * (1.0f / input.tpos.w)) {
+			//shadecolor.xyz = shadecolor.xyz * 0.5f;
+			shadowWeight = 0.5f;
+		}
 	}
 
 	float2 uv = input.uv.xy;
@@ -129,7 +131,8 @@ float4 main(VSOutput input) : SV_TARGET
 	float4 toonCol = tex.Sample(smp, float2(2.0f, 0.0f));
 
 	//シェーディングによる色で描画
-	return outputfogcolor * texcolor/* * toonCol*/;
-	return float4(shadecolor.xyz * texcolor.xyz * shadowWeight,shadecolor.w * texcolor.w) /* * toonCol*/;
+	//return shadecolor * texcolor/* * toonCol*/;
+	//return outputfogcolor * texcolor/* * toonCol*/;
+	return float4((shadecolor.xyz * texcolor.xyz * shadowWeight),(shadecolor.w * texcolor.w)) /* * toonCol*/;
 
 }

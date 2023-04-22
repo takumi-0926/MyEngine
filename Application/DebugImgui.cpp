@@ -1,8 +1,9 @@
 #include "DebugImgui.h"
 
-float DebugImgui::shadowCameraSite[2] = { 160.0f,160.0f };
-float DebugImgui::shadowlightPos[3] = { 25.0f,30.0f,0.0f };
-float DebugImgui::shadowlightTarget[3] = { 0.0f,0.0f,0.0f };
+float DebugImgui::shadowCameraSite[2] = { 320.0f,320.0f };
+float DebugImgui::shadowlightPos[3] = { 30.0f,50.0f,20.0f };
+float DebugImgui::shadowlightTarget[3] = { 0.0f,0.0f,40.0f };
+float DebugImgui::shadowlightLange[2] = { -5.0f,100.0f };
 
 DebugImgui::DebugImgui()
 {
@@ -24,6 +25,7 @@ void DebugImgui::UpdateImgui(Wrapper* dx12)
 	ImGui::InputFloat2("cameraSite", shadowCameraSite);
 	ImGui::InputFloat3("cameraPos", shadowlightPos);
 	ImGui::InputFloat3("cameraTarget", shadowlightTarget);
+	ImGui::InputFloat2("cameraLange", shadowlightLange);
 	ImGui::Image(texID, ImVec2(shadowCameraSite[0], shadowCameraSite[1]));
 	ImGui::End();
 }

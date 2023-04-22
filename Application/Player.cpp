@@ -130,8 +130,18 @@ void Player::moveUpdate()
 		actionExecution(Action);
 		return;
 	}
+	//回避状態の時はスキップ（変更しない）
+	if (Action == action::Avoid) {
+		actionExecution(Action);
+		return;
+	}
 
-	if (directInput->IsButtonPush(DirectInput::ButtonKind::ButtonX) || Input::GetInstance()->Push(DIK_X)) {
+	if (directInput->IsButtonPush(DirectInput::ButtonKind::ButtonB) || Input::GetInstance()->Push(DIK_SPACE)) {
+		ChangeAnimation(action::Avoid);
+		Action = action::Avoid;
+
+	}
+	else if (directInput->IsButtonPush(DirectInput::ButtonKind::ButtonX) || Input::GetInstance()->Push(DIK_X)) {
 		ChangeAnimation(action::Attack);
 		Action = action::Attack;
 
@@ -182,30 +192,32 @@ void Player::moveUpdate()
 }
 
 void Player::Avoid() {
-	if (avoidTime >= 30.0f) {
+	if (avoidTime >= 36.0f) {
 		Action = action::Wait;
 		avoidTime = 0.0f;
 	}
 
 	XMVECTOR vec = XMLoadFloat3(&avoidVec);
 	vec = XMVector3Normalize(vec);
-	position.x += -vec.m128_f32[0] * avoidSpeed;
-	position.y += -vec.m128_f32[1] * avoidSpeed;
-	position.z += -vec.m128_f32[2] * avoidSpeed;
+	position.x += vec.m128_f32[0] * avoidSpeed;
+	position.y += vec.m128_f32[1] * avoidSpeed;
+	position.z += vec.m128_f32[2] * avoidSpeed;
 
 	avoidTime += 1.0f;
 }
 void Player::CreateWeapon(Model* model)
 {
 	weapon = Weapon::Create(model);
-	followBoneNum = 21;
+	followBoneNum = 42;
 }
 
 void Player::Update()
 {
 	moveUpdate();
 
-	weapon->SetFollowingObjectBoneMatrix(model->GetBones()[followBoneNum].fbxCluster->GetLink()->EvaluateGlobalTransform(currentTime));
+	//武器にボーン行列を渡す
+	weapon->SetFollowingObjectBoneMatrix(
+		model->GetBones()[followBoneNum].fbxCluster->GetLink()->EvaluateGlobalTransform(currentTime),matWorld);
 	weapon->Update();
 
 	//回避行動

@@ -181,8 +181,16 @@ public:
 	void SetMoveVec(DirectX::XMFLOAT3 vec) { this->moveVec = vec; }
 	void SetAvoidVec(DirectX::XMFLOAT3 vec) { this->avoidVec = vec; }
 
+	inline void SetAngleH(float angle) { this->angleHorizonal = angle;}
+
 	int GetAction() { return Action; }
 
+	inline XMFLOAT3 GetPos() { return position; }
 	inline float GetAngleVertical() { return angleVertical; }
 	inline float GetAngleHorizonal() { return angleHorizonal; }
+
+	inline Weapon* GetInstance() {
+		Weapon* instance = new Weapon();
+		return instance;
+	}
 };

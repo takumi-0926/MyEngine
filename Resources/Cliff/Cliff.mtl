@@ -1,9 +1,9 @@
 # Blender 3.3.1 MTL File: 'None'
 # www.blender.org
 
-newmtl Rock
+newmtl Rock.002
 Ns 96.078453
-Ka 0.300000 0.300000 0.300000
+Ka 1.000000 1.000000 1.000000
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.000000
