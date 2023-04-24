@@ -50,8 +50,9 @@ private:
 	/// 1 : 通常深度
 	/// 2 : ライト深度
 	/// 3 : imGui
-	/// 4 : ポストエフェクト
-	/// 5 : 
+	/// 4 : ポストエフェクト(SRV)
+	/// 5 : ポストエフェクト(深度SRV)
+	/// 6 : 
 	/// </summary>
 
 	D3D12_CPU_DESCRIPTOR_HANDLE			heapHandle_CPU;
