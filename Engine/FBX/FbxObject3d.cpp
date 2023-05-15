@@ -266,7 +266,7 @@ void FbxObject3d::CreateGraphicsPipeline()
 			nullptr,
 			D3D_COMPILE_STANDARD_FILE_INCLUDE,
 			"main", "vs_5_0",
-			D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION,
+			D3DCOMPILE_DEBUG,
 			0,
 			&vsBlob, &errorBlob);
 		//読み込み成功チェック
@@ -290,7 +290,7 @@ void FbxObject3d::CreateGraphicsPipeline()
 			nullptr,
 			D3D_COMPILE_STANDARD_FILE_INCLUDE,
 			"main", "ps_5_0",
-			D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION,
+			D3DCOMPILE_DEBUG,
 			0,
 			&psBlob, &errorBlob);
 		//読み込み成功チェック

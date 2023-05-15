@@ -3,6 +3,8 @@
 #include <sstream>
 #include <algorithm>
 
+#include "..\Singleton_Heap.h"
+
 using namespace std;
 
 /// <summary>
@@ -403,27 +405,38 @@ void Model::CreateDescriptorHeap()
 
 void Model::LoadTextures()
 {
-	int textureIndex = 0;
+	//int textureIndex = Singleton_Heap::GetInstance()->Object3DTexture;
 	string directoryPath = baseDirectory + name + "/";
 
 	for (auto& m : materials) {
 		Material* material = m.second;
-
 		// テクスチャあり
 		if (material->textureFilename.size() > 0) {
-			CD3DX12_CPU_DESCRIPTOR_HANDLE cpuDescHandleSRV = CD3DX12_CPU_DESCRIPTOR_HANDLE(descHeap->GetCPUDescriptorHandleForHeapStart(), textureIndex, descriptorHandleIncrementSize);
-			CD3DX12_GPU_DESCRIPTOR_HANDLE gpuDescHandleSRV = CD3DX12_GPU_DESCRIPTOR_HANDLE(descHeap->GetGPUDescriptorHandleForHeapStart(), textureIndex, descriptorHandleIncrementSize);
+			CD3DX12_CPU_DESCRIPTOR_HANDLE cpuDescHandleSRV = CD3DX12_CPU_DESCRIPTOR_HANDLE(
+				Singleton_Heap::GetInstance()->GetDescHeap()->GetCPUDescriptorHandleForHeapStart(), 
+				Singleton_Heap::GetInstance()->Object3DTexture,
+				Singleton_Heap::GetInstance()->GetDescriptorIncrementSize());
+			CD3DX12_GPU_DESCRIPTOR_HANDLE gpuDescHandleSRV = CD3DX12_GPU_DESCRIPTOR_HANDLE(
+				Singleton_Heap::GetInstance()->GetDescHeap()->GetGPUDescriptorHandleForHeapStart(), 
+				Singleton_Heap::GetInstance()->Object3DTexture,
+				Singleton_Heap::GetInstance()->GetDescriptorIncrementSize());
 			// マテリアルにテクスチャ読み込み
 			material->LoadTexture(directoryPath, cpuDescHandleSRV, gpuDescHandleSRV);
-			textureIndex++;
+			Singleton_Heap::GetInstance()->Object3DTexture++;
 		}
 		// テクスチャなし
 		else {
-			CD3DX12_CPU_DESCRIPTOR_HANDLE cpuDescHandleSRV = CD3DX12_CPU_DESCRIPTOR_HANDLE(descHeap->GetCPUDescriptorHandleForHeapStart(), textureIndex, descriptorHandleIncrementSize);
-			CD3DX12_GPU_DESCRIPTOR_HANDLE gpuDescHandleSRV = CD3DX12_GPU_DESCRIPTOR_HANDLE(descHeap->GetGPUDescriptorHandleForHeapStart(), textureIndex, descriptorHandleIncrementSize);
+			CD3DX12_CPU_DESCRIPTOR_HANDLE cpuDescHandleSRV = CD3DX12_CPU_DESCRIPTOR_HANDLE(
+				Singleton_Heap::GetInstance()->GetDescHeap()->GetCPUDescriptorHandleForHeapStart(), 
+				Singleton_Heap::GetInstance()->Object3DTexture,
+				Singleton_Heap::GetInstance()->GetDescriptorIncrementSize());
+			CD3DX12_GPU_DESCRIPTOR_HANDLE gpuDescHandleSRV = CD3DX12_GPU_DESCRIPTOR_HANDLE(
+				Singleton_Heap::GetInstance()->GetDescHeap()->GetGPUDescriptorHandleForHeapStart(), 
+				Singleton_Heap::GetInstance()->Object3DTexture,
+				Singleton_Heap::GetInstance()->GetDescriptorIncrementSize());
 			// マテリアルにテクスチャ読み込み
 			material->LoadTexture(baseDirectory, cpuDescHandleSRV, gpuDescHandleSRV);
-			textureIndex++;
+			Singleton_Heap::GetInstance()->Object3DTexture++;
 		}
 	}
 }
@@ -431,8 +444,8 @@ void Model::LoadTextures()
 void Model::Draw(ID3D12GraphicsCommandList* cmdList)
 {
 	// デスクリプタヒープの配列
-	if (descHeap) {
-		ID3D12DescriptorHeap* ppHeaps[] = { descHeap.Get() };
+	if (Singleton_Heap::GetInstance()->GetDescHeap()) {
+		ID3D12DescriptorHeap* ppHeaps[] = { Singleton_Heap::GetInstance()->GetDescHeap() };
 		cmdList->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
 	}
 

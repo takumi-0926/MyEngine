@@ -15,10 +15,8 @@ public:
 	template <class T> using Comptr = Microsoft::WRL::ComPtr<T>;
 
 private:
-	//ウィンドウズアプリケーション
-	//Application* WinApp;
 
-		// 定数バッファ用データ構造体B0
+	// 定数バッファ用データ構造体B0
 	struct ConstBufferDataB0_1
 	{
 		//XMFLOAT4 color;	// 色 (RGBA)
@@ -64,9 +62,6 @@ private:
 	//シーンを構成するバッファまわり
 	ConstBufferDataB0_1*				_mappedSceneData;
 	ComPtr<ID3D12Resource>				_sceneConstBuff = nullptr;
-	ComPtr<ID3D12DescriptorHeap>		_sceneDescHeap = nullptr;
-	//imgui
-	ComPtr<ID3D12DescriptorHeap>		_heapForImgui; //ヒープ保持用
 
 	D3D12_DESCRIPTOR_HEAP_DESC          heapDesc = {};
 
@@ -196,7 +191,6 @@ public:
 	ComPtr<IDXGISwapChain4> SwapChain();
 	ComPtr<ID3D12GraphicsCommandList> CommandList();
 	ComPtr<ID3D12DescriptorHeap> GetDescHeap() { return _descHeap.Get(); }
-	ComPtr<ID3D12DescriptorHeap> GetHeapImgui() { return _heapForImgui.Get(); }
 	Camera* Camera() { return camera; }
 	static int lightNum;
 

@@ -4,6 +4,8 @@
 #include "Collision\BaseCollision.h"
 #include "Collision\CollisionManager.h"
 
+#include "..\Singleton_Heap.h"
+
 Wrapper* Object3Ds::dx12 = nullptr;
 Camera* Object3Ds::camera = nullptr;
 

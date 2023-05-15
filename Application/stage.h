@@ -13,9 +13,9 @@ enum ObjectType {
 
 class Stage : public Object3Ds {
 public:
-	static Stage* Create(Model* model = nullptr);
+	static Stage* Create(Model* model = nullptr,bool flag = true);
 
-	bool Initialize(Model* model);
+	bool Initialize(Model* model, bool flag);
 
 	Stage();
 	void Update() override;
@@ -24,10 +24,13 @@ public:
 private:
 	int ObjectNum = 0;
 	bool installation = false;
+
 public:
 	inline int GetObjectNum() { return this->ObjectNum; }
 	inline void SetObjectNum(int num) { this->ObjectNum = num; }
 
 	inline bool GetInstallation() { return this->installation; }
 	inline void SetInstallation(bool flg) { this->installation = flg; }
+
+	void SetCollision();
 };

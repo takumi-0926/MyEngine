@@ -17,8 +17,9 @@ void DebugImgui::UpdateImgui(Wrapper* dx12)
 {
 	//深度テクスチャID取得
 	auto HeapGPUHandle = dx12->GetDescHeap()->GetGPUDescriptorHandleForHeapStart();
+	auto a = dx12->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	//HeapGPUHandle.ptr += device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-	ImTextureID texID = ImTextureID(HeapGPUHandle.ptr += dx12->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) * 2);
+	ImTextureID texID = ImTextureID(HeapGPUHandle.ptr += a * 2);
 
 	ImGui::Begin("ShadowCameraTest");
 	ImGui::SetWindowSize(ImVec2(400, 500), ImGuiCond_::ImGuiCond_FirstUseEver);

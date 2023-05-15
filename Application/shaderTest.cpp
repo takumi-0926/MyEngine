@@ -47,5 +47,5 @@ void ShaderTest::Draw()
 	cmdList->SetGraphicsRootConstantBufferView(0, constBuffB0->GetGPUVirtualAddress());
 
 	// ƒ‚ƒfƒ‹•`‰æ
-	model->Draw(cmdList.Get());
+	//model->Draw(cmdList.Get());
 }

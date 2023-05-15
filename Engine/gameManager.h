@@ -56,6 +56,7 @@ enum Scene {
 enum GameMode {
 	NASI,
 	START,
+	LOAD,
 	Preparation,
 	POSE,
 	WEAPONSELECT,
@@ -78,6 +79,13 @@ enum SpriteName {
 	Start_UI_01,
 	Start_UI_02,
 	Start_UI_03,
+};
+
+enum LoadMode {
+	No,
+	Start,
+	Run,
+	End,
 };
 
 enum modelName {
@@ -234,8 +242,6 @@ private://メンバ変数(ゲームシーン)
 	Triangle triangle[50] = {};
 	Ray ray;
 
-	//object2d* line[10] = {};
-
 	Triangle triangle02[2] = {};
 	Sqhere sqhere02 = {};
 
@@ -298,7 +304,8 @@ private://メンバ変数(ゲームシーン)
 	int SetNum = 0;
 
 	bool pose = false;//ポーズフラグ
-
+	bool load = false;//ローディング
+	int _loadMode = 0;//ローディング状態
 public://メンバ関数
 	//コンストラクタ
 	GameManager();
@@ -319,6 +326,10 @@ public://メンバ関数
 	void GameUpdate();
 	void EndUpdate();
 	void DebugTestUpdate();
+
+	void asyncLoad();
+
+	void loadingUpdate();
 
 	void PlayerUpdate();
 	void EnemyUpdate();
@@ -560,7 +571,6 @@ public://メンバ関数
 		distance = std::sqrt(x * 2 + z * 2);
 		return distance;
 	}
-
 };
 
 XMFLOAT3 add(const XMFLOAT3& v1, const XMFLOAT3& v2);

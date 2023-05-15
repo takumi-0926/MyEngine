@@ -1,7 +1,7 @@
 #include "stage.h"
 #include "Collision/MeshCollider.h"
 
-Stage* Stage::Create(Model* model)
+Stage* Stage::Create(Model* model, bool flag)
 {
 	// 3Dオブジェクトのインスタンスを生成
 	Stage* instance = new Stage();
@@ -10,7 +10,7 @@ Stage* Stage::Create(Model* model)
 	}
 
 	// 初期化
-	if (!instance->Initialize(model)) {
+	if (!instance->Initialize(model,flag)) {
 		delete instance;
 		assert(0);
 		return nullptr;
@@ -19,7 +19,7 @@ Stage* Stage::Create(Model* model)
 	return instance;
 }
 
-bool Stage::Initialize(Model* model)
+bool Stage::Initialize(Model* model, bool flag)
 {
 	if (!Object3Ds::Initialize()) {
 		return false;
@@ -27,12 +27,14 @@ bool Stage::Initialize(Model* model)
 
 	SetModel(model);
 
-	//コライダー追加
-	MeshCollider* collider = new MeshCollider();
-	collider->ConstructTriangles(model);
-	SetCollider(collider);
+	if (flag) {
+		//コライダー追加
+		MeshCollider* collider = new MeshCollider();
+		collider->ConstructTriangles(model);
+		SetCollider(collider);
 
-	collider->SetAttribute(COLLISION_ATTR_LANDSHAPE);
+		collider->SetAttribute(COLLISION_ATTR_LANDSHAPE);
+	}
 
 	Update();
 	return true;
@@ -50,4 +52,14 @@ void Stage::Update()
 void Stage::Draw()
 {
 	Object3Ds::Draw();
+}
+
+void Stage::SetCollision()
+{
+	//コライダー追加
+	MeshCollider* collider = new MeshCollider();
+	collider->ConstructTriangles(model);
+	SetCollider(collider);
+
+	collider->SetAttribute(COLLISION_ATTR_LANDSHAPE);
 }

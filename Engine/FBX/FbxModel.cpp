@@ -1,4 +1,5 @@
 #include "FbxModel.h"
+#include "..\Singleton_Heap.h"
 
 ID3D12Device* FbxModel::device = nullptr;
 
@@ -115,10 +116,15 @@ void FbxModel::CreateBuffers(ID3D12Device* device)
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 	srvDesc.Texture2D.MipLevels = 1;
 
+	auto handle = Singleton_Heap::GetInstance()->GetDescHeap()->GetCPUDescriptorHandleForHeapStart();
+	handle.ptr += Singleton_Heap::GetInstance()->GetDescriptorIncrementSize() * Singleton_Heap::GetInstance()->FbxTexture;
+
+	Singleton_Heap::GetInstance()->FbxTexture++;
+
 	device->CreateShaderResourceView(
 		texBuff.Get(),
 		&srvDesc,
-		descHeapSRV->GetCPUDescriptorHandleForHeapStart()
+		handle
 	);
 
 	CreateConstantBuffer();
@@ -150,11 +156,16 @@ void FbxModel::Draw(ID3D12GraphicsCommandList* cmdList)
 		1, constBuff->GetGPUVirtualAddress()
 	);
 
-	ID3D12DescriptorHeap* ppheap[] = { descHeapSRV.Get() };
+	ID3D12DescriptorHeap* ppheap[] = { Singleton_Heap::GetInstance()->GetDescHeap()};
 	cmdList->SetDescriptorHeaps(_countof(ppheap), ppheap);
 
+	auto handle = Singleton_Heap::GetInstance()->GetDescHeap()->GetGPUDescriptorHandleForHeapStart();
+	handle.ptr += Singleton_Heap::GetInstance()->GetDescriptorIncrementSize() * Singleton_Heap::GetInstance()->FbxTexture;
+
+	Singleton_Heap::GetInstance()->FbxTexture++;
+
 	cmdList->SetGraphicsRootDescriptorTable(
-		2, descHeapSRV->GetGPUDescriptorHandleForHeapStart()
+		2, handle
 	);
 
 	//•`‰æ

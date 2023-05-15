@@ -321,6 +321,7 @@
     <ClInclude Include="Engine\Math\Vector3.h" />
     <ClInclude Include="Engine\JsonLoader.h" />
     <ClInclude Include="Application\Weapon.h" />
+    <ClInclude Include="Singleton_Heap.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application\BillboardObject.cpp" />

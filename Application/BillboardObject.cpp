@@ -7,7 +7,6 @@ Wrapper* BillboardObject::dx12 = nullptr;
 ComPtr<ID3D12Device> BillboardObject::device = nullptr;
 ComPtr<ID3D12GraphicsCommandList> BillboardObject::cmdList = nullptr;
 UINT BillboardObject::descriptorHandleIncrementSize;
-ComPtr<ID3D12DescriptorHeap> BillboardObject::descHeap = nullptr;
 ComPtr<ID3D12Resource> BillboardObject::texBuff[objectSRVCount];
 
 BillboardObject::BillboardVertex BillboardObject::vertices[vertexCount];
@@ -19,6 +18,7 @@ ComPtr<ID3D12Resource> BillboardObject::indexBuff;
 D3D12_VERTEX_BUFFER_VIEW BillboardObject::vbView{};
 D3D12_INDEX_BUFFER_VIEW BillboardObject::ibView{};
 
+ComPtr<ID3D12DescriptorHeap> BillboardObject::descHeap = nullptr;
 CD3DX12_CPU_DESCRIPTOR_HANDLE BillboardObject::cpuDescHandleSRV;
 CD3DX12_GPU_DESCRIPTOR_HANDLE BillboardObject::gpuDescHandleSRV;
 

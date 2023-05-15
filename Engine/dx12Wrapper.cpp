@@ -2,6 +2,8 @@
 
 #include "dx12Wrapper.h"
 
+#include "..\Singleton_Heap.h"
+
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
 
@@ -104,11 +106,11 @@ bool Wrapper::Init(HWND _hwnd, SIZE _ret) {
 		assert(0);
 		return false;
 	}
-	_heapForImgui = CreateDescriptorHeapForImgui();
-	if (_heapForImgui == nullptr) {
-		assert(0);
-		return false;
-	}
+	//_heapForImgui = CreateDescriptorHeapForImgui();
+	//if (_heapForImgui == nullptr) {
+	//	assert(0);
+	//	return false;
+	//}
 
 	return true;
 }

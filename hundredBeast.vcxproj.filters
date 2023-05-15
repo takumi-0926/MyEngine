@@ -349,6 +349,9 @@
     <ClInclude Include="Application\DebugImgui.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Singleton_Heap.h">
+      <Filter>ソース ファイル\DirectX12</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application\enemy.cpp">
