@@ -46,9 +46,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//DirectX初期化
 		dx12 = new Wrapper();
 		dx12->Init(app->_hwnd(), app->GetWindowSize());
-		//シングルトンなデバイス、ディスクヒープの生成
-		Singleton_Heap::GetInstance()->CreateDevice();
-		Singleton_Heap::GetInstance()->CreateDescHeap();
 
 
 		Input::GetInstance()->Initalize(app);
@@ -69,42 +66,42 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			return false;
 		}
 		bool blnResult = ImGui_ImplWin32_Init(app->_hwnd());
-		auto ImguiCPU = dx12->GetDescHeap()->GetCPUDescriptorHandleForHeapStart();
-		ImguiCPU.ptr += dx12->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) * 3;
-		auto ImguiGPU = dx12->GetDescHeap()->GetGPUDescriptorHandleForHeapStart();
-		ImguiGPU.ptr += dx12->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) * 3;
+		auto ImguiCPU = Singleton_Heap::GetInstance()->GetDescHeap()->GetCPUDescriptorHandleForHeapStart();
+		ImguiCPU.ptr += Singleton_Heap::GetInstance()->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) * 3;
+		auto ImguiGPU = Singleton_Heap::GetInstance()->GetDescHeap()->GetGPUDescriptorHandleForHeapStart();
+		ImguiGPU.ptr += Singleton_Heap::GetInstance()->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) * 3;
 
 		blnResult = ImGui_ImplDX12_Init(
-			dx12->GetDevice(),
+			Singleton_Heap::GetInstance()->GetDevice(),
 			3,
 			DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
-			dx12->GetDescHeap().Get(),
+			Singleton_Heap::GetInstance()->GetDescHeap(),
 			ImguiCPU,
 			ImguiGPU);
 	}
 
 	Object3Ds obj3d;
 	{
-		if (!obj3d.StaticInitialize(dx12->GetDevice())) {
+		if (!obj3d.StaticInitialize(Singleton_Heap::GetInstance()->GetDevice())) {
 			assert(0);
 			return 1;
 		}
 
-		BillboardObject::StaticInitialize(dx12->GetDevice());
+		BillboardObject::StaticInitialize(Singleton_Heap::GetInstance()->GetDevice());
 	}
 
 	//Fbx初期化
-	FbxLoader::GetInstance()->Initialize(dx12->GetDevice());
-	FbxObject3d::staticInitialize(dx12->GetDevice());
+	FbxLoader::GetInstance()->Initialize(Singleton_Heap::GetInstance()->GetDevice());
+	FbxObject3d::staticInitialize(Singleton_Heap::GetInstance()->GetDevice());
 
-	if (!ParticleManager::StaticInitialize(dx12->GetDevice(), app->window_width, app->window_height)) {
+	if (!ParticleManager::StaticInitialize(Singleton_Heap::GetInstance()->GetDevice(), app->window_width, app->window_height)) {
 		assert(0);
 		return 1;
 	}
 
 	{
 		//スプライト初期化
-		if (!Sprite::staticInitalize(dx12->GetDevice(), app->GetWindowSize())) {
+		if (!Sprite::staticInitalize(Singleton_Heap::GetInstance()->GetDevice(), app->GetWindowSize())) {
 			assert(0);
 			return 1;
 		}
@@ -114,7 +111,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	PMDobject::StaticInitialize(dx12);
 
-	Light::StaticInitalize(dx12->GetDevice());
+	Light::StaticInitalize(Singleton_Heap::GetInstance()->GetDevice());
 
 	GameManager gameScene;
 	//ゲームシーン初期化
@@ -124,7 +121,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	}
 
 	postEffect = new PostEffect();
-	postEffect->Initialize(dx12->GetDescHeap().Get());
+	postEffect->Initialize(Singleton_Heap::GetInstance()->GetDescHeap());
 
 
 	//ゲームループ
@@ -168,15 +165,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		dx12->PreRun();
 		
 		//ポストエフェクトを描画
-		postEffect->Draw(dx12->CommandList().Get(), dx12->GetDescHeap().Get());
+		postEffect->Draw(dx12->CommandList().Get(), Singleton_Heap::GetInstance()->GetDescHeap());
 
 		//スプライト描画
 		gameScene.SubDraw();
 
 		ImGui::Render();
+		ID3D12DescriptorHeap* heaps[] = { Singleton_Heap::GetInstance()->GetDescHeap() };
 		dx12->CommandList()->SetDescriptorHeaps(
 			1,
-			dx12->GetDescHeap().GetAddressOf());
+			heaps);
 		ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), dx12->CommandList().Get());
 		
 		dx12->PostRun();

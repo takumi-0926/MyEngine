@@ -28,8 +28,8 @@ private:
 	};
 
 	//dx12基盤
-	ComPtr<ID3D12Device>				_dev = nullptr;				//デバイス
-	ComPtr<IDXGIFactory6>				_dxgifactory = nullptr;		//dxgiファクトリー
+	//ComPtr<ID3D12Device>				_dev = nullptr;				//デバイス
+	//ComPtr<IDXGIFactory6>				_dxgifactory = nullptr;		//dxgiファクトリー
 	//スワップチェーン
 	ComPtr<IDXGISwapChain4>				_swapchain = nullptr;		//スワップチェーン
 	//コマンド
@@ -157,13 +157,7 @@ public:
 		_cmdList->ClearDepthStencilView(dsvH, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 	}
 
-	void ClearDepthShadow() {
-		// 深度ステンシルビュー用デスクリプタヒープのハンドルを取得
-		CD3DX12_CPU_DESCRIPTOR_HANDLE dsvH = CD3DX12_CPU_DESCRIPTOR_HANDLE(_dsvHeap->GetCPUDescriptorHandleForHeapStart());
-		dsvH.ptr += _dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
-		// 深度バッファのクリア
-		_cmdList->ClearDepthStencilView(dsvH, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
-	}
+	void ClearDepthShadow();
 
 	/// <summary>
 	/// カメラのセット
@@ -179,15 +173,10 @@ public:
 
 	void DrawLight(ID3D12GraphicsCommandList* cmdlist);
 	void DrawDepth();
-	void SceneDraw() {
-		//現在のシーン(ビュープロジェクション)をセット
-		ID3D12DescriptorHeap* sceneheaps[] = { _descHeap.Get() };
-		_cmdList->SetDescriptorHeaps(1, sceneheaps);
-		_cmdList->SetGraphicsRootDescriptorTable(0, _descHeap->GetGPUDescriptorHandleForHeapStart());
-	}
+	void SceneDraw();
 	void SceneUpdate();
 
-	ID3D12Device* GetDevice() { return _dev.Get(); }
+	//ID3D12Device* GetDevice() { return _dev.Get(); }
 	ComPtr<IDXGISwapChain4> SwapChain();
 	ComPtr<ID3D12GraphicsCommandList> CommandList();
 	ComPtr<ID3D12DescriptorHeap> GetDescHeap() { return _descHeap.Get(); }

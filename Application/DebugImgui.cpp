@@ -1,5 +1,7 @@
 #include "DebugImgui.h"
 
+#include "..\Singleton_Heap.h"
+
 float DebugImgui::shadowCameraSite[2] = { 320.0f,320.0f };
 float DebugImgui::shadowlightPos[3] = { 30.0f,50.0f,20.0f };
 float DebugImgui::shadowlightTarget[3] = { 0.0f,0.0f,40.0f };
@@ -13,11 +15,11 @@ DebugImgui::~DebugImgui()
 {
 }
 
-void DebugImgui::UpdateImgui(Wrapper* dx12)
+void DebugImgui::UpdateImgui()
 {
 	//深度テクスチャID取得
-	auto HeapGPUHandle = dx12->GetDescHeap()->GetGPUDescriptorHandleForHeapStart();
-	auto a = dx12->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	auto HeapGPUHandle = Singleton_Heap::GetInstance()->GetDescHeap()->GetGPUDescriptorHandleForHeapStart();
+	auto a = Singleton_Heap::GetInstance()->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	//HeapGPUHandle.ptr += device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	ImTextureID texID = ImTextureID(HeapGPUHandle.ptr += a * 2);
 

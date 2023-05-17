@@ -73,11 +73,15 @@ bool Wrapper::Init(HWND _hwnd, SIZE _ret) {
 #endif
 	InitalizeCamera(_ret.cx, _ret.cy);
 
+	//シングルトンなデバイス、ディスクヒープの生成
+	Singleton_Heap::GetInstance()->CreateDevice();
+	Singleton_Heap::GetInstance()->CreateDescHeap();
+
 	//DirectX12関連初期化
-	if (FAILED(InitializeDevice())) {
-		assert(0);
-		return false;
-	}
+	//if (FAILED(InitializeDevice())) {
+	//	assert(0);
+	//	return false;
+	//}
 	if (FAILED(InitializeCommand())) {
 		assert(0);
 		return false;
@@ -126,7 +130,7 @@ void Wrapper::PreRun()
 	//描画先を指定
 	//レンダターゲットビュー用のディスクリプタヒープのハンドルを用意
 	auto rtvH = _rtvHeaps->GetCPUDescriptorHandleForHeapStart();
-	rtvH.ptr += bbIdx * _dev->GetDescriptorHandleIncrementSize(heapDesc.Type);
+	rtvH.ptr += bbIdx * Singleton_Heap::GetInstance()->GetDevice()->GetDescriptorHandleIncrementSize(heapDesc.Type);
 	auto dsvH = _dsvHeap->GetCPUDescriptorHandleForHeapStart();
 	_cmdList->OMSetRenderTargets(1, &rtvH, true, &dsvH);
 
@@ -153,7 +157,7 @@ void Wrapper::PreRunShadow()
 
 	//描画先を指定
 	auto handle = _dsvHeap->GetCPUDescriptorHandleForHeapStart();
-	handle.ptr += _dev->GetDescriptorHandleIncrementSize(
+	handle.ptr += Singleton_Heap::GetInstance()->GetDevice()->GetDescriptorHandleIncrementSize(
 		D3D12_DESCRIPTOR_HEAP_TYPE_DSV
 	);
 	_cmdList->OMSetRenderTargets(0, nullptr, false, &handle);
@@ -205,61 +209,61 @@ void Wrapper::Processing()
 }
 
 HRESULT Wrapper::result() {
-	auto result = CreateDXGIFactory1(IID_PPV_ARGS(&_dxgifactory));
-	return result;
+	//auto result = CreateDXGIFactory1(IID_PPV_ARGS(&_dxgifactory));
+	return S_OK;
 }
 
 HRESULT Wrapper::InitializeDevice() {
-	auto _result = result();
-	//DXGIファクトリーの生成
-	D3D_FEATURE_LEVEL levels[] = {
-		D3D_FEATURE_LEVEL_12_1,
-		D3D_FEATURE_LEVEL_12_0,
-		D3D_FEATURE_LEVEL_11_1,
-		D3D_FEATURE_LEVEL_11_0
-	};
-
-	//アダプター列挙用
-	vector<ComPtr<IDXGIAdapter>>adapters;
-	//ここに特定の名前を持つアダプターオブジェクトが入る
-	ComPtr<IDXGIAdapter> tmpAdapter = nullptr;
-	//アダプター
-	for (int i = 0; _dxgifactory->EnumAdapters(i, &tmpAdapter) != DXGI_ERROR_NOT_FOUND; i++) {
-		adapters.push_back(tmpAdapter);
-	}
-
-	for (auto adpt : adapters) {
-		DXGI_ADAPTER_DESC adesc = {};
-		adpt->GetDesc(&adesc);//アダプターの説明オブジェクト取得
-		wstring strDesc = adesc.Description;
-		//探したいアダプターの名前を確認
-		if (strDesc.find(L"NVIDIA") != string::npos) {
-			tmpAdapter = adpt;
-			break;
-		}
-	}
-
-	//Direct3Dデバイスの設定
-	D3D_FEATURE_LEVEL featureLevel;
-	//フィーチャーレベルの取得
-	for (auto lv : levels) {
-		if (D3D12CreateDevice(nullptr, lv, IID_PPV_ARGS(&_dev)) == S_OK) {
-			featureLevel = lv;
-			_result = S_OK;
-			break;
-		}
-	}
-
-#ifdef _DEBUG
-	ComPtr<ID3D12InfoQueue> infoQueue;
-	if (SUCCEEDED(_dev->QueryInterface(IID_PPV_ARGS(&infoQueue)))) {
-		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, true);
-		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, true);
-	}
-
-#endif // _DEBUG
-
-	return _result;
+//	auto _result = result();
+//	//DXGIファクトリーの生成
+//	D3D_FEATURE_LEVEL levels[] = {
+//		D3D_FEATURE_LEVEL_12_1,
+//		D3D_FEATURE_LEVEL_12_0,
+//		D3D_FEATURE_LEVEL_11_1,
+//		D3D_FEATURE_LEVEL_11_0
+//	};
+//
+//	//アダプター列挙用
+//	vector<ComPtr<IDXGIAdapter>>adapters;
+//	//ここに特定の名前を持つアダプターオブジェクトが入る
+//	ComPtr<IDXGIAdapter> tmpAdapter = nullptr;
+//	//アダプター
+//	for (int i = 0; _dxgifactory->EnumAdapters(i, &tmpAdapter) != DXGI_ERROR_NOT_FOUND; i++) {
+//		adapters.push_back(tmpAdapter);
+//	}
+//
+//	for (auto adpt : adapters) {
+//		DXGI_ADAPTER_DESC adesc = {};
+//		adpt->GetDesc(&adesc);//アダプターの説明オブジェクト取得
+//		wstring strDesc = adesc.Description;
+//		//探したいアダプターの名前を確認
+//		if (strDesc.find(L"NVIDIA") != string::npos) {
+//			tmpAdapter = adpt;
+//			break;
+//		}
+//	}
+//
+//	//Direct3Dデバイスの設定
+//	D3D_FEATURE_LEVEL featureLevel;
+//	//フィーチャーレベルの取得
+//	for (auto lv : levels) {
+//		if (D3D12CreateDevice(nullptr, lv, IID_PPV_ARGS(&_dev)) == S_OK) {
+//			featureLevel = lv;
+//			_result = S_OK;
+//			break;
+//		}
+//	}
+//
+//#ifdef _DEBUG
+//	ComPtr<ID3D12InfoQueue> infoQueue;
+//	if (SUCCEEDED(_dev->QueryInterface(IID_PPV_ARGS(&infoQueue)))) {
+//		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, true);
+//		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, true);
+//	}
+//
+//#endif // _DEBUG
+//
+	return S_OK;
 }
 
 HRESULT Wrapper::InitializeSwapChain(const HWND& _hwnd) {
@@ -282,7 +286,7 @@ HRESULT Wrapper::InitializeSwapChain(const HWND& _hwnd) {
 	swapchainDesc.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;//特に指定なし
 	swapchainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;//ウィンドウ⇔フルスクリーン切り替え可能
 
-	auto result = _dxgifactory->CreateSwapChainForHwnd(
+	auto result = Singleton_Heap::GetInstance()->GetDXGIFactory()->CreateSwapChainForHwnd(
 		_cmdQueue.Get(),
 		_hwnd,
 		&swapchainDesc,
@@ -295,13 +299,13 @@ HRESULT Wrapper::InitializeSwapChain(const HWND& _hwnd) {
 
 HRESULT Wrapper::InitializeCommand() {
 	//コマンドリスト、コマンドアロケーターの生成
-	auto result = _dev->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(_cmdAllocator.ReleaseAndGetAddressOf()));
+	auto result = Singleton_Heap::GetInstance()->GetDevice()->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(_cmdAllocator.ReleaseAndGetAddressOf()));
 	if (FAILED(result)) {
 		assert(0);
 		return result;
 	}
 
-	result = _dev->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, _cmdAllocator.Get(), nullptr, IID_PPV_ARGS(_cmdList.ReleaseAndGetAddressOf()));
+	result = Singleton_Heap::GetInstance()->GetDevice()->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, _cmdAllocator.Get(), nullptr, IID_PPV_ARGS(_cmdList.ReleaseAndGetAddressOf()));
 	if (FAILED(result)) {
 		assert(0);
 		return result;
@@ -315,7 +319,7 @@ HRESULT Wrapper::InitializeCommand() {
 	cmdQueueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;	//コマンドリストと合わせる
 
 	//キューの作成
-	result = _dev->CreateCommandQueue(&cmdQueueDesc, IID_PPV_ARGS(_cmdQueue.ReleaseAndGetAddressOf()));
+	result = Singleton_Heap::GetInstance()->GetDevice()->CreateCommandQueue(&cmdQueueDesc, IID_PPV_ARGS(_cmdQueue.ReleaseAndGetAddressOf()));
 
 	_cmdQueue->SetName(L"queue");
 
@@ -331,7 +335,7 @@ HRESULT Wrapper::InitializeRenderHeap()
 	heapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;//特に指定なし
 
 	DXGI_SWAP_CHAIN_DESC swcDesc = {};
-	auto result = _dev->CreateDescriptorHeap(&heapDesc, IID_PPV_ARGS(_rtvHeaps.ReleaseAndGetAddressOf()));
+	auto result = Singleton_Heap::GetInstance()->GetDevice()->CreateDescriptorHeap(&heapDesc, IID_PPV_ARGS(_rtvHeaps.ReleaseAndGetAddressOf()));
 	if (FAILED(result)) {
 		assert(0);
 		return result;
@@ -363,9 +367,9 @@ HRESULT Wrapper::InitializeRenderHeap()
 
 		//rtvDesc.Format = _backBuffer[i]->GetDesc().Format;
 		//レンダターゲットビューの生成
-		_dev->CreateRenderTargetView(_backBuffer[i].Get(), &rtvDesc, handle);
+		Singleton_Heap::GetInstance()->GetDevice()->CreateRenderTargetView(_backBuffer[i].Get(), &rtvDesc, handle);
 		//ポインターをずらす
-		handle.ptr += _dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+		handle.ptr += Singleton_Heap::GetInstance()->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 	}
 
 	return result;
@@ -379,7 +383,7 @@ HRESULT Wrapper::InitializeDescHeap() {
 	heapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;//特に指定なし
 
 	DXGI_SWAP_CHAIN_DESC swcDesc = {};
-	auto result = _dev->CreateDescriptorHeap(&heapDesc, IID_PPV_ARGS(_descHeap.ReleaseAndGetAddressOf()));
+	auto result = Singleton_Heap::GetInstance()->GetDevice()->CreateDescriptorHeap(&heapDesc, IID_PPV_ARGS(_descHeap.ReleaseAndGetAddressOf()));
 	if (FAILED(result)) {
 		assert(0);
 		return result;
@@ -392,8 +396,8 @@ HRESULT Wrapper::InitializeDescHeap() {
 	}
 
 	//先頭アドレスの設定
-	heapHandle_CPU = _descHeap->GetCPUDescriptorHandleForHeapStart();
-	heapHandle_GPU = _descHeap->GetGPUDescriptorHandleForHeapStart();
+	heapHandle_CPU = Singleton_Heap::GetInstance()->GetDescHeap()->GetCPUDescriptorHandleForHeapStart();
+	heapHandle_GPU = Singleton_Heap::GetInstance()->GetDescHeap()->GetGPUDescriptorHandleForHeapStart();
 	//_backBuffer.resize(swcDesc.BufferCount);
 
 	////SRGBレンダターゲットビュー設定
@@ -447,7 +451,7 @@ HRESULT Wrapper::InitializeDepthBuff(SIZE ret) {
 	depthClearValue.DepthStencil.Depth = 1.0f;//深さ1.0fでクリア
 	depthClearValue.Format = DXGI_FORMAT_D32_FLOAT;//32ビットfloat値としてクリア
 
-	auto result = _dev->CreateCommittedResource(
+	auto result = Singleton_Heap::GetInstance()->GetDevice()->CreateCommittedResource(
 		&depthHeapProp,
 		D3D12_HEAP_FLAG_NONE,
 		&resdesc,
@@ -461,7 +465,7 @@ HRESULT Wrapper::InitializeDepthBuff(SIZE ret) {
 
 	resdesc.Width = shadow_difinition;
 	resdesc.Height = shadow_difinition;
-	result = _dev->CreateCommittedResource(
+	result = Singleton_Heap::GetInstance()->GetDevice()->CreateCommittedResource(
 		&depthHeapProp,
 		D3D12_HEAP_FLAG_NONE,
 		&resdesc,
@@ -477,7 +481,7 @@ HRESULT Wrapper::InitializeDepthBuff(SIZE ret) {
 	D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc = {};
 	dsvHeapDesc.NumDescriptors = 2;
 	dsvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
-	result = _dev->CreateDescriptorHeap(&dsvHeapDesc, IID_PPV_ARGS(_dsvHeap.ReleaseAndGetAddressOf()));
+	result = Singleton_Heap::GetInstance()->GetDevice()->CreateDescriptorHeap(&dsvHeapDesc, IID_PPV_ARGS(_dsvHeap.ReleaseAndGetAddressOf()));
 	if (FAILED(result)) {
 		assert(0);
 		return result;
@@ -490,29 +494,17 @@ HRESULT Wrapper::InitializeDepthBuff(SIZE ret) {
 	dsvDesc.Flags = D3D12_DSV_FLAG_NONE;
 
 	auto handle = _dsvHeap->GetCPUDescriptorHandleForHeapStart();
-	_dev->CreateDepthStencilView(
+	Singleton_Heap::GetInstance()->GetDevice()->CreateDepthStencilView(
 		_depthBuffer.Get(),
 		&dsvDesc,
 		handle);
 
-	handle.ptr += _dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
+	handle.ptr += Singleton_Heap::GetInstance()->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
 
-	_dev->CreateDepthStencilView(
+	Singleton_Heap::GetInstance()->GetDevice()->CreateDepthStencilView(
 		_lightDepthBuffer.Get(),
 		&dsvDesc,
 		handle);
-
-	//深度テクスチャ用ヒープ作成
-	//D3D12_DESCRIPTOR_HEAP_DESC texHeapdesc = {};
-	//texHeapdesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-	//texHeapdesc.NodeMask = 0;
-	//texHeapdesc.NumDescriptors = 2;
-	//texHeapdesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-	//result = _dev->CreateDescriptorHeap(&texHeapdesc, IID_PPV_ARGS(&_depthHaepSRV));
-	//if (FAILED(result)) {
-	//	assert(0);
-	//	return result;
-	//}
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC texResdesc = {};
 	texResdesc.Format = DXGI_FORMAT_R32_FLOAT;
@@ -521,13 +513,13 @@ HRESULT Wrapper::InitializeDepthBuff(SIZE ret) {
 	texResdesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 
 	//深度テクスチャリソースを作成
-	_dev->CreateShaderResourceView(
+	Singleton_Heap::GetInstance()->GetDevice()->CreateShaderResourceView(
 		_depthBuffer.Get(), &texResdesc, heapHandle_CPU);
 
-	heapHandle_CPU.ptr += _dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	heapHandle_CPU.ptr += Singleton_Heap::GetInstance()->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
 	//ライトデプス
-	_dev->CreateShaderResourceView(
+	Singleton_Heap::GetInstance()->GetDevice()->CreateShaderResourceView(
 		_lightDepthBuffer.Get(), &texResdesc, heapHandle_CPU);
 
 	return result;
@@ -535,7 +527,7 @@ HRESULT Wrapper::InitializeDepthBuff(SIZE ret) {
 
 HRESULT Wrapper::InitializeFence() {
 	//フェンス生成
-	auto result = _dev->CreateFence(_fenceval, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(_fence.ReleaseAndGetAddressOf()));
+	auto result = Singleton_Heap::GetInstance()->GetDevice()->CreateFence(_fenceval, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(_fence.ReleaseAndGetAddressOf()));
 
 	return result;
 }
@@ -546,7 +538,7 @@ HRESULT Wrapper::CreateSceneView()
 
 	CD3DX12_HEAP_PROPERTIES properties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
 	CD3DX12_RESOURCE_DESC desc = CD3DX12_RESOURCE_DESC::Buffer((sizeof(ConstBufferDataB0_1) + 0xff) & ~0xff);
-	result = _dev->CreateCommittedResource(
+	result = Singleton_Heap::GetInstance()->GetDevice()->CreateCommittedResource(
 		&properties,
 		D3D12_HEAP_FLAG_NONE,
 		&desc,
@@ -578,15 +570,23 @@ HRESULT Wrapper::CreateSceneView()
 	cbvDesc.BufferLocation = _sceneConstBuff->GetGPUVirtualAddress();
 	cbvDesc.SizeInBytes = UINT(_sceneConstBuff->GetDesc().Width);
 	//定数バッファビューの作成
-	_dev->CreateConstantBufferView(&cbvDesc, heapHandle_CPU);
+	Singleton_Heap::GetInstance()->GetDevice()->CreateConstantBufferView(&cbvDesc, heapHandle_CPU);
 
-	auto inc = _dev->GetDescriptorHandleIncrementSize(
+	auto inc = Singleton_Heap::GetInstance()->GetDevice()->GetDescriptorHandleIncrementSize(
 		D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
 	heapHandle_CPU.ptr += inc;
 	return result;
 }
 
+void Wrapper::ClearDepthShadow()
+{
+	// 深度ステンシルビュー用デスクリプタヒープのハンドルを取得
+	CD3DX12_CPU_DESCRIPTOR_HANDLE dsvH = CD3DX12_CPU_DESCRIPTOR_HANDLE(_dsvHeap->GetCPUDescriptorHandleForHeapStart());
+	dsvH.ptr += Singleton_Heap::GetInstance()->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
+	// 深度バッファのクリア
+	_cmdList->ClearDepthStencilView(dsvH, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+}
 ComPtr<ID3D12DescriptorHeap> Wrapper::CreateDescriptorHeapForImgui()
 {
 	ComPtr<ID3D12DescriptorHeap> ret; //imgui用ヒープ
@@ -597,7 +597,7 @@ ComPtr<ID3D12DescriptorHeap> Wrapper::CreateDescriptorHeapForImgui()
 	desc.NumDescriptors = 1;
 	desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 
-	_dev->CreateDescriptorHeap(
+	Singleton_Heap::GetInstance()->GetDevice()->CreateDescriptorHeap(
 		&desc, IID_PPV_ARGS(ret.ReleaseAndGetAddressOf()));
 
 	return ret;
@@ -654,9 +654,30 @@ void Wrapper::DrawLight(ID3D12GraphicsCommandList* cmdlist)
 void Wrapper::DrawDepth()
 {
 	//深度SRV
-	_cmdList->SetDescriptorHeaps(1, _descHeap.GetAddressOf());
-	heapHandle_GPU = _descHeap->GetGPUDescriptorHandleForHeapStart();
-	heapHandle_GPU.ptr += _dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) * 2;
+	ID3D12DescriptorHeap* sceneheaps[] = { Singleton_Heap::GetInstance()->GetDescHeap() };
+	_cmdList->SetDescriptorHeaps(1, sceneheaps);
+	heapHandle_GPU = Singleton_Heap::GetInstance()->GetDescHeap()->GetGPUDescriptorHandleForHeapStart();
+	heapHandle_GPU.ptr += Singleton_Heap::GetInstance()->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) * 2;
 
 	_cmdList->SetGraphicsRootDescriptorTable(4, heapHandle_GPU);
+
+	////深度SRV
+	//_cmdList->SetDescriptorHeaps(1, _descHeap.GetAddressOf());
+	//heapHandle_GPU = _descHeap->GetGPUDescriptorHandleForHeapStart();
+	//heapHandle_GPU.ptr += _dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) * 2;
+
+	//_cmdList->SetGraphicsRootDescriptorTable(4, heapHandle_GPU);
+}
+
+void Wrapper::SceneDraw()
+{
+	//現在のシーン(ビュープロジェクション)をセット
+	ID3D12DescriptorHeap* sceneheaps[] = { Singleton_Heap::GetInstance()->GetDescHeap()};
+	_cmdList->SetDescriptorHeaps(1, sceneheaps);
+	_cmdList->SetGraphicsRootDescriptorTable(0, Singleton_Heap::GetInstance()->GetDescHeap()->GetGPUDescriptorHandleForHeapStart());
+
+	////現在のシーン(ビュープロジェクション)をセット
+	//ID3D12DescriptorHeap* sceneheaps[] = { _descHeap.Get() };
+	//_cmdList->SetDescriptorHeaps(1, sceneheaps);
+	//_cmdList->SetGraphicsRootDescriptorTable(0, _descHeap->GetGPUDescriptorHandleForHeapStart());
 }

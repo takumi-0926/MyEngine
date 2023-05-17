@@ -36,7 +36,7 @@ float4 main(VSOutput input) : SV_TARGET
 	//シャドウマップ
 	float shadowWeight = 1.0f;
 	//範囲を0～1に
-	float3 posFromLightUV = input.tpos.xyz / input.tpos.w;
+	float posFromLightUV = 1.0f / input.tpos.w;
 	float2 shadowUV;
 	shadowUV.x = (1.0f + input.tpos.x * posFromLightUV) * 0.5f;
 	shadowUV.y = (1.0f - input.tpos.y * posFromLightUV) * 0.5f;
@@ -45,7 +45,7 @@ float4 main(VSOutput input) : SV_TARGET
 
 	//深度値を比較
 	if (shadowUV.x >= 0 && shadowUV.x <= 1.0f && shadowUV.y >= 0 && shadowUV.y <= 1.0f) {
-		if (depthFromLight + 0.005f < input.tpos.z * (1.0f / input.tpos.w)) {
+		if (depthFromLight + 0.005f < input.tpos.z * posFromLightUV) {
 			//shadecolor.xyz = shadecolor.xyz * 0.5f;
 			shadowWeight = 0.5f;
 		}

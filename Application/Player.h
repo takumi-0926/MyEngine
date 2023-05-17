@@ -41,10 +41,11 @@ private:
 
 	Weapon* weapon = nullptr;
 
-	float avoidSpeed = 1.0f;
+	float avoidSpeed = 1.8f;
+	float avoidTime = 0.0f;
+	bool avoid = false;
 	int Action = 0;
 
-	float avoidTime = 0.0f;
 	float speed = 0.0;
 	float angleVertical, angleHorizonal;
 
@@ -57,7 +58,7 @@ private:
 private:
 	void actionExecution(int num);
 	void moveUpdate();
-	void Avoid();
+	void Avoid(XMFLOAT3& vec);
 
 	/// <summary>
 /// ˆÚ“®

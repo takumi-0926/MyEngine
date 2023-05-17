@@ -30,6 +30,7 @@ public:
 
 	ID3D12DescriptorHeap* GetDescHeap();
 	ID3D12Device* GetDevice();
+	IDXGIFactory6* GetDXGIFactory();
 	UINT GetDescriptorIncrementSize();
 
 private:
@@ -157,6 +158,11 @@ inline ID3D12DescriptorHeap* Singleton_Heap::GetDescHeap()
 inline ID3D12Device* Singleton_Heap::GetDevice()
 {
 	return device.Get();
+}
+
+inline IDXGIFactory6* Singleton_Heap::GetDXGIFactory()
+{
+	return _dxgifactory.Get();
 }
 
 inline UINT Singleton_Heap::GetDescriptorIncrementSize()

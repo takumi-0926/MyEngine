@@ -117,7 +117,6 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	}
 
 	LoadTitleResources();
-	LoadGameResources();
 
 	//カメラをセット
 	camera = new DebugCamera(Application::window_width, Application::window_height, input);
@@ -282,19 +281,6 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 		baseCamp.push_back(newObject);
 	}
 
-	//防衛砲台
-	for (int i = 0; i < 6; i++) {
-		defense_facilities[i] = DefCannon::Appearance(0, defenceModel, defenceModel, defenceModel);
-		defense_facilities[i]->BulletCreate(bulletModel);
-		defense_facilities[i]->Update();
-		defense_facilities[i]->scale = { 5,5,5 };
-	}
-
-	//スカイドーム-------------------
-	skyDome = Object3Ds::Create(skyDomeModel);
-	skyDome->scale = { 4,4,4 };
-	skyDome->position = { 0,350,0 };
-
 	//MMDオブジェクト----------------
 	//modelPlayer = PMDmodel::CreateFromPMD("Resources/Model/初音ミク.pmd");
 	//modelPlayer->LoadVMDFile(vmdData::WAIT, "Resources/vmd/marieru_stand.vmd");
@@ -302,28 +288,6 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	//modelPlayer->LoadVMDFile(vmdData::ATTACK, "Resources/vmd/attack.vmd");
 	//modelPlayer->LoadVMDFile(vmdData::DAMAGE, "Resources/vmd/腹部ダメージモーション.vmd");
 	//modelPlayer->LoadVMDFile(vmdData::AVOID, "Resources/vmd/Rick式走りモーション05.vmd");
-
-	//プレイヤー---------------------
-	_player = Player::Create(testModel);
-	_player->CreateWeapon(Model::CreateFromOBJ("weapon"));
-	_player->SetScale({ 0.2f, 0.2f, 0.2f });
-	_player->SetPosition(XMFLOAT3(0.0f, 0.0f, 100.0f));
-	_player->PlayAnimation();
-
-	//当たり判定用球体生成
-	weaponCollider.radius = 10.0f;
-	playerCollider.radius = 10.0f;
-
-	_player->GetInstance()->GetPos();
-	//エネミー-----------------------
-	for (int i = 0; i < 3; i++)
-	{
-		protEnemy[i] = Enemy::Create(wolf[i], golem[i]);
-		//武器生成
-		//protEnemy[i]->CreateWeapon(Model::CreateFromOBJ("weapon"));
-		//パーティクル生成
-		protEnemy[i]->Particle();
-	}
 
 	//スプライト---------------------
 	Title = Sprite::Create(0, { 640.0f,120.0f });
@@ -369,57 +333,11 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	start->SetAlpha(0.0f);
 	start->SetSize({ 360,360 });
 	start->Update();
-	//門HP（赤状態）
-	gateBreak_red = Fade::Create(12, { 72,134 });
-	gateBreak_red->SetAnchorPoint({ 0.5f,0.5f });
-	gateBreak_red->SetSize({ 80,80 });
-	gateBreak_red->Update();
-	//門HP（黄状態）
-	gateBreak_yellow = Fade::Create(13, { 72,134 });
-	gateBreak_yellow->SetAnchorPoint({ 0.5f,0.5f });
-	gateBreak_yellow->SetSize({ 80,80 });
-	gateBreak_yellow->Update();
-	//門HP（）緑状態
-	gateBreak_green = Fade::Create(14, { 72,134 });
-	gateBreak_green->SetAnchorPoint({ 0.5f,0.5f });
-	gateBreak_green->SetSize({ 80,80 });
-	gateBreak_green->Update();
-
-	//ゲーム内ガイド
-	guideModels[0] = Model::CreateFromOBJ("guide");
-	moveGuide = Object3Ds::Create(guideModels[0]);
-	moveGuide->SetPosition(XMFLOAT3(555.0f, 3.0f, 10.0f));
-	moveGuide->scale = XMFLOAT3(5, 5, 5);
-
-	//ヒットボックス-----------------
-	triangle[0].p0 = XMVectorSet(stages[64]->position.x - 100.0f, stages[64]->position.y, stages[64]->position.z, 1);
-	triangle[0].p1 = XMVectorSet(stages[64]->position.x - 100.0f, stages[64]->position.y + 120.0f, stages[64]->position.z, 1);
-	triangle[0].p2 = XMVectorSet(stages[64]->position.x + 100.0f, stages[64]->position.y, stages[64]->position.z, 1);
-	triangle[0].normal = XMVectorSet(0.0f, 0.0f, 1.0f, 0);
 
 	//入力及び音声
 	input->Update();
 
 	SceneNum = TITLE;
-
-	//カメラの移動元の作成
-	const float distanceFromPlayerToCamera = 10.0f;//カメラとプレイヤーの距離を決定
-	const float cameraHeight = 25.0f;//カメラの高さ
-	vv0 = { -1.0f,0.0f,0.0f,0.0f };//カメラの正面ベクトルを決定
-	XMFLOAT3 direction = { vv0.m128_f32[0],vv0.m128_f32[1],vv0.m128_f32[2] };
-
-	afterEye.x = _player->GetPosition().x + direction.x * distanceFromPlayerToCamera;
-	afterEye.y = _player->GetPosition().y + direction.y * distanceFromPlayerToCamera;
-	afterEye.z = _player->GetPosition().z + direction.z * distanceFromPlayerToCamera;
-	afterEye.y += cameraHeight;
-	mainCamera->SetEye(afterEye);
-	//カメラ注視点を決定
-	XMFLOAT3 _target;
-	_target.x = _player->GetPosition().x;
-	_target.y = _player->GetPosition().y + direction.y * distanceFromPlayerToCamera * 2.0f;
-	_target.z = _player->GetPosition().z;
-	//_target.y += cameraHeight / 1.5f;
-	mainCamera->SetTarget(_target);
 
 	particlemanager->CreateParticle(30, XMFLOAT3(0, 0, 0), 0.01f, 0.01f, 12, 4.0f, { 0.2f,0.2f,0.8f,1 }, 1);
 
@@ -435,10 +353,10 @@ void GameManager::Update()
 		ImGui::Begin("Rendering Test Menu");
 		ImGui::SetWindowSize(ImVec2(400, 500), ImGuiCond_::ImGuiCond_FirstUseEver);
 		//imguiのUIコントロール
-		ImGui::Text("PlayerPosition : %.2f %.2f", _player->GetPosition().x, _player->GetPosition().z);
-		ImGui::Text("ClearResultPos : %.2f %.2f", clear->Pos().x, clear->Pos().y);
+		//ImGui::Text("PlayerPosition : %.2f %.2f", _player->GetPosition().x, _player->GetPosition().z);
+		//ImGui::Text("ClearResultPos : %.2f %.2f", clear->Pos().x, clear->Pos().y);
 		//ImGui::Text("ClearResultPos : %.2f %.2f", protEnemy[0]->weapon->position.x, protEnemy[0]->weapon->position.z);
-		ImGui::Text("ClearResultPos : %.2f %.2f", protEnemy[0]->GetPosition().x, protEnemy[0]->GetPosition().z);
+		//ImGui::Text("ClearResultPos : %.2f %.2f", protEnemy[0]->GetPosition().x, protEnemy[0]->GetPosition().z);
 		ImGui::Checkbox("EnemyPop", &blnChk);
 		ImGui::RadioButton("Game Mode", &radio, 0);
 		ImGui::SameLine();
@@ -467,7 +385,7 @@ void GameManager::Update()
 		ImGui::ColorPicker4("ColorPicker4", particleColor, ImGuiColorEditFlags_::ImGuiColorEditFlags_PickerHueWheel | ImGuiColorEditFlags_::ImGuiColorEditFlags_AlphaBar);
 		ImGui::End();
 
-		DebugImgui::UpdateImgui(dx12);
+		DebugImgui::UpdateImgui();
 
 		//カメラ切り替え
 		static bool isCamera = false;
@@ -570,11 +488,12 @@ void GameManager::TitleUpdate()
 	if (fade->GetFadeIn()) {
 		fade->FadeIn();
 		if (!fade->GetFadeIn()) {
-			if (TitleHierarchy == 0) { SceneNum = GAME; }
+			if (TitleHierarchy == 0) { SceneNum = Scene::GAME; }
 			Wrapper::SetCamera(mainCamera);
 			fade->SetFadeIn(false);
 			fade->SetFadeOut(true);
 
+			load = true;
 			TitleReset();
 		}
 	}
@@ -593,12 +512,20 @@ void GameManager::GameUpdate() {
 	if (SceneNum == GAME) {
 
 		//フェードアウト
-		if (fade->GetFadeOut()) {
+		if (fade->GetFadeOut() && !load ) {
 			fade->FadeOut();
 		}
 
+		if (load) { GameModeNum = GameMode::LOAD; }
 		//当たり判定確認
 		//CollisionManager::GetInstance()->CheckAllCollision();
+
+		if (GameModeNum == GameMode::LOAD) {
+			loadingUpdate();
+			if (!load) {
+				GameModeNum = GameMode::START;
+			}
+		}
 
 		//ゲームスタート時処理
 		if (GameModeNum == GameMode::START) {
@@ -1077,7 +1004,6 @@ void GameManager::DebugTestUpdate()
 {
 	if (SceneNum == Scene::DebugTest) {
 		camera->Update();
-		dx12->SceneUpdate();
 		particlemanager->Update();
 		debugFilde->Update();
 		debugCharacter->Update();
@@ -1507,6 +1433,7 @@ void GameManager::loadingUpdate() {
 		switch (_loadMode)
 		{
 		case LoadMode::No:
+			_loadMode = LoadMode::Start;
 			//何もない・・・
 		case LoadMode::Start:
 			//ローディング始め
@@ -1514,6 +1441,8 @@ void GameManager::loadingUpdate() {
 			_loadMode = LoadMode::Run;
 		case LoadMode::Run:
 			//ローディング中にやりたいこと
+
+			th.join();
 		case LoadMode::End:
 			//ローディング終わり
 			load = false;
@@ -1640,6 +1569,88 @@ void GameManager::LoadGameResources()
 	Start_UI_03.reset(Fade::Create(SpriteName::Start_UI_03, { 640.0f,360.0f }));
 	Start_UI_03.get()->SetAnchorPoint({ 0.5f,0.5f });
 	Start_UI_03.get()->Update();
+
+	//門HP（赤状態）
+	gateBreak_red = Fade::Create(12, { 72,134 });
+	gateBreak_red->SetAnchorPoint({ 0.5f,0.5f });
+	gateBreak_red->SetSize({ 80,80 });
+	gateBreak_red->Update();
+	//門HP（黄状態）
+	gateBreak_yellow = Fade::Create(13, { 72,134 });
+	gateBreak_yellow->SetAnchorPoint({ 0.5f,0.5f });
+	gateBreak_yellow->SetSize({ 80,80 });
+	gateBreak_yellow->Update();
+	//門HP（）緑状態
+	gateBreak_green = Fade::Create(14, { 72,134 });
+	gateBreak_green->SetAnchorPoint({ 0.5f,0.5f });
+	gateBreak_green->SetSize({ 80,80 });
+	gateBreak_green->Update();
+
+	//スカイドーム-------------------
+	skyDome = Object3Ds::Create(skyDomeModel);
+	skyDome->scale = { 4,4,4 };
+	skyDome->position = { 0,350,0 };
+
+	//ゲーム内ガイド
+	guideModels[0] = Model::CreateFromOBJ("guide");
+	moveGuide = Object3Ds::Create(guideModels[0]);
+	moveGuide->SetPosition(XMFLOAT3(555.0f, 3.0f, 10.0f));
+	moveGuide->scale = XMFLOAT3(5, 5, 5);
+
+	//ヒットボックス-----------------
+	triangle[0].p0 = XMVectorSet(stages[64]->position.x - 100.0f, stages[64]->position.y, stages[64]->position.z, 1);
+	triangle[0].p1 = XMVectorSet(stages[64]->position.x - 100.0f, stages[64]->position.y + 120.0f, stages[64]->position.z, 1);
+	triangle[0].p2 = XMVectorSet(stages[64]->position.x + 100.0f, stages[64]->position.y, stages[64]->position.z, 1);
+	triangle[0].normal = XMVectorSet(0.0f, 0.0f, 1.0f, 0);
+
+	//防衛砲台
+	for (int i = 0; i < 6; i++) {
+		defense_facilities[i] = DefCannon::Appearance(0, defenceModel, defenceModel, defenceModel);
+		defense_facilities[i]->BulletCreate(bulletModel);
+		defense_facilities[i]->Update();
+		defense_facilities[i]->scale = { 5,5,5 };
+	}
+
+	//プレイヤー---------------------
+	_player = Player::Create(testModel);
+	_player->CreateWeapon(Model::CreateFromOBJ("weapon"));
+	_player->SetScale({ 0.2f, 0.2f, 0.2f });
+	_player->SetPosition(XMFLOAT3(0.0f, 0.0f, 100.0f));
+	_player->PlayAnimation();
+
+	//当たり判定用球体生成
+	weaponCollider.radius = 10.0f;
+	playerCollider.radius = 10.0f;
+
+	_player->GetInstance()->GetPos();
+	//エネミー-----------------------
+	for (int i = 0; i < 3; i++)
+	{
+		protEnemy[i] = Enemy::Create(wolf[i], golem[i]);
+		//武器生成
+		//protEnemy[i]->CreateWeapon(Model::CreateFromOBJ("weapon"));
+		//パーティクル生成
+		protEnemy[i]->Particle();
+	}
+
+	//カメラの移動元の作成
+	const float distanceFromPlayerToCamera = 10.0f;//カメラとプレイヤーの距離を決定
+	const float cameraHeight = 25.0f;//カメラの高さ
+	vv0 = { -1.0f,0.0f,0.0f,0.0f };//カメラの正面ベクトルを決定
+	XMFLOAT3 direction = { vv0.m128_f32[0],vv0.m128_f32[1],vv0.m128_f32[2] };
+
+	afterEye.x = _player->GetPosition().x + direction.x * distanceFromPlayerToCamera;
+	afterEye.y = _player->GetPosition().y + direction.y * distanceFromPlayerToCamera;
+	afterEye.z = _player->GetPosition().z + direction.z * distanceFromPlayerToCamera;
+	afterEye.y += cameraHeight;
+	mainCamera->SetEye(afterEye);
+	//カメラ注視点を決定
+	XMFLOAT3 _target;
+	_target.x = _player->GetPosition().x;
+	_target.y = _player->GetPosition().y + direction.y * distanceFromPlayerToCamera * 2.0f;
+	_target.z = _player->GetPosition().z;
+	//_target.y += cameraHeight / 1.5f;
+	mainCamera->SetTarget(_target);
 
 }
 void GameManager::LoadAnotherResourecs()

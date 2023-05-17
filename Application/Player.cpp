@@ -84,35 +84,40 @@ void Player::actionExecution(int num)
 
 	}
 	//移動状態
-	else if (num == action::Walk || num == action::Dash) {
+	else if (num == action::Walk || num == action::Dash || num == action::Avoid) {
 
-		//左移動
-		if (Input::GetInstance()->Push(DIK_A) || directInput->leftStickX() < 0.0f) {
-			SetPosition((MoveLeft(GetPosition())));
+		if (num == action::Avoid) {
+			Avoid(v);
 		}
-		//右移動
-		if (Input::GetInstance()->Push(DIK_D) || directInput->leftStickX() > 0.0f) {
-			SetPosition((MoveRight(GetPosition())));
-		}
-		//下移動
-		if (Input::GetInstance()->Push(DIK_W) || directInput->leftStickY() < 0.0f) {
-			SetPosition((MoveBefore(GetPosition())));
-		}
-		//上移動
-		if (Input::GetInstance()->Push(DIK_S) || directInput->leftStickY() > 0.0f) {
-			SetPosition((MoveAfter(GetPosition())));
-		}
-		XMMATRIX matRot = XMMatrixIdentity();
-		//角度回転
-		matRot = XMMatrixRotationY(XMConvertToRadians(angleHorizonal));
+		else {
+			//左移動
+			if (Input::GetInstance()->Push(DIK_A) || directInput->leftStickX() < 0.0f) {
+				SetPosition((MoveLeft(GetPosition())));
+			}
+			//右移動
+			if (Input::GetInstance()->Push(DIK_D) || directInput->leftStickX() > 0.0f) {
+				SetPosition((MoveRight(GetPosition())));
+			}
+			//下移動
+			if (Input::GetInstance()->Push(DIK_W) || directInput->leftStickY() < 0.0f) {
+				SetPosition((MoveBefore(GetPosition())));
+			}
+			//上移動
+			if (Input::GetInstance()->Push(DIK_S) || directInput->leftStickY() > 0.0f) {
+				SetPosition((MoveAfter(GetPosition())));
+			}
+			XMMATRIX matRot = XMMatrixIdentity();
+			//角度回転
+			matRot = XMMatrixRotationY(XMConvertToRadians(angleHorizonal));
 
-		XMVECTOR _v({ v.x, v.y, v.z, 0 });
-		_v = XMVector3TransformNormal(_v, matRot);
-		v.x = _v.m128_f32[0];
-		v.y = _v.m128_f32[1];
-		v.z = _v.m128_f32[2];
+			XMVECTOR _v({ v.x, v.y, v.z, 0 });
+			_v = XMVector3TransformNormal(_v, matRot);
+			v.x = _v.m128_f32[0];
+			v.y = _v.m128_f32[1];
+			v.z = _v.m128_f32[2];
 
-		SetMatRot(LookAtRotation(v, XMFLOAT3(0.0f, 1.0f, 0.0f)));
+			SetMatRot(LookAtRotation(v, XMFLOAT3(0.0f, 1.0f, 0.0f)));
+		}
 	}
 	//攻撃状態
 	else if (num == action::Attack) {
@@ -191,17 +196,31 @@ void Player::moveUpdate()
 	actionExecution(Action);
 }
 
-void Player::Avoid() {
+void Player::Avoid(XMFLOAT3& vec) {
 	if (avoidTime >= 36.0f) {
 		Action = action::Wait;
 		avoidTime = 0.0f;
+		avoid = false;
+
+		return;
 	}
 
-	XMVECTOR vec = XMLoadFloat3(&avoidVec);
-	vec = XMVector3Normalize(vec);
-	position.x += vec.m128_f32[0] * avoidSpeed;
-	position.y += vec.m128_f32[1] * avoidSpeed;
-	position.z += vec.m128_f32[2] * avoidSpeed;
+	if (!avoid) {
+		avoidVec = vec;
+		avoid = true;
+	}
+
+	XMMATRIX matRot = XMMatrixIdentity();
+	//角度回転
+	matRot = XMMatrixRotationY(XMConvertToRadians(angleHorizonal));
+
+	XMVECTOR _vec = XMLoadFloat3(&avoidVec);
+	_vec = XMVector3Normalize(_vec);
+	_vec = XMVector3TransformNormal(_vec, matRot);
+
+	position.x -= _vec.m128_f32[0] * avoidSpeed;
+	position.y -= _vec.m128_f32[1] * avoidSpeed;
+	position.z -= _vec.m128_f32[2] * avoidSpeed;
 
 	avoidTime += 1.0f;
 }
@@ -217,11 +236,11 @@ void Player::Update()
 
 	//武器にボーン行列を渡す
 	weapon->SetFollowingObjectBoneMatrix(
-		model->GetBones()[followBoneNum].fbxCluster->GetLink()->EvaluateGlobalTransform(currentTime),matWorld);
+		model->GetBones()[followBoneNum].fbxCluster->GetLink()->EvaluateGlobalTransform(currentTime), matWorld);
 	weapon->Update();
 
 	//回避行動
-	if (Action == action::Avoid) { Avoid(); }
+	//if (Action == action::Avoid) { Avoid(); }
 
 	//落下処理
 	if (!OnGround) {

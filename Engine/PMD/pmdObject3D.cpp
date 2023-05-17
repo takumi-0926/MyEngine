@@ -3,6 +3,8 @@
 #include "Collision\BaseCollision.h"
 #include "Collision\CollisionManager.h"
 
+#include "..\Singleton_Heap.h"
+
 ComPtr<ID3D12RootSignature> PMDobject::_rootsignature;
 ComPtr<ID3D12PipelineState> PMDobject::_pipelinestate;
 ComPtr<ID3D12PipelineState> PMDobject::_plsShadow;
@@ -25,7 +27,7 @@ bool PMDobject::StaticInitialize(Wrapper* _dx12)
 	assert(!PMDobject::dx12);
 
 	// nullptrチェック
-	assert(_dx12->GetDevice());
+	assert(Singleton_Heap::GetInstance()->GetDevice());
 
 	//設定
 	PMDobject::dx12 = _dx12;

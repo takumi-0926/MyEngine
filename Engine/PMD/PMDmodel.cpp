@@ -13,6 +13,8 @@
 #include "object\baseObject.h"
 #include "dx12Wrapper.h"
 
+#include "..\Singleton_Heap.h"
+
 using namespace Microsoft::WRL;
 using namespace DirectX;
 using namespace std;
@@ -157,7 +159,7 @@ ComPtr<ID3D12Resource> PMDmodel::LoadTextureFromFile(string& texPath) {
 	texresDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
 
 	//テクスチャバッファのリソース生成
-	result = dx12->GetDevice()->CreateCommittedResource(
+	result = Singleton_Heap::GetInstance()->GetDevice()->CreateCommittedResource(
 		&texHeapProp,
 		D3D12_HEAP_FLAG_NONE,
 		&texresDesc,
@@ -198,7 +200,7 @@ ID3D12Resource* PMDmodel::CreateWhiteTexture()
 	resDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
 
 	ID3D12Resource* whiteBuff = nullptr;
-	auto result = dx12->GetDevice()->CreateCommittedResource(
+	auto result = Singleton_Heap::GetInstance()->GetDevice()->CreateCommittedResource(
 		&texHeapProp,
 		D3D12_HEAP_FLAG_NONE,
 		&resDesc,
@@ -243,7 +245,7 @@ ID3D12Resource* PMDmodel::CreateBlackTexture()
 	resDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
 
 	ID3D12Resource* blackBuff = nullptr;
-	auto result = dx12->GetDevice()->CreateCommittedResource(
+	auto result = Singleton_Heap::GetInstance()->GetDevice()->CreateCommittedResource(
 		&texHeapProp,
 		D3D12_HEAP_FLAG_NONE,
 		&resDesc,
@@ -303,7 +305,7 @@ bool PMDmodel::StaticInitialize(Wrapper* _dx12)
 	assert(!PMDmodel::dx12);
 
 	// nullptrチェック
-	assert(_dx12->GetDevice());
+	assert(Singleton_Heap::GetInstance()->GetDevice());
 
 	//設定
 	PMDmodel::dx12 = _dx12;
@@ -378,11 +380,11 @@ void PMDmodel::UpdateWorldMatrix()
 void PMDmodel::Draw(ID3D12GraphicsCommandList* cmdList, bool isShadow)
 {
 	// nullptrチェック
-	assert(dx12->GetDevice());
+	assert(Singleton_Heap::GetInstance()->GetDevice());
 	assert(cmdList);
 
-	auto heapHandle = dx12->GetDescHeap()->GetGPUDescriptorHandleForHeapStart();
-	auto IncSize = dx12->GetDevice()->GetDescriptorHandleIncrementSize(
+	auto heapHandle = Singleton_Heap::GetInstance()->GetDescHeap()->GetGPUDescriptorHandleForHeapStart();
+	auto IncSize = Singleton_Heap::GetInstance()->GetDevice()->GetDescriptorHandleIncrementSize(
 		D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	heapHandle.ptr += IncSize;
 	cmdList->SetGraphicsRootDescriptorTable(1, heapHandle);
@@ -392,7 +394,7 @@ void PMDmodel::Draw(ID3D12GraphicsCommandList* cmdList, bool isShadow)
 
 	heapHandle.ptr += IncSize;
 	unsigned int idxOffset = 0;
-	auto cbvsrvIncSize = dx12->GetDevice()->GetDescriptorHandleIncrementSize(
+	auto cbvsrvIncSize = Singleton_Heap::GetInstance()->GetDevice()->GetDescriptorHandleIncrementSize(
 		D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) * 4;
 	if (isShadow) {
 		cmdList->DrawIndexedInstanced(indicesnum, 1, 0, 0, 0);
@@ -516,7 +518,7 @@ HRESULT PMDmodel::LoadPMDFile(const char* path)
 
 
 	//頂点バッファのリソース生成
-	result = dx12->GetDevice()->CreateCommittedResource(
+	result = Singleton_Heap::GetInstance()->GetDevice()->CreateCommittedResource(
 		&heapprop, D3D12_HEAP_FLAG_NONE,
 		&resdesc, D3D12_RESOURCE_STATE_GENERIC_READ,
 		nullptr, IID_PPV_ARGS(vertBuff.ReleaseAndGetAddressOf()));
@@ -562,7 +564,7 @@ HRESULT PMDmodel::LoadPMDFile(const char* path)
 	resdesc = CD3DX12_RESOURCE_DESC::Buffer(
 		indices.size() * sizeof(indices[0]));
 
-	result = dx12->GetDevice()->CreateCommittedResource(
+	result = Singleton_Heap::GetInstance()->GetDevice()->CreateCommittedResource(
 		&heapprop, D3D12_HEAP_FLAG_NONE,
 		&resdesc, D3D12_RESOURCE_STATE_GENERIC_READ,
 		nullptr, IID_PPV_ARGS(&indexBuff));
@@ -879,7 +881,7 @@ HRESULT PMDmodel::CreateTransform()
 
 	CD3DX12_HEAP_PROPERTIES properties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
 	CD3DX12_RESOURCE_DESC desc = CD3DX12_RESOURCE_DESC::Buffer(buffSize);
-	auto result = dx12->GetDevice()->CreateCommittedResource(
+	auto result = Singleton_Heap::GetInstance()->GetDevice()->CreateCommittedResource(
 		&properties,
 		D3D12_HEAP_FLAG_NONE,
 		&desc,
@@ -911,15 +913,15 @@ HRESULT PMDmodel::CreateTransform()
 	_mappedMatrices[0] = matWorld;
 	copy(boneMatrices.begin(), boneMatrices.end(), _mappedMatrices + 1);
 
-	auto heapHandle = dx12->GetDescHeap()->GetCPUDescriptorHandleForHeapStart();
-	auto IncSize = dx12->GetDevice()->GetDescriptorHandleIncrementSize(
+	auto heapHandle = Singleton_Heap::GetInstance()->GetDescHeap()->GetCPUDescriptorHandleForHeapStart();
+	auto IncSize = Singleton_Heap::GetInstance()->GetDevice()->GetDescriptorHandleIncrementSize(
 		D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	heapHandle.ptr += IncSize;
 
 	D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc = {};
 	cbvDesc.BufferLocation = transformBuff->GetGPUVirtualAddress();
 	cbvDesc.SizeInBytes = (UINT)buffSize;
-	dx12->GetDevice()->CreateConstantBufferView(
+	Singleton_Heap::GetInstance()->GetDevice()->CreateConstantBufferView(
 		&cbvDesc,
 		heapHandle);
 
@@ -933,7 +935,7 @@ HRESULT PMDmodel::CreateMaterial()
 
 	CD3DX12_HEAP_PROPERTIES properties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
 	CD3DX12_RESOURCE_DESC desc = CD3DX12_RESOURCE_DESC::Buffer(materiaBuffSize * materialNum);
-	auto result = dx12->GetDevice()->CreateCommittedResource(
+	auto result = Singleton_Heap::GetInstance()->GetDevice()->CreateCommittedResource(
 		&properties,
 		D3D12_HEAP_FLAG_NONE,
 		&desc,//メモリがもったいない
@@ -1049,7 +1051,7 @@ HRESULT PMDmodel::CreateMaterialAndTextureView()
 	matDescHeapDesc.NodeMask = 0;
 
 	matDescHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-	auto result = dx12->GetDevice()->CreateDescriptorHeap(
+	auto result = Singleton_Heap::GetInstance()->GetDevice()->CreateDescriptorHeap(
 		&matDescHeapDesc, IID_PPV_ARGS(&materialDescHeap));
 	if (FAILED(result)) { assert(0); }
 
@@ -1065,26 +1067,26 @@ HRESULT PMDmodel::CreateMaterialAndTextureView()
 	srvDesc.Texture2D.MipLevels = 1;//ミップマップは使用しない
 
 	//先頭を記録
-	auto matDescHeapH = dx12->GetDescHeap()->GetCPUDescriptorHandleForHeapStart();
-	auto inc = dx12->GetDevice()->GetDescriptorHandleIncrementSize(
+	auto matDescHeapH = Singleton_Heap::GetInstance()->GetDescHeap()->GetCPUDescriptorHandleForHeapStart();
+	auto inc = Singleton_Heap::GetInstance()->GetDevice()->GetDescriptorHandleIncrementSize(
 		D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	matDescHeapH.ptr += inc;
 	matDescHeapH.ptr += inc;
 	for (uint32_t i = 0; i < materialNum; ++i) {
 		//マテリアル用定数バッファビュー
-		dx12->GetDevice()->CreateConstantBufferView(&matCBVDesc, matDescHeapH);
+		Singleton_Heap::GetInstance()->GetDevice()->CreateConstantBufferView(&matCBVDesc, matDescHeapH);
 		matDescHeapH.ptr += inc;
 		matCBVDesc.BufferLocation += materiaBuffSize;
 
 		//シェーダーリソースビュー
 		if (textureResources[i] == nullptr) {
 			srvDesc.Format = CreateWhiteTexture()->GetDesc().Format;
-			dx12->GetDevice()->CreateShaderResourceView(
+			Singleton_Heap::GetInstance()->GetDevice()->CreateShaderResourceView(
 				CreateWhiteTexture(), &srvDesc, matDescHeapH);
 		}
 		else {
 			srvDesc.Format = textureResources[i]->GetDesc().Format;
-			dx12->GetDevice()->CreateShaderResourceView(
+			Singleton_Heap::GetInstance()->GetDevice()->CreateShaderResourceView(
 				textureResources[i].Get(), &srvDesc, matDescHeapH);
 		}
 		matDescHeapH.ptr += inc;
@@ -1092,12 +1094,12 @@ HRESULT PMDmodel::CreateMaterialAndTextureView()
 		//乗算スフィアマップ用ビュー
 		if (sphResources[i] == nullptr) {
 			srvDesc.Format = CreateWhiteTexture()->GetDesc().Format;
-			dx12->GetDevice()->CreateShaderResourceView(
+			Singleton_Heap::GetInstance()->GetDevice()->CreateShaderResourceView(
 				CreateWhiteTexture(), &srvDesc, matDescHeapH);
 		}
 		else {
 			srvDesc.Format = sphResources[i]->GetDesc().Format;
-			dx12->GetDevice()->CreateShaderResourceView(
+			Singleton_Heap::GetInstance()->GetDevice()->CreateShaderResourceView(
 				sphResources[i].Get(), &srvDesc, matDescHeapH);
 		}
 		matDescHeapH.ptr += inc;
@@ -1105,12 +1107,12 @@ HRESULT PMDmodel::CreateMaterialAndTextureView()
 		//加算スフィアマップ用ビュー
 		if (spaResources[i] == nullptr) {
 			srvDesc.Format = CreateBlackTexture()->GetDesc().Format;
-			dx12->GetDevice()->CreateShaderResourceView(
+			Singleton_Heap::GetInstance()->GetDevice()->CreateShaderResourceView(
 				CreateBlackTexture(), &srvDesc, matDescHeapH);
 		}
 		else {
 			srvDesc.Format = spaResources[i]->GetDesc().Format;
-			dx12->GetDevice()->CreateShaderResourceView(
+			Singleton_Heap::GetInstance()->GetDevice()->CreateShaderResourceView(
 				spaResources[i].Get(), &srvDesc, matDescHeapH);
 		}
 		matDescHeapH.ptr += inc;
@@ -1121,19 +1123,19 @@ HRESULT PMDmodel::CreateMaterialAndTextureView()
 }
 
 HRESULT PMDmodel::CreateDescHeap() {
-	//ディスクリプタヒープ生成(汎用)
-	D3D12_DESCRIPTOR_HEAP_DESC heapDesc = {};
-	heapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;//どんなビューを作るのか()
-	heapDesc.NodeMask = 0;
-	heapDesc.NumDescriptors = 1024;//全体のヒープ領域数
-	heapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;//特に指定なし
+	////ディスクリプタヒープ生成(汎用)
+	//D3D12_DESCRIPTOR_HEAP_DESC heapDesc = {};
+	//heapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;//どんなビューを作るのか()
+	//heapDesc.NodeMask = 0;
+	//heapDesc.NumDescriptors = 1024;//全体のヒープ領域数
+	//heapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;//特に指定なし
 
-	DXGI_SWAP_CHAIN_DESC swcDesc = {};
-	auto result = dx12->GetDevice()->CreateDescriptorHeap(&heapDesc, IID_PPV_ARGS(descHeap.ReleaseAndGetAddressOf()));
-	if (FAILED(result)) {
-		assert(0);
-		return result;
-	}
+	//DXGI_SWAP_CHAIN_DESC swcDesc = {};
+	//auto result = Singleton_Heap::GetInstance()->GetDevice()->CreateDescriptorHeap(&heapDesc, IID_PPV_ARGS(descHeap.ReleaseAndGetAddressOf()));
+	//if (FAILED(result)) {
+	//	assert(0);
+	//	return result;
+	//}
 	return S_OK;
 }
 
