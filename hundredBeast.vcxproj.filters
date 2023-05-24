@@ -352,6 +352,9 @@
     <ClInclude Include="Singleton_Heap.h">
       <Filter>ソース ファイル\DirectX12</Filter>
     </ClInclude>
+    <ClInclude Include="fps.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application\enemy.cpp">
@@ -502,6 +505,9 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Application\DebugImgui.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="fps.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>

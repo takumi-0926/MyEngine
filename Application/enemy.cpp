@@ -96,25 +96,11 @@ Enemy* Enemy::Create(FbxModel* model1, FbxModel* model2)
 
 	// 初期化
 	instance->Initialize();
-	//if (!instance->Initialize()) {
-	//	delete instance;
-	//	assert(0);
-	//	return nullptr;
-	//}
-
-	//if (model) {
-	//	FbxModel* _model = model;
-	//	instance->SetModel(_model);
-	//	instance->LoadAnima();
-	//}
 
 	return instance;
 }
 void Enemy::Initialize()
 {
-	//if (!FbxObject3d::Initialize()) {
-	//	return false;
-	//}
 	FbxObject3d::Initialize();
 
 	float radius = 10.0f;
@@ -129,11 +115,6 @@ void Enemy::Update() {
 	collider->Update();
 
 	particle->Update();
-
-
-	//weapon->SetFollowingObjectBoneMatrix(model->GetBones()[followBoneNum].fbxCluster->GetLink()->EvaluateGlobalTransform(currentTime));
-	//weapon->SetPosition(position);
-	//weapon->Update();
 
 	//落下処理
 	if (!OnGround) {
@@ -230,25 +211,6 @@ void Enemy::Update() {
 		CollisionManager::GetInstance()->RemoveCollider(collider);
 	}
 
-	//if (position.x <= -100.0f) {
-	//	position.x = -100.0f;
-	//}
-	//if (position.x >= 100.0f) {
-	//	position.x = 100.0f;
-	//}
-	//if (position.z <= -120.0f) {
-	//	position.z = -120.0f;
-	//}
-	//if (position.z >= 342.0f) {
-	//	position.z = 342.0f;
-	//}
-
-	//static bool flag = false;
-	//if (position.z >= -100.0f && !flag) {
-	//	position.z = -60.0f;
-	//	flag = true;
-	//}
-
 	FbxObject3d::Update();
 }
 void Enemy::Draw(ID3D12GraphicsCommandList* cmdList)
@@ -257,8 +219,6 @@ void Enemy::Draw(ID3D12GraphicsCommandList* cmdList)
 	SetAlpha();
 
 	FbxObject3d::Draw(cmdList);
-
-	//weapon->Draw();
 }
 
 void Enemy::OnCollision(const CollisionInfo& info)
@@ -288,7 +248,6 @@ void Enemy::Appearance()
 	if (r % 2 == 1) {
 		mode = Activity::wolf;
 		SetModel(modelType[Activity::wolf]);
-		//weapon->SetFollowingObjectBoneMatrix(model->GetBones()[23].fbxCluster->GetLink()->EvaluateGlobalTransform());
 		status.HP = 2;
 		status.speed = 1.0f;
 		shadowOffset = 1.0f;
@@ -328,7 +287,8 @@ void Enemy::Move(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 	//移動処理
 	//パターン1
 	if (this->mode == -1) {
-		float distance = 1000;//距離保存用
+		//距離保存用
+		float distance = 1000;
 		for (int i = 0; i < 6; i++)
 		{
 			//距離を測定して攻撃対象を決定
@@ -477,11 +437,6 @@ void Enemy::Attack(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 				ChangeAnimation(AttackType_Wolf::Type01_Walk);
 			}
 			else { StopAnimation(); }
-			//else if (this->attackTime >= 1.0f) {
-			//	this->position.x -= this->vectol.m128_f32[0] / 100;
-			//	this->position.y -= this->vectol.m128_f32[1] / 100;
-			//	this->position.z -= this->vectol.m128_f32[2] / 100;
-			//}
 
 			//移動処理移行時の初期化
 			if (this->attackTime >= 1.0f) {
@@ -565,16 +520,18 @@ void Enemy::JumpAttack(XMFLOAT3& targetPosition)
 		jump.pos = lerp(a, b, jumpTime);
 		position = XMFLOAT3(jump.pos.x, jump.pos.y, jump.pos.z);
 		//疑似関数clamp
-		if (jumpTime < 0) { jumpTime = 0; }
-		else if (jumpTime > maxTime) {
-			jumpTime = maxTime;
-			p = true;
-		}
-		else if (jumpTime < maxTime) {
-			jumpTime += 1.0f / 30.0f;
-		}
-		else {
-			jumpTime = jumpTime;
+		{
+			if (jumpTime < 0) { jumpTime = 0; }
+			else if (jumpTime > maxTime) {
+				jumpTime = maxTime;
+				p = true;
+			}
+			else if (jumpTime < maxTime) {
+				jumpTime += 1.0f / 30.0f;
+			}
+			else {
+				jumpTime = jumpTime;
+			}
 		}
 
 		if (p) {
@@ -604,10 +561,11 @@ void Enemy::JumpAttack(XMFLOAT3& targetPosition)
 void Enemy::Retreat()
 {
 	if (actionPattern != MoveMode::retreat)return;
+
 	ChangeAnimation(MotionType::WalkMotion);
-
+	//移動
 	move(Normalize(objectVector(position, RetreatPos)));
-
+	//回転
 	matRot = LookAtRotation(
 		VectorToXMFloat(Normalize(objectVector(position, RetreatPos))),
 		XMFLOAT3(0.0f, 1.0f, 0.0f));
@@ -632,7 +590,7 @@ void Enemy::Damage()
 		damage = false;
 		count = 0.0f;
 	}
-
+	//ダメージパーティクル生成
 	particle->CreateParticle(
 		60, XMFLOAT3(position.x, position.y + particleOffset, position.z),
 		0.0001f, 0.05f, 5, 8.0f, { 1,0,0,1 });

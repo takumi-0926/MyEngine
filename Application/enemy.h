@@ -66,17 +66,16 @@ public:
 
 
 	float damegeCount = 0.0f;
-
+	//個体識別番号
 	unsigned short myNumber = 0;
 	int registrationNumber = 0;
-
+	//パーティクル位置調整
 	float particleOffset = 0.0f;
-
+	//影位置調整
 	float shadowOffset = 0.0f;
-
-	int followBoneNum = 0;
-
+	//透明度
 	float alpha = 1.0f;
+	//デフォルト色
 	vector<XMFLOAT3> defalt_ambient;
 	XMVECTOR vectol;
 	XMFLOAT3 attackPos;
@@ -88,9 +87,13 @@ public:
 	ParticleManager* particle = nullptr;
 
 private:
+	//Vector型をXMFLAT3型にキャスト
 	XMFLOAT3 VectorToXMFloat(XMVECTOR vec);
-	float	 objectDistance(XMFLOAT3 pos1, XMFLOAT3 pos2);	//建物との直線距離を計算
-	XMVECTOR objectVector(XMFLOAT3 pos1, XMFLOAT3 pos2);	//建物間のベクトルを計算
+	//二点間の距離を算出
+	float objectDistance(XMFLOAT3 pos1, XMFLOAT3 pos2);	
+	//二点間のベクトルを算出
+	XMVECTOR objectVector(XMFLOAT3 pos1, XMFLOAT3 pos2);	
+	//正規化
 	XMVECTOR Normalize(XMVECTOR vec);
 	void move(XMVECTOR vector);	//ベクトル移動
 	void moveReset();
@@ -158,7 +161,6 @@ public:
 		model->alpha = this->alpha;
 		model->Update();
 	}
-	inline void SetFollowBoneNum(int num) { this->followBoneNum = num; }
 
 	void CreateWeapon(Model* model);
 	void Particle();

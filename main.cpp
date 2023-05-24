@@ -42,7 +42,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//ウィンドウズ初期化
 		app = new Application();
 		app->CreateWindows();
-
+		app->InitFps();
 		//DirectX初期化
 		dx12 = new Wrapper();
 		dx12->Init(app->_hwnd(), app->GetWindowSize());
@@ -138,6 +138,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			break;
 		}
 
+		app->CalculationFps();
+
 		//ImGui
 		ImGui_ImplDX12_NewFrame();
 		ImGui_ImplWin32_NewFrame();
@@ -178,6 +180,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), dx12->CommandList().Get());
 		
 		dx12->PostRun();
+
+		app->CalculationSleep();
 	}
 
 #pragma region 後処理

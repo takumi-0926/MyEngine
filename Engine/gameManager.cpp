@@ -15,6 +15,8 @@
 #include "Collision\SphereCollider.h"
 #include "Collision\CollisionManager.h"
 
+std::thread th = {};
+
 GameManager::GameManager()
 {
 }
@@ -110,6 +112,10 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 		assert(0);
 		return false;
 	}
+	if (!Sprite::loadTexture(18, L"Resources/loading.png")) {
+		assert(0);
+		return false;
+	}
 
 	if (!BillboardObject::LoadTexture(0, L"Resources/GateUI_red.png")) {
 		assert(0);
@@ -199,10 +205,10 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 		Model* model = nullptr;
 		decltype(stageModels)::iterator it = stageModels.find(objectData.name);
 		if (it != stageModels.end()) { model = it->second; }
-		Stage* newObject= Stage::Create(model);
+		Stage* newObject = Stage::Create(model);
 
 		//当たり判定をつけるかどうか
-		if (objectData.name != "Tree" && objectData.name != "Cliff") { 
+		if (objectData.name != "Tree" && objectData.name != "Cliff") {
 			newObject->SetCollision();
 		}
 		//名前を付ける
@@ -334,6 +340,9 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	start->SetSize({ 360,360 });
 	start->Update();
 
+	loadResource.reset(Sprite::Create(18, { 640.0f, 360.0f }));
+	loadResource.get()->Update();
+
 	//入力及び音声
 	input->Update();
 
@@ -414,19 +423,25 @@ void GameManager::Update()
 			baseCamp[29]->position.z));
 
 	//ステージ描画更新処理
-	for (auto& object : stages) {
-		if (UseStage == GameLocation::BaseStage) { object->SetColliderInvisible(true); }
-		if (UseStage == GameLocation::BaseCamp) { object->SetColliderInvisible(false); }
-		object->Update();
-	}
-	for (auto& object : baseCamp) {
-		if (UseStage == GameLocation::BaseCamp) { object->SetColliderInvisible(true); }
-		if (UseStage == GameLocation::BaseStage) { object->SetColliderInvisible(false); }
-		object->Update();
-	}
+
+	//タイトルステージ
 	for (auto& object : titleStages) {
 		object->SetColliderInvisible(false);
 		object->Update();
+	}
+	for (auto& object : stages) {
+		if (UseStage == GameLocation::BaseCamp) { object->SetColliderInvisible(false); }
+		if (UseStage == GameLocation::BaseStage) {
+			object->SetColliderInvisible(true);
+			object->Update();
+		}
+	}
+	for (auto& object : baseCamp) {
+		if (UseStage == GameLocation::BaseStage) { object->SetColliderInvisible(false); }
+		if (UseStage == GameLocation::BaseCamp) {
+			object->SetColliderInvisible(true);
+			object->Update();
+		}
 	}
 
 	camera->Update();
@@ -488,7 +503,6 @@ void GameManager::TitleUpdate()
 	if (fade->GetFadeIn()) {
 		fade->FadeIn();
 		if (!fade->GetFadeIn()) {
-			if (TitleHierarchy == 0) { SceneNum = Scene::GAME; }
 			Wrapper::SetCamera(mainCamera);
 			fade->SetFadeIn(false);
 			fade->SetFadeOut(true);
@@ -497,14 +511,13 @@ void GameManager::TitleUpdate()
 			TitleReset();
 		}
 	}
-	//static float teu = 0.0f;
-	//TitleResources[1].get()->SetSize(XMFLOAT2(teu, 44.0f));
-	//TitleResources[1].get()->Update();
-	//teu += 20.0f;
-	//if (teu >= 440.0f) {
-	//	teu = 440.0f;
-	//}
-	debugText.Print("hello", 100.0f, 100.0f, 8.0f);
+
+	if (load) {
+		loading();
+
+		if (!load) { SceneNum = Scene::GAME; }
+	}
+
 	keyFlag = false;
 }
 void GameManager::GameUpdate() {
@@ -512,20 +525,20 @@ void GameManager::GameUpdate() {
 	if (SceneNum == GAME) {
 
 		//フェードアウト
-		if (fade->GetFadeOut() && !load ) {
+		if (fade->GetFadeOut() && !load) {
 			fade->FadeOut();
 		}
 
-		if (load) { GameModeNum = GameMode::LOAD; }
 		//当たり判定確認
 		//CollisionManager::GetInstance()->CheckAllCollision();
 
-		if (GameModeNum == GameMode::LOAD) {
-			loadingUpdate();
-			if (!load) {
-				GameModeNum = GameMode::START;
-			}
-		}
+		//if (GameModeNum == GameMode::LOAD) {
+		//	loading();
+		//	if (!load) {
+		//		GameModeNum = GameMode::START;
+		//	}
+		//	return;
+		//}
 
 		//ゲームスタート時処理
 		if (GameModeNum == GameMode::START) {
@@ -623,7 +636,6 @@ void GameManager::GameUpdate() {
 					if (Hhit == true && _enemy[i]->attackHit == true) {
 						_enemy[i]->attackHit = false;
 						popHp += 10;
-						//_player->model->vmdNumber = vmdData::DAMAGE;
 					}
 					//ゲームオーバー条件				
 					//if (gateHP <= 0 || playerHp <= 0) { SceneChange = true; }
@@ -1268,12 +1280,10 @@ void GameManager::MainDraw()
 void GameManager::SubDraw()
 {
 	// コマンドリストの取得
-	ID3D12GraphicsCommandList* cmdList = dx12->CommandList().Get();
+	Sprite::PreDraw(dx12->CommandList().Get());
 
 	if (SceneNum == TITLE) {
-		Sprite::PreDraw(cmdList);
 		Title->Draw();
-		//debugText.DrawAll(cmdList);
 
 		if (TitleWave == 0) {
 			for (int i = 0; i < 2; i++) { TitleResources[i].get()->Draw(); }
@@ -1287,24 +1297,15 @@ void GameManager::SubDraw()
 			else { TitleResources_Option[1].get()->Draw(); }
 			TitleResources_Option[2].get()->Draw();
 		}
-
-		Sprite::PostDraw();
-
-		//BaseObject::PreDraw(cmdList);
-		//BaseObject::PostDraw();
-
 	}
 	else if (SceneNum == GAME) {
-		Sprite::PreDraw(cmdList);
-		Sprite::PostDraw();
 
-		BillboardObject::PreDraw(cmdList);
+		//BillboardObject::PreDraw(cmdList);
 
-		Bottom->Draw(cmdList);
+		//Bottom->Draw(cmdList);
 
-		BillboardObject::PostDraw();
+		//BillboardObject::PostDraw();
 
-		Sprite::PreDraw(cmdList);
 		if (GameModeNum != GameMode::POSE) {
 
 			if (GameModeNum == GameMode::Preparation) {
@@ -1336,17 +1337,12 @@ void GameManager::SubDraw()
 		if (GameModeNum == GameMode::POSE) {
 			Pose->Draw();
 		}
-
-		Sprite::PostDraw();
 	}
 	else if (SceneNum == END) {
-		Sprite::PreDraw(cmdList);
 		End->Draw();
-		Sprite::PostDraw();
 	}
 
 	//フェード用画像描画
-	Sprite::PreDraw(cmdList);
 	start->Draw();
 	if (fade->GetFadeIn() || fade->GetFadeOut() || fade->GethalfFade()) {
 		fade->Draw();
@@ -1368,6 +1364,12 @@ void GameManager::SubDraw()
 			gateBreak_red->Draw();
 		}
 	}
+
+	//ローディング中
+	if (load) {
+		loadResource.get()->Draw();
+	}
+
 	Sprite::PostDraw();
 }
 void GameManager::ShadowDraw(bool isShadow)
@@ -1426,25 +1428,27 @@ void GameManager::ShadowDraw(bool isShadow)
 	BaseObject::PostDraw();
 }
 
-void GameManager::loadingUpdate() {
+void GameManager::loading() {
 
 	if (load) {
-		std::thread th = {};
 		switch (_loadMode)
 		{
 		case LoadMode::No:
 			_loadMode = LoadMode::Start;
+
+			break;
 			//何もない・・・
 		case LoadMode::Start:
 			//ローディング始め
 			th = std::thread([&] {asyncLoad(); });
 			_loadMode = LoadMode::Run;
+			break;
 		case LoadMode::Run:
 			//ローディング中にやりたいこと
-
-			th.join();
+			break;
 		case LoadMode::End:
 			//ローディング終わり
+			th.join();
 			load = false;
 
 		default:
@@ -1627,8 +1631,6 @@ void GameManager::LoadGameResources()
 	for (int i = 0; i < 3; i++)
 	{
 		protEnemy[i] = Enemy::Create(wolf[i], golem[i]);
-		//武器生成
-		//protEnemy[i]->CreateWeapon(Model::CreateFromOBJ("weapon"));
 		//パーティクル生成
 		protEnemy[i]->Particle();
 	}

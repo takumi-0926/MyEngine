@@ -68,9 +68,10 @@ void Fade::Draw()
 void Fade::FadeIn()
 {
 	if (!fadeIn) { return; }
-	SetAlpha(_alpha);
 	_alpha += fadeNum;
+	SetAlpha(_alpha);
 	if (_alpha >= 1.0f) {
+		SetAlpha(1.0f);
 		fadeIn = false;
 		fadeOut = true;
 	}
@@ -80,9 +81,10 @@ void Fade::FadeIn()
 void Fade::FadeOut()
 {
 	if (!fadeOut) { return; }
-	SetAlpha(_alpha);
 	_alpha -= fadeNum;
+	SetAlpha(_alpha);
 	if (_alpha <= 0.0f) {
+		SetAlpha(0.0f);
 		fadeOut = false;
 	}
 	Update();

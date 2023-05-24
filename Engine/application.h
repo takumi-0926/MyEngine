@@ -1,10 +1,17 @@
 #pragma once
 #include <Windows.h>
+#pragma comment(lib,"winmm.lib")
 
 class Application {
 private://メンバ変数
 	WNDCLASSEX windowClass{};
 	HWND hwnd = nullptr;
+	double fps = 0;
+	LARGE_INTEGER Freq = { 0 };
+	LARGE_INTEGER StartTime = { 0 };
+	LARGE_INTEGER NowTime = { 0 };
+	int iCount = 0;
+	DWORD SleepTime = 0;
 
 public://静的メンバ変数
 
@@ -34,6 +41,10 @@ public:
 
 	//終了時処理
 	void Processing();
+
+	void InitFps();
+	void CalculationFps();
+	void CalculationSleep();
 
 	//ゲッター
 	SIZE GetWindowSize()const {

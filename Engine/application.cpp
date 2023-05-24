@@ -62,6 +62,45 @@ void Application::Processing() {
 	UnregisterClass(windowClass.lpszClassName, windowClass.hInstance);
 }
 
+void Application::InitFps()
+{
+	QueryPerformanceFrequency(&Freq);
+	//ç°ÇÃéûä‘ÇéÊìæ
+	QueryPerformanceCounter(&StartTime);
+}
+
+void Application::CalculationFps()
+{
+	//FPSÇÃåvéZ
+	if (iCount == 60) {
+		QueryPerformanceCounter(&NowTime);
+		fps = 1000.0f / ((static_cast<double>(NowTime.QuadPart
+			- StartTime.QuadPart) * 1000 / Freq.QuadPart) / 60);
+		StartTime = NowTime;
+	}
+	iCount++;
+}
+
+void Application::CalculationSleep()
+{
+	QueryPerformanceCounter(&NowTime);
+
+	SleepTime = static_cast<DWORD>((1000.0f / 60.0f)
+		* iCount - (NowTime.QuadPart - StartTime.QuadPart)
+		* 1000.0f / Freq.QuadPart);
+
+	if (SleepTime > 0 && SleepTime < 18) {
+		timeBeginPeriod(1);
+		Sleep(SleepTime);
+		timeEndPeriod(1);
+	}
+	else {
+		timeBeginPeriod(1);
+		Sleep(1);
+		timeEndPeriod(1);
+	}
+}
+
 Application& Application::Instance() {
 	static Application instance;
 	return instance;

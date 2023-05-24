@@ -321,6 +321,7 @@
     <ClInclude Include="Engine\Math\Vector3.h" />
     <ClInclude Include="Engine\JsonLoader.h" />
     <ClInclude Include="Application\Weapon.h" />
+    <ClInclude Include="fps.h" />
     <ClInclude Include="Singleton_Heap.h" />
   </ItemGroup>
   <ItemGroup>
@@ -356,6 +357,7 @@
     <ClCompile Include="Engine\Input\input.cpp" />
     <ClCompile Include="Engine\light\Light.cpp" />
     <ClCompile Include="Engine\JsonLoader.cpp" />
+    <ClCompile Include="fps.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Engine\Math\Matrix4.cpp" />
     <ClCompile Include="Engine\object\Material.cpp" />

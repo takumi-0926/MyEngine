@@ -51,12 +51,12 @@ enum Scene {
 	TITLE,
 	GAME,
 	END,
-	DebugTest
+	DebugTest,
+	LOAD,
 };
 enum GameMode {
 	NASI,
 	START,
-	LOAD,
 	Preparation,
 	POSE,
 	WEAPONSELECT,
@@ -167,6 +167,8 @@ private://メンバ変数(初期化)
 	int TitleHierarchy = 0;
 	bool titleStart = 0;
 	bool titleOption = 0;
+
+	unique_ptr<Sprite> loadResource = {};
 
 	//カウントUI周り変数
 	unique_ptr<Sprite> One_Numbers[10] = {};//0～9の数字スプライト
@@ -329,7 +331,7 @@ public://メンバ関数
 
 	void asyncLoad();
 
-	void loadingUpdate();
+	void loading();
 
 	void PlayerUpdate();
 	void EnemyUpdate();
