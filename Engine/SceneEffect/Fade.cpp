@@ -23,6 +23,7 @@ Fade* Fade::Create(UINT texNumber, XMFLOAT2 position, XMFLOAT4 color, XMFLOAT2 a
 	// 仮サイズ
 	XMFLOAT2 size = { 100.0f, 100.0f };
 
+
 	if (spritecommon._texBuff[texNumber])
 	{
 		// テクスチャ情報取得
