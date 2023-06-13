@@ -10,6 +10,10 @@ using namespace std;
 /// </summary>
 ID3D12Device* Material::device = nullptr;
 
+wstring Material::fileExt;
+wstring Material::directorypath;
+wstring Material::fileName;
+
 void Material::StaticInitialize(ID3D12Device* device)
 {
 	// 再初期化チェック
@@ -74,11 +78,25 @@ void Material::LoadTexture(const std::string& directoryPath, CD3DX12_CPU_DESCRIP
 	// ユニコード文字列に変換
 	MultiByteToWideChar(CP_ACP, 0, filepath.c_str(), -1, wfilepath, _countof(wfilepath));
 
-	result = LoadFromWICFile(
-		wfilepath, WIC_FLAGS_NONE,
-		&metadata, scratchImg);
-	if (FAILED(result)) {
-		assert(0);
+	SeparateFilePath(wfilepath);
+
+	if (fileExt == L"dds") {
+		result = LoadFromDDSFile(
+			wfilepath, DDS_FLAGS_NONE,
+			&metadata, scratchImg);
+		if (FAILED(result)) {
+			assert(0);
+			//return false;
+		}
+	}
+	else {
+		result = LoadFromWICFile(
+			wfilepath, WIC_FLAGS_NONE,
+			&metadata, scratchImg);
+		if (FAILED(result)) {
+			assert(0);
+			//return false;
+		}
 	}
 
 	const Image* img = scratchImg.GetImage(0, 0, 0); // 生データ抽出
@@ -132,6 +150,46 @@ void Material::LoadTexture(const std::string& directoryPath, CD3DX12_CPU_DESCRIP
 	);
 }
 
+void Material::SeparateFilePath(const std::wstring& filepath)
+{
+
+	size_t pos1;
+	std::wstring exceptExt;
+
+	pos1 = filepath.rfind('.');
+	if (pos1 != std::wstring::npos) {
+
+		fileExt = filepath.substr(pos1 + 1, filepath.size() - pos1 - 1);
+
+		exceptExt = filepath.substr(0, pos1);
+	}
+	else {
+		fileExt = L"";
+		exceptExt = filepath;
+	}
+
+	pos1 = exceptExt.rfind('\\');
+	if (pos1 != std::wstring::npos) {
+		directorypath = exceptExt.substr(0, pos1 - 1);
+
+		fileName = exceptExt.substr(pos1 + 1, exceptExt.size() - pos1 - 1);
+
+		//return 0;
+	}
+
+	pos1 = exceptExt.rfind('/');
+	if (pos1 != std::wstring::npos) {
+		directorypath = exceptExt.substr(0, pos1 - 1);
+
+		fileName = exceptExt.substr(pos1 + 1, exceptExt.size() - pos1 - 1);
+
+		//return 0;
+	}
+
+	directorypath = L"";
+	fileName = exceptExt;
+
+}
 void Material::Update()
 {
 	HRESULT result;

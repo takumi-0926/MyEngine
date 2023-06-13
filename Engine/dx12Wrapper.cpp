@@ -2,7 +2,7 @@
 
 #include "dx12Wrapper.h"
 
-#include "..\Singleton_Heap.h"
+#include "Singleton_Heap.h"
 
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")

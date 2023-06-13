@@ -45,9 +45,9 @@ private:
 
 	FbxScene* fbxScene = nullptr;
 
-	~FbxModel();
 
 public:
+	~FbxModel();
 	void CreateBuffers(ID3D12Device* device);
 
 	void Update();
@@ -104,6 +104,9 @@ public:
 
 	std::vector<unsigned short> indices;
 
+	//リソース番号
+	int TextureOffset = 0;
+
 	//ボーン配列
 	vector<Bone> bones;
 private:
@@ -122,6 +125,9 @@ public:
 	const XMMATRIX& GetModelTransform() { return meshNode->globleTransForm; }
 	vector<Bone>& GetBones() { return bones; }
 	FbxScene* GetFbxScene() { return fbxScene; }
+	int GetTextureOffset() { return TextureOffset; }
+
+	void SetTextureOffset(int num) { this->TextureOffset = num; }
 
 	/// <summary>
 	/// 静的初期化

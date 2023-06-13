@@ -101,58 +101,36 @@ void PostEffect::Initialize(ID3D12DescriptorHeap* heap)
 		1, 0, 1, 0, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET
 	);
 
+	auto texProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
+	auto texValue = CD3DX12_CLEAR_VALUE(DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, clearColor);
+
 	//バッファ生成
 	result = device->CreateCommittedResource(
-		&CD3DX12_HEAP_PROPERTIES(
-			D3D12_CPU_PAGE_PROPERTY_WRITE_BACK,D3D12_MEMORY_POOL_L0),
+		&texProperties,
 		D3D12_HEAP_FLAG_NONE,
 		&texresDesc,
 		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
-		&CD3DX12_CLEAR_VALUE(DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, clearColor),
+		&texValue,
 		IID_PPV_ARGS(&texBuff)
 	);
 	assert(SUCCEEDED(result));
 
-	//auto texProperties = CD3DX12_HEAP_PROPERTIES(D3D12_CPU_PAGE_PROPERTY_WRITE_BACK, D3D12_MEMORY_POOL_L0);
-	//auto texValue = CD3DX12_CLEAR_VALUE(DXGI_FORMAT_R8G8B8A8_UNORM, clearColor);
+	////画素数
+	//const UINT pixelCount = Application::window_width * Application::window_height;
+	////一行分のデータサイズ
+	//const UINT rowPitch = sizeof(UINT) * Application::window_width;
+	////全体のデータサイズ
+	//const UINT depthPitch = rowPitch * Application::window_height;
 
-	////バッファ生成
-	//result = device->CreateCommittedResource(
-	//	&texProperties,
-	//	D3D12_HEAP_FLAG_NONE,
-	//	&texresDesc,
-	//	D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
-	//	&texValue,
-	//	IID_PPV_ARGS(&texBuff)
-	//);
+	////画像イメージ
+	//UINT* img = new UINT[pixelCount];
+	//for (int i = 0; i < pixelCount; i++) { img[i] = 0xff0000ff; }
+
+	////データ転送
+	//result = texBuff->WriteToSubresource(
+	//	0, nullptr, img, rowPitch, depthPitch);
 	//assert(SUCCEEDED(result));
-//
-	//画素数
-	const UINT pixelCount = Application::window_width * Application::window_height;
-	//一行分のデータサイズ
-	const UINT rowPitch = sizeof(UINT) * Application::window_width;
-	//全体のデータサイズ
-	const UINT depthPitch = rowPitch * Application::window_height;
-
-	//画像イメージ
-	UINT* img = new UINT[pixelCount];
-	for (int i = 0; i < pixelCount; i++) { img[i] = 0xff0000ff; }
-
-	//データ転送
-	result = texBuff->WriteToSubresource(
-		0, nullptr, img, rowPitch, depthPitch);
-	assert(SUCCEEDED(result));
-	delete[] img;
-//
-	////SRVデスクリプタヒープ設定
-	//D3D12_DESCRIPTOR_HEAP_DESC srvDescHeap = {};
-	//srvDescHeap.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-	//srvDescHeap.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-	//srvDescHeap.NumDescriptors = 1;
-
-	//result = device->CreateDescriptorHeap(
-	//	&srvDescHeap, IID_PPV_ARGS(descHeapSRV.ReleaseAndGetAddressOf()));
-	//assert(SUCCEEDED(result));
+	//delete[] img;
 
 	//SRV設定
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};

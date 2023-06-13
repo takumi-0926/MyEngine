@@ -1,6 +1,6 @@
 #include "DebugImgui.h"
 
-#include "..\Singleton_Heap.h"
+#include "Singleton_Heap.h"
 
 float DebugImgui::shadowCameraSite[2] = { 320.0f,320.0f };
 float DebugImgui::shadowlightPos[3] = { 30.0f,50.0f,20.0f };

@@ -57,6 +57,11 @@ public:
 	float alpha;		// アルファ
 	std::string textureFilename;	// テクスチャファイル名
 
+private:
+	static std::wstring directorypath;
+	static std::wstring fileName;
+	static std::wstring fileExt;;
+
 public:
 	/// <summary>
 	/// 定数バッファの取得
@@ -70,6 +75,8 @@ public:
 	/// <param name="cpuHandle">CPUデスクリプタハンドル</param>
 	/// <param name="gpuHandle">GPUデスクリプタハンドル</param>
 	void LoadTexture(const std::string& directoryPath, CD3DX12_CPU_DESCRIPTOR_HANDLE cpuHandle, CD3DX12_GPU_DESCRIPTOR_HANDLE gpuHandle);
+
+	void SeparateFilePath(const std::wstring& filepath);
 
 	/// <summary>
 	/// 更新

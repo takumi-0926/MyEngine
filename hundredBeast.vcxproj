@@ -281,7 +281,6 @@
     <ClInclude Include="Engine\Input\DirectInput.h" />
     <ClInclude Include="Application\Easing.h" />
     <ClInclude Include="Application\enemy.h" />
-    <ClInclude Include="Application\EnemyManager.h" />
     <ClInclude Include="Engine\light\DirectionalLight.h" />
     <ClInclude Include="Engine\light\LightGroup.h" />
     <ClInclude Include="Engine\light\PointLight.h" />
@@ -321,13 +320,15 @@
     <ClInclude Include="Engine\Math\Vector3.h" />
     <ClInclude Include="Engine\JsonLoader.h" />
     <ClInclude Include="Application\Weapon.h" />
-    <ClInclude Include="fps.h" />
-    <ClInclude Include="Singleton_Heap.h" />
+    <ClInclude Include="Engine\fps.h" />
+    <ClInclude Include="Engine\safeDelete.h" />
+    <ClInclude Include="Engine\Singleton_Heap.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application\BillboardObject.cpp" />
     <ClCompile Include="Application\DebugImgui.cpp" />
     <ClCompile Include="Application\Weapon.cpp" />
+    <ClCompile Include="Application\EnemyManager.cpp" />
     <ClCompile Include="Engine\2d\PostEffect.cpp" />
     <ClCompile Include="Engine\application.cpp" />
     <ClCompile Include="Engine\dx12Wrapper.cpp" />
@@ -357,7 +358,7 @@
     <ClCompile Include="Engine\Input\input.cpp" />
     <ClCompile Include="Engine\light\Light.cpp" />
     <ClCompile Include="Engine\JsonLoader.cpp" />
-    <ClCompile Include="fps.cpp" />
+    <ClCompile Include="Engine\fps.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Engine\Math\Matrix4.cpp" />
     <ClCompile Include="Engine\object\Material.cpp" />

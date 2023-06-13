@@ -2,7 +2,7 @@
 #include "gameManager.h"
 #include "application.h"
 #include "dx12Wrapper.h"
-#include "..\Singleton_Heap.h"
+#include "Singleton_Heap.h"
 #include "Audio/audio.h"
 #include "Input/input.h"
 #include "delete.h"
@@ -150,14 +150,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		Object3Ds::SetDx12(dx12);
 		gameScene.Update();
 
-		Singleton_Heap::GetInstance()->FbxTexture = 200;
-
 		//影
 		dx12->PreRunShadow();
 		gameScene.ShadowDraw();
 		//dx12->PostRun();
-
-		Singleton_Heap::GetInstance()->FbxTexture = 200;
 
 		//レンダーテクスチャに描画
 		postEffect->PreDrawScene(dx12->CommandList().Get());
