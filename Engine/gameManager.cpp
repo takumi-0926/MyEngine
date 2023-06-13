@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <future>
 #include "gameManager.h"
+#include "Singleton_Heap.h"
 #include "object\baseObject.h"
 #include "FBX\FbxLoader.h"
 #include "FBX\FbxObject3d.h"
@@ -44,7 +45,7 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	debugText.Initialize(debugTextTexNumber);
 
 	//画像リソース
-	if (!Sprite::loadTexture(0, L"Resources/Title.png")) {
+	if (!Sprite::loadTexture(0, L"Resources/Title.dds")) {
 		assert(0);
 		return false;
 	}
@@ -64,11 +65,11 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 		assert(0);
 		return false;
 	}
-	if (!Sprite::loadTexture(6, L"Resources/start.png")) {
+	if (!Sprite::loadTexture(6, L"Resources/start.dds")) {
 		assert(0);
 		return false;
 	}
-	if (!Sprite::loadTexture(7, L"Resources/clear_result.png")) {
+	if (!Sprite::loadTexture(7, L"Resources/clear_result.dds")) {
 		assert(0);
 		return false;
 	}
@@ -76,7 +77,7 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 		assert(0);
 		return false;
 	}
-	if (!Sprite::loadTexture(9, L"Resources/blackTex.png")) {
+	if (!Sprite::loadTexture(9, L"Resources/blackTex.dds")) {
 		assert(0);
 		return false;
 	}
@@ -112,7 +113,7 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 		assert(0);
 		return false;
 	}
-	if (!Sprite::loadTexture(18, L"Resources/loading.png")) {
+	if (!Sprite::loadTexture(18, L"Resources/loading.dds")) {
 		assert(0);
 		return false;
 	}
@@ -182,11 +183,6 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	skyDomeModel = Model::CreateFromOBJ("skydome");
 	bulletModel = Model::CreateFromOBJ("bullet");
 	Box1x1 = Model::CreateFromOBJ("Box");
-
-	for (int i = 0; i < 3; i++) {
-		golem[i] = FbxLoader::GetInstance()->LoadModelFromFile("Golem");
-		wolf[i] = FbxLoader::GetInstance()->LoadModelFromFile("Wolf");
-	}
 
 	//ステージデータ及びモデルデータ読み込み
 	stageModels.insert(std::make_pair("Ground", Model::CreateFromOBJ("Ground")));
@@ -299,7 +295,7 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	Title = Sprite::Create(0, { 640.0f,120.0f });
 	End = Sprite::Create(1, { 0.0f,0.0f });
 	HpBer = Sprite::Create(3, { 0.0f,0.0f });
-	Pose = Sprite::Create(15, { 0.0f,0.0f });
+	Pose.reset(Sprite::Create(15, { 0.0f,0.0f }));
 
 	Title->Update();
 
@@ -312,14 +308,6 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	hp = Sprite::Create(4, { 36.0f,32.0f });
 	hp->SetSize(XMFLOAT2(playerHp * 4.5f, 30));
 	hp->Update();
-
-	BreakBar = Sprite::Create(10, { 540,640 });
-	BreakBar->Update();
-	for (int i = 0; i < 15; i++) {
-		static float xpos = 48.0f;
-		BreakGage[i] = Sprite::Create(11, { xpos * i + 540.0f,640 });
-		BreakGage[i]->Update();
-	}
 
 	//シーンエフェクト--------------------
 	//フェードイン・アウト
@@ -340,8 +328,22 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	start->SetSize({ 360,360 });
 	start->Update();
 
-	loadResource.reset(Sprite::Create(18, { 640.0f, 360.0f }));
-	loadResource.get()->Update();
+
+
+	int fontWidth = 64;
+	int fontHeight = 64;
+
+	float basePos = 360.0f;
+	float offset = 50.f;
+
+	for (int i = 0; i < 11; i++)
+	{
+		Now_Loading[i].reset(Sprite::Create(18, { 640.0f + offset * i ,basePos }));
+		Now_Loading[i].get()->SetTextureRect({ float(fontWidth * i), 0 }, { float(fontWidth), float(fontHeight) });
+		Now_Loading[i].get()->SetSize({ float(fontWidth),float(fontHeight) });
+		Now_Loading[i].get()->SetAnchorPoint({ 0.5f,0.5f });
+		Now_Loading[i].get()->Update();
+	}
 
 	//入力及び音声
 	input->Update();
@@ -460,8 +462,6 @@ void GameManager::TitleUpdate()
 	//タイトル更新
 	if (SceneNum != TITLE)return;
 
-	//if(directInput->IsButtonPush(directInput->DownButton))
-
 	//タイトル進度0
 	if (TitleWave == 0) {
 		if (input->Trigger(DIK_SPACE) || directInput->IsButtonPush(DirectInput::ButtonKind::ButtonA)) {
@@ -528,17 +528,6 @@ void GameManager::GameUpdate() {
 		if (fade->GetFadeOut() && !load) {
 			fade->FadeOut();
 		}
-
-		//当たり判定確認
-		//CollisionManager::GetInstance()->CheckAllCollision();
-
-		//if (GameModeNum == GameMode::LOAD) {
-		//	loading();
-		//	if (!load) {
-		//		GameModeNum = GameMode::START;
-		//	}
-		//	return;
-		//}
 
 		//ゲームスタート時処理
 		if (GameModeNum == GameMode::START) {
@@ -611,7 +600,7 @@ void GameManager::GameUpdate() {
 		//ゲーム進行中処理
 		else if (GameModeNum == GameMode::NASI) {
 			if (UseStage != GameLocation::BaseCamp) {
-				EnemyUpdate();
+				enemy->Update(_player->GetPos(), defense_facilities, stages[10]->position);
 			}
 			PlayerUpdate();
 
@@ -622,21 +611,20 @@ void GameManager::GameUpdate() {
 					XMVECTOR inter;
 					bool Ghit = Collision::CheckSqhere2Triangle(sqhere[i], triangle[0], &inter);
 
-					//ゲート攻撃
-					if (Ghit == true && reception <= 0 && _enemy[i]->attackHit == true) {
-						if (_enemy[i]->mode != 3) { continue; }
-						Hhit = false;
-						_enemy[i]->attackHit = false;
-						gateHP -= 1;
-						shake = true;
-						reception = 600;
-					}
+					//ゲート攻撃(使う)
+					//if (Ghit == true && reception <= 0 && _enemy[i]->attackHit == true) {
+					//	if (_enemy[i]->mode != 3) { continue; }
+					//	_enemy[i]->attackHit = false;
+					//	gateHP -= 1;
+					//	shake = true;
+					//	reception = 600;
+					//}
 
-					//エネミーからのダメージ
-					if (Hhit == true && _enemy[i]->attackHit == true) {
-						_enemy[i]->attackHit = false;
-						popHp += 10;
-					}
+					//エネミーからのダメージ(使う)
+					//if (Hhit == true && _enemy[i]->attackHit == true) {
+					//	_enemy[i]->attackHit = false;
+					//	popHp += 10;
+					//}
 					//ゲームオーバー条件				
 					//if (gateHP <= 0 || playerHp <= 0) { SceneChange = true; }
 					reception--;
@@ -765,7 +753,7 @@ void GameManager::GameUpdate() {
 			//パーティクル生成
 			static float createTime = 0.2f;
 			if (createTime <= 0.0f) {
-				//particlemanager->CreateParticle(30, _player->model->position, 0.01f, 0.005f, 10, 5.0f, XMFLOAT4(particleColor));
+				particlemanager->CreateParticle(30, _player->GetPos(), 0.01f, 0.005f, 10, 5.0f, XMFLOAT4(particleColor));
 
 				createTime = 0.2f;
 			}
@@ -776,6 +764,7 @@ void GameManager::GameUpdate() {
 		if (GameModeNum == GameMode::WEAPONSELECT) {
 			weaponSelect->Update();
 			for (int i = 0; i < 3; i++) { weaponSlot[i]->Update(); }
+			_player->SetAction(action::Wait);
 			_player->Update();
 
 			//施設選択
@@ -971,12 +960,11 @@ void GameManager::GameUpdate() {
 				FbxObject3d::SetCamera(dx12->Camera());
 
 				dx12->SceneUpdate();
-				//obj03->Update();
 				for (int i = 0; i < 6; i++) {
-					defense_facilities[i]->Update();
-					defense_facilities[i]->moveUpdate(_enemy);
+					//使う
+					//defense_facilities[i]->Update();
+					//defense_facilities[i]->moveUpdate(_enemy);
 				}
-				//HitBox::mainUpdate(_player->model->GetBoneMat(), _player->model->rotation);
 
 				hp->SetSize(XMFLOAT2(playerHp * 4.5f, 30));
 				hp->Update();
@@ -986,11 +974,12 @@ void GameManager::GameUpdate() {
 
 				particlemanager->Update();
 				Bottom->Update();
-				for (int i = 0; i < _enemy.size(); i++) {
-					light->SetCircleShadowCasterPos(i, XMFLOAT3({ _enemy[i]->GetPosition().x, _enemy[i]->GetPosition().y, _enemy[i]->GetPosition().z }));
-					light->SetCircleShadowDir(i, XMVECTOR({ circleShadowDir[0],circleShadowDir[1],circleShadowDir[2],0 }));
-					light->SetCircleShadowAtten(i, XMFLOAT3(circleShadowAtten));
-					light->SetCircleShadowFacterAngle(i, XMFLOAT2(circleShadowFacterAnlge[1], circleShadowFacterAnlge[2] * _enemy[i]->shadowOffset));
+				for (int i = 0; i < enemy->GetGolem().size(); i++) {
+					//使う
+					//light->SetCircleShadowCasterPos(i, XMFLOAT3({ enemy->GetGolem() ->GetPosition().x, _enemy[i]->GetPosition().y, _enemy[i]->GetPosition().z }));
+					//light->SetCircleShadowDir(i, XMVECTOR({ circleShadowDir[0],circleShadowDir[1],circleShadowDir[2],0 }));
+					//light->SetCircleShadowAtten(i, XMFLOAT3(circleShadowAtten));
+					//light->SetCircleShadowFacterAngle(i, XMFLOAT2(circleShadowFacterAnlge[1], circleShadowFacterAnlge[2] * _enemy[i]->shadowOffset));
 				}
 				light->Update();
 
@@ -1120,59 +1109,31 @@ void GameManager::PlayerUpdate()
 	if (directInput->IsButtonPush(DirectInput::ButtonKind::ButtonX) || input->Push(DIK_X)) {
 		for (int i = 0; i < sqhere.size(); i++)
 		{
-			bool Ahit = Collision::CheckSqhere2Sqhere(sqhere[i], weaponCollider);
+			//使う
+			//bool Ahit = Collision::CheckSqhere2Sqhere(sqhere[i], weaponCollider);
 
-			if (Ahit != true) { continue; }
-			_enemy[i]->damage = true;
-			if (_enemy[i]->damage != true)continue;
-			_enemy[i]->status.HP -= 1;
-			//体力がなくなっていれば
-			if (_enemy[i]->status.HP <= 0) {
-				repelCount += 1;
-			}
+			//if (Ahit != true) { continue; }
+			//_enemy[i]->damage = true;
+			//if (_enemy[i]->damage != true)continue;
+			//_enemy[i]->status.HP -= 1;
+			////体力がなくなっていれば
+			//if (_enemy[i]->status.HP <= 0) {
+			//	repelCount += 1;
+			//}
 		}
 	}
 }
 void GameManager::EnemyUpdate()
 {
 	//エネミーの生成
-	{
-		//生成時間になり、生成対象が生きていないなら
-		enemyPopTime += 1.0f / 60.0f;
-		if (enemyPopTime >= 5.0f) {
-			for (int i = 0; i < 3; i++) {
-				if (protEnemy[i]->alive) { continue; }
-
-				protEnemy[i]->Appearance();
-				_enemy.push_back(protEnemy[i]);
-
-				//当たり判定用球体生成
-				Sqhere _sqhere;
-				_sqhere.radius = 20.0f;
-				sqhere.push_back(_sqhere);
-
-				enemyPopTime = 0.0f;
-
-				break;
-			}
-		}
-	}
-	//エネミー関係の制御
-	{
-		for (int i = 0; i < _enemy.size(); i++) {
-			_enemy[i]->moveUpdate(_player->GetPosition(), defense_facilities, stages[64]->position);
-			sqhere[i].center = XMVectorSet(_enemy[i]->GetPosition().x, _enemy[i]->GetPosition().y + 10.0f, _enemy[i]->GetPosition().z, 1);
-			if (_enemy[i]->alive) { continue; }
-			_enemy.erase(_enemy.begin() + i);
-			sqhere.erase(sqhere.begin() + i);
-		}
-	}
 }
 
 void GameManager::MainDraw()
 {
 	// コマンドリストの取得
 	ID3D12GraphicsCommandList* cmdList = dx12->CommandList().Get();
+
+	if (!load) { Singleton_Heap::GetInstance()->FbxTexture = 200; }
 
 	if (SceneNum == TITLE) {
 		BaseObject::PreDraw(cmdList);
@@ -1223,9 +1184,7 @@ void GameManager::MainDraw()
 			}
 
 			//敵描画
-			for (int i = 0; i < _enemy.size(); i++) {
-				_enemy[i]->Draw(cmdList);
-			}
+			enemy->Draw(cmdList);
 		}
 
 		BaseObject::PostDraw();
@@ -1241,9 +1200,9 @@ void GameManager::MainDraw()
 		// 3Dオブクジェクトの描画
 		particlemanager->Draw();
 
-		for (int i = 0; i < _enemy.size(); i++) {
-			_enemy[i]->particle->Draw();
-		}
+		//for (int i = 0; i < _enemy.size(); i++) {
+		//	_enemy[i]->particle->Draw();
+		//}
 
 		// 3Dオブジェクト描画後処理
 		ParticleManager::PostDraw();
@@ -1323,10 +1282,33 @@ void GameManager::SubDraw()
 			hp->Draw();
 			HpBer->Draw();
 
+			//修正
+			static float pos = 12.f;
+			static float pos_h = 240.f;
+			static float offset = 24.f;
+			cross.get()->SetPos({ pos + offset * 2 ,pos_h });
+			cross.get()->Update();
+			cross.get()->Draw();
 
-			BreakBar->Draw();
-			for (int i = 0; i < repelCount; i++) {
-				BreakGage[i]->Draw();
+			BreakCountMax[1].get()->SetPos({ pos + offset * 3,pos_h });
+			BreakCountMax[15].get()->SetPos({ pos + offset * 4,pos_h });
+			BreakCountMax[1].get()->Update();
+			BreakCountMax[15].get()->Update();
+			BreakCountMax[1].get()->Draw();
+			BreakCountMax[15].get()->Draw();
+
+			if (repelCount >= 10) {
+				BreakCount[repelCount - 10].get()->SetPos({ pos,pos_h });
+				BreakCount[11].get()->SetPos({ pos + offset,pos_h });
+				BreakCount[repelCount - 10].get()->Update();
+				BreakCount[11].get()->Update();
+				BreakCount[repelCount - 10].get()->Draw();
+				BreakCount[11].get()->Draw();
+			}
+			else {
+				BreakCount[repelCount].get()->SetPos({ pos + offset * 0.5f,pos_h });
+				BreakCount[repelCount].get()->Update();
+				BreakCount[repelCount].get()->Draw();
 			}
 
 			if (GameModeNum == GameMode::WEAPONSELECT) {
@@ -1367,7 +1349,10 @@ void GameManager::SubDraw()
 
 	//ローディング中
 	if (load) {
-		loadResource.get()->Draw();
+		for (int i = 0; i < 11; i++)
+		{
+			Now_Loading[i].get()->Draw();
+		}
 	}
 
 	Sprite::PostDraw();
@@ -1376,6 +1361,8 @@ void GameManager::ShadowDraw(bool isShadow)
 {
 	// コマンドリストの取得
 	ID3D12GraphicsCommandList* cmdList = dx12->CommandList().Get();
+
+	if (!load) { Singleton_Heap::GetInstance()->FbxTexture = 200; }
 
 	//深度バッファクリア
 	dx12->ClearDepthShadow();
@@ -1411,9 +1398,10 @@ void GameManager::ShadowDraw(bool isShadow)
 			}
 
 			//敵描画
-			for (int i = 0; i < _enemy.size(); i++) {
-				_enemy[i]->ShadowDraw(cmdList);
-			}
+			//for (int i = 0; i < _enemy.size(); i++) {
+			//	_enemy[i]->ShadowDraw(cmdList);
+			//}
+			enemy->Draw(cmdList, true);
 		}
 	}
 
@@ -1445,6 +1433,16 @@ void GameManager::loading() {
 			break;
 		case LoadMode::Run:
 			//ローディング中にやりたいこと
+
+			//文字回転
+			for (int i = 0; i < 11; i++)
+			{
+				static float angle = 0.0f;
+				angle += 0.5f;
+				Now_Loading[i].get()->SetRot(angle);
+				Now_Loading[i].get()->Update();
+			}
+
 			break;
 		case LoadMode::End:
 			//ローディング終わり
@@ -1535,7 +1533,7 @@ void GameManager::LoadTitleResources()
 }
 void GameManager::LoadGameResources()
 {
-	if (!Sprite::loadTexture(SpriteName::Numbers, L"Resources/Numbers.png")) { assert(0); }
+	if (!Sprite::loadTexture(SpriteName::Numbers, L"Resources/Numbers.dds")) { assert(0); }
 	if (!Sprite::loadTexture(SpriteName::Start_UI_01, L"Resources/Start_UI_01.png")) { assert(0); }
 	if (!Sprite::loadTexture(SpriteName::Start_UI_02, L"Resources/Start_UI_02.png")) { assert(0); }
 	if (!Sprite::loadTexture(SpriteName::Start_UI_03, L"Resources/Start_UI_03.png")) { assert(0); }
@@ -1560,6 +1558,21 @@ void GameManager::LoadGameResources()
 		//更新
 		One_Numbers[i].get()->Update();
 		Ten_Numbers[i].get()->Update();
+	}
+
+	cross.reset(Sprite::Create(SpriteName::Numbers, { 698.f,320.f }));
+	cross.get()->SetTextureRect({ 0, float(fontHeight) }, { float(fontWidth), float(fontHeight) });
+	cross.get()->SetSize({ float(fontWidth),float(fontHeight) });
+	cross.get()->Update();
+	for (int i = 0; i < 20; i++) {
+		BreakCount[i].reset(Sprite::Create(SpriteName::Numbers, { 0,0 }));
+		BreakCountMax[i].reset(Sprite::Create(SpriteName::Numbers, { 0,0 }));
+		BreakCount[i].get()->SetTextureRect({ float(fontWidth * i), 0 }, { float(fontWidth), float(fontHeight) });
+		BreakCountMax[i].get()->SetTextureRect({ float(fontWidth * i), 0 }, { float(fontWidth), float(fontHeight) });
+		BreakCount[i].get()->SetSize({ float(fontWidth),float(fontHeight) });
+		BreakCountMax[i].get()->SetSize({ float(fontWidth),float(fontHeight) });
+		BreakCount[i].get()->Update();
+		BreakCountMax[i].get()->Update();
 	}
 
 	Start_UI_01.reset(Sprite::Create(SpriteName::Start_UI_01, { 640.0f,basePos + 84.0f }));
@@ -1602,9 +1615,9 @@ void GameManager::LoadGameResources()
 	moveGuide->scale = XMFLOAT3(5, 5, 5);
 
 	//ヒットボックス-----------------
-	triangle[0].p0 = XMVectorSet(stages[64]->position.x - 100.0f, stages[64]->position.y, stages[64]->position.z, 1);
-	triangle[0].p1 = XMVectorSet(stages[64]->position.x - 100.0f, stages[64]->position.y + 120.0f, stages[64]->position.z, 1);
-	triangle[0].p2 = XMVectorSet(stages[64]->position.x + 100.0f, stages[64]->position.y, stages[64]->position.z, 1);
+	triangle[0].p0 = XMVectorSet(stages[10]->position.x - 100.0f, stages[10]->position.y, stages[10]->position.z, 1);
+	triangle[0].p1 = XMVectorSet(stages[10]->position.x - 100.0f, stages[10]->position.y + 120.0f, stages[10]->position.z, 1);
+	triangle[0].p2 = XMVectorSet(stages[10]->position.x + 100.0f, stages[10]->position.y, stages[10]->position.z, 1);
 	triangle[0].normal = XMVectorSet(0.0f, 0.0f, 1.0f, 0);
 
 	//防衛砲台
@@ -1616,7 +1629,7 @@ void GameManager::LoadGameResources()
 	}
 
 	//プレイヤー---------------------
-	_player = Player::Create(testModel);
+	_player = Player::Create(FbxLoader::GetInstance()->LoadModelFromFile("testModel"));
 	_player->CreateWeapon(Model::CreateFromOBJ("weapon"));
 	_player->SetScale({ 0.2f, 0.2f, 0.2f });
 	_player->SetPosition(XMFLOAT3(0.0f, 0.0f, 100.0f));
@@ -1628,12 +1641,15 @@ void GameManager::LoadGameResources()
 
 	_player->GetInstance()->GetPos();
 	//エネミー-----------------------
-	for (int i = 0; i < 3; i++)
-	{
-		protEnemy[i] = Enemy::Create(wolf[i], golem[i]);
-		//パーティクル生成
-		protEnemy[i]->Particle();
-	}
+	//for (int i = 0; i < 3; i++)
+	//{
+	//	protEnemy[i] = Enemy::Create(wolf[i], golem[i]);
+	//	//パーティクル生成
+	//	protEnemy[i]->Particle();
+	//}
+
+	enemy = new EnemyManager();
+	enemy = EnemyManager::Create(FbxLoader::GetInstance()->LoadModelFromFile("Golem"), FbxLoader::GetInstance()->LoadModelFromFile("Wolf"));
 
 	//カメラの移動元の作成
 	const float distanceFromPlayerToCamera = 10.0f;//カメラとプレイヤーの距離を決定

@@ -116,8 +116,9 @@ void FbxModel::CreateBuffers(ID3D12Device* device)
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 	srvDesc.Texture2D.MipLevels = 1;
 
+	int ptrNum = Singleton_Heap::GetInstance()->FbxTexture;
 	auto handle = Singleton_Heap::GetInstance()->GetDescHeap()->GetCPUDescriptorHandleForHeapStart();
-	handle.ptr += Singleton_Heap::GetInstance()->GetDescriptorIncrementSize() * Singleton_Heap::GetInstance()->FbxTexture;
+	handle.ptr += Singleton_Heap::GetInstance()->GetDescriptorIncrementSize() * ptrNum;
 
 	Singleton_Heap::GetInstance()->FbxTexture++;
 
@@ -160,9 +161,7 @@ void FbxModel::Draw(ID3D12GraphicsCommandList* cmdList)
 	cmdList->SetDescriptorHeaps(_countof(ppheap), ppheap);
 
 	auto handle = Singleton_Heap::GetInstance()->GetDescHeap()->GetGPUDescriptorHandleForHeapStart();
-	handle.ptr += Singleton_Heap::GetInstance()->GetDescriptorIncrementSize() * Singleton_Heap::GetInstance()->FbxTexture;
-
-	Singleton_Heap::GetInstance()->FbxTexture++;
+	handle.ptr += Singleton_Heap::GetInstance()->GetDescriptorIncrementSize() * (Singleton_Heap::GetInstance()->FbxTexture + TextureOffset);
 
 	cmdList->SetGraphicsRootDescriptorTable(
 		2, handle

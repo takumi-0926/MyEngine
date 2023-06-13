@@ -121,10 +121,13 @@ void Player::actionExecution(int num)
 	}
 	//攻撃状態
 	else if (num == action::Attack) {
-		if (playEnd) {
-			Action = -1;
-		}
+		//if (playEnd) {
+		//	Action = -1;
+		//}
 	}
+	//攻撃
+	Attack();
+
 	playEnd = false;
 }
 
@@ -147,11 +150,13 @@ void Player::moveUpdate()
 
 	}
 	else if (directInput->IsButtonPush(DirectInput::ButtonKind::ButtonX) || Input::GetInstance()->Push(DIK_X)) {
-		ChangeAnimation(action::Attack);
-		Action = action::Attack;
+		attack = true;
 
+		ChangeAnimation(attackNum);
 		//武器の当たり判定有効化
 		weapon->SetColliderInvisible(false);
+
+		Action = action::Attack;
 	}
 	else if (directInput->leftStickX() < 0.0f || directInput->leftStickX() > 0.0f || directInput->leftStickY() < 0.0f || directInput->leftStickY() > 0.0f) {
 
@@ -191,9 +196,57 @@ void Player::moveUpdate()
 			angleVertical = -60;
 		}
 	}
-
+	
 	//行動実行
 	actionExecution(Action);
+}
+
+void Player::Attack()
+{
+	if (!attack) { 
+		return; 
+	}
+
+	//コンボアタック先行入力
+	if (directInput->IsButtonPush(DirectInput::ButtonKind::ButtonX) || Input::GetInstance()->Push(DIK_X)) {
+
+		if (attackNum == action::Attack) { combo = action::Attack2; }
+		if (attackNum == action::Attack2) { combo = action::Attack3; }
+
+		atCombo = true;
+	}
+	//回避先行入力
+	else if (directInput->IsButtonPush(DirectInput::ButtonKind::ButtonB) || Input::GetInstance()->Push(DIK_SPACE)) {
+
+	}
+
+	//1秒間先行判定
+	if (atCombo) {
+		freamCount += 1.f / 60.f;
+
+		if (freamCount >= 0.1f) {
+			combo = attackNum;
+			freamCount = 0.f;
+			atCombo = false;
+		}
+	}
+
+	//行動終了時
+	if (playEnd) {
+
+		//先行入力確認
+		if (atCombo) {
+			//入力あり
+			attackNum = combo;
+		}
+		else {
+			//入力なし
+			Action = -1;
+			attack = false;
+		}
+
+		freamCount = 0.f;
+	}
 }
 
 void Player::Avoid(XMFLOAT3& vec) {
@@ -238,9 +291,6 @@ void Player::Update()
 	weapon->SetFollowingObjectBoneMatrix(
 		model->GetBones()[followBoneNum].fbxCluster->GetLink()->EvaluateGlobalTransform(currentTime), matWorld);
 	weapon->Update();
-
-	//回避行動
-	//if (Action == action::Avoid) { Avoid(); }
 
 	//落下処理
 	if (!OnGround) {

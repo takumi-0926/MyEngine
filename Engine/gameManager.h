@@ -16,6 +16,7 @@
 
 #include "testObj.h"
 #include "enemy.h"
+#include "EnemyManager.h"
 
 #include "object\object2d.h"
 #include "hitBox.h"
@@ -108,13 +109,11 @@ private://メンバ変数(初期化)
 	//プレイヤー / エネミー
 	Player* _player = nullptr;//プレイヤー本体
 	PMDmodel* modelPlayer = nullptr;//プレイヤーモデル
-	Enemy* protEnemy[3] = {};//エネミー生成用
-	vector<Enemy*>   _enemy;//エネミー本体
+	EnemyManager* enemy{};//エネミー管理
 	FbxModel* golem[3] = {};//ゴーレムモデル（FBX）
 	FbxModel* wolf[3] = {};//ウルフモデル（FBX）
 	//HitBox* HitBox = {};//ヒットボックス（プレイヤー用）
 	int useModel = 0;//エネミー識別用変数
-	float enemyPopTime = 0.0f;
 
 	//ステージ
 	int UseStage = 0;//ゲーム中のステージ識別用変数
@@ -168,7 +167,16 @@ private://メンバ変数(初期化)
 	bool titleStart = 0;
 	bool titleOption = 0;
 
-	unique_ptr<Sprite> loadResource = {};
+	unique_ptr<Sprite> Now_Loading[11] = {};
+	unique_ptr<Sprite> BreakCount[20] = {};
+	unique_ptr<Sprite> BreakCountMax[20] = {};
+	unique_ptr<Sprite> cross = nullptr;
+	//クリアまでの必要討伐数
+	int ClearCount = 15;
+	//撃退数
+	int repelCount = 0;
+
+	unique_ptr<Sprite> Pose = nullptr;
 
 	//カウントUI周り変数
 	unique_ptr<Sprite> One_Numbers[10] = {};//0～9の数字スプライト
@@ -208,9 +216,6 @@ private://メンバ変数(初期化)
 	FbxObject3d* testObject = nullptr;
 
 	DebugText* text = nullptr;
-	Sprite* BreakBar = nullptr;
-	Sprite* BreakGage[15] = {};
-	Sprite* Pose = nullptr;
 
 private://メンバ変数(ゲームシーン)
 	Model* modelPlane = nullptr;
@@ -257,11 +262,6 @@ private://メンバ変数(ゲームシーン)
 	//ゲームモード
 	int GameModeNum = GameMode::START;
 	int count = 24;
-
-	//クリアまでの必要討伐数
-	int ClearCount = 15;
-	//撃退数
-	int repelCount = 0;
 
 	bool resetFlag = false;
 
@@ -349,92 +349,6 @@ public://メンバ関数
 	void GameReset();
 
 	/// <summary>
-	/// 移動
-	/// </summary>
-	/// <param name="pos">移動させる座標</param>
-	/// <returns>移動後の座標</returns>
-	inline XMFLOAT3 MoveBefore(XMFLOAT3 pos)
-	{
-		XMMATRIX matRot = XMMatrixIdentity();
-
-		//Z方向ベクトル
-		Zv = { 0.0f,0.0f,1.0f,0.0f };
-
-		//角度回転
-		matRot = XMMatrixRotationY(XMConvertToRadians(angleHorizonal));
-
-		//Z方向ベクトルを回転
-		Zv = XMVector3TransformNormal(Zv, matRot);
-
-		//加算
-		pos.x += Zv.m128_f32[0] * directInput->getLeftY() * speed;
-		pos.y += Zv.m128_f32[1] * directInput->getLeftY() * speed;
-		pos.z += Zv.m128_f32[2] * directInput->getLeftY() * speed;
-
-		return pos;
-	}
-	inline XMFLOAT3 MoveAfter(XMFLOAT3 pos)
-	{
-		XMMATRIX matRot = XMMatrixIdentity();
-
-		//Z方向ベクトル
-		Zv = { 0.0f,0.0f,1.0f,0.0f };
-
-		//弾角度回転
-		matRot = XMMatrixRotationY(XMConvertToRadians(angleHorizonal));
-
-		//Z方向ベクトルを回転
-		Zv = XMVector3TransformNormal(Zv, matRot);
-
-		//加算
-		pos.x += Zv.m128_f32[0] * directInput->getLeftY() * speed;
-		pos.y += Zv.m128_f32[1] * directInput->getLeftY() * speed;
-		pos.z += Zv.m128_f32[2] * directInput->getLeftY() * speed;
-
-		return pos;
-	}
-	inline XMFLOAT3 MoveLeft(XMFLOAT3 pos)
-	{
-		XMMATRIX matRot = XMMatrixIdentity();
-
-		//X方向ベクトル
-		Xv = { 1.0f,0.0f,0.0f,0.0f };
-
-		//角度回転
-		matRot = XMMatrixRotationY(XMConvertToRadians(angleHorizonal));
-
-		//X方向ベクトルを回転
-		Xv = XMVector3TransformNormal(Xv, matRot);
-
-		//加算
-		pos.x -= Xv.m128_f32[0] * directInput->getLeftX() * speed;
-		pos.y -= Xv.m128_f32[1] * directInput->getLeftX() * speed;
-		pos.z -= Xv.m128_f32[2] * directInput->getLeftX() * speed;
-
-		return pos;
-	}
-	inline XMFLOAT3 MoveRight(XMFLOAT3 pos)
-	{
-		XMMATRIX matRot = XMMatrixIdentity();
-
-		//X方向ベクトル
-		Xv = { 1.0f,0.0f,0.0f,0.0f };
-
-		//角度回転
-		matRot = XMMatrixRotationY(XMConvertToRadians(angleHorizonal));
-
-		//X方向ベクトルを回転
-		Xv = XMVector3TransformNormal(Xv, matRot);
-
-		//加算
-		pos.x -= Xv.m128_f32[0] * directInput->getLeftX() * speed;
-		pos.y -= Xv.m128_f32[1] * directInput->getLeftX() * speed;
-		pos.z -= Xv.m128_f32[2] * directInput->getLeftX() * speed;
-
-		return pos;
-	}
-
-	/// <summary>
 	/// 進行方向に回転
 	/// </summary>
 	/// <param name="forward">進行方向ベクトル</param>
@@ -480,38 +394,6 @@ public://メンバ関数
 		rot = XMMatrixRotationQuaternion(rq);
 
 		return rot;
-	}
-
-	/// <summary>
-	/// クォータニオン作成
-	/// </summary>
-	/// <param name="v1"></param>
-	/// <param name="v2"></param>
-	/// <returns></returns>
-	inline XMVECTOR CreateQuaternion(XMFLOAT3 forward, XMFLOAT3 upward) {
-		Vector3 z = Vector3(forward.x, forward.y, forward.z);//進行方向ベクトル（前方向）
-		Vector3 up = Vector3(upward.x, upward.y, upward.z);  //上方向
-		Vector3 _z = { 0.0f,0.0f,1.0f };//Z方向単位ベクトル
-		Vector3 cross = {};
-		Quaternion q = quaternion(0, 0, 0, 1);//回転クォータニオン
-
-		cross = z.cross(_z);
-		q.x = cross.x;
-		q.y = cross.y;
-		q.z = cross.z;
-		q.w = sqrt((z.length() * z.length())* (_z.length() * _z.length())) + z.dot(_z);
-
-		//単位クォータニオン化
-		q = normalize(q);
-		q = conjugate(q);
-
-		//任意軸回転
-		XMVECTOR _q = { q.x,q.y,q.z,q.w };
-
-		XMMATRIX rot;//回転行列
-		rot = XMMatrixRotationQuaternion(_q);
-
-		return _q;
 	}
 
 	/// <summary>

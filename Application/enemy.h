@@ -12,8 +12,8 @@
 #include "ParticleManager.h"
 
 enum Activity {
-	wolf = 0,
-	golem,
+	golem = 1,
+	wolf,
 };
 enum AttackType_Wolf {
 	Type01_Walk,
@@ -25,6 +25,7 @@ enum MotionType {
 	WalkMotion = 0,
 	AttackMotion_01,
 	AttackMotion_02,
+	AttackMotion_03,
 };
 
 class PMDmodel;
@@ -53,7 +54,7 @@ public:
 	Status status;//28
 	bool alive = false;	//生存判定
 	bool startAttack = false;
-	bool attackHit = true;
+	bool attackHit = false;
 	bool attackOnMove = false;
 	bool damage = false;
 
@@ -82,7 +83,7 @@ public:
 	XMFLOAT3 oldPos;
 	XMFLOAT3 RetreatPos = { 1.0f,20.0f,-150.0f };
 
-	FbxModel* modelType[2] = {};
+	FbxModel* model = {};
 	Weapon* weapon = nullptr;
 	ParticleManager* particle = nullptr;
 
@@ -95,11 +96,12 @@ private:
 	XMVECTOR objectVector(XMFLOAT3 pos1, XMFLOAT3 pos2);	
 	//正規化
 	XMVECTOR Normalize(XMVECTOR vec);
-	void move(XMVECTOR vector);	//ベクトル移動
+	void Move(XMVECTOR vector);	//ベクトル移動
 	void moveReset();
 public:
 	Enemy();		//コンストラクタ
-	static Enemy* Create(FbxModel* model1, FbxModel* model2);//インスタンス生成
+	~Enemy();
+	static unique_ptr<Enemy> Create(FbxModel* model, const int Type);//インスタンス生成
 	void Initialize()override;
 	void Update() override;
 	void moveUpdate(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos);
@@ -162,7 +164,6 @@ public:
 		model->Update();
 	}
 
-	void CreateWeapon(Model* model);
 	void Particle();
 
 	/// <summary>
@@ -180,7 +181,7 @@ public:
 	/// </summary>
 	void Attack(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos);
 	void JumpAttack(XMFLOAT3& targetPosition);
-
+	void FingerAttack(XMFLOAT3& targetPosition);
 	/// <summary>
 	/// 退却時処理
 	/// </summary>

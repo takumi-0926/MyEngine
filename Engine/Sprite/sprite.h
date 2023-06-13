@@ -147,6 +147,14 @@ public:
 		this->position = pos;
 		TransVertex();
 	}
+	/// <summary>
+/// 
+/// </summary>
+/// <param name="pos"></param>
+	void SetRot(float rot) {
+		this->rotation = rot;
+		TransVertex();
+	}
 
 	void MovePos(XMFLOAT2 pos) {
 		this->position.x += pos.x;

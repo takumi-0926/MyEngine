@@ -14,6 +14,8 @@ enum action {
 	Attack,
 	Damage,
 	Avoid,
+	Attack2,
+	Attack3,
 };
 
 //class Input;
@@ -36,14 +38,25 @@ private:
 	};
 
 	DirectX::XMFLOAT3 moveVec = {};
-	DirectX::XMFLOAT3 avoidVec = {};
 	XMVECTOR Zv, Xv, Yv;
 
 	Weapon* weapon = nullptr;
 
+	bool move{};
+	bool attack{};
+	bool avoid{};
+
+	//âÒîópïœêî
+	DirectX::XMFLOAT3 avoidVec = {};
 	float avoidSpeed = 1.8f;
 	float avoidTime = 0.0f;
-	bool avoid = false;
+
+	//çUåÇópïœêî
+	int combo = 0;
+	int attackNum = action::Attack;
+	float freamCount = 0;
+	bool atCombo = false;
+
 	int Action = 0;
 
 	float speed = 0.0;
@@ -58,6 +71,8 @@ private:
 private:
 	void actionExecution(int num);
 	void moveUpdate();
+
+	void Attack();
 	void Avoid(XMFLOAT3& vec);
 
 	/// <summary>

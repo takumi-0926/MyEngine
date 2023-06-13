@@ -4,12 +4,35 @@
 #include "Collision/CollisionAttribute.h"
 #include "Collision/QueryCallBack.h"
 
+#include "safeDelete.h"
+
 enum MoveMode {
-	move,
-	attack,
-	avoid,
-	retreat
+	Move,
+	Attack,
+	Avoid,
+	Retreat
 };
+
+Enemy::Enemy()
+{
+	status = {
+					   2,//デフォルトHP
+				   10.0f,//デフォルト攻撃力
+					1.0f,//デフォルト防御力
+					1.0f,//デフォルト速度
+		{1.0f,1.0f,1.0f},//デフォルト大きさ
+	};
+	alive = false;
+	mode = 0;
+	vectol = {};
+	oldPos = {};
+	attackPos = {};
+}
+
+Enemy::~Enemy()
+{
+	safe_delete(model);
+}
 
 XMFLOAT3 Enemy::VectorToXMFloat(XMVECTOR vec)
 {
@@ -51,32 +74,18 @@ XMVECTOR Enemy::Normalize(XMVECTOR vec)
 	_ret.m128_f32[3] = 0;
 	return _ret;
 }
-void Enemy::move(XMVECTOR vector)
+void Enemy::Move(XMVECTOR vector)
 {
 	this->position.x -= vector.m128_f32[0] * this->status.speed;
 	this->position.y -= vector.m128_f32[1] * this->status.speed;
 	this->position.z -= vector.m128_f32[2] * this->status.speed;
 }
 
-Enemy::Enemy()
+
+unique_ptr<Enemy> Enemy::Create(FbxModel* model,const int Type)
 {
-	status = {
-					   2,//デフォルトHP
-				   10.0f,//デフォルト攻撃力
-					1.0f,//デフォルト防御力
-					1.0f,//デフォルト速度
-		{1.0f,1.0f,1.0f},//デフォルト大きさ
-	};
-	alive = false;
-	mode = 0;
-	vectol = {};
-	oldPos = {};
-	attackPos = {};
-}
-Enemy* Enemy::Create(FbxModel* model1, FbxModel* model2)
-{
-	// 3Dオブジェクトのインスタンスを生成
-	Enemy* instance = new Enemy();
+	//インスタンスを生成
+	unique_ptr<Enemy> instance = make_unique<Enemy>();
 	if (instance == nullptr) {
 		return nullptr;
 	}
@@ -85,19 +94,25 @@ Enemy* Enemy::Create(FbxModel* model1, FbxModel* model2)
 	instance->position.z = -70;
 
 	//使用モデル登録
-	instance->modelType[0] = model1;
-	instance->modelType[1] = model2;
+	instance->model = model;
+	instance->model->SetTextureOffset(Type);
 
 	//識別番号設定
 	instance->myNumber = rand() % RAND_MAX;
 
+	instance->mode = Type;
 	//アンビエント元を取得
 	//instance->defalt_ambient.push_back(model->ambient);
 
 	// 初期化
 	instance->Initialize();
 
-	return instance;
+	//生まれた
+	instance->Appearance();
+
+	instance->Particle();
+
+	return move(instance);
 }
 void Enemy::Initialize()
 {
@@ -105,9 +120,10 @@ void Enemy::Initialize()
 
 	float radius = 10.0f;
 
+	SetModel(model);
+
 	SetCollider(new SphereCollider(XMVECTOR({ 0,radius,0,0 }), radius));
 	collider->SetAttribute(COLLISION_ATTR_ENEMYS);
-	//return true;
 }
 void Enemy::Update() {
 
@@ -226,11 +242,6 @@ void Enemy::OnCollision(const CollisionInfo& info)
 	damage = true;
 }
 
-void Enemy::CreateWeapon(Model* model)
-{
-	weapon = Weapon::Create(model);
-}
-
 void Enemy::Particle()
 {
 	particle = ParticleManager::Create();
@@ -238,25 +249,16 @@ void Enemy::Particle()
 
 void Enemy::Appearance()
 {
-	//Enemy* ene = nullptr;
-	//static float popTime = 0;
 	//三体まで
 	//if (popTime >= 10.0f) {
-	int r = rand() % 10;
-	//if (r % 2 == 1) { ene = Enemy::Create(model2); }
-	//if (r % 2 != 1) { ene = Enemy::Create(model1); }
-	if (r % 2 == 1) {
-		mode = Activity::wolf;
-		SetModel(modelType[Activity::wolf]);
+	if (mode = Activity::wolf) {
 		status.HP = 2;
 		status.speed = 1.0f;
 		shadowOffset = 1.0f;
 		particleOffset = 10.0f;
-		scale = XMFLOAT3(0.3f, 0.3f, 0.3f);
+		scale = XMFLOAT3(0.5f, 0.5f, 0.5f);
 	}
-	else if (r % 2 != 1) {
-		mode = Activity::golem;
-		SetModel(modelType[Activity::golem]);
+	else if (mode = Activity::golem) {
 		status.HP = 4;
 		status.speed = 0.6f;
 		shadowOffset = 1.5f;
@@ -281,7 +283,7 @@ void Enemy::Move(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 {
 	int objectNo = 0;
 
-	if (actionPattern != MoveMode::move)return;
+	if (actionPattern != MoveMode::Move)return;
 	ChangeAnimation(MotionType::WalkMotion);
 
 	//移動処理
@@ -300,7 +302,7 @@ void Enemy::Move(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 			}
 		}
 
-		move(Normalize(objectVector(this->position, bPos[objectNo]->position)));
+		Move(Normalize(objectVector(this->position, bPos[objectNo]->position)));
 		this->matRot = LookAtRotation(
 			VectorToXMFloat(Normalize(objectVector(this->position, bPos[objectNo]->position))),
 			XMFLOAT3(0.0f, 1.0f, 0.0f));
@@ -320,30 +322,30 @@ void Enemy::Move(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 
 		//移動から攻撃へ
 		if (objectDistance(this->position, bPos[objectNo]->position) <= d) {
-			actionPattern = MoveMode::attack;
+			actionPattern = MoveMode::Attack;
 			this->attackOnMove = false;
 		}
 	}
 	//パターン2
 	if (this->mode == Activity::wolf) {
-		move(Normalize(objectVector(this->position, pPos)));
+		Move(Normalize(objectVector(this->position, pPos)));
 		this->matRot = LookAtRotation(
 			VectorToXMFloat(Normalize(objectVector(this->position, pPos))),
 			XMFLOAT3(0.0f, 1.0f, 0.0f));
 
 		//移動から攻撃へ
 		if (objectDistance(this->position, pPos) <= 21) {
-			actionPattern = MoveMode::attack;
+			actionPattern = MoveMode::Attack;
 			attackPattern = MotionType::AttackMotion_02;
 		}
 		if (objectDistance(this->position, pPos) <= 15) {
-			actionPattern = MoveMode::attack;
+			actionPattern = MoveMode::Attack;
 			attackPattern = MotionType::AttackMotion_01;
 		}
 	}
 	//パターン3
 	if (this->mode == Activity::golem) {
-		move(Normalize(objectVector(this->position, gPos)));
+		Move(Normalize(objectVector(this->position, gPos)));
 		this->matRot = LookAtRotation(
 			VectorToXMFloat(Normalize(objectVector(this->position, gPos))),
 			XMFLOAT3(0.0f, 1.0f, 0.0f));
@@ -352,7 +354,7 @@ void Enemy::Move(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 
 		//移動から攻撃へ
 		if (objectDistance(this->position, gPos) <= dd) {
-			actionPattern = MoveMode::attack;
+			actionPattern = MoveMode::Attack;
 			this->attackOnMove = false;
 		}
 	}
@@ -363,7 +365,7 @@ void Enemy::Attack(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 	static int d = 7;
 	int objectNo = 0;
 
-	if (actionPattern != MoveMode::attack)return;
+	if (actionPattern != MoveMode::Attack)return;
 	//ChangeAnimation(MotionType::AttackMotion);
 
 	//攻撃処理
@@ -384,7 +386,7 @@ void Enemy::Attack(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 				this->attackOnMove = true;
 			}
 			else {
-				move(Normalize(objectVector(this->position, bPos[objectNo]->position)));
+				Move(Normalize(objectVector(this->position, bPos[objectNo]->position)));
 				this->matRot = LookAtRotation(
 					VectorToXMFloat(Normalize(objectVector(this->position, gPos))),
 					XMFLOAT3(0.0f, 1.0f, 0.0f));
@@ -403,7 +405,7 @@ void Enemy::Attack(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 				if (this->position.z == this->attackPos.z) {
 					moveReset();
 					this->attackTime = 0.0f;
-					actionPattern = MoveMode::move;
+					actionPattern = MoveMode::Move;
 					this->startAttack = false;
 					this->attackHit = true;
 				};
@@ -442,7 +444,7 @@ void Enemy::Attack(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 			if (this->attackTime >= 1.0f) {
 				moveReset();
 				this->attackTime = 0.0f;
-				actionPattern = MoveMode::move;
+				actionPattern = MoveMode::Move;
 				this->startAttack = false;
 				this->attackHit = true;
 			}
@@ -452,6 +454,9 @@ void Enemy::Attack(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 		//ジャンプ攻撃
 		else if (attackPattern == MotionType::AttackMotion_02) {
 			JumpAttack(pPos);
+		}
+		else if (attackPattern == MotionType::AttackMotion_03) {
+			FingerAttack(pPos);
 		}
 	}
 	if (this->mode == Activity::golem) {
@@ -490,7 +495,7 @@ void Enemy::Attack(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 		if (attackTime >= 5.0f && this->attackOnMove == true) {
 			moveReset();
 			this->attackTime = 0.0f;
-			actionPattern = MoveMode::move;
+			actionPattern = MoveMode::Move;
 			this->startAttack = false;
 			this->attackHit = true;
 		}
@@ -503,6 +508,7 @@ void Enemy::JumpAttack(XMFLOAT3& targetPosition)
 	attackTime += 1.0f / 60.0f;
 	if (!startAttack) {
 		startAttack = true;
+		attackHit = true;
 		jump.pos = Vector3(position.x, position.y, position.z);
 		jump.p1 = Vector3(position.x, position.y, position.z);
 		jump.p2 = Vector3((position.x + targetPosition.x) / 2.0f, (position.y + targetPosition.y) / 2.0f + 80.0f, (position.z + targetPosition.z) / 2.0f);
@@ -545,9 +551,8 @@ void Enemy::JumpAttack(XMFLOAT3& targetPosition)
 		if (this->attackTime >= 3.5f) {
 			moveReset();
 			this->attackTime = 0.0f;
-			actionPattern = MoveMode::move;
+			actionPattern = MoveMode::Move;
 			this->startAttack = false;
-			this->attackHit = true;
 
 			jumpTime = 0.0f;
 		}
@@ -558,13 +563,17 @@ void Enemy::JumpAttack(XMFLOAT3& targetPosition)
 	}
 }
 
+void Enemy::FingerAttack(XMFLOAT3& targetPosition)
+{
+}
+
 void Enemy::Retreat()
 {
-	if (actionPattern != MoveMode::retreat)return;
+	if (actionPattern != MoveMode::Retreat)return;
 
 	ChangeAnimation(MotionType::WalkMotion);
 	//移動
-	move(Normalize(objectVector(position, RetreatPos)));
+	Move(Normalize(objectVector(position, RetreatPos)));
 	//回転
 	matRot = LookAtRotation(
 		VectorToXMFloat(Normalize(objectVector(position, RetreatPos))),
@@ -595,7 +604,7 @@ void Enemy::Damage()
 		60, XMFLOAT3(position.x, position.y + particleOffset, position.z),
 		0.0001f, 0.05f, 5, 8.0f, { 1,0,0,1 });
 
-	if (status.HP <= 0) { actionPattern = MoveMode::retreat; }
+	if (status.HP <= 0) { actionPattern = MoveMode::Retreat; }
 }
 
 void Enemy::moveUpdate(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
