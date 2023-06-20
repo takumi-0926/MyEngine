@@ -606,6 +606,48 @@ void GameManager::GameUpdate() {
 
 			//当たり判定（プレイヤー / 敵 / 最終関門）
 			{
+				//敵からの攻撃
+				for (auto& enemy : enemy->GetWolf())
+				{
+					//敵が攻撃状態でなければスルー
+					if (!enemy.get()->attack) { continue; }
+
+					bool hit = Collision::CheckSqhere2Sqhere(enemy.get()->collision, _player->GetCollision());
+
+					if (hit) { _player->SetDamage(true); }
+				}
+
+				//自分の攻撃
+				for (auto& enemy : enemy->GetWolf())
+				{
+					//自分が攻撃していなければスルー
+					if (!_player->GetAttack()) { continue; }
+
+					//既に攻撃が当たっていたらスルー
+					if (_player->GetHit()) { continue; }
+
+					//bool hit = Collision::CheckSqhere2Sqhere(enemy.get()->collision, _player->GetInstance()->GetCollision());
+					bool hit = Collision::CheckSqhere2Sqhere(enemy.get()->collision, weaponCollider);
+
+					if (hit) { 
+						enemy.get()->SetDamage(true); 
+						_player->SetHit(true);
+					}
+				}
+
+				//ゲートへの攻撃
+				for (auto& enemy : enemy->GetGolem())
+				{
+					//敵が攻撃状態でなければスルー
+					if (!enemy.get()->attack) { continue; }
+
+					XMVECTOR inter;
+
+					bool hit = Collision::CheckSqhere2Triangle(enemy.get()->collision, triangle[0], &inter);
+
+					if (hit) { enemy.get()->SetDamage(true); }
+				}
+
 				for (int i = 0; i < sqhere.size(); i++) {
 					bool Hhit = Collision::CheckSqhere2Sqhere(sqhere[i], playerCollider);
 					XMVECTOR inter;
@@ -1057,12 +1099,12 @@ void GameManager::PlayerUpdate()
 		_player->GetPos().z + vv0.m128_f32[2] * 2,
 		1);
 
-	//プレイヤーの正面に当たり判定設置
-	playerCollider.center = XMVectorSet(
-		_player->GetPos().x,
-		_player->GetPos().y + 20.0f,
-		_player->GetPos().z,
-		1);
+	////プレイヤーの位置に当たり判定設置
+	//playerCollider.center = XMVectorSet(
+	//	_player->GetPos().x,
+	//	_player->GetPos().y + 20.0f,
+	//	_player->GetPos().z,
+	//	1);
 
 	//カメラワーク(追従)
 	{

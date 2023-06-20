@@ -35,6 +35,8 @@ Weapon* Weapon::Create(Model* model)
 	}
 
 
+	instance->collision.radius = 20.0f;
+
 	return instance;
 }
 

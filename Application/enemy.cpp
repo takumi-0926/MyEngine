@@ -93,6 +93,9 @@ unique_ptr<Enemy> Enemy::Create(FbxModel* model,const int Type)
 	instance->position.y = 20;
 	instance->position.z = -70;
 
+	instance->collision.center = XMLoadFloat3(&instance->position);
+	instance->collision.radius = 20.0f;
+
 	//使用モデル登録
 	instance->model = model;
 	instance->model->SetTextureOffset(Type);
@@ -131,6 +134,9 @@ void Enemy::Update() {
 	collider->Update();
 
 	particle->Update();
+
+	//コリジョン追跡
+	collision.center = XMLoadFloat3(&position);
 
 	//落下処理
 	if (!OnGround) {
@@ -342,6 +348,11 @@ void Enemy::Move(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 			actionPattern = MoveMode::Attack;
 			attackPattern = MotionType::AttackMotion_01;
 		}
+		if (objectDistance(this->position, pPos) <= 8) {
+			actionPattern = MoveMode::Attack;
+			attackPattern = MotionType::AttackMotion_03;
+		}
+
 	}
 	//パターン3
 	if (this->mode == Activity::golem) {
@@ -371,11 +382,11 @@ void Enemy::Attack(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 	//攻撃処理
 	if (this->mode == -1) {
 		//攻撃時の情報取得
-		if (this->startAttack == false) {
+		if (this->attack == false) {
 			moveReset();
 			this->vectol = objectVector(bPos[objectNo]->position, this->position);
 			this->attackPos = this->position;
-			this->startAttack = true;
+			this->attack = true;
 		}
 
 		if (this->attackTime >= 3.0f) {
@@ -406,7 +417,7 @@ void Enemy::Attack(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 					moveReset();
 					this->attackTime = 0.0f;
 					actionPattern = MoveMode::Move;
-					this->startAttack = false;
+					this->attack = false;
 					this->attackHit = true;
 				};
 			};
@@ -414,16 +425,16 @@ void Enemy::Attack(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 
 		this->attackTime += 1.0f / 60.0f;
 	}
-	if (this->mode == Activity::wolf) {
+	if (mode == Activity::wolf) {
 
 		//突進攻撃
 		if (attackPattern == MotionType::AttackMotion_01) {
 
 			//攻撃時の情報取得
-			if (this->startAttack == false) {
+			if (!attack) {
 				this->vectol = objectVector(pPos, this->position);
 				this->attackPos = this->position;
-				this->startAttack = true;
+				attack = true;
 			}
 
 			//攻撃開始（突進）
@@ -445,7 +456,7 @@ void Enemy::Attack(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 				moveReset();
 				this->attackTime = 0.0f;
 				actionPattern = MoveMode::Move;
-				this->startAttack = false;
+				attack = false;
 				this->attackHit = true;
 			}
 
@@ -459,13 +470,13 @@ void Enemy::Attack(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 			FingerAttack(pPos);
 		}
 	}
-	if (this->mode == Activity::golem) {
+	if (mode == Activity::golem) {
 		//攻撃時の情報取得
-		if (this->startAttack == false) {
+		if (attack) {
 			moveReset();
 			this->vectol = objectVector(gPos, this->position);
 			this->attackPos = this->position;
-			this->startAttack = true;
+			attack = true;
 		}
 
 		ChangeAnimation(MotionType::AttackMotion_01);
@@ -492,11 +503,11 @@ void Enemy::Attack(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 		//}
 
 		//移動処理移行時の初期化
-		if (attackTime >= 5.0f && this->attackOnMove == true) {
+		if (attackTime >= 5.0f && attackOnMove) {
 			moveReset();
 			this->attackTime = 0.0f;
 			actionPattern = MoveMode::Move;
-			this->startAttack = false;
+			attack = false;
 			this->attackHit = true;
 		}
 		this->attackTime += 1.0f / 60.0f;
@@ -506,8 +517,8 @@ void Enemy::Attack(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 void Enemy::JumpAttack(XMFLOAT3& targetPosition)
 {
 	attackTime += 1.0f / 60.0f;
-	if (!startAttack) {
-		startAttack = true;
+	if (!attack) {
+		attack = true;
 		attackHit = true;
 		jump.pos = Vector3(position.x, position.y, position.z);
 		jump.p1 = Vector3(position.x, position.y, position.z);
@@ -548,23 +559,62 @@ void Enemy::JumpAttack(XMFLOAT3& targetPosition)
 		}
 
 		//移動処理移行時の初期化
-		if (this->attackTime >= 3.5f) {
+		if (this->attackTime >= 3.f) {
 			moveReset();
 			this->attackTime = 0.0f;
 			actionPattern = MoveMode::Move;
-			this->startAttack = false;
+			attack = false;
 
 			jumpTime = 0.0f;
 		}
 	}
 	else {
-		StopAnimation();
 		ChangeAnimation(AttackType_Wolf::Type02_JumpWait, true);
 	}
 }
 
 void Enemy::FingerAttack(XMFLOAT3& targetPosition)
 {
+	if (!attack) {
+		attack = true;
+		attackHit = true;
+	}
+
+
+	//攻撃時の情報取得
+	if (!attack) {
+		vectol = objectVector(targetPosition, position);
+		attackPos = position;
+		attack = true;
+	}
+
+	//攻撃開始（突進）
+	if (attackTime >= 0.5f) {
+		rotation.y = 2.f;
+		position.x += XMVector3Normalize(vectol).m128_f32[0] * 4;
+		position.y += XMVector3Normalize(vectol).m128_f32[1] * 4;
+		position.z += XMVector3Normalize(vectol).m128_f32[2] * 4;
+
+		particle->CreateParticle(60,
+			XMFLOAT3(position),
+			0.01f, 0.02f, 8, 2.0f, { 0.2f,0.2f,0.8f,1 }, 2);
+
+		ChangeAnimation(AttackType_Wolf::Type01_Walk);
+	}
+	else { 
+		StopAnimation();
+	}
+
+	//移動処理移行時の初期化
+	if (attackTime >= 3.5f) {
+		moveReset();
+		attackTime = 0.0f;
+		rotation.y = 0.0f;
+		actionPattern = MoveMode::Move;
+		attack = false;
+	}
+
+	attackTime += 1.0f / 60.0f;
 }
 
 void Enemy::Retreat()

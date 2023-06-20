@@ -39,12 +39,14 @@ private:
 
 	DirectX::XMFLOAT3 moveVec = {};
 	XMVECTOR Zv, Xv, Yv;
+	XMVECTOR _v;
 
 	Weapon* weapon = nullptr;
+	Sqhere collision = {};
 
-	bool move{};
-	bool attack{};
-	bool avoid{};
+	bool move{}; //ˆÚ“®’†true
+	bool attack{}; //UŒ‚’†true
+	bool avoid{}; //‰ñ”ð’†true
 
 	//‰ñ”ð—p•Ï”
 	DirectX::XMFLOAT3 avoidVec = {};
@@ -67,6 +69,9 @@ private:
 	XMVECTOR fallV;
 
 	int followBoneNum = 0;
+
+	bool Hit = false;
+	bool Damage = false;
 
 private:
 	void actionExecution(int num);
@@ -193,9 +198,11 @@ public:
 
 public:
 	//void SetInput(const Input& input) { this->input = input; }
-	void SetAction(int num) { this->Action = num; }
-	void SetMoveVec(DirectX::XMFLOAT3 vec) { this->moveVec = vec; }
-	void SetAvoidVec(DirectX::XMFLOAT3 vec) { this->avoidVec = vec; }
+	inline void SetAction(int num) { this->Action = num; }
+	inline void SetMoveVec(DirectX::XMFLOAT3 vec) { this->moveVec = vec; }
+	inline void SetAvoidVec(DirectX::XMFLOAT3 vec) { this->avoidVec = vec; }
+	inline void SetHit(bool flag) { this->Hit = flag; }
+	inline void SetDamage(bool flag) { this->Damage = flag; }
 
 	inline void SetAngleH(float angle) { this->angleHorizonal = angle;}
 
@@ -204,7 +211,10 @@ public:
 	inline XMFLOAT3 GetPos() { return position; }
 	inline float GetAngleVertical() { return angleVertical; }
 	inline float GetAngleHorizonal() { return angleHorizonal; }
-
+	inline bool GetHit() { return Hit; }
+	inline bool GetDamage() { return Damage; }
+	inline bool GetAttack() { return attack; }
+	inline Sqhere GetCollision() { return collision; }
 	inline Weapon* GetInstance() {
 		Weapon* instance = new Weapon();
 		return instance;

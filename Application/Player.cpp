@@ -69,10 +69,12 @@ void Player::Initialize()
 {
 	FbxObject3d::Initialize();
 
-	//コライダー追加
+	//コライダー追加（斥候用）
 	float radius = 3.0f;
 	SetCollider(new SphereCollider(XMVECTOR({ 0,radius,0,0 }), radius));
 	collider->SetAttribute(COLLISION_ATTR_ALLIES);
+
+	collision.radius = 20.0f;
 }
 
 void Player::actionExecution(int num)
@@ -110,7 +112,7 @@ void Player::actionExecution(int num)
 			//角度回転
 			matRot = XMMatrixRotationY(XMConvertToRadians(angleHorizonal));
 
-			XMVECTOR _v({ v.x, v.y, v.z, 0 });
+			_v ={ v.x, v.y, v.z, 0 };
 			_v = XMVector3TransformNormal(_v, matRot);
 			v.x = _v.m128_f32[0];
 			v.y = _v.m128_f32[1];
@@ -196,28 +198,49 @@ void Player::moveUpdate()
 			angleVertical = -60;
 		}
 	}
-	
+
+	//攻撃が当たったとき
+	if (Hit) {
+		static float h_time = 0.0f;
+		h_time += 1.f / 60.f;
+		if (h_time >= 1.f) {
+			Hit = false;
+			h_time = 0.0f;
+		}
+	}
+
+	//攻撃を受けたとき
+	if (Damage) {
+		static float d_time = 0.0f;
+		d_time += 1.f / 60.f;
+		if (d_time >= 1.f) {
+			Damage = false;
+			d_time = 0.0f;
+		}
+	}
+
 	//行動実行
 	actionExecution(Action);
 }
 
 void Player::Attack()
 {
-	if (!attack) { 
-		return; 
+	if (!attack) {
+		return;
 	}
 
 	//コンボアタック先行入力
 	if (directInput->IsButtonPush(DirectInput::ButtonKind::ButtonX) || Input::GetInstance()->Push(DIK_X)) {
 
 		if (attackNum == action::Attack) { combo = action::Attack2; }
-		if (attackNum == action::Attack2) { combo = action::Attack3; }
+		else if (attackNum == action::Attack2) { combo = action::Attack3; }
 
 		atCombo = true;
 	}
 	//回避先行入力
 	else if (directInput->IsButtonPush(DirectInput::ButtonKind::ButtonB) || Input::GetInstance()->Push(DIK_SPACE)) {
 
+		combo = action::Avoid;
 	}
 
 	//1秒間先行判定
@@ -236,12 +259,27 @@ void Player::Attack()
 
 		//先行入力確認
 		if (atCombo) {
+
 			//入力あり
-			attackNum = combo;
+			if (combo == action::Avoid) {
+				ChangeAnimation(action::Avoid);
+				Action = action::Avoid;
+
+				attackNum = action::Attack;
+				attack = false;
+			}
+			else {
+
+				attackNum = combo;
+				atCombo = false;
+
+				ChangeAnimation(attackNum);
+			}
 		}
 		else {
 			//入力なし
 			Action = -1;
+			attackNum = action::Attack;
 			attack = false;
 		}
 
@@ -287,9 +325,17 @@ void Player::Update()
 {
 	moveUpdate();
 
-	//武器にボーン行列を渡す
-	weapon->SetFollowingObjectBoneMatrix(
-		model->GetBones()[followBoneNum].fbxCluster->GetLink()->EvaluateGlobalTransform(currentTime), matWorld);
+	collision.center = XMLoadFloat3(&position);
+
+	weapon->SetCollision(XMVectorSet(
+		position.x + _v.m128_f32[0] * 2,
+		position.x + 20.0f,
+		position.x + _v.m128_f32[2] * 2,
+		1));
+
+		//武器にボーン行列を渡す
+		weapon->SetFollowingObjectBoneMatrix(
+			model->GetBones()[followBoneNum].fbxCluster->GetLink()->EvaluateGlobalTransform(currentTime), matWorld);
 	weapon->Update();
 
 	//落下処理

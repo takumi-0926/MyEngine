@@ -12,8 +12,8 @@
 #include "ParticleManager.h"
 
 enum Activity {
-	golem = 1,
-	wolf,
+	wolf = 1,
+	golem,
 };
 enum AttackType_Wolf {
 	Type01_Walk,
@@ -53,7 +53,7 @@ public:
 
 	Status status;//28
 	bool alive = false;	//生存判定
-	bool startAttack = false;
+	bool attack = false;
 	bool attackHit = false;
 	bool attackOnMove = false;
 	bool damage = false;
@@ -65,6 +65,7 @@ public:
 	float maxTime = 1.0f;
 	int mode = 0;
 
+	Sqhere collision = {};
 
 	float damegeCount = 0.0f;
 	//個体識別番号
@@ -91,9 +92,9 @@ private:
 	//Vector型をXMFLAT3型にキャスト
 	XMFLOAT3 VectorToXMFloat(XMVECTOR vec);
 	//二点間の距離を算出
-	float objectDistance(XMFLOAT3 pos1, XMFLOAT3 pos2);	
+	float objectDistance(XMFLOAT3 pos1, XMFLOAT3 pos2);
 	//二点間のベクトルを算出
-	XMVECTOR objectVector(XMFLOAT3 pos1, XMFLOAT3 pos2);	
+	XMVECTOR objectVector(XMFLOAT3 pos1, XMFLOAT3 pos2);
 	//正規化
 	XMVECTOR Normalize(XMVECTOR vec);
 	void Move(XMVECTOR vector);	//ベクトル移動
@@ -191,4 +192,8 @@ public:
 	/// 被ダメージ時処理
 	/// </summary>
 	void Damage();
+
+public:
+	inline void SetDamage(bool flag) { this->damage = flag; }
+
 };
