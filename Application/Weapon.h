@@ -1,6 +1,7 @@
 #pragma once
 #include "object/object3D.h"
 #include "FBX/FbxLoader.h"
+#include "OBB.h"
 #include "Collision/CollisionPrimitive.h"
 
 //手持ち武器クラス
@@ -15,6 +16,9 @@ class Weapon : public Object3Ds {
 	bool FollowFlag = false;
 
 	XMMATRIX FbxWorld;
+
+	OBB obb = {};
+
 public:
 	Weapon(); //コンストラクタ
 	~Weapon();//デストラクタ
@@ -39,4 +43,6 @@ public:
 	inline XMFLOAT3 GetPos() { return position; }
 
 	inline Sqhere GetCollision() { return collision; }
+
+	inline OBB GetObb() { return obb; }
 };

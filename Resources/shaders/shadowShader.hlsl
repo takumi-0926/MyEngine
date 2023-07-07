@@ -11,8 +11,7 @@ float4 shadowVS(
 	//output.svpos = mul(mul(viewproj, world), pos);
 	////output.svpos = mul(mul(lightCamera, world), pos);
 	//
-	pos = mul(world, pos);
 	//output.normal = wnormal.xyz;
 	//output.uv = uv;
-	return mul(lightCamera, pos);
+	return mul(mul(lightCamera,world), pos);
 }

@@ -2,10 +2,10 @@
 
 #include "Singleton_Heap.h"
 
-float DebugImgui::shadowCameraSite[2] = { 320.0f,320.0f };
-float DebugImgui::shadowlightPos[3] = { 30.0f,50.0f,20.0f };
+float DebugImgui::shadowCameraSite[2] = { 1280.0f,720.0f };
+float DebugImgui::shadowlightPos[3] = { 0.0f,50.0f,0.0f };
 float DebugImgui::shadowlightTarget[3] = { 0.0f,0.0f,40.0f };
-float DebugImgui::shadowlightLange[2] = { -5.0f,100.0f };
+float DebugImgui::shadowlightLange[2] = { -200.0f,200.0f };
 
 DebugImgui::DebugImgui()
 {

@@ -109,7 +109,7 @@ void FbxObject3d::Update()
 
 	if (isPlay)
 	{
-		currentTime += frameTime;
+		currentTime += frameTime * FbxTime(fastTime);
 		if (currentTime > animas[nowPlayMotion].endTime)
 		{
 			if (!isLoop) {

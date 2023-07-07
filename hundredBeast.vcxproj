@@ -323,6 +323,9 @@
     <ClInclude Include="Engine\fps.h" />
     <ClInclude Include="Engine\safeDelete.h" />
     <ClInclude Include="Engine\Singleton_Heap.h" />
+    <ClInclude Include="Engine\Math\MyMath.h" />
+    <ClInclude Include="Engine\OBB.h" />
+    <ClInclude Include="Engine\OBBCollision.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application\BillboardObject.cpp" />
@@ -377,6 +380,8 @@
     <ClCompile Include="Application\stage.cpp" />
     <ClCompile Include="Application\stageObject.cpp" />
     <ClCompile Include="Engine\Math\Vector3.cpp" />
+    <ClCompile Include="Engine\OBB.cpp" />
+    <ClCompile Include="Engine\OBBCollision.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="imgui\imgui.vcxproj">

@@ -6,10 +6,7 @@
 class Easing;
 class Fade : public Sprite {
 private:
-	float AddTime = 1.0f / 60.0f;
 	//フェード関係
-	float fadeTime = 60;
-	float fadeNum = 1 / fadeTime;
 	bool fadeIn = false;
 	bool fadeOut = false;
 	bool halffade = false;

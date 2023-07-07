@@ -106,6 +106,14 @@ private://メンバ変数(初期化)
 	Wrapper* dx12;		 //DirectX
 	DebugText debugText; //デバッグテキスト
 
+	//カメラ
+	Camera* mainCamera = nullptr;//ゲームカメラ
+	Camera* titleCamera = nullptr;//タイトルカメラ
+	Camera* setCamera = nullptr;
+	DebugCamera* camera = nullptr;
+	XMFLOAT3 afterEye;
+	XMFLOAT3 setObjectPos;
+
 	//プレイヤー / エネミー
 	Player* _player = nullptr;//プレイヤー本体
 	PMDmodel* modelPlayer = nullptr;//プレイヤーモデル
@@ -114,6 +122,8 @@ private://メンバ変数(初期化)
 	FbxModel* wolf[3] = {};//ウルフモデル（FBX）
 	//HitBox* HitBox = {};//ヒットボックス（プレイヤー用）
 	int useModel = 0;//エネミー識別用変数
+	XMMATRIX rotM = {};//ベクトル回転
+	XMVECTOR vv0 = {};//プレイヤー前ベクトル
 
 	//ステージ
 	int UseStage = 0;//ゲーム中のステージ識別用変数
@@ -127,7 +137,10 @@ private://メンバ変数(初期化)
 
 	//防衛施設
 	DefCannon* defense_facilities[6] = {};//全防衛施設情報
+	Model* defenceModel = nullptr;//施設モデル
 	Model* bulletModel = nullptr;//弾モデル
+	float angleVertical, angleHorizonal;
+	int SetNum = 0;
 
 	//衝突マネージャー
 	CollisionManager* collisionManager = nullptr;
@@ -157,6 +170,11 @@ private://メンバ変数(初期化)
 	//画面UI
 	Sprite* weaponSelect = nullptr;
 	Sprite* weaponSlot[3] = {};
+	Sprite* Title = nullptr;
+	Sprite* End = nullptr;
+	Sprite* hp = nullptr;
+	Sprite* HpBer = nullptr;
+	bool result = false;//クリア判定
 
 	//タイトル周り変数
 	unique_ptr<Sprite> TitleResources[2] = {};
@@ -167,7 +185,6 @@ private://メンバ変数(初期化)
 	bool titleStart = 0;
 	bool titleOption = 0;
 
-	unique_ptr<Sprite> Now_Loading[11] = {};
 	unique_ptr<Sprite> BreakCount[20] = {};
 	unique_ptr<Sprite> BreakCountMax[20] = {};
 	unique_ptr<Sprite> cross = nullptr;
@@ -176,7 +193,12 @@ private://メンバ変数(初期化)
 	//撃退数
 	int repelCount = 0;
 
+	//ポーズ / ロード
 	unique_ptr<Sprite> Pose = nullptr;
+	unique_ptr<Sprite> Now_Loading[11] = {};
+	bool pose = false;//ポーズフラグ
+	bool load = false;//ローディング
+	int _loadMode = 0;//ローディング状態
 
 	//カウントUI周り変数
 	unique_ptr<Sprite> One_Numbers[10] = {};//0～9の数字スプライト
@@ -193,7 +215,6 @@ private://メンバ変数(初期化)
 	int WeaponCount = 0;
 	int UseFoundation = 0;
 	bool WeaponSelectDo = false;
-	bool result = false;
 
 	bool keyFlag = false;
 	//ゲーム内ガイドオブジェクト
@@ -208,6 +229,8 @@ private://メンバ変数(初期化)
 	int testNum[3] = { 0,0,0 };
 	float debugCameraPos[3] = { 0,0,0 };
 	float debugPointLightPos[3] = { 0,0,0 };
+	float particleColor[4] = {};
+
 	Object3Ds* debugFilde = nullptr;
 	Model* debugFildeModel = nullptr;
 	Object3Ds* debugCharacter = nullptr;
@@ -218,43 +241,12 @@ private://メンバ変数(初期化)
 	DebugText* text = nullptr;
 
 private://メンバ変数(ゲームシーン)
-	Model* modelPlane = nullptr;
-	Model* modelBox = nullptr;
-	Model* modelPyramid = nullptr;
-	vector<Object3Ds*>stageObjects;
-	Sprite* hp = nullptr;
-	Sprite* Damege = nullptr;
-
-	Model* defenceModel = nullptr;
-	Model* Box1x1 = nullptr;
-
-	Sprite* Title = nullptr;
-	Sprite* End = nullptr;
-	//Sprite* sprite03 = nullptr;
-	Sprite* HpBer = nullptr;
-	//Sprite* sprite05 = nullptr;
-	//PMDmodel* pModel = nullptr;
-	//PMDobject* pmdObj = nullptr;
-	//FbxModel* fbxModel1 = nullptr;
-	//FbxObject3d* fbxObj1 = nullptr;
-
-	vector<Object3Ds> block;
-	DebugCamera* camera = nullptr;
-	Camera* mainCamera = nullptr;
-	Camera* titleCamera = nullptr;
-	Camera* setCamera = nullptr;
-
 
 	Plane plane[25] = {};
 	Triangle triangle[50] = {};
 	Ray ray;
 
-	Triangle triangle02[2] = {};
-	Sqhere sqhere02 = {};
-
 	Easing easing;
-
-	float particleColor[4] = {};
 
 	//シーン番号
 	int SceneNum = TITLE;
@@ -269,45 +261,15 @@ private://メンバ変数(ゲームシーン)
 	float angle;
 	bool colFlag;
 
-	XMMATRIX rotM = {};
-	float angleVertical, angleHorizonal;
-	XMVECTOR vv0 = {};
-
-	XMVECTOR Zv;
-	XMVECTOR Xv;
-	XMVECTOR Yv;
-
-	Obj* test[NUM_OBJ];
-	int	_idx_obj = 0;
-
-	int playerHp = P_HP;
-	int reception = 600;
-
-	float speed = 0.0;
-
-	bool isDamege = false;
-
-	bool enemyToPlayerDamege = false;
-	float DamegeAlpha = 1.0f;
-	float popHp = 0;
-
 	static const int debugTextTexNumber = 99;
 
-	XMFLOAT3 afterEye;
-	XMFLOAT3 setObjectPos;
-
-	//シェイク関係
+	//シェイク関係（数学クラスに移動）
 	float shakeTime = 20.0f;//シェイク時間
 	XMFLOAT3 BasePos;//シェイク元座標
 	XMFLOAT3 shakeRand;//シェイク加算値
 	bool PosDecision = false; //座標決定
 	bool shake = false;
 
-	int SetNum = 0;
-
-	bool pose = false;//ポーズフラグ
-	bool load = false;//ローディング
-	int _loadMode = 0;//ローディング状態
 public://メンバ関数
 	//コンストラクタ
 	GameManager();

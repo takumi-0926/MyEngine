@@ -8,7 +8,7 @@
 
 #include "FBX/FbxObject3d.h"
 
-#include "Weapon.h"
+#include "OBB.h"
 #include "ParticleManager.h"
 
 enum Activity {
@@ -46,6 +46,9 @@ class Enemy : public FbxObject3d {
 		Vector3 p2;
 		Vector3 p3;
 	}jump;
+
+	OBB obb = {};
+
 public:
 	//’n–Ê”»’è—p
 	bool OnGround = true;
@@ -63,6 +66,7 @@ public:
 	float attackTime = 0.0f;
 	float jumpTime = 0.0f;
 	float maxTime = 1.0f;
+	float damageTime = 0.0f;
 	int mode = 0;
 
 	Sqhere collision = {};
@@ -85,7 +89,6 @@ public:
 	XMFLOAT3 RetreatPos = { 1.0f,20.0f,-150.0f };
 
 	FbxModel* model = {};
-	Weapon* weapon = nullptr;
 	ParticleManager* particle = nullptr;
 
 private:
@@ -195,5 +198,6 @@ public:
 
 public:
 	inline void SetDamage(bool flag) { this->damage = flag; }
-
+	bool GetAlive() { return alive; }
+	inline OBB GetObb() { return obb; }
 };

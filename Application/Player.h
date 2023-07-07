@@ -33,9 +33,9 @@ private:
 	/// ステータス
 	/// </summary>
 	struct Status {
-		float HP;
+		float HP = 100.f;
 		float Attack;
-	};
+	}status;
 
 	DirectX::XMFLOAT3 moveVec = {};
 	XMVECTOR Zv, Xv, Yv;
@@ -47,6 +47,10 @@ private:
 	bool move{}; //移動中true
 	bool attack{}; //攻撃中true
 	bool avoid{}; //回避中true
+
+	bool attackSt{};
+	float stTime{};
+	float stMax = 0.5f;
 
 	//回避用変数
 	DirectX::XMFLOAT3 avoidVec = {};
@@ -71,13 +75,14 @@ private:
 	int followBoneNum = 0;
 
 	bool Hit = false;
-	bool Damage = false;
+	bool damage = false;
 
 private:
 	void actionExecution(int num);
 	void moveUpdate();
 
 	void Attack();
+	void Damage();
 	void Avoid(XMFLOAT3& vec);
 
 	/// <summary>
@@ -172,7 +177,7 @@ private:
 	/// <param name="forward">進行方向ベクトル</param>
 	/// <param name="upward">上ベクトル</param>
 	/// <returns>回転行列（クォータニオン）</returns>
-	XMMATRIX LookAtRotation(XMFLOAT3 forward, XMFLOAT3 upward);
+	//XMMATRIX LookAtRotation(XMFLOAT3 forward, XMFLOAT3 upward);
 
 public:
 	/// <summary>
@@ -202,9 +207,9 @@ public:
 	inline void SetMoveVec(DirectX::XMFLOAT3 vec) { this->moveVec = vec; }
 	inline void SetAvoidVec(DirectX::XMFLOAT3 vec) { this->avoidVec = vec; }
 	inline void SetHit(bool flag) { this->Hit = flag; }
-	inline void SetDamage(bool flag) { this->Damage = flag; }
+	inline void SetDamage(bool flag) { this->damage = flag; }
 
-	inline void SetAngleH(float angle) { this->angleHorizonal = angle;}
+	inline void SetAngleH(float angle) { this->angleHorizonal = angle; }
 
 	int GetAction() { return Action; }
 
@@ -212,11 +217,10 @@ public:
 	inline float GetAngleVertical() { return angleVertical; }
 	inline float GetAngleHorizonal() { return angleHorizonal; }
 	inline bool GetHit() { return Hit; }
-	inline bool GetDamage() { return Damage; }
+	inline bool GetDamage() { return damage; }
 	inline bool GetAttack() { return attack; }
+	inline bool GetAttackSt() { return attackSt; }
 	inline Sqhere GetCollision() { return collision; }
-	inline Weapon* GetInstance() {
-		Weapon* instance = new Weapon();
-		return instance;
-	}
+	inline Weapon* GetWeapon() { return weapon; }
+	inline Status* GetStatus() { return &status; }
 };

@@ -38,14 +38,14 @@ float4 main(VSOutput input) : SV_TARGET
 	//範囲を0～1に
 	float posFromLightUV = 1.0f / input.tpos.w;
 	float2 shadowUV;
-	shadowUV.x = (1.0f + input.tpos.x * posFromLightUV) * 0.5f;
-	shadowUV.y = (1.0f - input.tpos.y * posFromLightUV) * 0.5f;
+	shadowUV.x = 0.5f + (input.tpos.x / input.tpos.w) * 0.5f;
+	shadowUV.y = 1.0f - (input.tpos.y / input.tpos.w) * 0.5f;
 
 	float depthFromLight = lightDepthTex.Sample(smp, shadowUV).x;
 
 	//深度値を比較
 	if (shadowUV.x >= 0 && shadowUV.x <= 1.0f && shadowUV.y >= 0 && shadowUV.y <= 1.0f) {
-		if (depthFromLight + 0.005f < input.tpos.z * posFromLightUV) {
+		if (depthFromLight + 0.005f < input.tpos.z / input.tpos.w) {
 			//shadecolor.xyz = shadecolor.xyz * 0.5f;
 			shadowWeight = 0.5f;
 		}

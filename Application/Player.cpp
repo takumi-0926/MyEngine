@@ -1,53 +1,10 @@
 #include "Player.h"
 #include "Math/Vector3.h"
 #include "Math/Quaternion.h"
-
+#include "Math/MyMath.h"
 #include "Collision/CollisionManager.h"
 #include "Collision/CollisionAttribute.h"
 #include "Collision/SphereCollider.h"
-
-XMMATRIX Player::LookAtRotation(XMFLOAT3 forward, XMFLOAT3 upward)
-{
-	Vector3 z = Vector3(forward.x, forward.y, forward.z);//進行方向ベクトル（前方向）
-	Vector3 up = Vector3(upward.x, upward.y, upward.z);  //上方向
-	XMMATRIX rot;//回転行列
-	Quaternion q = quaternion(0, 0, 0, 1);//回転クォータニオン
-	Vector3 _z = { 0.0f,0.0f,1.0f };//Z方向単位ベクトル
-	Vector3 cross;
-	XMMATRIX matRot = XMMatrixIdentity();
-
-	float a;//角度保存用
-	float b;//角度保存用
-	float c;//角度保存用
-	float d;//角度保存用
-
-	//カメラに合わせるための回転行列
-	matRot = XMMatrixRotationY(XMConvertToRadians(angleHorizonal));
-
-	cross = z.cross(_z);
-
-	q.x = cross.x;
-	q.y = cross.y;
-	q.z = cross.z;
-
-	q.w = sqrt(
-		(z.length() * z.length())
-		* (_z.length() * _z.length())) + z.dot(_z);
-
-	//単位クォータニオン化
-	q = normalize(q);
-	q = conjugate(q);
-	a = q.x;
-	b = q.y;
-	c = q.z;
-	d = q.w;
-
-	//任意軸回転
-	XMVECTOR rq = { q.x,q.y,q.z,q.w };
-	rot = XMMatrixRotationQuaternion(rq);
-
-	return rot;
-}
 
 Player* Player::Create(FbxModel* model)
 {
@@ -69,12 +26,14 @@ void Player::Initialize()
 {
 	FbxObject3d::Initialize();
 
+	SetFastTime(2);
+
 	//コライダー追加（斥候用）
 	float radius = 3.0f;
 	SetCollider(new SphereCollider(XMVECTOR({ 0,radius,0,0 }), radius));
 	collider->SetAttribute(COLLISION_ATTR_ALLIES);
 
-	collision.radius = 20.0f;
+	collision.radius = 10.0f;
 }
 
 void Player::actionExecution(int num)
@@ -112,11 +71,9 @@ void Player::actionExecution(int num)
 			//角度回転
 			matRot = XMMatrixRotationY(XMConvertToRadians(angleHorizonal));
 
-			_v ={ v.x, v.y, v.z, 0 };
+			_v = { v.x, v.y, v.z, 0 };
 			_v = XMVector3TransformNormal(_v, matRot);
-			v.x = _v.m128_f32[0];
-			v.y = _v.m128_f32[1];
-			v.z = _v.m128_f32[2];
+			v = XMFLOAT3(_v.m128_f32);
 
 			SetMatRot(LookAtRotation(v, XMFLOAT3(0.0f, 1.0f, 0.0f)));
 		}
@@ -129,6 +86,8 @@ void Player::actionExecution(int num)
 	}
 	//攻撃
 	Attack();
+
+	Damage();
 
 	playEnd = false;
 }
@@ -179,8 +138,8 @@ void Player::moveUpdate()
 		Action = action::Wait;
 	}
 
-	float angleH = 150.0f;
-	float angleV = 60.0f;
+	const float angleH = 150.0f;
+	const float angleV = 90.0f;
 
 	if (directInput->rightStickX() >= 0.5f || directInput->rightStickX() <= -0.5f) {
 		angleHorizonal +=
@@ -201,23 +160,12 @@ void Player::moveUpdate()
 
 	//攻撃が当たったとき
 	if (Hit) {
-		static float h_time = 0.0f;
-		h_time += 1.f / 60.f;
-		if (h_time >= 1.f) {
+		if (playEnd) {
 			Hit = false;
-			h_time = 0.0f;
 		}
 	}
 
 	//攻撃を受けたとき
-	if (Damage) {
-		static float d_time = 0.0f;
-		d_time += 1.f / 60.f;
-		if (d_time >= 1.f) {
-			Damage = false;
-			d_time = 0.0f;
-		}
-	}
 
 	//行動実行
 	actionExecution(Action);
@@ -228,6 +176,12 @@ void Player::Attack()
 	if (!attack) {
 		return;
 	}
+
+	if (stTime >= stMax) {
+		attackSt = true;
+	}
+
+	stTime += fps;
 
 	//コンボアタック先行入力
 	if (directInput->IsButtonPush(DirectInput::ButtonKind::ButtonX) || Input::GetInstance()->Push(DIK_X)) {
@@ -247,7 +201,7 @@ void Player::Attack()
 	if (atCombo) {
 		freamCount += 1.f / 60.f;
 
-		if (freamCount >= 0.1f) {
+		if (freamCount >= 0.5f) {
 			combo = attackNum;
 			freamCount = 0.f;
 			atCombo = false;
@@ -256,6 +210,9 @@ void Player::Attack()
 
 	//行動終了時
 	if (playEnd) {
+
+		//攻撃可能
+		Hit = false;
 
 		//先行入力確認
 		if (atCombo) {
@@ -267,11 +224,17 @@ void Player::Attack()
 
 				attackNum = action::Attack;
 				attack = false;
+
+				attackSt = false;
+				stTime = {};
 			}
 			else {
 
 				attackNum = combo;
 				atCombo = false;
+
+				attackSt = false;
+				stTime = {};
 
 				ChangeAnimation(attackNum);
 			}
@@ -281,14 +244,33 @@ void Player::Attack()
 			Action = -1;
 			attackNum = action::Attack;
 			attack = false;
+
+			attackSt = false;
+			stTime = {};
 		}
 
 		freamCount = 0.f;
 	}
 }
 
+void Player::Damage()
+{
+	if (!damage)return;
+
+	static int count = 10;
+
+	if (count >= 0) {
+		status.HP--;
+		count--;
+	}
+	else {
+		count = 10;
+		damage = false;
+	}
+}
+
 void Player::Avoid(XMFLOAT3& vec) {
-	if (avoidTime >= 36.0f) {
+	if (avoidTime >= 18.0f) {
 		Action = action::Wait;
 		avoidTime = 0.0f;
 		avoid = false;
@@ -309,10 +291,7 @@ void Player::Avoid(XMFLOAT3& vec) {
 	_vec = XMVector3Normalize(_vec);
 	_vec = XMVector3TransformNormal(_vec, matRot);
 
-	position.x -= _vec.m128_f32[0] * avoidSpeed;
-	position.y -= _vec.m128_f32[1] * avoidSpeed;
-	position.z -= _vec.m128_f32[2] * avoidSpeed;
-
+	position -= XMFLOAT3(_vec.m128_f32) * 3;
 	avoidTime += 1.0f;
 }
 void Player::CreateWeapon(Model* model)
@@ -327,15 +306,11 @@ void Player::Update()
 
 	collision.center = XMLoadFloat3(&position);
 
-	weapon->SetCollision(XMVectorSet(
-		position.x + _v.m128_f32[0] * 2,
-		position.x + 20.0f,
-		position.x + _v.m128_f32[2] * 2,
-		1));
+	weapon->SetCollision(XMVectorSet(position.x + _v.m128_f32[0], position.y, position.z + _v.m128_f32[2], 1));
 
-		//武器にボーン行列を渡す
-		weapon->SetFollowingObjectBoneMatrix(
-			model->GetBones()[followBoneNum].fbxCluster->GetLink()->EvaluateGlobalTransform(currentTime), matWorld);
+	//武器にボーン行列を渡す
+	weapon->SetFollowingObjectBoneMatrix(
+		model->GetBones()[followBoneNum].fbxCluster->GetLink()->EvaluateGlobalTransform(currentTime), matWorld);
 	weapon->Update();
 
 	//落下処理
@@ -345,9 +320,7 @@ void Player::Update()
 
 		fallV.m128_f32[1] = max(fallV.m128_f32[1] + fallAcc, fallVYMin);
 
-		position.x += fallV.m128_f32[0];
-		position.y += fallV.m128_f32[1];
-		position.z += fallV.m128_f32[2];
+		position += XMFLOAT3(fallV.m128_f32);
 	}
 
 	//球コライダー生成
@@ -384,9 +357,8 @@ void Player::Update()
 
 	CollisionManager::GetInstance()->QuerySqhere(*sqhereCollider, &callBack, COLLISION_ATTR_LANDSHAPE);
 
-	position.x += callBack.move.m128_f32[0];
-	position.y += callBack.move.m128_f32[1];
-	position.z += callBack.move.m128_f32[2];
+	position += XMFLOAT3(callBack.move.m128_f32);
+
 	UpdateWorldMatrix();
 	collider->Update();
 
@@ -424,5 +396,8 @@ void Player::Update()
 void Player::Draw(ID3D12GraphicsCommandList* cmdList)
 {
 	FbxObject3d::Draw(cmdList);
-	weapon->Draw();
+
+	if (Action == action::Attack) {
+		weapon->Draw();
+	}
 }
