@@ -21,6 +21,58 @@
 
 std::thread th = {};
 
+void GameManager::LoadModelResources()
+{
+	testModel = FbxLoader::GetInstance()->LoadModelFromFile("testModel");
+
+	debugFildeModel = Model::CreateFromOBJ("Ground");
+	debugCharacterModel = Model::CreateFromOBJ("Box");
+
+	//基本オブジェクト--------------
+	defenceModel = Model::CreateFromOBJ("KSR-29");
+	skyDomeModel = Model::CreateFromOBJ("skydome");
+	bulletModel = Model::CreateFromOBJ("bullet");
+
+	//ステージモデル
+	stageModels.insert(std::make_pair("Ground", Model::CreateFromOBJ("Ground")));
+	stageModels.insert(std::make_pair("Gate", Model::CreateFromOBJ("Gate")));
+	stageModels.insert(std::make_pair("Wall", Model::CreateFromOBJ("Wall")));
+	stageModels.insert(std::make_pair("Tree", Model::CreateFromOBJ("Tree")));
+	stageModels.insert(std::make_pair("Cliff", Model::CreateFromOBJ("Cliff")));
+	stageModels.insert(std::make_pair("Foundation", Model::CreateFromOBJ("Foundation")));
+	stageModels.insert(std::make_pair("Spike", Model::CreateFromOBJ("spike")));
+	stageModels.insert(std::make_pair("WallRock", Model::CreateFromOBJ("WallRock")));
+	stageModels.insert(std::make_pair("Camp", Model::CreateFromOBJ("Camp")));
+	stageModels.insert(std::make_pair("Tent", Model::CreateFromOBJ("Tent")));
+
+}
+void GameManager::LoadSpriteResources()
+{
+	//this->audio->Load();// デバッグテキスト用テクスチャ読み込み
+	if (!Sprite::loadTexture(debugTextTexNumber, L"Resources/debugfont.png")) { assert(0); }
+
+	//画像リソース
+	if (!Sprite::loadTexture(0, L"Resources/Title.dds")) { assert(0); }
+	if (!Sprite::loadTexture(1, L"Resources/end.png")) { assert(0); }
+	if (!Sprite::loadTexture(2, L"Resources/haikei.png")) { assert(0); }
+	if (!Sprite::loadTexture(3, L"Resources/HpBer.png")) { assert(0); }
+	if (!Sprite::loadTexture(4, L"Resources/Hp.png")) { assert(0); }
+	if (!Sprite::loadTexture(6, L"Resources/start.dds")) { assert(0); }
+	if (!Sprite::loadTexture(7, L"Resources/clear_result.dds")) { assert(0); }
+	if (!Sprite::loadTexture(8, L"Resources/failed_result.png")) { assert(0); }
+	if (!Sprite::loadTexture(9, L"Resources/blackTex.dds")) { assert(0); }
+	if (!Sprite::loadTexture(10, L"Resources/breakBer.png")) { assert(0); }
+	if (!Sprite::loadTexture(11, L"Resources/breakGage.png")) { assert(0); }
+	if (!Sprite::loadTexture(12, L"Resources/GateUI_red.png")) { assert(0); }
+	if (!Sprite::loadTexture(13, L"Resources/GateUI_yellow.png")) { assert(0); }
+	if (!Sprite::loadTexture(14, L"Resources/GateUI.png")) { assert(0); }
+	if (!Sprite::loadTexture(15, L"Resources/pose.png")) { assert(0); }
+	if (!Sprite::loadTexture(16, L"Resources/weapon.png")) { assert(0); }
+	if (!Sprite::loadTexture(17, L"Resources/weaponSlot.png")) { assert(0); }
+	if (!Sprite::loadTexture(18, L"Resources/loading.dds")) { assert(0); }
+	if (!BillboardObject::LoadTexture(0, L"Resources/GateUI_red.png")) { assert(0); }
+}
+
 GameManager::GameManager()
 {
 }
@@ -40,93 +92,12 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	this->input = input;
 	this->audio = audio;
 
-	//this->audio->Load();// デバッグテキスト用テクスチャ読み込み
-	if (!Sprite::loadTexture(debugTextTexNumber, L"Resources/debugfont.png")) {
-		assert(0);
-		return false;
-	}
-	debugText.Initialize(debugTextTexNumber);
-
-	//画像リソース
-	if (!Sprite::loadTexture(0, L"Resources/Title.dds")) {
-		assert(0);
-		return false;
-	}
-	if (!Sprite::loadTexture(1, L"Resources/end.png")) {
-		assert(0);
-		return false;
-	}
-	if (!Sprite::loadTexture(2, L"Resources/haikei.png")) {
-		assert(0);
-		return false;
-	}
-	if (!Sprite::loadTexture(3, L"Resources/HpBer.png")) {
-		assert(0);
-		return false;
-	}
-	if (!Sprite::loadTexture(4, L"Resources/Hp.png")) {
-		assert(0);
-		return false;
-	}
-	if (!Sprite::loadTexture(6, L"Resources/start.dds")) {
-		assert(0);
-		return false;
-	}
-	if (!Sprite::loadTexture(7, L"Resources/clear_result.dds")) {
-		assert(0);
-		return false;
-	}
-	if (!Sprite::loadTexture(8, L"Resources/failed_result.png")) {
-		assert(0);
-		return false;
-	}
-	if (!Sprite::loadTexture(9, L"Resources/blackTex.dds")) {
-		assert(0);
-		return false;
-	}
-	if (!Sprite::loadTexture(10, L"Resources/breakBer.png")) {
-		assert(0);
-		return false;
-	}
-	if (!Sprite::loadTexture(11, L"Resources/breakGage.png")) {
-		assert(0);
-		return false;
-	}
-	if (!Sprite::loadTexture(12, L"Resources/GateUI_red.png")) {
-		assert(0);
-		return false;
-	}
-	if (!Sprite::loadTexture(13, L"Resources/GateUI_yellow.png")) {
-		assert(0);
-		return false;
-	}
-	if (!Sprite::loadTexture(14, L"Resources/GateUI.png")) {
-		assert(0);
-		return false;
-	}
-	if (!Sprite::loadTexture(15, L"Resources/pose.png")) {
-		assert(0);
-		return false;
-	}
-	if (!Sprite::loadTexture(16, L"Resources/weapon.png")) {
-		assert(0);
-		return false;
-	}
-	if (!Sprite::loadTexture(17, L"Resources/weaponSlot.png")) {
-		assert(0);
-		return false;
-	}
-	if (!Sprite::loadTexture(18, L"Resources/loading.dds")) {
-		assert(0);
-		return false;
-	}
-
-	if (!BillboardObject::LoadTexture(0, L"Resources/GateUI_red.png")) {
-		assert(0);
-		return false;
-	}
+	LoadSpriteResources();
+	LoadModelResources();
 
 	LoadTitleResources();
+
+	debugText.Initialize(debugTextTexNumber);
 
 	//カメラをセット
 	camera = new DebugCamera(Application::window_width, Application::window_height, input);
@@ -162,9 +133,7 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	//ライトセット
 	Wrapper::SetLight(light);
 
-	debugFildeModel = Model::CreateFromOBJ("Ground");
 	debugFilde = Object3Ds::Create(debugFildeModel);
-	debugCharacterModel = Model::CreateFromOBJ("Box");
 	debugCharacter = Object3Ds::Create(debugCharacterModel);
 
 	particlemanager = ParticleManager::Create();
@@ -172,32 +141,14 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 
 	Bottom = BillboardObject::Create(0);
 	Bottom->Update();
-
 	Bottom->CreateObject(XMFLOAT3(0, 10, 0), 5);
 
-	testModel = FbxLoader::GetInstance()->LoadModelFromFile("testModel");
 	testObject = new FbxObject3d;
 	testObject->Initialize();
 	testObject->SetModel(testModel);
 	testObject->PlayAnimation();
 
-	//基本オブジェクト--------------
-	defenceModel = Model::CreateFromOBJ("KSR-29");
-	skyDomeModel = Model::CreateFromOBJ("skydome");
-	bulletModel = Model::CreateFromOBJ("bullet");
-
 	//ステージデータ及びモデルデータ読み込み
-	stageModels.insert(std::make_pair("Ground", Model::CreateFromOBJ("Ground")));
-	stageModels.insert(std::make_pair("Gate", Model::CreateFromOBJ("Gate")));
-	stageModels.insert(std::make_pair("Wall", Model::CreateFromOBJ("Wall")));
-	stageModels.insert(std::make_pair("Tree", Model::CreateFromOBJ("Tree")));
-	stageModels.insert(std::make_pair("Cliff", Model::CreateFromOBJ("Cliff")));
-	stageModels.insert(std::make_pair("Foundation", Model::CreateFromOBJ("Foundation")));
-	stageModels.insert(std::make_pair("Spike", Model::CreateFromOBJ("spike")));
-	stageModels.insert(std::make_pair("WallRock", Model::CreateFromOBJ("WallRock")));
-	stageModels.insert(std::make_pair("Camp", Model::CreateFromOBJ("Camp")));
-	stageModels.insert(std::make_pair("Tent", Model::CreateFromOBJ("Tent")));
-
 	stageData = JsonLoader::LoadJsonFile("titleStageData");
 	for (auto& objectData : stageData->objects) {
 		Model* model = nullptr;
@@ -285,14 +236,6 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 		baseCamp.push_back(newObject);
 	}
 
-	//MMDオブジェクト----------------
-	//modelPlayer = PMDmodel::CreateFromPMD("Resources/Model/初音ミク.pmd");
-	//modelPlayer->LoadVMDFile(vmdData::WAIT, "Resources/vmd/marieru_stand.vmd");
-	//modelPlayer->LoadVMDFile(vmdData::WALK, "Resources/vmd/Rick式走りモーション02.vmd");
-	//modelPlayer->LoadVMDFile(vmdData::ATTACK, "Resources/vmd/attack.vmd");
-	//modelPlayer->LoadVMDFile(vmdData::DAMAGE, "Resources/vmd/腹部ダメージモーション.vmd");
-	//modelPlayer->LoadVMDFile(vmdData::AVOID, "Resources/vmd/Rick式走りモーション05.vmd");
-
 	//スプライト---------------------
 	Title = Sprite::Create(0, { 640.0f,120.0f });
 	End = Sprite::Create(1, { 0.0f,0.0f });
@@ -330,7 +273,6 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	start->Update();
 
 
-
 	int fontWidth = 64;
 	int fontHeight = 64;
 
@@ -345,11 +287,6 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 		Now_Loading[i].get()->SetAnchorPoint({ 0.5f,0.5f });
 		Now_Loading[i].get()->Update();
 	}
-
-	//入力及び音声
-	input->Update();
-
-	SceneNum = TITLE;
 
 	particlemanager->CreateParticle(30, XMFLOAT3(0, 0, 0), 0.01f, 0.01f, 12, 4.0f, { 0.2f,0.2f,0.8f,1 }, 1);
 
@@ -505,16 +442,6 @@ void GameManager::TitleUpdate()
 void GameManager::GameUpdate() {
 	//ゲーム
 	if (SceneNum == GAME) {
-
-		ImGui::Begin("Rendering Test Menu");
-		ImGui::SetWindowSize(ImVec2(400, 500), ImGuiCond_::ImGuiCond_FirstUseEver);
-
-		ImGui::InputFloat3("Poscol", _player->GetCollision().center.m128_f32);
-		ImGui::InputFloat3("PosWeaCol", _player->GetWeapon()->GetCollision().center.m128_f32);
-
-		ImGui::End();
-
-
 		//フェードアウト
 		if (fade->GetFadeOut() && !load) {
 			fade->FadeOut();
@@ -607,6 +534,7 @@ void GameManager::GameUpdate() {
 
 					if (hit) {
 						_player->SetDamage(true);
+						_player->SetDamageVec(enemy.get()->GetPosition());
 						enemy.get()->attackHit = true;
 					}
 				}
@@ -620,8 +548,7 @@ void GameManager::GameUpdate() {
 					//既に攻撃が当たっていたらスルー
 					if (_player->GetHit()) { continue; }
 
-					bool hit = collisionOBBtoOBB(enemy.get()->GetObb() , _player->GetWeapon()->GetObb());
-					//bool hit = Collision::CheckSqhere2Sqhere(enemy.get()->collision, weaponCollider);
+					bool hit = collisionOBBtoOBB(enemy.get()->GetObb(), _player->GetWeapon()->GetObb());
 
 					if (hit) {
 						enemy.get()->SetDamage(true);
@@ -641,24 +568,6 @@ void GameManager::GameUpdate() {
 					bool hit = Collision::CheckSqhere2Triangle(enemy.get()->collision, triangle[0], &inter);
 
 					if (hit) { enemy.get()->SetDamage(true); }
-				}
-
-				for (int i = 0; i < sqhere.size(); i++) {
-					bool Hhit = Collision::CheckSqhere2Sqhere(sqhere[i], playerCollider);
-					XMVECTOR inter;
-					bool Ghit = Collision::CheckSqhere2Triangle(sqhere[i], triangle[0], &inter);
-
-					//ゲート攻撃(使う)
-					//if (Ghit == true && reception <= 0 && _enemy[i]->attackHit == true) {
-					//	if (_enemy[i]->mode != 3) { continue; }
-					//	_enemy[i]->attackHit = false;
-					//	gateHP -= 1;
-					//	shake = true;
-					//	reception = 600;
-					//}
-
-					//ゲームオーバー条件				
-					//if (gateHP <= 0 || playerHp <= 0) { SceneChange = true; }
 				}
 			}
 
@@ -782,7 +691,7 @@ void GameManager::GameUpdate() {
 
 				createTime = 0.2f;
 			}
-			createTime -= 1.0f / 60.0f;
+			createTime -= fps;
 
 		}
 
@@ -1047,7 +956,7 @@ void GameManager::DebugTestUpdate()
 
 			createTime = 0.2f;
 		}
-		createTime -= 1.0f / 60.0f;
+		createTime -= fps;
 
 		static XMFLOAT3 pos = { 0,0,0 };
 		static float sp = 0.2f;
@@ -1061,7 +970,7 @@ void GameManager::DebugTestUpdate()
 		else if (input->Push(DIK_O)) { pos.y = sp; }
 		else { pos.y = 0; }
 
-		debugCharacter->position = add(debugCharacter->position, pos);
+		debugCharacter->position += pos;
 	}
 }
 
@@ -1490,13 +1399,6 @@ void GameManager::GameReset()
 	mainCamera->SetTarget(_target);
 }
 
-XMFLOAT3 GameManager::moveCamera(XMFLOAT3 pos1, XMFLOAT3 pos2, float pct)
-{
-	XMFLOAT3 pos;
-	pos = pos1 + ((pos2 - pos1) * pct);
-	return pos;
-}
-
 void GameManager::LoadTitleResources()
 {
 	if (!Sprite::loadTexture(SpriteName::Title_UI, L"Resources/Title_UI_01.png")) { assert(0); }
@@ -1656,14 +1558,4 @@ void GameManager::LoadGameResources()
 }
 void GameManager::LoadAnotherResourecs()
 {
-}
-
-XMFLOAT3 add(const XMFLOAT3& v1, const XMFLOAT3& v2)
-{
-	XMFLOAT3 pos;
-	pos.x = v1.x + v2.x;
-	pos.y = v1.y + v2.y;
-	pos.z = v1.z + v2.z;
-
-	return pos;
 }

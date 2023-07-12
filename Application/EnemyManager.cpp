@@ -26,7 +26,7 @@ EnemyManager* EnemyManager::Create(FbxModel* model1, FbxModel* model2, FbxModel*
 
 void EnemyManager::EnemyCreate()
 {
-	if (enemyNum > 15)return;
+	if (enemyNum >= 1)return;
 	//golem.push_back(Enemy::Create(GolemModel,Activity::golem));
 	wolf.push_back(Enemy::Create(WolfModel, Activity::wolf));
 

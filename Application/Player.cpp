@@ -123,12 +123,12 @@ void Player::moveUpdate()
 
 		//‘–‚è‚Æƒ_ƒbƒVƒ…‚ÌØ‚è‘Ö‚¦
 		if (directInput->getTriggerZ() != 0) {
-			speed = 2.0f;
+			speed = 3.0f;
 			ChangeAnimation(action::Dash);
 			Action = action::Dash;
 		}
 		else {
-			speed = 1.0f;
+			speed = 2.0f;
 			ChangeAnimation(action::Walk);
 			Action = action::Walk;
 		}
@@ -262,6 +262,11 @@ void Player::Damage()
 	if (count >= 0) {
 		status.HP--;
 		count--;
+
+		XMVECTOR _vec = twoPointVector(position, damageVec);
+		_vec = XMVector3Normalize(_vec);
+
+		position += XMFLOAT3(_vec.m128_f32);
 	}
 	else {
 		count = 10;
@@ -269,7 +274,7 @@ void Player::Damage()
 	}
 }
 
-void Player::Avoid(XMFLOAT3& vec) {
+void Player::Avoid(const XMFLOAT3& vec) {
 	if (avoidTime >= 18.0f) {
 		Action = action::Wait;
 		avoidTime = 0.0f;

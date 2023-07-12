@@ -269,11 +269,11 @@ void Enemy::Appearance()
 	//ŽO‘Ì‚Ü‚Å
 	//if (popTime >= 10.0f) {
 	if (mode = Activity::wolf) {
-		status.HP = 2;
+		status.HP = 15;
 		status.speed = 1.0f;
 		shadowOffset = 1.0f;
 		particleOffset = 10.0f;
-		scale = XMFLOAT3(0.5f, 0.5f, 0.5f);
+		scale = XMFLOAT3(0.7f, 0.7f, 0.7f);
 	}
 	else if (mode = Activity::golem) {
 		status.HP = 4;

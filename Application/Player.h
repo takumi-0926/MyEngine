@@ -37,23 +37,25 @@ private:
 		float Attack;
 	}status;
 
-	DirectX::XMFLOAT3 moveVec = {};
-	XMVECTOR Zv, Xv, Yv;
-	XMVECTOR _v;
-
 	Weapon* weapon = nullptr;
 	Sqhere collision = {};
+
+	DirectX::XMFLOAT3 moveVec = {};
+	DirectX::XMFLOAT3 damageVec = {};
+	DirectX::XMFLOAT3 avoidVec = {};
 
 	bool move{}; //移動中true
 	bool attack{}; //攻撃中true
 	bool avoid{}; //回避中true
 
-	bool attackSt{};
-	float stTime{};
-	float stMax = 0.5f;
+	bool Hit = false;//攻撃成功時
+	bool damage = false;
+
+	XMVECTOR Zv, Xv, Yv;
+	XMVECTOR _v;
+
 
 	//回避用変数
-	DirectX::XMFLOAT3 avoidVec = {};
 	float avoidSpeed = 1.8f;
 	float avoidTime = 0.0f;
 
@@ -62,6 +64,9 @@ private:
 	int attackNum = action::Attack;
 	float freamCount = 0;
 	bool atCombo = false;
+	bool attackSt{};
+	float stTime{};
+	float stMax = 0.5f;
 
 	int Action = 0;
 
@@ -74,8 +79,6 @@ private:
 
 	int followBoneNum = 0;
 
-	bool Hit = false;
-	bool damage = false;
 
 private:
 	void actionExecution(int num);
@@ -83,7 +86,7 @@ private:
 
 	void Attack();
 	void Damage();
-	void Avoid(XMFLOAT3& vec);
+	void Avoid(const XMFLOAT3& vec);
 
 	/// <summary>
 /// 移動
@@ -171,14 +174,6 @@ private:
 		return pos;
 	}
 
-	/// <summary>
-	/// 進行方向に回転
-	/// </summary>
-	/// <param name="forward">進行方向ベクトル</param>
-	/// <param name="upward">上ベクトル</param>
-	/// <returns>回転行列（クォータニオン）</returns>
-	//XMMATRIX LookAtRotation(XMFLOAT3 forward, XMFLOAT3 upward);
-
 public:
 	/// <summary>
 	/// インスタンス生成
@@ -205,6 +200,7 @@ public:
 	//void SetInput(const Input& input) { this->input = input; }
 	inline void SetAction(int num) { this->Action = num; }
 	inline void SetMoveVec(DirectX::XMFLOAT3 vec) { this->moveVec = vec; }
+	inline void SetDamageVec(DirectX::XMFLOAT3 vec) { this->damageVec = vec; }
 	inline void SetAvoidVec(DirectX::XMFLOAT3 vec) { this->avoidVec = vec; }
 	inline void SetHit(bool flag) { this->Hit = flag; }
 	inline void SetDamage(bool flag) { this->damage = flag; }

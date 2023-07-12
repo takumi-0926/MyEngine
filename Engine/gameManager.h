@@ -283,6 +283,9 @@ public://メンバ関数
 	void LoadGameResources();//ゲーム内リソース読み込み
 	void LoadAnotherResourecs();//その他リソース読み込み
 
+	void LoadModelResources();
+	void LoadSpriteResources();
+
 	//更新
 	void Update();
 
@@ -359,14 +362,6 @@ public://メンバ関数
 	}
 
 	/// <summary>
-	/// カメラの移動（指定した場所まで）
-	/// </summary>
-	/// <param name="pos1">元の位置</param>
-	/// <param name="pos2">指定場所</param>
-	/// <param name="pct">経過時間</param>
-	XMFLOAT3 moveCamera(XMFLOAT3 pos1, XMFLOAT3 pos2, float pct);
-
-	/// <summary>
 	/// 同一地点判別
 	/// </summary>
 	/// <param name="pos1"></param>
@@ -408,15 +403,4 @@ public://メンバ関数
 		//シェイクタイム減算
 		shakeTime -= 1.0f;
 	}
-
-	inline float distance(XMFLOAT3 pos1, XMFLOAT3 pos2)
-	{
-		float distance;
-		float x = abs(pos1.x - pos2.x);
-		float z = abs(pos1.z - pos2.z);
-		distance = std::sqrt(x * 2 + z * 2);
-		return distance;
-	}
 };
-
-XMFLOAT3 add(const XMFLOAT3& v1, const XMFLOAT3& v2);

@@ -7,6 +7,42 @@ using namespace DirectX;
 
 extern const float fps;
 
+//XMFLOAT3型関係演算子オーバーロード
+using float3 = XMFLOAT3;
+inline const float3& operator-=(float3& f1, const float3& f2) {
+	f1.x = f1.x - f2.x;
+	f1.y = f1.y - f2.y;
+	f1.z = f1.z - f2.z;
+
+	return f1;
+}
+
+inline const float3 operator-(const float3& v1, const float3& v2) {
+	float3 temp(v1);
+	return temp -= v2;
+}
+
+inline const float3& operator+=(float3& f1, const float3& f2) {
+	f1.x = f1.x + f2.x;
+	f1.y = f1.y + f2.y;
+	f1.z = f1.z + f2.z;
+	return f1;
+}
+
+inline const float3 operator+(const float3& v1, const float3& v2) {
+	float3 temp(v1);
+	return temp += v2;
+}
+
+inline const float3 operator*(const float3& v1, const float& f) {
+	float3 temp(v1);
+	temp.x *= f;
+	temp.y *= f;
+	temp.z *= f;
+	return temp;
+}
+
+//スケール抽出
 inline XMMATRIX ExtractScaleMat(XMMATRIX matworld)
 {
 	return XMMatrixScaling(
@@ -21,12 +57,12 @@ inline XMMATRIX ExtractScaleMat(XMMATRIX matworld)
 			}).m128_f32[0]
 	);
 }
-
+//位置抽出
 inline XMMATRIX ExtractPositionMat(XMMATRIX matworld)
 {
 	return XMMatrixTranslation(matworld.r[3].m128_f32[0], matworld.r[3].m128_f32[1], matworld.r[3].m128_f32[2]);
 }
-
+//回転抽出
 inline XMMATRIX ExtractRotationMat(XMMATRIX matworld)
 {
 	XMMATRIX mOffset = ExtractPositionMat(matworld);
@@ -36,7 +72,7 @@ inline XMMATRIX ExtractRotationMat(XMMATRIX matworld)
 	// 左からScaling、右からOffsetの逆行列をそれぞれかける。
 	return XMMatrixInverse(&det, mScaling) * matworld * XMMatrixInverse(&det, mOffset);
 }
-
+//回転
 inline XMMATRIX LookAtRotation(XMFLOAT3 forward, XMFLOAT3 upward)
 {
 	Vector3 z = Vector3(forward.x, forward.y, forward.z);//進行方向ベクトル（前方向）
@@ -75,37 +111,57 @@ inline XMMATRIX LookAtRotation(XMFLOAT3 forward, XMFLOAT3 upward)
 	return rot;
 }
 
-using float3 = XMFLOAT3;
-
-inline const float3& operator-=(float3& f1, const float3& f2) {
-	f1.x = f1.x - f2.x;
-	f1.y = f1.y - f2.y;
-	f1.z = f1.z - f2.z;
-
-	return f1;
+//移動
+inline XMFLOAT3 moveCamera(const XMFLOAT3 pos1, const XMFLOAT3 pos2, float pct)
+{
+	XMFLOAT3 pos{};
+	pos = pos1 + ((pos2 - pos1) * pct);
+	return pos;
 }
 
-inline const float3 operator-(const float3& v1, const float3& v2) {
-	float3 temp(v1);
-	return temp -= v2;
+//距離
+inline float distance(XMFLOAT3 pos1, XMFLOAT3 pos2)
+{
+	float distance{};
+	float x = abs(pos1.x - pos2.x);
+	float z = abs(pos1.z - pos2.z);
+	distance = float(sqrt(x * 2 + z * 2));
+	return distance;
 }
 
-inline const float3& operator+=(float3& f1, const float3& f2) {
-	f1.x = f1.x + f2.x;
-	f1.y = f1.y + f2.y;
-	f1.z = f1.z + f2.z;
-	return f1;
+//Vector型をXMFLAT3型にキャスト
+inline XMFLOAT3 VectorToXMFloat(XMVECTOR vec)
+{
+	XMFLOAT3 ret{};
+	ret.x = vec.m128_f32[0];
+	ret.y = vec.m128_f32[1];
+	ret.z = vec.m128_f32[2];
+	return ret;
 }
 
-inline const float3 operator+(const float3& v1, const float3& v2) {
-	float3 temp(v1);
-	return temp += v2;
+//二点間のベクトルを算出
+inline XMVECTOR twoPointVector(XMFLOAT3 pos1, XMFLOAT3 pos2)
+{
+	XMVECTOR distance{};
+	float x = pos1.x - pos2.x;
+	float z = pos1.z - pos2.z;
+	distance = { x,0,z,0 };
+	return distance;
+}
+//正規化
+inline XMVECTOR Normalize(XMVECTOR vec)
+{
+	Vector3 ret{};
+	ret.x = vec.m128_f32[0];
+	ret.y = vec.m128_f32[1];
+	ret.z = vec.m128_f32[2];
+	ret.normalize();
+
+	XMVECTOR _ret{};
+	_ret.m128_f32[0] = ret.x;
+	_ret.m128_f32[1] = ret.y;
+	_ret.m128_f32[2] = ret.z;
+	_ret.m128_f32[3] = 0;
+	return _ret;
 }
 
-inline const float3 operator*(const float3& v1, const float& f) {
-	float3 temp(v1);
-	temp.x *= f;
-	temp.y *= f;
-	temp.z *= f;
-	return temp;
-}
