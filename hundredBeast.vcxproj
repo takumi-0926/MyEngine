@@ -326,6 +326,7 @@
     <ClInclude Include="Engine\Math\MyMath.h" />
     <ClInclude Include="Engine\OBB.h" />
     <ClInclude Include="Engine\OBBCollision.h" />
+    <ClInclude Include="Framework.h" />
     <ClInclude Include="HundredBeast.h" />
     <ClInclude Include="PlayScene.h" />
     <ClInclude Include="UIManager.h" />
@@ -365,6 +366,7 @@
     <ClCompile Include="Engine\light\Light.cpp" />
     <ClCompile Include="Engine\JsonLoader.cpp" />
     <ClCompile Include="Engine\fps.cpp" />
+    <ClCompile Include="Framework.cpp" />
     <ClCompile Include="HundredBeast.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Engine\Math\Matrix4.cpp" />

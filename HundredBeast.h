@@ -1,43 +1,33 @@
 #pragma once
+#include "Framework.h"
 
-class Wrapper;
-class DebugText;
-class Application;
 class PostEffect;
 class GameManager;
 
-class HundredBeast
+class HundredBeast : public Framework
 {
 public:
 	/// <summary>
 	/// 初期化
 	/// </summary>
-	void Initialize();
+	void Initialize() override;
 
 	/// <summary>
 	/// 終了
 	/// </summary>
-	void Finalize();
+	void Finalize() override;
 
 	/// <summary>
 	/// 更新
 	/// </summary>
-	void Update();
+	void Update() override;
 
 	/// <summary>
 	/// 描画
 	/// </summary>
-	void Draw();
-
-
-	bool IsEndReqest() { return endReqest; }
+	void Draw() override;
 
 private:
-	bool endReqest = false;
-
-	Wrapper* dx12 = nullptr;		 //DirectX
-	DebugText* debugText = nullptr; //デバッグテキスト
-	Application* app = nullptr; //アプリケーション
 	PostEffect* postEffect = nullptr; //ポストエフェクト
 
 	GameManager* gameScene = nullptr;
