@@ -158,6 +158,7 @@ private://メンバ変数(初期化)
 	XMFLOAT3 pointLightPos = {};
 
 	//テクスチャエフェクト
+	unique_ptr<Fade> Effect[8];
 	Fade* fade = nullptr;//シーン切り替え時
 	Fade* clear = nullptr;//クリア時
 	Fade* failed = nullptr;//ゲームオーバー時
@@ -168,6 +169,7 @@ private://メンバ変数(初期化)
 	int gateHP = GATE_MAX;//門耐久値
 
 	//画面UI
+	unique_ptr<Sprite> screenUI[6];
 	Sprite* weaponSelect = nullptr;
 	Sprite* weaponSlot[3] = {};
 	Sprite* Title = nullptr;

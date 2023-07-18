@@ -5,7 +5,6 @@
 #include "object\baseObject.h"
 #include "FBX\FbxLoader.h"
 #include "FBX\FbxObject3d.h"
-#include "PMD/PMXLoader.h"
 #include "stage.h"
 #include "Player.h"
 #include "JsonLoader.h"
@@ -70,7 +69,7 @@ void GameManager::LoadSpriteResources()
 	if (!Sprite::loadTexture(16, L"Resources/weapon.png")) { assert(0); }
 	if (!Sprite::loadTexture(17, L"Resources/weaponSlot.png")) { assert(0); }
 	if (!Sprite::loadTexture(18, L"Resources/loading.dds")) { assert(0); }
-	if (!BillboardObject::LoadTexture(0, L"Resources/GateUI_red.png")) { assert(0); }
+	//if (!BillboardObject::LoadTexture(0, L"Resources/GateUI_red.png")) { assert(0); }
 }
 
 GameManager::GameManager()
@@ -139,9 +138,9 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	particlemanager = ParticleManager::Create();
 	particlemanager->Update();
 
-	Bottom = BillboardObject::Create(0);
-	Bottom->Update();
-	Bottom->CreateObject(XMFLOAT3(0, 10, 0), 5);
+	//Bottom = BillboardObject::Create(0);
+	//Bottom->Update();
+	//Bottom->CreateObject(XMFLOAT3(0, 10, 0), 5);
 
 	testObject = new FbxObject3d;
 	testObject->Initialize();
@@ -900,7 +899,7 @@ void GameManager::GameUpdate() {
 				skyDome->Update();
 
 				particlemanager->Update();
-				Bottom->Update();
+				//Bottom->Update();
 				static int i = 0;
 				for (auto& enemy : enemy->GetWolf()) {
 					//使う
@@ -1094,11 +1093,11 @@ void GameManager::MainDraw()
 
 		BaseObject::PostDraw();
 
-		BillboardObject::PreDraw(cmdList);
+		//BillboardObject::PreDraw(cmdList);
 
-		Bottom->Draw(cmdList);
+		//Bottom->Draw(cmdList);
 
-		BillboardObject::PostDraw();
+		//BillboardObject::PostDraw();
 
 		// 3Dオブジェクト描画前処理
 		ParticleManager::PreDraw(cmdList);

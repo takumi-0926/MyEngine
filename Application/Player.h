@@ -2,10 +2,8 @@
 #include "PMD/pmdObject3D.h"
 #include "FBX/FbxObject3d.h"
 #include "Weapon.h"
-#include "hitBox.h"
 
 #include"Input/input.h"
-//#include "Input/input.h"
 
 enum action {
 	Wait = 0,
@@ -89,10 +87,10 @@ private:
 	void Avoid(const XMFLOAT3& vec);
 
 	/// <summary>
-/// 移動
-/// </summary>
-/// <param name="pos">移動させる座標</param>
-/// <returns>移動後の座標</returns>
+	/// 移動
+	/// </summary>
+	/// <param name="pos">移動させる座標</param>
+	/// <returns>移動後の座標</returns>
 	inline XMFLOAT3 MoveBefore(XMFLOAT3 pos)
 	{
 		XMMATRIX matRot = XMMatrixIdentity();
@@ -194,10 +192,13 @@ public:
 	/// </summary>
 	void Draw(ID3D12GraphicsCommandList* cmdList)override;
 
+	/// <summary>
+	/// 武器オブジェクト生成
+	/// </summary>
+	/// <param name="model">使用モデル</param>
 	void CreateWeapon(Model* model);
 
 public:
-	//void SetInput(const Input& input) { this->input = input; }
 	inline void SetAction(int num) { this->Action = num; }
 	inline void SetMoveVec(DirectX::XMFLOAT3 vec) { this->moveVec = vec; }
 	inline void SetDamageVec(DirectX::XMFLOAT3 vec) { this->damageVec = vec; }
