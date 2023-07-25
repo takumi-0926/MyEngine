@@ -18,7 +18,7 @@
 
 #include "Math/MyMath.h"
 
-std::thread th = {};
+//std::thread th = {};
 
 void GameManager::LoadModelResources()
 {
@@ -69,6 +69,7 @@ void GameManager::LoadSpriteResources()
 	if (!Sprite::loadTexture(16, L"Resources/weapon.png")) { assert(0); }
 	if (!Sprite::loadTexture(17, L"Resources/weaponSlot.png")) { assert(0); }
 	if (!Sprite::loadTexture(18, L"Resources/loading.dds")) { assert(0); }
+	if (!Sprite::loadTexture(19, L"Resources/controll.png")) { assert(0); }
 	//if (!BillboardObject::LoadTexture(0, L"Resources/GateUI_red.png")) { assert(0); }
 }
 
@@ -275,17 +276,20 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	int fontWidth = 64;
 	int fontHeight = 64;
 
-	float basePos = 360.0f;
+	float basePos = 680.0f;
 	float offset = 50.f;
 
 	for (int i = 0; i < 11; i++)
 	{
-		Now_Loading[i].reset(Sprite::Create(18, { 640.0f + offset * i ,basePos }));
+		Now_Loading[i].reset(Sprite::Create(18, { 740.0f + offset * i ,basePos }));
 		Now_Loading[i].get()->SetTextureRect({ float(fontWidth * i), 0 }, { float(fontWidth), float(fontHeight) });
 		Now_Loading[i].get()->SetSize({ float(fontWidth),float(fontHeight) });
 		Now_Loading[i].get()->SetAnchorPoint({ 0.5f,0.5f });
 		Now_Loading[i].get()->Update();
 	}
+	LoadControll.reset(Sprite::Create(19, { 640.0f,360.0f }));
+	LoadControll.get()->SetAnchorPoint({ 0.5f,0.5f });
+	LoadControll.get()->Update();
 
 	particlemanager->CreateParticle(30, XMFLOAT3(0, 0, 0), 0.01f, 0.01f, 12, 4.0f, { 0.2f,0.2f,0.8f,1 }, 1);
 
@@ -1256,6 +1260,7 @@ void GameManager::SubDraw()
 
 	//ローディング中
 	if (load) {
+		LoadControll.get()->Draw();
 		for (int i = 0; i < 11; i++)
 		{
 			Now_Loading[i].get()->Draw();
@@ -1325,41 +1330,41 @@ void GameManager::ShadowDraw(bool isShadow)
 
 void GameManager::loading() {
 
-	if (load) {
-		switch (_loadMode)
-		{
-		case LoadMode::No:
-			_loadMode = LoadMode::Start;
+	//if (load) {
+	//	switch (_loadMode)
+	//	{
+	//	case LoadMode::No:
+	//		_loadMode = LoadMode::Start;
 
-			break;
-			//何もない・・・
-		case LoadMode::Start:
-			//ローディング始め
-			th = std::thread([&] {asyncLoad(); });
-			_loadMode = LoadMode::Run;
-			break;
-		case LoadMode::Run:
-			//ローディング中にやりたいこと
+	//		break;
+	//		//何もない・・・
+	//	case LoadMode::Start:
+	//		//ローディング始め
+	//		th = std::thread([&] {asyncLoad(); });
+	//		_loadMode = LoadMode::Run;
+	//		break;
+	//	case LoadMode::Run:
+	//		//ローディング中にやりたいこと
 
-			//文字回転
-			for (int i = 0; i < 11; i++)
-			{
-				static float angle = 0.0f;
-				angle += 0.5f;
-				Now_Loading[i].get()->SetRot(angle);
-				Now_Loading[i].get()->Update();
-			}
+	//		//文字回転
+	//		for (int i = 0; i < 11; i++)
+	//		{
+	//			static float angle = 0.0f;
+	//			angle += 0.5f;
+	//			Now_Loading[i].get()->SetRot(angle);
+	//			Now_Loading[i].get()->Update();
+	//		}
 
-			break;
-		case LoadMode::End:
-			//ローディング終わり
-			th.join();
-			load = false;
+	//		break;
+	//	case LoadMode::End:
+	//		//ローディング終わり
+	//		th.join();
+	//		load = false;
 
-		default:
-			break;
-		}
-	}
+	//	default:
+	//		break;
+	//	}
+	//}
 }
 void GameManager::asyncLoad()
 {

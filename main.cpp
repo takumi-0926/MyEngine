@@ -1,6 +1,6 @@
 
 #include "HundredBeast.h"
-#include "light\Light.h"
+#include <windows.h>
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 

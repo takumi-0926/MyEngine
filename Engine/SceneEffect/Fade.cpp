@@ -21,6 +21,10 @@ Fade::Fade(
 {
 }
 
+Fade::~Fade()
+{
+}
+
 Fade* Fade::Create(UINT texNumber, XMFLOAT2 position, XMFLOAT4 color, XMFLOAT2 anchorpoint, bool isFlipX, bool isFlipY)
 {
 	// âºÉTÉCÉY

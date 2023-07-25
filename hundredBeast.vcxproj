@@ -326,10 +326,11 @@
     <ClInclude Include="Engine\Math\MyMath.h" />
     <ClInclude Include="Engine\OBB.h" />
     <ClInclude Include="Engine\OBBCollision.h" />
-    <ClInclude Include="Framework.h" />
-    <ClInclude Include="HundredBeast.h" />
-    <ClInclude Include="PlayScene.h" />
-    <ClInclude Include="UIManager.h" />
+    <ClInclude Include="Engine\Framework.h" />
+    <ClInclude Include="Engine\HundredBeast.h" />
+    <ClInclude Include="Application\PlayScene.h" />
+    <ClInclude Include="Application\UIManager.h" />
+    <ClInclude Include="TitleScene.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application\BillboardObject.cpp" />
@@ -366,8 +367,8 @@
     <ClCompile Include="Engine\light\Light.cpp" />
     <ClCompile Include="Engine\JsonLoader.cpp" />
     <ClCompile Include="Engine\fps.cpp" />
-    <ClCompile Include="Framework.cpp" />
-    <ClCompile Include="HundredBeast.cpp" />
+    <ClCompile Include="Engine\Framework.cpp" />
+    <ClCompile Include="Engine\HundredBeast.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Engine\Math\Matrix4.cpp" />
     <ClCompile Include="Engine\object\Material.cpp" />
@@ -388,8 +389,9 @@
     <ClCompile Include="Engine\Math\Vector3.cpp" />
     <ClCompile Include="Engine\OBB.cpp" />
     <ClCompile Include="Engine\OBBCollision.cpp" />
-    <ClCompile Include="PlayScene.cpp" />
-    <ClCompile Include="UIManager.cpp" />
+    <ClCompile Include="Application\PlayScene.cpp" />
+    <ClCompile Include="Application\UIManager.cpp" />
+    <ClCompile Include="TitleScene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="imgui\imgui.vcxproj">

@@ -6,7 +6,6 @@ class Application;
 class Framework
 {
 public:
-
 	/// <summary>
 	/// 実行
 	/// </summary>
@@ -40,6 +39,5 @@ protected:
 	Wrapper* dx12 = nullptr;		 //DirectX
 	DebugText* debugText = nullptr; //デバッグテキスト
 	Application* app = nullptr; //アプリケーション
-
 };
 

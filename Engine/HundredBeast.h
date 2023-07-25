@@ -2,6 +2,7 @@
 #include "Framework.h"
 
 class PostEffect;
+class PlayScene;
 class GameManager;
 
 class HundredBeast : public Framework
@@ -31,5 +32,6 @@ private:
 	PostEffect* postEffect = nullptr; //ポストエフェクト
 
 	GameManager* gameScene = nullptr;
+	PlayScene* Scene = nullptr;
 };
 
