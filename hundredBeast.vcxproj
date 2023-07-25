@@ -260,6 +260,7 @@
     <ClInclude Include="Engine\2d\PostEffect.h" />
     <ClInclude Include="Engine\application.h" />
     <ClInclude Include="Engine\dx12Wrapper.h" />
+    <ClInclude Include="Engine\Framework.h" />
     <ClInclude Include="Engine\gameManager.h" />
     <ClInclude Include="Engine\Audio\audio.h" />
     <ClInclude Include="Application\bullet.h" />
@@ -278,6 +279,7 @@
     <ClInclude Include="Engine\Collision\SphereCollider.h" />
     <ClInclude Include="Application\DefCannon.h" />
     <ClInclude Include="Engine\delete.h" />
+    <ClInclude Include="Engine\HundredBeast.h" />
     <ClInclude Include="Engine\Input\DirectInput.h" />
     <ClInclude Include="Application\Easing.h" />
     <ClInclude Include="Application\enemy.h" />
@@ -326,10 +328,6 @@
     <ClInclude Include="Engine\Math\MyMath.h" />
     <ClInclude Include="Engine\OBB.h" />
     <ClInclude Include="Engine\OBBCollision.h" />
-    <ClInclude Include="Framework.h" />
-    <ClInclude Include="HundredBeast.h" />
-    <ClInclude Include="PlayScene.h" />
-    <ClInclude Include="UIManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application\BillboardObject.cpp" />
@@ -339,6 +337,7 @@
     <ClCompile Include="Engine\2d\PostEffect.cpp" />
     <ClCompile Include="Engine\application.cpp" />
     <ClCompile Include="Engine\dx12Wrapper.cpp" />
+    <ClCompile Include="Engine\Framework.cpp" />
     <ClCompile Include="Engine\gameManager.cpp" />
     <ClCompile Include="Engine\Audio\audio.cpp" />
     <ClCompile Include="Application\bullet.cpp" />
@@ -350,6 +349,7 @@
     <ClCompile Include="Engine\Collision\MeshCollider.cpp" />
     <ClCompile Include="Engine\Collision\SphereCollider.cpp" />
     <ClCompile Include="Application\DefCannon.cpp" />
+    <ClCompile Include="Engine\HundredBeast.cpp" />
     <ClCompile Include="Engine\Input\DirectInput.cpp" />
     <ClCompile Include="Application\enemy.cpp" />
     <ClCompile Include="Engine\light\LightGroup.cpp" />
@@ -366,8 +366,6 @@
     <ClCompile Include="Engine\light\Light.cpp" />
     <ClCompile Include="Engine\JsonLoader.cpp" />
     <ClCompile Include="Engine\fps.cpp" />
-    <ClCompile Include="Framework.cpp" />
-    <ClCompile Include="HundredBeast.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Engine\Math\Matrix4.cpp" />
     <ClCompile Include="Engine\object\Material.cpp" />
@@ -388,8 +386,6 @@
     <ClCompile Include="Engine\Math\Vector3.cpp" />
     <ClCompile Include="Engine\OBB.cpp" />
     <ClCompile Include="Engine\OBBCollision.cpp" />
-    <ClCompile Include="PlayScene.cpp" />
-    <ClCompile Include="UIManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="imgui\imgui.vcxproj">
