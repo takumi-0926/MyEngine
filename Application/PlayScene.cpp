@@ -1,5 +1,4 @@
 #include "PlayScene.h"
-#include "Sprite/sprite.h"
 #include "Player.h"
 #include "EnemyManager.h"
 #include "Math/MyMath.h"
@@ -7,10 +6,10 @@
 #include "stage.h"
 #include "object/Model.h"
 #include <JsonLoader.h>
+#include "UIManager.h"
 
 #include <future>
 
-#include "Sprite/sprite.h"
 #include <Singleton_Heap.h>
 
 static const int debugTextTexNumber = 99;
@@ -21,30 +20,6 @@ void PlayScene::Initialize(Wrapper* _dx12)
 	assert(_dx12);
 
 	this->dx12 = _dx12;
-
-	//this->audio->Load();// デバッグテキスト用テクスチャ読み込み
-	if (!Sprite::loadTexture(debugTextTexNumber, L"Resources/debugfont.png")) { assert(0); }
-
-	//画像リソース
-	if (!Sprite::loadTexture(0, L"Resources/Title.dds")) { assert(0); }
-	if (!Sprite::loadTexture(1, L"Resources/end.png")) { assert(0); }
-	if (!Sprite::loadTexture(2, L"Resources/haikei.png")) { assert(0); }
-	if (!Sprite::loadTexture(3, L"Resources/HpBer.png")) { assert(0); }
-	if (!Sprite::loadTexture(4, L"Resources/Hp.png")) { assert(0); }
-	if (!Sprite::loadTexture(6, L"Resources/start.dds")) { assert(0); }
-	if (!Sprite::loadTexture(7, L"Resources/clear_result.dds")) { assert(0); }
-	if (!Sprite::loadTexture(8, L"Resources/failed_result.png")) { assert(0); }
-	if (!Sprite::loadTexture(9, L"Resources/blackTex.dds")) { assert(0); }
-	if (!Sprite::loadTexture(10, L"Resources/breakBer.png")) { assert(0); }
-	if (!Sprite::loadTexture(11, L"Resources/breakGage.png")) { assert(0); }
-	if (!Sprite::loadTexture(12, L"Resources/GateUI_red.png")) { assert(0); }
-	if (!Sprite::loadTexture(13, L"Resources/GateUI_yellow.png")) { assert(0); }
-	if (!Sprite::loadTexture(14, L"Resources/GateUI.png")) { assert(0); }
-	if (!Sprite::loadTexture(15, L"Resources/pose.png")) { assert(0); }
-	if (!Sprite::loadTexture(16, L"Resources/weapon.png")) { assert(0); }
-	if (!Sprite::loadTexture(17, L"Resources/weaponSlot.png")) { assert(0); }
-	if (!Sprite::loadTexture(18, L"Resources/loading.dds")) { assert(0); }
-	if (!Sprite::loadTexture(19, L"Resources/controll.png")) { assert(0); }
 
 	//基本オブジェクト--------------
 	defenceModel = Model::CreateFromOBJ("KSR-29");
@@ -92,83 +67,6 @@ void PlayScene::Initialize(Wrapper* _dx12)
 	light->SetCircleShadowActive(2, true);
 	//ライトセット
 	Wrapper::SetLight(light);
-
-	/// <summary>
-	/// ////////////////////////////////////////////////////////////
-	/// </summary>
-	/// <param name="_dx12"></param>
-	if (!Sprite::loadTexture(SpriteName::Title_UI, L"Resources/Title_UI_01.png")) { assert(0); }
-	if (!Sprite::loadTexture(SpriteName::Title_UI_High, L"Resources/Title_UI_high.png")) { assert(0); }
-	if (!Sprite::loadTexture(SpriteName::Title_UI_Low, L"Resources/Title_UI_low.png")) { assert(0); }
-	if (!Sprite::loadTexture(SpriteName::Start_TItle_UI, L"Resources/Title_UI_start.png")) { assert(0); }
-	if (!Sprite::loadTexture(SpriteName::Option_TItle_UI, L"Resources/Title_UI_option.png")) { assert(0); }
-
-	TitleResources[0].reset(Sprite::Create(Title_UI_High, { 1280.0f - 440.0f,512.0f }));
-	TitleResources[1].reset(Sprite::Create(Title_UI, { 1280.0f - 440.0f,512.0f }));
-	TitleResources_Start[0].reset(Sprite::Create(Title_UI_High, { 1280.0f - 440.0f,512.0f }));
-	TitleResources_Start[1].reset(Sprite::Create(Title_UI_Low, { 1280.0f - 440.0f,512.0f }));
-	TitleResources_Start[2].reset(Sprite::Create(Start_TItle_UI, { 1280.0f - 440.0f,512.0f }));
-	TitleResources_Option[0].reset(Sprite::Create(Title_UI_High, { 1280.0f - 440.0f,556.0f }));
-	TitleResources_Option[1].reset(Sprite::Create(Title_UI_Low, { 1280.0f - 440.0f,556.0f }));
-	TitleResources_Option[2].reset(Sprite::Create(Option_TItle_UI, { 1280.0f - 440.0f,556.0f }));
-
-	TitleResources[0].get()->SetSize(XMFLOAT2(440.0f, 44.0f));
-	TitleResources[1].get()->SetSize(XMFLOAT2(440.0f, 44.0f));
-	for (int i = 0; i < 3; i++) {
-		TitleResources_Start[i].get()->SetSize(XMFLOAT2(440.0f, 44.0f));
-		TitleResources_Option[i].get()->SetSize(XMFLOAT2(440.0f, 44.0f));
-	}
-
-	for (int i = 0; i < 2; i++) { TitleResources[i].get()->Update(); }
-	for (int i = 0; i < 3; i++) { TitleResources_Start[i].get()->Update(); }
-	for (int i = 0; i < 3; i++) { TitleResources_Option[i].get()->Update(); }
-
-	//シーンエフェクト--------------------
-//フェードイン・アウト
-	fade.reset(Fade::Create(9, { 0.0f,0.0f }));
-	fade.get()->SetAlpha(0.0f);
-	//クリア時UI
-	clear.reset(Fade::Create(7, { Application::window_width / 2,Application::window_height / 2 }));
-	clear.get()->SetAnchorPoint({ 0.5f,0.5f });
-	clear.get()->SetSize({ 480,480 });
-	//ゲームオーバー時UI
-	failed.reset(Fade::Create(8, { Application::window_width / 2,Application::window_height / 2 }));
-	failed.get()->SetAnchorPoint({ 0.5f,0.5f });
-	failed.get()->SetSize({ 480,480 });
-	//スタート時UI
-	start.reset(Fade::Create(6, { 0,80 }));
-	start.get()->SetAnchorPoint({ 0.5f,0.5f });
-	start.get()->SetAlpha(0.0f);
-	start.get()->SetSize({ 360,360 });
-	start.get()->Update();
-
-	int fontWidth = 64;
-	int fontHeight = 64;
-
-	float basePos = 680.0f;
-	float offset = 50.f;
-
-	for (int i = 0; i < 11; i++)
-	{
-		Now_Loading[i].reset(Sprite::Create(18, { 740.0f + offset * i ,basePos }));
-		Now_Loading[i].get()->SetTextureRect({ float(fontWidth * i), 0 }, { float(fontWidth), float(fontHeight) });
-		Now_Loading[i].get()->SetSize({ float(fontWidth),float(fontHeight) });
-		Now_Loading[i].get()->SetAnchorPoint({ 0.5f,0.5f });
-		Now_Loading[i].get()->Update();
-	}
-	LoadControll.reset(Sprite::Create(19, { 640.0f,360.0f }));
-	LoadControll.get()->SetAnchorPoint({ 0.5f,0.5f });
-	LoadControll.get()->Update();
-
-	//スプライト---------------------
-	Title = Sprite::Create(0, { 640.0f,120.0f });
-	End = Sprite::Create(1, { 0.0f,0.0f });
-	HpBer = Sprite::Create(3, { 0.0f,0.0f });
-	Pose.reset(Sprite::Create(15, { 0.0f,0.0f }));
-
-	Title->Update();
-
-	///////////////////////////////////////////////////////////////////////////
 
 	//ステージデータ及びモデルデータ読み込み
 	stageData = JsonLoader::LoadJsonFile("titleStageData");
@@ -293,46 +191,47 @@ void PlayScene::Update()
 	}
 
 	//タイトル進度0
-	if (TitleWave == 0) {
+	if (UIManager::GetInstance()->GetWave() == 0) {
 		if (Input::GetInstance()->Trigger(DIK_SPACE) || directInput->IsButtonPush(DirectInput::ButtonKind::ButtonA)) {
-			TitleWave++;
-			titleStart = true;
-			titleOption = false;
+			UIManager::GetInstance()->SetWave(1);
+			UIManager::GetInstance()->SetStart(true);
+			UIManager::GetInstance()->SetOption(false);
+
 			keyFlag = true;
 		}
 	}
 	//タイトル進度1
-	else if (TitleWave == 1) {
+	else if (UIManager::GetInstance()->GetWave() == 1) {
 
 		//項目選択（スタート、オプション）
-		if (directInput->IsButtonPush(DirectInput::ButtonKind::DownButton) && TitleHierarchy < 1) { TitleHierarchy++; }
-		if (directInput->IsButtonPush(DirectInput::ButtonKind::UpButton) && TitleHierarchy >= 1) { TitleHierarchy--; }
+		if (directInput->IsButtonPush(DirectInput::ButtonKind::DownButton) && UIManager::GetInstance()->GetHieraruchy() < 1) { UIManager::GetInstance()->SetHieraruchy(1); }
+		if (directInput->IsButtonPush(DirectInput::ButtonKind::UpButton) && UIManager::GetInstance()->GetHieraruchy() >= 1) { UIManager::GetInstance()->SetHieraruchy(0); }
 
 		//スタート選択状態
-		if (TitleHierarchy == 0) {
-			titleStart = true;
-			titleOption = false;
+		if (UIManager::GetInstance()->GetHieraruchy() == 0) {
+			UIManager::GetInstance()->SetStart(true);
+			UIManager::GetInstance()->SetOption(false);
 
 			//タイトルからゲームへ
 			if ((Input::GetInstance()->Trigger(DIK_SPACE) || directInput->IsButtonPush(DirectInput::ButtonKind::ButtonA)) && !keyFlag) {
-				fade.get()->SetFadeIn(true);
-				start.get()->SetFadeIn(true);
+				UIManager::GetInstance()->GetFade()->SetFadeIn(true);
+				UIManager::GetInstance()->GetFade()->SetFadeIn(true);
 			}
 		}
 		//オプション選択状態
-		else if (TitleHierarchy == 1) {
-			titleStart = false;
-			titleOption = true;
+		else if (UIManager::GetInstance()->GetHieraruchy() == 1) {
+			UIManager::GetInstance()->SetStart(false);
+			UIManager::GetInstance()->SetOption(true);
 		}
 	}
 
 	//フェードイン
-	if (fade.get()->GetFadeIn()) {
-		fade.get()->FadeIn();
-		if (!fade.get()->GetFadeIn()) {
+	if (UIManager::GetInstance()->GetFade()->GetFadeIn()) {
+		UIManager::GetInstance()->GetFade()->FadeIn();
+		if (!UIManager::GetInstance()->GetFade()->GetFadeIn()) {
 			Wrapper::SetCamera(mainCamera);
-			fade.get()->SetFadeIn(false);
-			fade.get()->SetFadeOut(true);
+			UIManager::GetInstance()->GetFade()->SetFadeIn(false);
+			UIManager::GetInstance()->GetFade()->SetFadeOut(true);
 
 			load = true;
 		}
@@ -364,40 +263,10 @@ void PlayScene::Draw()
 	// コマンドリストの取得
 	Sprite::PreDraw(dx12->CommandList().Get());
 
-	Title->Draw();
+	UIManager::GetInstance()->TitleDarw();
 
-	if (TitleWave == 0) {
-		for (int i = 0; i < 2; i++) { TitleResources[i].get()->Draw(); }
-	}
-	else if (TitleWave == 1) {
-		if (titleStart) { TitleResources_Start[0].get()->Draw(); }
-		else { TitleResources_Start[1].get()->Draw(); }
-		TitleResources_Start[2].get()->Draw();
-
-		if (titleOption) { TitleResources_Option[0].get()->Draw(); }
-		else { TitleResources_Option[1].get()->Draw(); }
-		TitleResources_Option[2].get()->Draw();
-	}
-
-	//フェード用画像描画
-	start.get()->Draw();
-	if (fade.get()->GetFadeIn() || fade.get()->GetFadeOut() || fade.get()->GethalfFade()) {
-		fade.get()->Draw();
-	}
-	if (clear.get()->GetClear()) {
-		clear.get()->Draw();
-	}
-	else if (failed.get()->GetFailed()) {
-		failed.get()->Draw();
-	}
-
-	//ローディング中
 	if (load) {
-		LoadControll.get()->Draw();
-		for (int i = 0; i < 11; i++)
-		{
-			Now_Loading[i].get()->Draw();
-		}
+		UIManager::GetInstance()->LoadDraw();
 	}
 
 	Sprite::PostDraw();
@@ -431,76 +300,6 @@ void PlayScene::asyncLoad()
 
 void PlayScene::LoadResource()
 {
-	if (!Sprite::loadTexture(SpriteName::Numbers, L"Resources/Numbers.dds")) { assert(0); }
-	if (!Sprite::loadTexture(SpriteName::Start_UI_01, L"Resources/Start_UI_01.png")) { assert(0); }
-	if (!Sprite::loadTexture(SpriteName::Start_UI_02, L"Resources/Start_UI_02.png")) { assert(0); }
-	if (!Sprite::loadTexture(SpriteName::Start_UI_03, L"Resources/Start_UI_03.png")) { assert(0); }
-
-	int fontWidth = 32;
-	int fontHeight = 48;
-
-	float basePos = 32.0f;
-	float offset = 3.5f;
-
-	for (int i = 0; i < 10; i++)
-	{
-		//生成
-		One_Numbers[i].reset(Sprite::Create(SpriteName::Numbers, { 640.0f - offset ,basePos }));
-		Ten_Numbers[i].reset(Sprite::Create(SpriteName::Numbers, { 640.0f - float(fontWidth) + offset, basePos }));
-		//指定の数字を枠切り
-		One_Numbers[i].get()->SetTextureRect({ float(fontWidth * i), 0 }, { float(fontWidth), float(fontHeight) });
-		Ten_Numbers[i].get()->SetTextureRect({ float(fontWidth * i), 0 }, { float(fontWidth), float(fontHeight) });
-		//サイズ設定
-		One_Numbers[i].get()->SetSize({ float(fontWidth),float(fontHeight) });
-		Ten_Numbers[i].get()->SetSize({ float(fontWidth),float(fontHeight) });
-		//更新
-		One_Numbers[i].get()->Update();
-		Ten_Numbers[i].get()->Update();
-	}
-
-	cross.reset(Sprite::Create(SpriteName::Numbers, { 698.f,320.f }));
-	cross.get()->SetTextureRect({ 0, float(fontHeight) }, { float(fontWidth), float(fontHeight) });
-	cross.get()->SetSize({ float(fontWidth),float(fontHeight) });
-	cross.get()->Update();
-	for (int i = 0; i < 20; i++) {
-		BreakCount[i].reset(Sprite::Create(SpriteName::Numbers, { 0,0 }));
-		BreakCountMax[i].reset(Sprite::Create(SpriteName::Numbers, { 0,0 }));
-		BreakCount[i].get()->SetTextureRect({ float(fontWidth * i), 0 }, { float(fontWidth), float(fontHeight) });
-		BreakCountMax[i].get()->SetTextureRect({ float(fontWidth * i), 0 }, { float(fontWidth), float(fontHeight) });
-		BreakCount[i].get()->SetSize({ float(fontWidth),float(fontHeight) });
-		BreakCountMax[i].get()->SetSize({ float(fontWidth),float(fontHeight) });
-		BreakCount[i].get()->Update();
-		BreakCountMax[i].get()->Update();
-	}
-
-	Start_UI_01.reset(Sprite::Create(SpriteName::Start_UI_01, { 640.0f,basePos + 84.0f }));
-	Start_UI_01.get()->SetAnchorPoint({ 0.5f,0.5f });
-	Start_UI_01.get()->Update();
-
-	Start_UI_02.reset(Sprite::Create(SpriteName::Start_UI_02, { 640.0f,basePos + 24.0f }));
-	Start_UI_02.get()->SetAnchorPoint({ 0.5f,0.5f });
-	Start_UI_02.get()->Update();
-
-	Start_UI_03.reset(Fade::Create(SpriteName::Start_UI_03, { 640.0f,360.0f }));
-	Start_UI_03.get()->SetAnchorPoint({ 0.5f,0.5f });
-	Start_UI_03.get()->Update();
-
-	//門HP（赤状態）
-	gateBreak_red.reset(Fade::Create(12, { 72,134 }));
-	gateBreak_red.get()->SetAnchorPoint({ 0.5f,0.5f });
-	gateBreak_red.get()->SetSize({ 80,80 });
-	gateBreak_red.get()->Update();
-	//門HP（黄状態）
-	gateBreak_yellow.reset(Fade::Create(13, {72,134}));
-	gateBreak_yellow.get()->SetAnchorPoint({ 0.5f,0.5f });
-	gateBreak_yellow.get()->SetSize({ 80,80 });
-	gateBreak_yellow.get()->Update();
-	//門HP（）緑状態
-	gateBreak_green.reset(Fade::Create(14, { 72,134 }));
-	gateBreak_green.get()->SetAnchorPoint({ 0.5f,0.5f });
-	gateBreak_green.get()->SetSize({ 80,80 });
-	gateBreak_green.get()->Update();
-
 	//スカイドーム-------------------
 	skyDome = Object3Ds::Create(skyDomeModel);
 	skyDome->scale = { 4,4,4 };
@@ -552,14 +351,7 @@ void PlayScene::loading()
 		case LoadMode::Run:
 			//ローディング中にやりたいこと
 
-			//文字回転
-			for (int i = 0; i < 11; i++)
-			{
-				static float angle = 0.0f;
-				angle += 0.5f;
-				Now_Loading[i].get()->SetRot(angle);
-				Now_Loading[i].get()->Update();
-			}
+			UIManager::GetInstance()->LoadUpdate();
 
 			break;
 		case LoadMode::End:

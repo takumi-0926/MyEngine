@@ -2,7 +2,10 @@
 #include <DirectXMath.h>
 #include <memory>
 
+#include "UIManager.h"
+
 class Sprite;
+class Camera;
 
 enum LoadMode {
 	No,
@@ -41,11 +44,21 @@ public:
 	void loading();
 
 private:
-	//ポーズ / ロード
-	unique_ptr<Sprite> Pose = nullptr;
+	Camera* titleCamera = nullptr;//タイトルカメラ
+
+	//タイトル周り変数
+	unique_ptr<Sprite> TitleResources[2] = {};
+	unique_ptr<Sprite> TitleResources_Start[3] = {};
+	unique_ptr<Sprite> TitleResources_Option[3] = {};
+	unique_ptr<Sprite> Title = nullptr;
+	int TitleWave = 0;
+	int TitleHierarchy = 0;
+	bool titleStart = 0;
+	bool titleOption = 0;
+
+	//ロード
 	unique_ptr<Sprite> Now_Loading[11] = {};
 	unique_ptr<Sprite> LoadControll = nullptr;
-	bool pose = false;//ポーズフラグ
 	bool load = false;//ローディング
 	int _loadMode = 0;//ローディング状態
 

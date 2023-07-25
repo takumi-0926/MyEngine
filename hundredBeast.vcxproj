@@ -257,6 +257,7 @@
   <ItemGroup>
     <ClInclude Include="Application\BillboardObject.h" />
     <ClInclude Include="Application\DebugImgui.h" />
+    <ClInclude Include="Application\EnemyManager.h" />
     <ClInclude Include="Engine\2d\PostEffect.h" />
     <ClInclude Include="Engine\application.h" />
     <ClInclude Include="Engine\dx12Wrapper.h" />

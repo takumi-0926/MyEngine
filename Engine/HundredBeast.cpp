@@ -11,8 +11,9 @@
 #include "FBX/FbxLoader.h"
 #include "FBX/FbxObject3d.h"
 #include "ParticleManager.h"
-//#include "gameManager.h"
+
 #include "PlayScene.h"
+#include "UIManager.h"
 
 void HundredBeast::Initialize()
 {
@@ -22,6 +23,8 @@ void HundredBeast::Initialize()
 	//ƒQ[ƒ€ƒV[ƒ“‰Šú‰»
 	//gameScene = new GameManager();
 	//if (!gameScene->Initalize(dx12, Audio::GetInstance(), Input::GetInstance())) { assert(0); }
+
+	UIManager::GetInstance()->Initialize();
 
 	Scene = new PlayScene();
 	Scene->Initialize(dx12);
