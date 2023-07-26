@@ -180,7 +180,7 @@ public:
 	ComPtr<IDXGISwapChain4> SwapChain();
 	ComPtr<ID3D12GraphicsCommandList> CommandList();
 	ComPtr<ID3D12DescriptorHeap> GetDescHeap() { return _descHeap.Get(); }
-	Camera* Camera() { return camera; }
+	static Camera* Camera() { return camera; }
 	static int lightNum;
 
 };

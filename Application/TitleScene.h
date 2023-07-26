@@ -3,16 +3,10 @@
 #include <memory>
 
 #include "UIManager.h"
+#include "StageManager.h"
 
 class Sprite;
 class Camera;
-
-enum LoadMode {
-	No,
-	Start,
-	Run,
-	End,
-};
 
 using namespace std;
 using namespace DirectX;
@@ -26,7 +20,7 @@ public:
 	/// <summary>
 	/// 初期化
 	/// </summary>
-	void Initialize();
+	void Initialize(Wrapper* dx12);
 
 	/// <summary>
 	/// 更新
@@ -44,7 +38,11 @@ public:
 	void loading();
 
 private:
+	Wrapper* dx12;		 //DirectX
+
 	Camera* titleCamera = nullptr;//タイトルカメラ
+
+	Light* light = nullptr;
 
 	//タイトル周り変数
 	unique_ptr<Sprite> TitleResources[2] = {};

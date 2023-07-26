@@ -247,5 +247,4 @@ void UIManager::LoadDraw()
 	{
 		Now_Loading[i].get()->Draw();
 	}
-
 }

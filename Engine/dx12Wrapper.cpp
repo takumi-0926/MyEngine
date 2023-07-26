@@ -55,7 +55,7 @@ Wrapper::~Wrapper()
 
 Wrapper* Wrapper::GetInstance()
 {
-	Wrapper* instance = new Wrapper();
+	static Wrapper* instance = new Wrapper();
 	return instance;
 }
 

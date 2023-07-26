@@ -2,6 +2,7 @@
 #include "Framework.h"
 
 class PostEffect;
+class TitleScene;
 class PlayScene;
 class GameManager;
 
@@ -32,6 +33,6 @@ private:
 	PostEffect* postEffect = nullptr; //ポストエフェクト
 
 	GameManager* gameScene = nullptr;
-	PlayScene* Scene = nullptr;
+	TitleScene* Scene = nullptr;
 };
 

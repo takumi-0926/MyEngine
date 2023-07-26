@@ -331,7 +331,8 @@
     <ClInclude Include="Engine\HundredBeast.h" />
     <ClInclude Include="Application\PlayScene.h" />
     <ClInclude Include="Application\UIManager.h" />
-    <ClInclude Include="TitleScene.h" />
+    <ClInclude Include="Application\TitleScene.h" />
+    <ClInclude Include="Application\StageManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application\BillboardObject.cpp" />
@@ -392,7 +393,8 @@
     <ClCompile Include="Engine\OBBCollision.cpp" />
     <ClCompile Include="Application\PlayScene.cpp" />
     <ClCompile Include="Application\UIManager.cpp" />
-    <ClCompile Include="TitleScene.cpp" />
+    <ClCompile Include="Application\TitleScene.cpp" />
+    <ClCompile Include="Application\StageManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="imgui\imgui.vcxproj">

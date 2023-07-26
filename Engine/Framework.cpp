@@ -50,7 +50,7 @@ void Framework::Initialize()
 	//DirectX‰Šú‰»
 	dx12 = new Wrapper();
 	dx12->Init(app->_hwnd(), app->GetWindowSize());
-
+	Wrapper::GetInstance()->Init(app->_hwnd(), app->GetWindowSize());
 	Input::GetInstance()->Initalize(app);
 	//‰¹º‰Šú‰»
 	Audio::GetInstance()->Initalize();

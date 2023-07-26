@@ -12,8 +12,10 @@
 #include "FBX/FbxObject3d.h"
 #include "ParticleManager.h"
 
+#include "TitleScene.h"
 #include "PlayScene.h"
 #include "UIManager.h"
+#include "StageManager.h"
 
 void HundredBeast::Initialize()
 {
@@ -24,11 +26,14 @@ void HundredBeast::Initialize()
 	//gameScene = new GameManager();
 	//if (!gameScene->Initalize(dx12, Audio::GetInstance(), Input::GetInstance())) { assert(0); }
 
-	UIManager::GetInstance()->Initialize();
-
-	Scene = new PlayScene();
+	//シーン
+	Scene = new TitleScene();
 	Scene->Initialize(dx12);
-
+	//UIスプライト
+	UIManager::GetInstance()->Initialize();
+	//ステージ
+	StageManager::GetInstance()->Initialize();
+	//ポストエフェクト
 	postEffect = new PostEffect();
 	postEffect->Initialize(Singleton_Heap::GetInstance()->GetDescHeap());
 }

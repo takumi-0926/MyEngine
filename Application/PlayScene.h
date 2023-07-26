@@ -10,7 +10,6 @@ class Wrapper;
 class Camera;
 class Light;
 class Player;
-class Stage;
 class Object3Ds;
 class Model;
 class DefCannon;
@@ -47,10 +46,6 @@ enum GameMode {
 	OVER,
 };
 
-enum GameLocation {
-	BaseCamp,
-	BaseStage,
-};
 
 enum LoadMode {
 	No,
@@ -111,16 +106,6 @@ private:
 	EnemyManager* enemy{};//エネミー管理
 	XMMATRIX rotM = {};//ベクトル回転
 	XMVECTOR vv0 = {};//プレイヤー前ベクトル
-
-	//ステージ
-	int UseStage = 0;//ゲーム中のステージ識別用変数
-	map<string, Model*> stageModels;//ステージで使用するモデルの格納先
-	vector<Stage*>		titleStages;//ステージ情報
-	vector<Stage*>			 stages;//ステージ情報
-	vector<Stage*>		   baseCamp;//ベースキャンプ情報
-	JsonData* stageData;//ステージ構成保存用
-	Object3Ds* skyDome = nullptr;//背景オブジェクト
-	Model* skyDomeModel = nullptr;//背景モデル
 
 	ParticleManager* particlemanager = nullptr;
 
