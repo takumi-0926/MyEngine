@@ -2,6 +2,9 @@
 class Wrapper;
 class DebugText;
 class Application;
+class PostEffect;
+
+#include "..\SceneManager.h"
 
 class Framework
 {
@@ -29,7 +32,7 @@ public:
 	/// <summary>
 	/// 描画
 	/// </summary>
-	virtual void Draw() = 0;
+	virtual void Draw();
 
 	bool IsEndReqest() { return endReqest; }
 
@@ -39,5 +42,8 @@ protected:
 	Wrapper* dx12 = nullptr;		 //DirectX
 	DebugText* debugText = nullptr; //デバッグテキスト
 	Application* app = nullptr; //アプリケーション
+	PostEffect* postEffect = nullptr; //ポストエフェクト
+
+	SceneManager* sceneManager = nullptr;
 };
 

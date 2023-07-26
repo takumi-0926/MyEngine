@@ -8,6 +8,11 @@
 #include "FBX/FbxObject3d.h"
 #include "object/object3D.h"
 
+TitleScene::TitleScene(SceneManager* sceneManager_):
+	BsScene(sceneManager_)
+{
+}
+
 void TitleScene::Initialize(Wrapper* _dx12)
 {
 	assert(_dx12);
@@ -39,6 +44,10 @@ void TitleScene::Initialize(Wrapper* _dx12)
 	//ライトセット
 	Wrapper::SetLight(light);
 
+}
+
+void TitleScene::Finalize()
+{
 }
 
 void TitleScene::Update()

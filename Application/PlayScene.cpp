@@ -13,6 +13,11 @@
 static const int debugTextTexNumber = 99;
 std::thread th = {};
 
+PlayScene::PlayScene(SceneManager* sceneManager_):
+	BsScene(sceneManager_)
+{
+}
+
 void PlayScene::Initialize(Wrapper* _dx12)
 {
 	assert(_dx12);

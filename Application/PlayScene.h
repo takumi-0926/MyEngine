@@ -1,9 +1,6 @@
 #pragma once
 #include <DirectXMath.h>
-#include <map>
-#include <vector>
-#include "JsonLoader.h"
-
+#include "..\BsScene.h"
 #include "UIManager.h"
 
 class Wrapper;
@@ -16,13 +13,6 @@ class DefCannon;
 class EnemyManager;
 class ParticleManager;
 class DebugCamera;
-
-/// <summary>
-/// /////////////////////////////////
-/// </summary>
-
-#include "SceneEffect/Fade.h"
-class Sprite;
 
 using namespace std;
 using namespace DirectX;
@@ -60,24 +50,26 @@ const int P_HP = 100;
 /// <summary>
 /// ゲームプレイ
 /// </summary>
-class PlayScene
+class PlayScene : public BsScene
 {
 public:
+	PlayScene(SceneManager* sceneManager_);
+
 	/// <summary>
 	/// 初期化
 	/// </summary>
-	void Initialize(Wrapper* _dx12);
+	void Initialize(Wrapper* _dx12) override;
 
 	/// <summary>
 	/// 更新
 	/// </summary>
-	void Update();
+	void Update() override;
 
 	/// <summary>
 	/// 描画
 	/// </summary>
-	void Draw();
-	void ShadowDraw();
+	void Draw() override;
+	void ShadowDraw() override;
 
 	void asyncLoad();
 

@@ -333,12 +333,15 @@
     <ClInclude Include="Application\UIManager.h" />
     <ClInclude Include="Application\TitleScene.h" />
     <ClInclude Include="Application\StageManager.h" />
+    <ClInclude Include="BsScene.h" />
+    <ClInclude Include="SceneManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application\BillboardObject.cpp" />
     <ClCompile Include="Application\DebugImgui.cpp" />
     <ClCompile Include="Application\Weapon.cpp" />
     <ClCompile Include="Application\EnemyManager.cpp" />
+    <ClCompile Include="BsScene.cpp" />
     <ClCompile Include="Engine\2d\PostEffect.cpp" />
     <ClCompile Include="Engine\application.cpp" />
     <ClCompile Include="Engine\dx12Wrapper.cpp" />
@@ -395,6 +398,7 @@
     <ClCompile Include="Application\UIManager.cpp" />
     <ClCompile Include="Application\TitleScene.cpp" />
     <ClCompile Include="Application\StageManager.cpp" />
+    <ClCompile Include="SceneManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="imgui\imgui.vcxproj">

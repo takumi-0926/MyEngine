@@ -1,6 +1,7 @@
 #pragma once
 #include <DirectXMath.h>
 #include <memory>
+#include "..\BsScene.h"
 
 #include "UIManager.h"
 #include "StageManager.h"
@@ -14,24 +15,31 @@ using namespace DirectX;
 /// <summary>
 /// 
 /// </summary>
-class TitleScene
+class TitleScene : public BsScene
 {
 public:
+	TitleScene(SceneManager* sceneManager_);
+
 	/// <summary>
 	/// ‰Šú‰»
 	/// </summary>
-	void Initialize(Wrapper* dx12);
+	void Initialize(Wrapper* dx12) override;
+
+	/// <summary>
+	/// I—¹
+	/// </summary>
+	void Finalize() override;
 
 	/// <summary>
 	/// XV
 	/// </summary>
-	void Update();
+	void Update() override;
 
 	/// <summary>
 	/// •`‰æ
 	/// </summary>
-	void Draw();
-	void ShadowDraw();
+	void Draw() override;
+	void ShadowDraw() override;
 
 	void asyncLoad();
 

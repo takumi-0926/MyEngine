@@ -1,5 +1,6 @@
 #pragma once
 #include "Framework.h"
+#include "..\BsScene.h"
 
 class PostEffect;
 class TitleScene;
@@ -30,9 +31,5 @@ public:
 	void Draw() override;
 
 private:
-	PostEffect* postEffect = nullptr; //ポストエフェクト
-
-	GameManager* gameScene = nullptr;
-	TitleScene* Scene = nullptr;
 };
 
