@@ -1,6 +1,6 @@
 #pragma once
 #include "Framework.h"
-#include "..\BsScene.h"
+#include "BsScene.h"
 
 class PostEffect;
 class TitleScene;

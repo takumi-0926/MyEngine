@@ -11,7 +11,7 @@ public:
 	/// <summary>
 	/// ‰Šú‰»
 	/// </summary>
-	virtual void Initialize(Wrapper* dx12) = 0;
+	virtual void Initialize(Wrapper* _dx12) = 0;
 
 	/// <summary>
 	/// I—¹
@@ -29,7 +29,7 @@ public:
 	virtual void Draw() = 0;
 	virtual void ShadowDraw() = 0;
 
-private:
+protected:
 	SceneManager* sceneManager = nullptr;
 };
 

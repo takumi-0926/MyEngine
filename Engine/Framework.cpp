@@ -13,7 +13,7 @@
 #include "FBX/FbxObject3d.h"
 #include "ParticleManager.h"
 
-#include "..\SceneManager.h"
+#include "SceneManager.h"
 
 void Framework::Run()
 {
@@ -52,7 +52,7 @@ void Framework::Initialize()
 	//DirectX‰Šú‰»
 	dx12 = new Wrapper();
 	dx12->Init(app->_hwnd(), app->GetWindowSize());
-	Wrapper::GetInstance()->Init(app->_hwnd(), app->GetWindowSize());
+	//“ü—Í‰Šú‰»
 	Input::GetInstance()->Initalize(app);
 	//‰¹º‰Šú‰»
 	Audio::GetInstance()->Initalize();
@@ -98,7 +98,7 @@ void Framework::Initialize()
 	postEffect = new PostEffect();
 	postEffect->Initialize(Singleton_Heap::GetInstance()->GetDescHeap());
 
-	sceneManager = new SceneManager();
+	sceneManager = new SceneManager(dx12);
 }
 
 void Framework::Finalize()
@@ -134,6 +134,8 @@ void Framework::Update()
 	ImGui::NewFrame();
 
 	Input::GetInstance()->Update();
+
+	sceneManager->Update();
 }
 
 void Framework::Draw()

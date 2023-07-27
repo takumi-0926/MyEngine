@@ -57,7 +57,6 @@ PMDobject* PMDobject::Create(PMDmodel* _model)
 
 bool PMDobject::Initialize(PMDmodel* _model)
 {
-	this->dx12 = dx12;
 	HRESULT result;
 
 	result = CreateRootSignaturePMD();

@@ -13,7 +13,7 @@
 static const int debugTextTexNumber = 99;
 std::thread th = {};
 
-PlayScene::PlayScene(SceneManager* sceneManager_):
+PlayScene::PlayScene(SceneManager* sceneManager_) :
 	BsScene(sceneManager_)
 {
 }
@@ -32,11 +32,9 @@ void PlayScene::Initialize(Wrapper* _dx12)
 	mainCamera = new Camera(Application::window_width, Application::window_height);
 	setCamera = new Camera(Application::window_width, Application::window_height);
 
-	Wrapper::SetCamera(titleCamera);
-	FbxObject3d::SetCamera(dx12->Camera());
-	Object3Ds::SetCamera(dx12->Camera());
-
-	dx12->SceneUpdate();
+	Wrapper::SetCamera(mainCamera);
+	FbxObject3d::SetCamera(Wrapper::GetCamera());
+	Object3Ds::SetCamera(Wrapper::GetCamera());
 
 	//光源
 	light = Light::Create();
@@ -54,27 +52,28 @@ void PlayScene::Initialize(Wrapper* _dx12)
 	Wrapper::SetLight(light);
 }
 
+void PlayScene::Finalize()
+{
+}
+
 void PlayScene::Update()
 {
 	mainCamera->Update();
 	setCamera->Update();
+
+	//ライトセット
+	Wrapper::SetLight(light);
 
 	//ライト
 	light->SetPointLightPos(0,
 		XMFLOAT3(StageManager::GetInstance()->GetBaseCamp(29)->position.x,
 			StageManager::GetInstance()->GetBaseCamp(29)->position.y + 5.0f,
 			StageManager::GetInstance()->GetBaseCamp(29)->position.z));
-	
-	//フェードイン
-	if (UIManager::GetInstance()->GetFade()->GetFadeIn()) {
-		UIManager::GetInstance()->GetFade()->FadeIn();
-		if (!UIManager::GetInstance()->GetFade()->GetFadeIn()) {
-			Wrapper::SetCamera(mainCamera);
-			UIManager::GetInstance()->GetFade()->SetFadeIn(false);
-			UIManager::GetInstance()->GetFade()->SetFadeOut(true);
 
-			load = true;
-		}
+	//ロード
+	if (!load&& SceneNum == NONE) {
+		Wrapper::SetCamera(mainCamera);
+		load = true;
 	}
 
 	if (load) {
@@ -82,15 +81,12 @@ void PlayScene::Update()
 
 		if (!load) { SceneNum = Scene::GAME; }
 	}
-
-	keyFlag = false;
-
 }
 
 void PlayScene::Draw()
 {
 	// コマンドリストの取得
-	ID3D12GraphicsCommandList* cmdList = Wrapper::GetInstance()->CommandList().Get();
+	ID3D12GraphicsCommandList* cmdList = dx12->CommandList().Get();
 
 	if (!load) { Singleton_Heap::GetInstance()->FbxTexture = 200; }
 
@@ -101,9 +97,10 @@ void PlayScene::Draw()
 	BaseObject::PostDraw();
 
 	// コマンドリストの取得
-	Sprite::PreDraw(Wrapper::GetInstance()->CommandList().Get());
+	Sprite::PreDraw(dx12->CommandList().Get());
 
 	UIManager::GetInstance()->GameDarw();
+	UIManager::GetInstance()->FadeDraw();
 
 	if (load) {
 		UIManager::GetInstance()->LoadDraw();

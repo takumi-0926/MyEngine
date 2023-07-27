@@ -398,10 +398,10 @@ void BillboardObject::Update()
 
 	//UpdateWorldMatrix();
 
-	up = dx12->Camera()->GetUp();
+	up = dx12->GetCamera()->GetUp();
 
-	SetEye(dx12->Camera()->GetEye());
-	SetTarget(dx12->Camera()->GetTarget());
+	SetEye(dx12->GetCamera()->GetEye());
+	SetTarget(dx12->GetCamera()->GetTarget());
 
 	BillboardVertex* vertMap = nullptr;
 	result = vertBuff->Map(0, nullptr, (void**)&vertMap);
@@ -414,7 +414,7 @@ void BillboardObject::Update()
 		vertBuff->Unmap(0, nullptr);
 	}
 
-	const XMMATRIX& matViewProjection = dx12->Camera()->GetViewProjectionMatrix();
+	const XMMATRIX& matViewProjection = dx12->GetCamera()->GetViewProjectionMatrix();
 
 	// 定数バッファへデータ転送(OBJ)
 	ConstBufferDataB0* constMap = nullptr;

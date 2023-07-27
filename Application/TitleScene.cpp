@@ -1,4 +1,7 @@
 #include "TitleScene.h"
+#include "PlayScene.h"
+#include "SceneManager.h"
+
 #include <future>
 #include <Singleton_Heap.h>
 
@@ -15,7 +18,7 @@ TitleScene::TitleScene(SceneManager* sceneManager_):
 
 void TitleScene::Initialize(Wrapper* _dx12)
 {
-	assert(_dx12);
+	assert(&_dx12);
 
 	this->dx12 = _dx12;
 
@@ -26,9 +29,8 @@ void TitleScene::Initialize(Wrapper* _dx12)
 	titleCamera->Update();
 
 	Wrapper::SetCamera(titleCamera);
-	FbxObject3d::SetCamera(Wrapper::Camera());
-	Object3Ds::SetCamera(Wrapper::Camera());
-
+	FbxObject3d::SetCamera(Wrapper::GetCamera());
+	Object3Ds::SetCamera(Wrapper::GetCamera());
 	//光源
 	light = Light::Create();
 	light->SetDirLightActive(0, true);
@@ -53,6 +55,8 @@ void TitleScene::Finalize()
 void TitleScene::Update()
 {
 	titleCamera->Update();
+
+	Object3Ds::SetCamera(titleCamera);
 
 	StageManager::GetInstance()->Update();
 
@@ -91,6 +95,21 @@ void TitleScene::Update()
 		}
 	}
 
+	//フェードイン
+	if (UIManager::GetInstance()->GetFade()->GetFadeIn()) {
+		UIManager::GetInstance()->GetFade()->FadeIn();
+		if (!UIManager::GetInstance()->GetFade()->GetFadeIn()) {
+			UIManager::GetInstance()->GetFade()->SetFadeIn(false);
+			UIManager::GetInstance()->GetFade()->SetFadeOut(true);
+
+			//シーン切り替え
+			BsScene* scene = new PlayScene(sceneManager);
+			sceneManager->SetNextScene(scene);
+		}
+	}
+
+	keyFlag = false;
+
 	////フェードイン
 	//if (UIManager::GetInstance()->GetFade()->GetFadeIn()) {
 	//	UIManager::GetInstance()->GetFade()->FadeIn();
@@ -121,6 +140,7 @@ void TitleScene::Draw()
 	Sprite::PreDraw(dx12->CommandList().Get());
 
 	UIManager::GetInstance()->TitleDarw();
+	UIManager::GetInstance()->FadeDraw();
 
 	if (load) {
 		UIManager::GetInstance()->LoadDraw();

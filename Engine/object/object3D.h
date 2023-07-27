@@ -115,8 +115,8 @@ public:
 	static void SetCamera(Camera* camera) {
 		Object3Ds::camera = camera;
 	}
-	static void SetDx12(Wrapper* dx12) {
-		Object3Ds::dx12 = dx12;
+	static void SetDx12(Wrapper* _dx12) {
+		Object3Ds::dx12 = _dx12;
 	}
 
 	/// <summary>

@@ -234,6 +234,15 @@ void UIManager::TitleDarw()
 
 void UIManager::GameDarw()
 {
+	if ((GATE_MAX - 3) <= gateHP) {
+		gateBreak_green->Draw();
+	}
+	else if ((GATE_MAX - 6) <= gateHP) {
+		gateBreak_yellow->Draw();
+	}
+	else if ((GATE_MAX - 9) <= gateHP) {
+		gateBreak_red->Draw();
+	}
 }
 
 void UIManager::ENdDarw()
@@ -246,5 +255,20 @@ void UIManager::LoadDraw()
 	for (int i = 0; i < 11; i++)
 	{
 		Now_Loading[i].get()->Draw();
+	}
+}
+
+void UIManager::FadeDraw()
+{
+	//フェード用画像描画
+	start->Draw();
+	if (fade->GetFadeIn() || fade->GetFadeOut() || fade->GethalfFade()) {
+		fade->Draw();
+	}
+	if (clear->GetClear()) {
+		clear->Draw();
+	}
+	else if (failed->GetFailed()) {
+		failed->Draw();
 	}
 }

@@ -53,6 +53,7 @@ public:
 	void GameDarw();
 	void ENdDarw();
 	void LoadDraw();
+	void FadeDraw();
 
 private://¯•Ê•Ï”ŠÖŒW•Ï”
 	int TitleWave = 0;

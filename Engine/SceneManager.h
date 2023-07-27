@@ -1,5 +1,5 @@
 #pragma once
-#include "..\BsScene.h"
+#include "BsScene.h"
 
 /// <summary>
 /// シーン管理
@@ -7,6 +7,8 @@
 class SceneManager
 {
 public:
+	SceneManager(Wrapper* _dx12);
+
 	/// <summary>
 	/// 
 	/// </summary>
@@ -21,6 +23,7 @@ public:
 	//次シーン設定
 	void SetNextScene(BsScene* scene) { nextScene = scene; }
 private:
+	Wrapper* dx12 = nullptr;		 //DirectX
 	//シーン
 	BsScene* Scene = nullptr;
 	//次のシーン

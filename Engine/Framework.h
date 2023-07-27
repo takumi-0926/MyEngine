@@ -4,7 +4,7 @@ class DebugText;
 class Application;
 class PostEffect;
 
-#include "..\SceneManager.h"
+#include "SceneManager.h"
 
 class Framework
 {

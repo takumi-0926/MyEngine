@@ -1,7 +1,7 @@
 #pragma once
 #include <DirectXMath.h>
 #include <memory>
-#include "..\BsScene.h"
+#include "BsScene.h"
 
 #include "UIManager.h"
 #include "StageManager.h"
@@ -23,7 +23,7 @@ public:
 	/// <summary>
 	/// ‰Šú‰»
 	/// </summary>
-	void Initialize(Wrapper* dx12) override;
+	void Initialize(Wrapper* _dx12) override;
 
 	/// <summary>
 	/// I—¹

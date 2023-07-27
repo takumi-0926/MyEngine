@@ -112,9 +112,9 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	titleCamera->SetTarget(XMFLOAT3(0, 30.0f, 0.0f));
 	titleCamera->Update();
 
-	Wrapper::SetCamera(titleCamera);
-	FbxObject3d::SetCamera(dx12->Camera());
-	Object3Ds::SetCamera(dx12->Camera());
+	Wrapper::GetInstance()->SetCamera(titleCamera);
+	FbxObject3d::SetCamera(dx12->GetCamera());
+	Object3Ds::SetCamera(dx12->GetCamera());
 
 	dx12->SceneUpdate();
 
@@ -131,7 +131,7 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	light->SetCircleShadowActive(1, true);
 	light->SetCircleShadowActive(2, true);
 	//ライトセット
-	Wrapper::SetLight(light);
+	Wrapper::GetInstance()->SetLight(light);
 
 	debugFilde = Object3Ds::Create(debugFildeModel);
 	debugCharacter = Object3Ds::Create(debugCharacterModel);
@@ -425,7 +425,7 @@ void GameManager::TitleUpdate()
 	if (fade->GetFadeIn()) {
 		fade->FadeIn();
 		if (!fade->GetFadeIn()) {
-			Wrapper::SetCamera(mainCamera);
+			Wrapper::GetInstance()->SetCamera(mainCamera);
 			fade->SetFadeIn(false);
 			fade->SetFadeOut(true);
 
@@ -603,7 +603,7 @@ void GameManager::GameUpdate() {
 					_target.y += cameraHeight / 3.0f;
 					setCamera->SetTarget(_target);
 					setCamera->Update();
-					Wrapper::SetCamera(setCamera);
+					Wrapper::GetInstance()->SetCamera(setCamera);
 					GameModeNum = GameMode::SET;
 				}
 
@@ -781,11 +781,11 @@ void GameManager::GameUpdate() {
 			_target -= direction * distanceFromPlayerToCamera;
 			_target.y += cameraHeight / 3.0f;
 			setCamera->SetTarget(_target);
-			Wrapper::SetCamera(setCamera);
+			Wrapper::GetInstance()->SetCamera(setCamera);
 
 			if (input->Trigger(DIK_F) || directInput->IsButtonPush(DirectInput::ButtonKind::ButtonX)) {
-				Wrapper::SetCamera(mainCamera);
-				FbxObject3d::SetCamera(dx12->Camera());
+				Wrapper::GetInstance()->SetCamera(mainCamera);
+				FbxObject3d::SetCamera(dx12->GetCamera());
 				GameModeNum = GameMode::NASI;
 			}
 		}
@@ -806,7 +806,7 @@ void GameManager::GameUpdate() {
 			//エンド→タイトル遷移
 			if (input->Trigger(DIK_SPACE) || directInput->IsButtonPush(DirectInput::ButtonKind::ButtonA)) {
 				SceneNum = TITLE;
-				Wrapper::SetCamera(titleCamera);
+				Wrapper::GetInstance()->SetCamera(titleCamera);
 				clear->SetClear(false);
 
 				GameModeNum = GameMode::START;
@@ -847,7 +847,7 @@ void GameManager::GameUpdate() {
 			//エンド→タイトル遷移
 			if (input->Trigger(DIK_SPACE) || directInput->IsButtonPush(DirectInput::ButtonKind::ButtonA)) {
 				SceneNum = TITLE;
-				Wrapper::SetCamera(titleCamera);
+				Wrapper::GetInstance()->SetCamera(titleCamera);
 				failed->SetFailed(false);
 
 				GameModeNum = GameMode::START;
@@ -886,8 +886,8 @@ void GameManager::GameUpdate() {
 		//更新処理(固有)
 		{
 			if (GameModeNum != GameMode::POSE) {
-				Object3Ds::SetCamera(dx12->Camera());
-				FbxObject3d::SetCamera(dx12->Camera());
+				Object3Ds::SetCamera(dx12->GetCamera());
+				FbxObject3d::SetCamera(dx12->GetCamera());
 
 				dx12->SceneUpdate();
 				for (int i = 0; i < 6; i++) {
@@ -1026,7 +1026,7 @@ void GameManager::PlayerUpdate()
 		_target = _player->GetPosition();
 		_target.y += cameraHeight;
 		mainCamera->SetTarget(_target);
-		Wrapper::SetCamera(mainCamera);
+		Wrapper::GetInstance()->SetCamera(mainCamera);
 
 		mainCamera->Update();
 	}

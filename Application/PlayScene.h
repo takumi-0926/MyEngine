@@ -1,6 +1,6 @@
 #pragma once
 #include <DirectXMath.h>
-#include "..\BsScene.h"
+#include "BsScene.h"
 #include "UIManager.h"
 
 class Wrapper;
@@ -60,6 +60,8 @@ public:
 	/// </summary>
 	void Initialize(Wrapper* _dx12) override;
 
+	void Finalize()override;
+
 	/// <summary>
 	/// 更新
 	/// </summary>
@@ -107,7 +109,6 @@ private:
 
 	//カメラ
 	Camera* mainCamera = nullptr;//ゲームカメラ
-	Camera* titleCamera = nullptr;//タイトルカメラ
 	Camera* setCamera = nullptr;
 	DebugCamera* camera = nullptr;
 	XMFLOAT3 afterEye;
