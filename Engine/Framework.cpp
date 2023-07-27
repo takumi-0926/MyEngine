@@ -106,6 +106,8 @@ void Framework::Finalize()
 	//‚à‚¤ƒNƒ‰ƒX‚ÍŽg‚í‚È‚¢‚Ì‚ÅÁ‹Ž
 	app->Processing();
 
+	delete sceneManager;
+
 	delete dx12;
 
 	FbxLoader::GetInstance()->Finalize();

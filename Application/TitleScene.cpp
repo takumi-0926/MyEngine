@@ -11,11 +11,6 @@
 #include "FBX/FbxObject3d.h"
 #include "object/object3D.h"
 
-TitleScene::TitleScene(SceneManager* sceneManager_):
-	BsScene(sceneManager_)
-{
-}
-
 void TitleScene::Initialize(Wrapper* _dx12)
 {
 	assert(&_dx12);
@@ -85,7 +80,7 @@ void TitleScene::Update()
 			//タイトルからゲームへ
 			if ((Input::GetInstance()->Trigger(DIK_SPACE) || directInput->IsButtonPush(DirectInput::ButtonKind::ButtonA)) && !keyFlag) {
 				UIManager::GetInstance()->GetFade()->SetFadeIn(true);
-				UIManager::GetInstance()->GetFade()->SetFadeIn(true);
+				UIManager::GetInstance()->GetStarted()->SetFadeIn(true);
 			}
 		}
 		//オプション選択状態
@@ -103,7 +98,7 @@ void TitleScene::Update()
 			UIManager::GetInstance()->GetFade()->SetFadeOut(true);
 
 			//シーン切り替え
-			BsScene* scene = new PlayScene(sceneManager);
+			BsScene* scene = new PlayScene();
 			sceneManager->SetNextScene(scene);
 		}
 	}

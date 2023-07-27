@@ -165,3 +165,15 @@ inline XMVECTOR Normalize(XMVECTOR vec)
 	return _ret;
 }
 
+/// <summary>
+/// “¯ˆê’n“_”»•Ê
+/// </summary>
+/// <param name="pos1"></param>
+/// <param name="pos2"></param>
+/// <returns></returns>
+inline bool samePoint(XMFLOAT3 pos1, XMFLOAT3 pos2) {
+	if (pos1.x != pos2.x) { return false; }
+	if (pos1.y != pos2.y) { return false; }
+	if (pos1.z != pos2.z) { return false; }
+	return true;
+}

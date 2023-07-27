@@ -6,7 +6,7 @@ class SceneManager;
 class BsScene
 {
 public:
-	BsScene(SceneManager* sceneManager_);
+	virtual ~BsScene() = default;
 
 	/// <summary>
 	/// ‰Šú‰»
@@ -29,6 +29,8 @@ public:
 	virtual void Draw() = 0;
 	virtual void ShadowDraw() = 0;
 
+	//
+	void SetSceneManager(SceneManager* sceneManager_) { sceneManager = sceneManager_; }
 protected:
 	SceneManager* sceneManager = nullptr;
 };

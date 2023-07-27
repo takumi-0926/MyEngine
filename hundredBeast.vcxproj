@@ -341,7 +341,6 @@
     <ClCompile Include="Application\DebugImgui.cpp" />
     <ClCompile Include="Application\Weapon.cpp" />
     <ClCompile Include="Application\EnemyManager.cpp" />
-    <ClCompile Include="Engine\BsScene.cpp" />
     <ClCompile Include="Engine\2d\PostEffect.cpp" />
     <ClCompile Include="Engine\application.cpp" />
     <ClCompile Include="Engine\dx12Wrapper.cpp" />

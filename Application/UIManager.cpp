@@ -2,6 +2,8 @@
 #include "Sprite/sprite.h"
 #include "SceneEffect/Fade.h"
 
+#include "Input/input.h"
+
 static const int debugTextTexNumber = 99;
 
 UIManager* UIManager::GetInstance()
@@ -123,7 +125,7 @@ void UIManager::Initialize()
 	gateBreak_red.get()->Update();
 	//門HP（黄状態）
 	gateBreak_yellow.reset(Fade::Create(13, { 72,134 }));
-	gateBreak_yellow.get()->SetAnchorPoint({0.5f,0.5f});
+	gateBreak_yellow.get()->SetAnchorPoint({ 0.5f,0.5f });
 	gateBreak_yellow.get()->SetSize({ 80,80 });
 	gateBreak_yellow.get()->Update();
 	//門HP（）緑状態
@@ -176,6 +178,9 @@ void UIManager::Initialize()
 	Pose.reset(Sprite::Create(15, { 0.0f,0.0f }));
 
 	Title.get()->Update();
+
+	hp = Sprite::Create(4, { 36.0f,32.0f });
+	hp->Update();
 }
 
 void UIManager::TitleUpdate()
@@ -184,6 +189,37 @@ void UIManager::TitleUpdate()
 
 void UIManager::GameUpdate()
 {
+	if (mode == 2) {
+		//スタート時画像表示
+		start->SlideIn();
+		start->FadeIn();
+		start->SlideOut();
+		if (start->GetSlideOut()) {
+			start->FadeOut();
+			if (!start->GetFadeOut()) {
+				Start_UI_03.get()->SetFadeIn(true);
+			}
+		}
+		start->Update();
+	}
+
+	////カウント更新
+	//startTime = int(calculationTime);
+	//one_place = startTime % 10;
+	//tens_place = startTime / 10;
+	//calculationTime -= 1.0f / 50.0f;
+
+	if (Input::GetInstance()->Trigger(DIK_SPACE)) {
+		gateBreak_red->SetShake(true);
+		gateBreak_yellow->SetShake(true);
+		gateBreak_green->SetShake(true);
+	}
+
+	gateBreak_red->Update();
+	gateBreak_yellow->Update();
+	gateBreak_green->Update();
+
+	hp->Update();
 }
 
 void UIManager::EndUpdate()
@@ -218,18 +254,6 @@ void UIManager::TitleDarw()
 		else { TitleResources_Option[1].get()->Draw(); }
 		TitleResources_Option[2].get()->Draw();
 	}
-
-	//フェード用画像描画
-	start.get()->Draw();
-	if (fade.get()->GetFadeIn() || fade.get()->GetFadeOut() || fade.get()->GethalfFade()) {
-		fade.get()->Draw();
-	}
-	if (clear.get()->GetClear()) {
-		clear.get()->Draw();
-	}
-	else if (failed.get()->GetFailed()) {
-		failed.get()->Draw();
-	}
 }
 
 void UIManager::GameDarw()
@@ -242,6 +266,39 @@ void UIManager::GameDarw()
 	}
 	else if ((GATE_MAX - 9) <= gateHP) {
 		gateBreak_red->Draw();
+	}
+
+	hp->Draw();
+	HpBer->Draw();
+
+	//修正
+	static float pos = 12.f;
+	static float pos_h = 240.f;
+	static float offset = 24.f;
+	cross.get()->SetPos({ pos + offset * 2 ,pos_h });
+	cross.get()->Update();
+	cross.get()->Draw();
+
+	BreakCountMax[1].get()->SetPos({ pos + offset * 3,pos_h });
+	BreakCountMax[15].get()->SetPos({ pos + offset * 4,pos_h });
+	BreakCountMax[1].get()->Update();
+	BreakCountMax[15].get()->Update();
+	BreakCountMax[1].get()->Draw();
+	BreakCountMax[15].get()->Draw();
+
+	if (repelCount >= 10) {
+		BreakCount[repelCount - 10].get()->SetPos({ pos + offset,pos_h });
+		BreakCount[11].get()->SetPos({ pos,pos_h });
+		BreakCount[repelCount - 10].get()->Update();
+		BreakCount[11].get()->Update();
+		BreakCount[11].get()->Update();
+		BreakCount[repelCount - 10].get()->Draw();
+		BreakCount[11].get()->Draw();
+	}
+	else {
+		BreakCount[repelCount].get()->SetPos({ pos + offset * 0.5f,pos_h });
+		BreakCount[repelCount].get()->Update();
+		BreakCount[repelCount].get()->Draw();
 	}
 }
 
@@ -261,14 +318,29 @@ void UIManager::LoadDraw()
 void UIManager::FadeDraw()
 {
 	//フェード用画像描画
-	start->Draw();
-	if (fade->GetFadeIn() || fade->GetFadeOut() || fade->GethalfFade()) {
-		fade->Draw();
+	start.get()->Draw();
+	if (fade.get()->GetFadeIn() || fade.get()->GetFadeOut() || fade.get()->GethalfFade()) {
+		fade.get()->Draw();
 	}
-	if (clear->GetClear()) {
-		clear->Draw();
+	if (clear.get()->GetClear()) {
+		clear.get()->Draw();
 	}
-	else if (failed->GetFailed()) {
-		failed->Draw();
+	else if (failed.get()->GetFailed()) {
+		failed.get()->Draw();
 	}
+}
+
+void UIManager::PoseDraw()
+{
+	Pose->Draw();
+}
+
+void UIManager::StartDraw()
+{
+	////カウント周り
+	//Start_UI_02.get()->Draw();
+	//Start_UI_01.get()->Draw();
+	//Start_UI_03.get()->Draw();
+	//One_Numbers[one_place].get()->Draw();
+	//Ten_Numbers[tens_place].get()->Draw();
 }

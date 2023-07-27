@@ -55,23 +55,34 @@ public:
 	void LoadDraw();
 	void FadeDraw();
 
+	//ゲームシーン中描画
+	void PoseDraw();
+	void StartDraw();
+
+
 private://識別変数関係変数
 	int TitleWave = 0;
 	int TitleHierarchy = 0;
 	bool titleStart = 0;
 	bool titleOption = 0;
 
+	//撃退数
+	int repelCount = 0;
+	int mode = 0;
+
 public://識別変数関係ゲッター
 	int GetWave() { return TitleWave; }
 	int GetHieraruchy() { return TitleHierarchy; }
+	int GetRepel() { return repelCount; }
 	bool GetStart() { return titleStart; }
 	bool GetOption() { return titleOption; }
 
-	void SetWave(int wave) { this->TitleWave = wave; }
-	void SetHieraruchy(int hierarchy) { this->TitleHierarchy = hierarchy; }
-	void SetStart(bool flag) { this->titleStart = flag; }
-	void SetOption(bool flag) { this->titleOption = flag; }
-
+	void SetWave(int wave) { TitleWave = wave; }
+	void SetHieraruchy(int hierarchy) { TitleHierarchy = hierarchy; }
+	void SetStart(bool flag) { titleStart = flag; }
+	void SetOption(bool flag) { titleOption = flag; }
+	void SetRepel(int num) { repelCount = num; }
+	void SetMode(int num) { mode = num; }
 private:
 	//画面UI
 	unique_ptr<Sprite> screenUI[6];
@@ -80,7 +91,6 @@ private:
 	Sprite* End = nullptr;
 	Sprite* hp = nullptr;
 	Sprite* HpBer = nullptr;
-	bool result = false;//クリア判定
 
 	//カウントUI周り変数
 	unique_ptr<Sprite> One_Numbers[10] = {};//0～9の数字スプライト
@@ -119,7 +129,11 @@ private:
 	unique_ptr<Sprite> BreakCountMax[20] = {};
 	unique_ptr<Sprite> cross = nullptr;
 
-public:
+public://簡易ゲッター（Fadeはマネージャで管理しない）
 	Fade* GetFade() { return fade.get(); }
+	Fade* GetStarted() { return start.get(); }
+	Fade* GetClear() { return clear.get(); }
+	Fade* GetFailed() { return failed.get(); }
+	Sprite* GetHp() { return hp; }
 };
 

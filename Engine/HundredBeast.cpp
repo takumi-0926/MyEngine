@@ -23,7 +23,7 @@ void HundredBeast::Initialize()
 	Framework::Initialize();
 
 	//シーン
-	BsScene* scene = new TitleScene(sceneManager);
+	BsScene* scene = new TitleScene();
 	sceneManager->SetNextScene(scene);
 
 	//UIスプライト

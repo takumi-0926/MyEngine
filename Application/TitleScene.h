@@ -18,8 +18,6 @@ using namespace DirectX;
 class TitleScene : public BsScene
 {
 public:
-	TitleScene(SceneManager* sceneManager_);
-
 	/// <summary>
 	/// ‰Šú‰»
 	/// </summary>

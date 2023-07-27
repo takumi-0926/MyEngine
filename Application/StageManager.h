@@ -59,7 +59,7 @@ private:
 public:
 	int GetStage() { return UseStage; }
 	Stage* GetBaseCamp(int num) { return baseCamp[num]; }
-
+	Object3Ds* GetSkydome() { return skyDome;}
 	void SetUseStage(int num) { this->UseStage = num; }
 };
 

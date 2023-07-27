@@ -9,6 +9,8 @@ class SceneManager
 public:
 	SceneManager(Wrapper* _dx12);
 
+	~SceneManager();
+
 	/// <summary>
 	/// 
 	/// </summary>

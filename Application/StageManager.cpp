@@ -139,11 +139,12 @@ void StageManager::Update()
 			object->Update();
 		}
 	}
-
+	skyDome->Update();
 }
 
 void StageManager::Draw()
 {
+	skyDome->Draw();
 	//タイトルステージ
 	if (UseStage == 0) {
 		for (auto& object : titleStages) {
@@ -151,12 +152,16 @@ void StageManager::Draw()
 		}
 	}
 	//ベースキャンプ
-	else if(UseStage == 1) {
-
+	else if (UseStage == 1) {
+		for (auto& object : baseCamp) {
+			object->Draw();
+		}
 	}
 	//通常ステージ
 	else if (UseStage == 2) {
-
+		for (auto& object : stages) {
+			object->Draw();
+		}
 	}
 }
 
@@ -170,10 +175,14 @@ void StageManager::ShadowDraw()
 	}
 	//ベースキャンプ
 	else if (UseStage == 1) {
-
+		for (auto& object : baseCamp) {
+			object->ShadowDraw();
+		}
 	}
 	//通常ステージ
 	else if (UseStage == 2) {
-
+		for (auto& object : stages) {
+			object->ShadowDraw();
+		}
 	}
 }

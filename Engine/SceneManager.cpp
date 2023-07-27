@@ -6,6 +6,12 @@ SceneManager::SceneManager(Wrapper* _dx12):
 {
 }
 
+SceneManager::~SceneManager()
+{
+	Scene->Finalize();
+	delete Scene;
+}
+
 void SceneManager::Update()
 {
 	//シーン変更要求
@@ -20,6 +26,10 @@ void SceneManager::Update()
 		Scene = nextScene;
 		nextScene = nullptr;
 
+		//シーンに自分を設定
+		Scene->SetSceneManager(this);
+
+		//新シーンの初期化
 		Scene->Initialize(dx12);
 	}
 

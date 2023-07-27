@@ -983,13 +983,6 @@ void GameManager::PlayerUpdate()
 		_player->Update();
 	}
 
-	//武器の位置に当たり判定設置
-	weaponCollider.center = XMVectorSet(
-		_player->GetPos().x + vv0.m128_f32[0] * 2,
-		_player->GetPos().y + 20.0f,
-		_player->GetPos().z + vv0.m128_f32[2] * 2,
-		1);
-
 	//カメラワーク(追従)
 	{
 		//カメラとプレイヤーの距離を決定

@@ -2,6 +2,7 @@
 #include <DirectXMath.h>
 #include "BsScene.h"
 #include "UIManager.h"
+#include "Collision/CollisionPrimitive.h"
 
 class Wrapper;
 class Camera;
@@ -27,6 +28,7 @@ enum Scene {
 
 enum GameMode {
 	NONE,
+	PLAY,
 	START,
 	Preparation,
 	POSE,
@@ -53,8 +55,6 @@ const int P_HP = 100;
 class PlayScene : public BsScene
 {
 public:
-	PlayScene(SceneManager* sceneManager_);
-
 	/// <summary>
 	/// 初期化
 	/// </summary>
@@ -88,7 +88,7 @@ private://リセット対象
 	int SceneNum = TITLE;
 	bool SceneChange = false;
 	//ゲームモード
-	int GameModeNum = GameMode::START;
+	int GameModeNum = GameMode::NONE;
 
 	bool keyFlag = false;
 
@@ -120,9 +120,25 @@ private:
 	Model* bulletModel = nullptr;//弾モデル
 	float angleVertical, angleHorizonal;
 	int SetNum = 0;
+	Triangle triangle[50] = {};
 
 	bool pose = false;//ポーズフラグ
 	bool load = false;//ローディング
+	bool loadComplate = false;
 	int _loadMode = 0;//ローディング状態
+
+	bool result = false;//クリア判定
+
+	//////////////////////////////
+		//デバック確認用変数
+	float circleShadowDir[3] = { 0,-1,0 };
+	float circleShadowAtten[3] = { 0.5f,0.8f,0.0f };
+	float circleShadowFacterAnlge[2] = { 0.1f,0.5f };
+	float testPos[3] = { 1,0.0f,0 };
+	int testNum[3] = { 0,0,0 };
+	float debugCameraPos[3] = { 0,0,0 };
+	float debugPointLightPos[3] = { 0,0,0 };
+	float particleColor[4] = {};
+	/////////////////////////////////////
 };
 
