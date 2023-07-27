@@ -2,6 +2,10 @@
 
 void SceneManager::Update()
 {
+	if (nextScene) {
+
+	}
+
 	Scene->Update();
 }
 
