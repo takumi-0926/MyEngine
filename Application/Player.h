@@ -2,10 +2,8 @@
 #include "PMD/pmdObject3D.h"
 #include "FBX/FbxObject3d.h"
 #include "Weapon.h"
-#include "hitBox.h"
 
 #include"Input/input.h"
-//#include "Input/input.h"
 
 enum action {
 	Wait = 0,
@@ -33,21 +31,29 @@ private:
 	/// ステータス
 	/// </summary>
 	struct Status {
-		float HP;
+		float HP = 100.f;
 		float Attack;
-	};
-
-	DirectX::XMFLOAT3 moveVec = {};
-	XMVECTOR Zv, Xv, Yv;
+	}status;
 
 	Weapon* weapon = nullptr;
+	Sqhere collision = {};
 
-	bool move{};
-	bool attack{};
-	bool avoid{};
+	DirectX::XMFLOAT3 moveVec = {};
+	DirectX::XMFLOAT3 damageVec = {};
+	DirectX::XMFLOAT3 avoidVec = {};
+
+	bool move{}; //移動中true
+	bool attack{}; //攻撃中true
+	bool avoid{}; //回避中true
+
+	bool Hit = false;//攻撃成功時
+	bool damage = false;
+
+	XMVECTOR Zv, Xv, Yv;
+	XMVECTOR _v;
+
 
 	//回避用変数
-	DirectX::XMFLOAT3 avoidVec = {};
 	float avoidSpeed = 1.8f;
 	float avoidTime = 0.0f;
 
@@ -56,6 +62,9 @@ private:
 	int attackNum = action::Attack;
 	float freamCount = 0;
 	bool atCombo = false;
+	bool attackSt{};
+	float stTime{};
+	float stMax = 0.5f;
 
 	int Action = 0;
 
@@ -68,18 +77,20 @@ private:
 
 	int followBoneNum = 0;
 
+
 private:
 	void actionExecution(int num);
 	void moveUpdate();
 
 	void Attack();
-	void Avoid(XMFLOAT3& vec);
+	void Damage();
+	void Avoid(const XMFLOAT3& vec);
 
 	/// <summary>
-/// 移動
-/// </summary>
-/// <param name="pos">移動させる座標</param>
-/// <returns>移動後の座標</returns>
+	/// 移動
+	/// </summary>
+	/// <param name="pos">移動させる座標</param>
+	/// <returns>移動後の座標</returns>
 	inline XMFLOAT3 MoveBefore(XMFLOAT3 pos)
 	{
 		XMMATRIX matRot = XMMatrixIdentity();
@@ -161,14 +172,6 @@ private:
 		return pos;
 	}
 
-	/// <summary>
-	/// 進行方向に回転
-	/// </summary>
-	/// <param name="forward">進行方向ベクトル</param>
-	/// <param name="upward">上ベクトル</param>
-	/// <returns>回転行列（クォータニオン）</returns>
-	XMMATRIX LookAtRotation(XMFLOAT3 forward, XMFLOAT3 upward);
-
 public:
 	/// <summary>
 	/// インスタンス生成
@@ -189,24 +192,32 @@ public:
 	/// </summary>
 	void Draw(ID3D12GraphicsCommandList* cmdList)override;
 
+	/// <summary>
+	/// 武器オブジェクト生成
+	/// </summary>
+	/// <param name="model">使用モデル</param>
 	void CreateWeapon(Model* model);
 
 public:
-	//void SetInput(const Input& input) { this->input = input; }
-	void SetAction(int num) { this->Action = num; }
-	void SetMoveVec(DirectX::XMFLOAT3 vec) { this->moveVec = vec; }
-	void SetAvoidVec(DirectX::XMFLOAT3 vec) { this->avoidVec = vec; }
+	inline void SetAction(int num) { this->Action = num; }
+	inline void SetMoveVec(DirectX::XMFLOAT3 vec) { this->moveVec = vec; }
+	inline void SetDamageVec(DirectX::XMFLOAT3 vec) { this->damageVec = vec; }
+	inline void SetAvoidVec(DirectX::XMFLOAT3 vec) { this->avoidVec = vec; }
+	inline void SetHit(bool flag) { this->Hit = flag; }
+	inline void SetDamage(bool flag) { this->damage = flag; }
 
-	inline void SetAngleH(float angle) { this->angleHorizonal = angle;}
+	inline void SetAngleH(float angle) { this->angleHorizonal = angle; }
 
 	int GetAction() { return Action; }
 
 	inline XMFLOAT3 GetPos() { return position; }
 	inline float GetAngleVertical() { return angleVertical; }
 	inline float GetAngleHorizonal() { return angleHorizonal; }
-
-	inline Weapon* GetInstance() {
-		Weapon* instance = new Weapon();
-		return instance;
-	}
+	inline bool GetHit() { return Hit; }
+	inline bool GetDamage() { return damage; }
+	inline bool GetAttack() { return attack; }
+	inline bool GetAttackSt() { return attackSt; }
+	inline Sqhere GetCollision() { return collision; }
+	inline Weapon* GetWeapon() { return weapon; }
+	inline Status* GetStatus() { return &status; }
 };

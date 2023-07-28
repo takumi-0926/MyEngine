@@ -47,4 +47,8 @@ protected:
 	int enemyNum = {};
 	float enemyPopTime = {};
 
+	int num = 0;
+
+public:
+	int GetNum() { return num; }
 };

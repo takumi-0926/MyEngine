@@ -48,6 +48,8 @@ public:
 public:
 	static void staticInitialize(ID3D12Device* _device);
 
+	static void CreateGraphicsPipeline();
+
 	virtual void Initialize();
 
 	virtual void Update();
@@ -69,13 +71,11 @@ public:
 	void LoadAnima();
 
 public:
-	static void SetDevice(ID3D12Device* device) { FbxObject3d::device = device; }
-	static void SetCamera(Camera* camera) {
-		FbxObject3d::camera = camera;
-	}
-	void SetPosition(XMFLOAT3 pos) { this->position = pos; }
-	void SetScale(XMFLOAT3 scale) { this->scale = scale; }
-	static void CreateGraphicsPipeline();
+	inline static void SetDevice(ID3D12Device* device) { FbxObject3d::device = device; }
+	inline static void SetCamera(Camera* camera) {FbxObject3d::camera = camera;}
+	inline void SetPosition(XMFLOAT3 pos) { this->position = pos; }
+	inline void SetScale(XMFLOAT3 scale) { this->scale = scale; }
+	inline void SetFastTime(FbxTime time) { this->fastTime = time; }
 
 	void SetCollider(BaseCollider* collider);
 	virtual void OnCollision(const CollisionInfo& info) {}
@@ -111,11 +111,8 @@ protected:
 	FbxModel* model = nullptr;
 
 	FbxTime frameTime;
-
-	//FbxTime startTime;	//ŠJŽnŽžŠÔ
-	//FbxTime endTime;	//I—¹ŽžŠÔ
-
 	FbxTime currentTime;
+	FbxTime fastTime = {};
 
 	bool isPlay = false;
 	bool isLoop = false;
@@ -136,7 +133,6 @@ protected:
 
 public:
 	XMFLOAT3 GetPosition() { return position; }
-	//FbxTime GetCurrentTime() { return currentTime; }
 	inline void SetMatRot(XMMATRIX rot) { 
 		this->matRot = rot; 
 		this->useRotMat = true;

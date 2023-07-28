@@ -26,6 +26,7 @@ EnemyManager* EnemyManager::Create(FbxModel* model1, FbxModel* model2, FbxModel*
 
 void EnemyManager::EnemyCreate()
 {
+	if (enemyNum >= 1)return;
 	//golem.push_back(Enemy::Create(GolemModel,Activity::golem));
 	wolf.push_back(Enemy::Create(WolfModel, Activity::wolf));
 
@@ -40,33 +41,33 @@ void EnemyManager::Update(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 
 		EnemyCreate();
 
-		//使う
-		//for (int i = 0; i < 3; i++) {
-		//	if (protEnemy[i]->alive) { continue; }
-
-		//	protEnemy[i]->Appearance();
-		//	_enemy.push_back(protEnemy[i]);
-
-		//	//当たり判定用球体生成
-		//	Sqhere _sqhere;
-		//	_sqhere.radius = 20.0f;
-		//	sqhere.push_back(_sqhere);
-
 		enemyPopTime = 0.0f;
-
-		//	break;
-		//}
 	}
 	//エネミー関係の制御
 	{
 		for (auto& _enemy : golem) {
-			_enemy->moveUpdate(pPos,bPos,gPos);
-			_enemy->Update();
-		}
-		for (auto& _enemy : wolf) {
+			if (!_enemy->GetAlive()) {
+				//num++;
+				continue;
+			}
+
 			_enemy->moveUpdate(pPos, bPos, gPos);
 			_enemy->Update();
+
 		}
+		for (auto& _enemy : wolf) {
+			if (!_enemy->GetAlive()) {
+				//num++;
+				continue;
+			}
+
+			_enemy->moveUpdate(pPos, bPos, gPos);
+			_enemy->Update();
+
+		}
+
+		//golem.remove_if([](std::unique_ptr<Enemy>& enemy) {return !enemy->GetAlive();  });
+		//wolf.remove_if([](std::unique_ptr<Enemy>& enemy) {return !enemy->GetAlive();  });
 
 		//使う
 		//for (int i = 0; i < _enemy.size(); i++) {

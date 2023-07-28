@@ -55,7 +55,7 @@ Wrapper::~Wrapper()
 
 Wrapper* Wrapper::GetInstance()
 {
-	Wrapper* instance = new Wrapper();
+	static Wrapper* instance = new Wrapper();
 	return instance;
 }
 
@@ -72,6 +72,9 @@ bool Wrapper::Init(HWND _hwnd, SIZE _ret) {
 
 #endif
 	InitalizeCamera(_ret.cx, _ret.cy);
+	//カメラ初期化
+	Camera* cam = new Camera(0, 0);
+	SetCamera(cam);
 
 	//シングルトンなデバイス、ディスクヒープの生成
 	Singleton_Heap::GetInstance()->CreateDevice();
@@ -214,55 +217,55 @@ HRESULT Wrapper::result() {
 }
 
 HRESULT Wrapper::InitializeDevice() {
-//	auto _result = result();
-//	//DXGIファクトリーの生成
-//	D3D_FEATURE_LEVEL levels[] = {
-//		D3D_FEATURE_LEVEL_12_1,
-//		D3D_FEATURE_LEVEL_12_0,
-//		D3D_FEATURE_LEVEL_11_1,
-//		D3D_FEATURE_LEVEL_11_0
-//	};
-//
-//	//アダプター列挙用
-//	vector<ComPtr<IDXGIAdapter>>adapters;
-//	//ここに特定の名前を持つアダプターオブジェクトが入る
-//	ComPtr<IDXGIAdapter> tmpAdapter = nullptr;
-//	//アダプター
-//	for (int i = 0; _dxgifactory->EnumAdapters(i, &tmpAdapter) != DXGI_ERROR_NOT_FOUND; i++) {
-//		adapters.push_back(tmpAdapter);
-//	}
-//
-//	for (auto adpt : adapters) {
-//		DXGI_ADAPTER_DESC adesc = {};
-//		adpt->GetDesc(&adesc);//アダプターの説明オブジェクト取得
-//		wstring strDesc = adesc.Description;
-//		//探したいアダプターの名前を確認
-//		if (strDesc.find(L"NVIDIA") != string::npos) {
-//			tmpAdapter = adpt;
-//			break;
-//		}
-//	}
-//
-//	//Direct3Dデバイスの設定
-//	D3D_FEATURE_LEVEL featureLevel;
-//	//フィーチャーレベルの取得
-//	for (auto lv : levels) {
-//		if (D3D12CreateDevice(nullptr, lv, IID_PPV_ARGS(&_dev)) == S_OK) {
-//			featureLevel = lv;
-//			_result = S_OK;
-//			break;
-//		}
-//	}
-//
-//#ifdef _DEBUG
-//	ComPtr<ID3D12InfoQueue> infoQueue;
-//	if (SUCCEEDED(_dev->QueryInterface(IID_PPV_ARGS(&infoQueue)))) {
-//		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, true);
-//		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, true);
-//	}
-//
-//#endif // _DEBUG
-//
+	//	auto _result = result();
+	//	//DXGIファクトリーの生成
+	//	D3D_FEATURE_LEVEL levels[] = {
+	//		D3D_FEATURE_LEVEL_12_1,
+	//		D3D_FEATURE_LEVEL_12_0,
+	//		D3D_FEATURE_LEVEL_11_1,
+	//		D3D_FEATURE_LEVEL_11_0
+	//	};
+	//
+	//	//アダプター列挙用
+	//	vector<ComPtr<IDXGIAdapter>>adapters;
+	//	//ここに特定の名前を持つアダプターオブジェクトが入る
+	//	ComPtr<IDXGIAdapter> tmpAdapter = nullptr;
+	//	//アダプター
+	//	for (int i = 0; _dxgifactory->EnumAdapters(i, &tmpAdapter) != DXGI_ERROR_NOT_FOUND; i++) {
+	//		adapters.push_back(tmpAdapter);
+	//	}
+	//
+	//	for (auto adpt : adapters) {
+	//		DXGI_ADAPTER_DESC adesc = {};
+	//		adpt->GetDesc(&adesc);//アダプターの説明オブジェクト取得
+	//		wstring strDesc = adesc.Description;
+	//		//探したいアダプターの名前を確認
+	//		if (strDesc.find(L"NVIDIA") != string::npos) {
+	//			tmpAdapter = adpt;
+	//			break;
+	//		}
+	//	}
+	//
+	//	//Direct3Dデバイスの設定
+	//	D3D_FEATURE_LEVEL featureLevel;
+	//	//フィーチャーレベルの取得
+	//	for (auto lv : levels) {
+	//		if (D3D12CreateDevice(nullptr, lv, IID_PPV_ARGS(&_dev)) == S_OK) {
+	//			featureLevel = lv;
+	//			_result = S_OK;
+	//			break;
+	//		}
+	//	}
+	//
+	//#ifdef _DEBUG
+	//	ComPtr<ID3D12InfoQueue> infoQueue;
+	//	if (SUCCEEDED(_dev->QueryInterface(IID_PPV_ARGS(&infoQueue)))) {
+	//		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, true);
+	//		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, true);
+	//	}
+	//
+	//#endif // _DEBUG
+	//
 	return S_OK;
 }
 
@@ -672,7 +675,7 @@ void Wrapper::DrawDepth()
 void Wrapper::SceneDraw()
 {
 	//現在のシーン(ビュープロジェクション)をセット
-	ID3D12DescriptorHeap* sceneheaps[] = { Singleton_Heap::GetInstance()->GetDescHeap()};
+	ID3D12DescriptorHeap* sceneheaps[] = { Singleton_Heap::GetInstance()->GetDescHeap() };
 	_cmdList->SetDescriptorHeaps(1, sceneheaps);
 	_cmdList->SetGraphicsRootDescriptorTable(0, Singleton_Heap::GetInstance()->GetDescHeap()->GetGPUDescriptorHandleForHeapStart());
 

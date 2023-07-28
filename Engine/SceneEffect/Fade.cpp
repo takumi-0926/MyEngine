@@ -1,4 +1,7 @@
 #include "Fade.h"
+#include "Math/MyMath.h"
+
+extern const float fps = 1.0f / 60.0f;
 
 Fade::Fade(
 	UINT texNumber,
@@ -15,6 +18,10 @@ Fade::Fade(
 		anchorpoint,
 		isFlipX,
 		isFlipY)
+{
+}
+
+Fade::~Fade()
 {
 }
 
@@ -69,7 +76,7 @@ void Fade::Draw()
 void Fade::FadeIn()
 {
 	if (!fadeIn) { return; }
-	_alpha += fadeNum;
+	_alpha += fps;
 	SetAlpha(_alpha);
 	if (_alpha >= 1.0f) {
 		SetAlpha(1.0f);
@@ -82,7 +89,7 @@ void Fade::FadeIn()
 void Fade::FadeOut()
 {
 	if (!fadeOut) { return; }
-	_alpha -= fadeNum;
+	_alpha -= fps;
 	SetAlpha(_alpha);
 	if (_alpha <= 0.0f) {
 		SetAlpha(0.0f);
@@ -186,7 +193,14 @@ void Fade::SlideIn()
 
 void Fade::halfFade()
 {
+	if (!halffade) { return; }
+
 	SetAlpha(_alpha);
-	_alpha += fadeNum * 1.5f;
-	if (_alpha >= 0.7f) { _alpha = 0.7f; }
+	_alpha += fps * 1.5f;
+	if (_alpha >= 0.7f) { 
+		_alpha = 0.7f;
+		SetAlpha(0.7f);
+		halffade = false;
+	}
+	Update();
 }

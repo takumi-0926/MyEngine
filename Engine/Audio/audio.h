@@ -42,6 +42,17 @@ struct FormatChunk
 class Audio {
 	// Microsoft::WRL::を省略
 	template <class T> using ComPtr = Microsoft::WRL::ComPtr<T>;
+
+private:
+	// privateなコンストラクタ（シングルトンパターン）
+	Audio() = default;
+	// privateなデストラクタ（シングルトンパターン）
+	~Audio() = default;
+	// コピーコンストラクタを禁止（シングルトンパターン）
+	Audio(const Audio& obj) = delete;
+	// コピー代入演算子を禁止（シングルトンパターン）
+	void operator=(const Audio& obj) = delete;
+
 private://メンバ変数
 	ComPtr<IXAudio2> xAudio2;
 	IXAudio2MasteringVoice* masterVoice;
@@ -55,12 +66,13 @@ private://メンバ変数
 
 	//音声データの再生
 	void SoundPlayWave(IXAudio2* xaudio2, const SoundData& soundData);
+
 public:
+	static Audio* GetInstance();
+
 	bool Initalize();
 
 	void Load();
 
 	void Play(int number);
-
-	~Audio();
 };

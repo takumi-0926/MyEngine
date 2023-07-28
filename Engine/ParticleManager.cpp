@@ -2,21 +2,12 @@
 #include "dx12Wrapper.h"
 #include <d3dcompiler.h>
 #include <DirectXTex.h>
+#include "Math/MyMath.h"
 
 #pragma comment(lib, "d3dcompiler.lib")
 
 using namespace DirectX;
 using namespace Microsoft::WRL;
-
-//XMFLOAT3同士の加算処理
-const DirectX::XMFLOAT3 operator+(const DirectX::XMFLOAT3& lhs, const DirectX::XMFLOAT3& rhs) {
-	XMFLOAT3 result;
-	result.x = lhs.x + rhs.x;
-	result.y = lhs.y + rhs.y;
-	result.z = lhs.z + rhs.z;
-
-	return result;
-}
 
 /// <summary>
 /// 静的メンバ変数の実体
@@ -681,10 +672,10 @@ void ParticleManager::Update()
 		it->color.w = (it->e_color.w - it->s_color.w) / f;
 		it->color.w += it->s_color.w;
 	}
-	up = dx12->Camera()->GetUp();
+	up = dx12->GetCamera()->GetUp();
 
-	SetEye(dx12->Camera()->GetEye());
-	SetTarget(dx12->Camera()->GetTarget());
+	SetEye(dx12->GetCamera()->GetEye());
+	SetTarget(dx12->GetCamera()->GetTarget());
 
 	// 頂点バッファへデータ転送
 	VertexPos* vertMap = nullptr;
@@ -697,7 +688,7 @@ void ParticleManager::Update()
 		}
 		vertBuff->Unmap(0, nullptr);
 	}
-	const XMMATRIX& matViewProjection = dx12->Camera()->GetViewProjectionMatrix();
+	const XMMATRIX& matViewProjection = dx12->GetCamera()->GetViewProjectionMatrix();
 
 	// 定数バッファへデータ転送
 	ConstBufferData* constMap = nullptr;
@@ -821,7 +812,7 @@ void ParticleManager::CreateParticle(
 			const float md_vel = velocity;
 			XMFLOAT3 vel{};
 			//vel.x = float(sin(360) * md_vel - md_vel / 2);
-			//vel.y = float(sin(360) * md_vel - md_vel / 2);
+			vel.y = 0.01f;
 			//vel.z = float(sin(360) * md_vel - md_vel / 2);
 
 			XMFLOAT3 acc{};
@@ -844,7 +835,35 @@ void ParticleManager::CreateParticle(
 		}
 	}
 	else if (mode == 3) {
+		for (int i = 0; i < num; i++)
+		{
+			static float a = 0.0;
 
+			const XMFLOAT3 md_pos = emitter;
+			XMFLOAT3 pos{};
+			//pos.x = (float)rand() / RAND_MAX * md_pos.x - md_pos.x / 2.0f + float(sin(5.0f));
+			pos.x = md_pos.x + 10.0f * float(cos(360.0f * XMConvertToRadians(((rand() % 100) / 100.0f))));
+			pos.y = (float)rand() / RAND_MAX * md_pos.y - md_pos.y / 2.0f;
+			//pos.z = (float)rand() / RAND_MAX * md_pos.z - md_pos.z / 2.0f + float(sin(5.0f));
+			pos.z = md_pos.z + 10.0f * float(sin(360.0f * XMConvertToRadians(((rand() % 100) / 100.0f))));
+			const float md_vel = velocity;
+			XMFLOAT3 vel{};
+			//vel.x = float(sin(360) * md_vel - md_vel / 2);
+			//vel.y = float(sin(360) * md_vel - md_vel /2);
+			//vel.z = float(sin(360) * md_vel - md_vel/2);
+			vel.y = 1.0f;
+			XMFLOAT3 acc{};
+			const float md_acc = accel;
+			acc.z = float(sin(i) * md_acc);
+			acc.x = float(cos(i) * md_acc);
+			acc.y = float(md_acc / 3);
+
+			//XMVECTOR b = {};
+			//b = XMLoadFloat3(&acc);
+			//b += CreateQuaternion(XMFLOAT3({1,0,0 }), XMFLOAT3({ 0, 1, 0 }));
+			//XMStoreFloat3(&acc,b);
+			Add(life, pos, vel, acc, scale, 0.0f, color, color);
+		}
 	}
 }
 

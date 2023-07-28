@@ -34,6 +34,8 @@ bool Object3Ds::StaticInitialize(ID3D12Device* _device)
 
 	Object3Ds::device = _device;
 
+	camera = new Camera(0, 0);
+
 	//パイプライン生成
 	//LoadHlsls::LoadHlsl_VS(ShaderNo::OBJ, L"Resources/shaders/OBJVertexShader.hlsl", "main", "vs_5_0");
 	//LoadHlsls::LoadHlsl_PS(ShaderNo::OBJ, L"Resources/shaders/OBJPixelShader.hlsl", "main", "ps_5_0");

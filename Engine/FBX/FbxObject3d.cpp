@@ -109,7 +109,7 @@ void FbxObject3d::Update()
 
 	if (isPlay)
 	{
-		currentTime += frameTime;
+		currentTime += frameTime * FbxTime(fastTime);
 		if (currentTime > animas[nowPlayMotion].endTime)
 		{
 			if (!isLoop) {
@@ -171,10 +171,10 @@ void FbxObject3d::UpdateWorldMatrix()
 	matScale = XMMatrixScaling(scale.x, scale.y, scale.z);
 	if (!useRotMat) {
 		matRot = XMMatrixIdentity();
-		matRot *= XMMatrixRotationZ(XMConvertToRadians(rotation.z));
-		matRot *= XMMatrixRotationX(XMConvertToRadians(rotation.x));
-		matRot *= XMMatrixRotationY(XMConvertToRadians(rotation.y));
 	}
+	matRot *= XMMatrixRotationZ(XMConvertToRadians(rotation.z));
+	matRot *= XMMatrixRotationX(XMConvertToRadians(rotation.x));
+	matRot *= XMMatrixRotationY(XMConvertToRadians(rotation.y));
 	matTrans = XMMatrixTranslation(position.x, position.y, position.z);
 
 	matWorld = XMMatrixIdentity();

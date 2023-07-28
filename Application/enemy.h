@@ -8,12 +8,12 @@
 
 #include "FBX/FbxObject3d.h"
 
-#include "Weapon.h"
+#include "OBB.h"
 #include "ParticleManager.h"
 
 enum Activity {
-	golem = 1,
-	wolf,
+	wolf = 1,
+	golem,
 };
 enum AttackType_Wolf {
 	Type01_Walk,
@@ -46,6 +46,9 @@ class Enemy : public FbxObject3d {
 		Vector3 p2;
 		Vector3 p3;
 	}jump;
+
+	OBB obb = {};
+
 public:
 	//地面判定用
 	bool OnGround = true;
@@ -53,7 +56,7 @@ public:
 
 	Status status;//28
 	bool alive = false;	//生存判定
-	bool startAttack = false;
+	bool attack = false;
 	bool attackHit = false;
 	bool attackOnMove = false;
 	bool damage = false;
@@ -63,8 +66,10 @@ public:
 	float attackTime = 0.0f;
 	float jumpTime = 0.0f;
 	float maxTime = 1.0f;
+	float damageTime = 0.0f;
 	int mode = 0;
 
+	Sqhere collision = {};
 
 	float damegeCount = 0.0f;
 	//個体識別番号
@@ -84,16 +89,15 @@ public:
 	XMFLOAT3 RetreatPos = { 1.0f,20.0f,-150.0f };
 
 	FbxModel* model = {};
-	Weapon* weapon = nullptr;
 	ParticleManager* particle = nullptr;
 
 private:
 	//Vector型をXMFLAT3型にキャスト
 	XMFLOAT3 VectorToXMFloat(XMVECTOR vec);
 	//二点間の距離を算出
-	float objectDistance(XMFLOAT3 pos1, XMFLOAT3 pos2);	
+	float objectDistance(XMFLOAT3 pos1, XMFLOAT3 pos2);
 	//二点間のベクトルを算出
-	XMVECTOR objectVector(XMFLOAT3 pos1, XMFLOAT3 pos2);	
+	XMVECTOR objectVector(XMFLOAT3 pos1, XMFLOAT3 pos2);
 	//正規化
 	XMVECTOR Normalize(XMVECTOR vec);
 	void Move(XMVECTOR vector);	//ベクトル移動
@@ -191,4 +195,9 @@ public:
 	/// 被ダメージ時処理
 	/// </summary>
 	void Damage();
+
+public:
+	inline void SetDamage(bool flag) { this->damage = flag; }
+	bool GetAlive() { return alive; }
+	inline OBB GetObb() { return obb; }
 };

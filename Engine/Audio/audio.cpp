@@ -2,6 +2,12 @@
 #include <fstream>
 #include <cassert>
 
+Audio* Audio::GetInstance()
+{
+	static Audio instance;
+	return &instance;
+}
+
 //音声初期化
 bool Audio::Initalize()
 {
@@ -36,19 +42,6 @@ void Audio::Play(int number)
 
 	result = pSourceVoice->Start();
 	assert(SUCCEEDED(result));
-}
-
-Audio::~Audio()
-{
-	//for (int i = 0; i < 4; i++)
-	//{
-	//	soundData[i] = {};
-
-	//}
-	//delete soundData;
-	//delete& soundData[1];
-	//delete& soundData[2];
-	//delete& soundData[3];
 }
 
 //音声データのロード

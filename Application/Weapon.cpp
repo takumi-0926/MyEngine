@@ -1,6 +1,7 @@
 #include "Weapon.h"
 
 #include "Math/Vector3.h"
+#include "Math/MyMath.h"
 
 #include "Collision/MeshCollider.h"
 #include <Collision/CollisionAttribute.h>
@@ -34,6 +35,9 @@ Weapon* Weapon::Create(Model* model)
 		return nullptr;
 	}
 
+	instance->obb.Create();
+
+	instance->collision.radius = 20.0f;
 
 	return instance;
 }
@@ -83,6 +87,17 @@ void Weapon::Update()
 	constBuffB0->Unmap(0, nullptr);
 
 	collider->Update();
+
+	//obbçXêV
+	obb.SetVector(0, XMVector3TransformNormal(XMVECTOR{ 1, 0, 0 }, ExtractRotationMat(matWorld)));
+	obb.SetVector(1, XMVector3TransformNormal(XMVECTOR{ 0, 1, 0 }, ExtractRotationMat(matWorld)));
+	obb.SetVector(2, XMVector3TransformNormal(XMVECTOR{ 0, 0, 1 }, ExtractRotationMat(matWorld)));
+
+	obb.SetPos(matWorld);
+
+	obb.SetLength(0, 10);
+	obb.SetLength(1, 10);
+	obb.SetLength(2, 10);
 }
 
 void Weapon::Draw()
