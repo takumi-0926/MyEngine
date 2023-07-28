@@ -41,10 +41,13 @@ void TitleScene::Initialize(Wrapper* _dx12)
 	//ライトセット
 	Wrapper::SetLight(light);
 
+	StageManager::GetInstance()->SetUseStage(GameLocation::TitleStage);
 }
 
 void TitleScene::Finalize()
 {
+	delete light;
+	delete titleCamera;
 }
 
 void TitleScene::Update()
@@ -123,8 +126,6 @@ void TitleScene::Draw()
 	// コマンドリストの取得
 	ID3D12GraphicsCommandList* cmdList = dx12->CommandList().Get();
 
-	if (!load) { Singleton_Heap::GetInstance()->FbxTexture = 200; }
-
 	BaseObject::PreDraw(cmdList);
 
 	StageManager::GetInstance()->Draw();
@@ -136,10 +137,6 @@ void TitleScene::Draw()
 
 	UIManager::GetInstance()->TitleDarw();
 	UIManager::GetInstance()->FadeDraw();
-
-	if (load) {
-		UIManager::GetInstance()->LoadDraw();
-	}
 
 	Sprite::PostDraw();
 }

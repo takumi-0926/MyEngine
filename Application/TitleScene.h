@@ -60,12 +60,6 @@ private:
 	bool titleStart = 0;
 	bool titleOption = 0;
 
-	//ロード
-	unique_ptr<Sprite> Now_Loading[11] = {};
-	unique_ptr<Sprite> LoadControll = nullptr;
-	bool load = false;//ローディング
-	int _loadMode = 0;//ローディング状態
-
 	bool keyFlag = false;
 
 };

@@ -85,7 +85,6 @@ private://リセット対象
 	//撃退数
 	int repelCount = 0;
 	//シーン番号
-	int SceneNum = TITLE;
 	bool SceneChange = false;
 	//ゲームモード
 	int GameModeNum = GameMode::NONE;

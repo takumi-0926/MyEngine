@@ -192,7 +192,14 @@ void Fade::SlideIn()
 
 void Fade::halfFade()
 {
+	if (!halffade) { return; }
+
 	SetAlpha(_alpha);
 	_alpha += fps * 1.5f;
-	if (_alpha >= 0.7f) { _alpha = 0.7f; }
+	if (_alpha >= 0.7f) { 
+		_alpha = 0.7f;
+		SetAlpha(0.7f);
+		halffade = false;
+	}
+	Update();
 }

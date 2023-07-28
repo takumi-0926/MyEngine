@@ -138,6 +138,8 @@ void UIManager::Initialize()
 //フェードイン・アウト
 	fade.reset(Fade::Create(9, { 0.0f,0.0f }));
 	fade.get()->SetAlpha(0.0f);
+	fade.get()->Update();
+
 	//クリア時UI
 	clear.reset(Fade::Create(7, { Application::window_width / 2,Application::window_height / 2 }));
 	clear.get()->SetAnchorPoint({ 0.5f,0.5f });
@@ -319,9 +321,7 @@ void UIManager::FadeDraw()
 {
 	//フェード用画像描画
 	start.get()->Draw();
-	if (fade.get()->GetFadeIn() || fade.get()->GetFadeOut() || fade.get()->GethalfFade()) {
-		fade.get()->Draw();
-	}
+	fade.get()->Draw();
 	if (clear.get()->GetClear()) {
 		clear.get()->Draw();
 	}

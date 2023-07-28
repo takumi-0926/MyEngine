@@ -20,7 +20,7 @@ enum SpriteName {
 
 class Sprite;
 /// <summary>
-/// UI管理クラス（シングルトン）
+/// UI管理クラス（シングルトンにする予定）
 /// </summary>
 class UIManager
 {
@@ -29,10 +29,6 @@ public:
 	~UIManager() {};
 
 	static UIManager* GetInstance();
-
-private:
-	UIManager(const UIManager& manager) = delete;
-	UIManager& operator=(const UIManager& heap) = delete;
 
 public:
 	/// <summary>

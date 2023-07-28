@@ -1,4 +1,7 @@
 #include "PlayScene.h"
+#include "TitleScene.h"
+#include "SceneManager.h"
+
 #include "Player.h"
 #include "Camera/DebugCamera.h"
 
@@ -16,6 +19,8 @@ std::thread th = {};
 
 void PlayScene::Initialize(Wrapper* _dx12)
 {
+	UIManager* UI = UIManager::GetInstance();
+
 	assert(_dx12);
 
 	this->dx12 = _dx12;
@@ -51,6 +56,15 @@ void PlayScene::Initialize(Wrapper* _dx12)
 
 	particlemanager = ParticleManager::Create();
 	particlemanager->Update();
+
+	//撃退数
+	repelCount = 0;
+	UI->SetRepel(repelCount);
+	//シーン番号
+	SceneChange = false;
+	//ゲームモード
+	GameModeNum = GameMode::NONE;
+
 }
 
 void PlayScene::Finalize()
@@ -141,6 +155,9 @@ void PlayScene::Update()
 			if (!UI->GetStarted()->GetFadeOut()) {
 				GameModeNum = GameMode::PLAY;
 				UI->SetMode(PLAY);
+
+				//元の位置に戻す
+				UI->GetStarted()->SetPos(XMFLOAT2(0.0f, 80.0f));
 			}
 		}
 		UI->GetStarted()->Update();
@@ -370,6 +387,8 @@ void PlayScene::Update()
 		//エンド→タイトル遷移
 		if (Input::GetInstance()->Trigger(DIK_SPACE) || directInput->IsButtonPush(DirectInput::ButtonKind::ButtonA)) {
 			UI->GetClear()->SetClear(false);
+			BsScene* scene = new TitleScene();
+			sceneManager->SetNextScene(scene);
 		}
 	}
 	//ゲームオーバー時処理
@@ -387,6 +406,8 @@ void PlayScene::Update()
 		//エンド→タイトル遷移
 		if (Input::GetInstance()->Trigger(DIK_SPACE) || directInput->IsButtonPush(DirectInput::ButtonKind::ButtonA)) {
 			UI->GetFailed()->SetFailed(false);
+			BsScene* scene = new TitleScene();
+			sceneManager->SetNextScene(scene);
 		}
 	}
 	//ポーズ画面時処理
