@@ -188,9 +188,9 @@ inline XMVECTOR rightVec(XMVECTOR vec) {
 	Vector3 vec_ = { vec.m128_f32[0],vec.m128_f32[1],vec.m128_f32[2] };
 
 	//二つのベクトルのなす角を計算
-	float cos = (vec_.x * tmp.x + vec_.y * tmp.y + vec_.z * tmp.z)
+	float cos = float((vec_.x * tmp.x + vec_.y * tmp.y + vec_.z * tmp.z)
 		/ sqrt(vec_.x * vec_.x + vec_.y * vec_.y + vec_.z * vec_.z)
-		* sqrt(tmp.x * tmp.x + tmp.y * tmp.y + tmp.z * tmp.z);
+		* sqrt(tmp.x * tmp.x + tmp.y * tmp.y + tmp.z * tmp.z));
 
 	//計算元ベクトルが計算用ベクトルと限りなく同じ場合
 	if (cos < 0.00017f) {
