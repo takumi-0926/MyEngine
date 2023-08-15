@@ -69,6 +69,14 @@ void PlayScene::Initialize(Wrapper* _dx12)
 
 void PlayScene::Finalize()
 {
+	delete particlemanager;
+	delete light;
+	delete defenceModel;
+	delete bulletModel;
+	delete mainCamera;
+	delete setCamera;
+	delete _player;
+	delete enemy;
 }
 
 void PlayScene::Update()
@@ -398,7 +406,7 @@ void PlayScene::Update()
 			result = true;
 		}
 		if (result) {
-			UI->GetFade()->SetFailed(true);
+			UI->GetFailed()->SetFailed(true);
 		}
 		UI->GetFade()->Update();
 		UI->GetFailed()->Update();

@@ -452,6 +452,11 @@ void Enemy::Attack(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 					0.01f, 0.02f, 8, 4.0f, { 0.2f,0.2f,0.8f,1 }, 2);
 
 				ChangeAnimation(AttackType_Wolf::Type01_Walk);
+
+				if (attackHit) {
+					position -= XMFLOAT3(XMVector3Normalize(vectol).m128_f32) * 2;
+				}
+
 			}
 			else {
 				ChangeAnimation(AttackType_Wolf::Type02_JumpWait, true);

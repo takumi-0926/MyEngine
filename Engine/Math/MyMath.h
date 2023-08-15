@@ -177,3 +177,29 @@ inline bool samePoint(XMFLOAT3 pos1, XMFLOAT3 pos2) {
 	if (pos1.z != pos2.z) { return false; }
 	return true;
 }
+
+/// <summary>
+/// 垂直ベクトルの算出
+/// </summary>
+/// <param name="vec"></param>
+/// <returns></returns>
+inline XMVECTOR rightVec(XMVECTOR vec) {
+	Vector3 tmp = { 1,0,0 };
+	Vector3 vec_ = { vec.m128_f32[0],vec.m128_f32[1],vec.m128_f32[2] };
+
+	//二つのベクトルのなす角を計算
+	float cos = (vec_.x * tmp.x + vec_.y * tmp.y + vec_.z * tmp.z)
+		/ sqrt(vec_.x * vec_.x + vec_.y * vec_.y + vec_.z * vec_.z)
+		* sqrt(tmp.x * tmp.x + tmp.y * tmp.y + tmp.z * tmp.z);
+
+	//計算元ベクトルが計算用ベクトルと限りなく同じ場合
+	if (cos < 0.00017f) {
+		//計算用ベクトルを変更
+		tmp = { 0,1,0 };
+	}
+
+	//外積で垂直ベクトルを算出
+	Vector3 answer = vec_.cross(tmp);
+
+	return XMVECTOR{ answer.x, answer.y, answer.z, 0};
+}
