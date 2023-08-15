@@ -42,6 +42,8 @@ public:
 		XMFLOAT2 anchorpoint,
 		bool isFlipX, bool isFlipY);
 
+	~Fade();
+
 	static Fade* Create(
 		UINT texNumber,
 		XMFLOAT2 position,

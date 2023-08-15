@@ -1,7 +1,10 @@
 #pragma once
 #include "Framework.h"
+#include "BsScene.h"
 
 class PostEffect;
+class TitleScene;
+class PlayScene;
 class GameManager;
 
 class HundredBeast : public Framework
@@ -28,8 +31,5 @@ public:
 	void Draw() override;
 
 private:
-	PostEffect* postEffect = nullptr; //ポストエフェクト
-
-	GameManager* gameScene = nullptr;
 };
 

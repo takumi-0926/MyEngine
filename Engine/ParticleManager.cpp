@@ -672,10 +672,10 @@ void ParticleManager::Update()
 		it->color.w = (it->e_color.w - it->s_color.w) / f;
 		it->color.w += it->s_color.w;
 	}
-	up = dx12->Camera()->GetUp();
+	up = dx12->GetCamera()->GetUp();
 
-	SetEye(dx12->Camera()->GetEye());
-	SetTarget(dx12->Camera()->GetTarget());
+	SetEye(dx12->GetCamera()->GetEye());
+	SetTarget(dx12->GetCamera()->GetTarget());
 
 	// 頂点バッファへデータ転送
 	VertexPos* vertMap = nullptr;
@@ -688,7 +688,7 @@ void ParticleManager::Update()
 		}
 		vertBuff->Unmap(0, nullptr);
 	}
-	const XMMATRIX& matViewProjection = dx12->Camera()->GetViewProjectionMatrix();
+	const XMMATRIX& matViewProjection = dx12->GetCamera()->GetViewProjectionMatrix();
 
 	// 定数バッファへデータ転送
 	ConstBufferData* constMap = nullptr;

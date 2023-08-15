@@ -71,7 +71,7 @@ enum GameLocation {
 };
 
 enum SpriteName {
-	Title_UI = 19,		//
+	Title_UI = 20,		//
 	Title_UI_High,		//
 	Title_UI_Low,		//
 	Start_TItle_UI,		//
@@ -198,6 +198,7 @@ private://メンバ変数(初期化)
 	//ポーズ / ロード
 	unique_ptr<Sprite> Pose = nullptr;
 	unique_ptr<Sprite> Now_Loading[11] = {};
+	unique_ptr<Sprite> LoadControll = nullptr;
 	bool pose = false;//ポーズフラグ
 	bool load = false;//ローディング
 	int _loadMode = 0;//ローディング状態

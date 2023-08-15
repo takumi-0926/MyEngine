@@ -21,10 +21,15 @@ Fade::Fade(
 {
 }
 
+Fade::~Fade()
+{
+}
+
 Fade* Fade::Create(UINT texNumber, XMFLOAT2 position, XMFLOAT4 color, XMFLOAT2 anchorpoint, bool isFlipX, bool isFlipY)
 {
 	// ‰¼ƒTƒCƒY
 	XMFLOAT2 size = { 100.0f, 100.0f };
+
 
 	if (spritecommon._texBuff[texNumber])
 	{
@@ -188,7 +193,14 @@ void Fade::SlideIn()
 
 void Fade::halfFade()
 {
+	if (!halffade) { return; }
+
 	SetAlpha(_alpha);
 	_alpha += fps * 1.5f;
-	if (_alpha >= 0.7f) { _alpha = 0.7f; }
+	if (_alpha >= 0.7f) { 
+		_alpha = 0.7f;
+		SetAlpha(0.7f);
+		halffade = false;
+	}
+	Update();
 }

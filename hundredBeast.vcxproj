@@ -257,6 +257,7 @@
   <ItemGroup>
     <ClInclude Include="Application\BillboardObject.h" />
     <ClInclude Include="Application\DebugImgui.h" />
+    <ClInclude Include="Application\EnemyManager.h" />
     <ClInclude Include="Engine\2d\PostEffect.h" />
     <ClInclude Include="Engine\application.h" />
     <ClInclude Include="Engine\dx12Wrapper.h" />
@@ -328,6 +329,17 @@
     <ClInclude Include="Engine\Math\MyMath.h" />
     <ClInclude Include="Engine\OBB.h" />
     <ClInclude Include="Engine\OBBCollision.h" />
+<<<<<<< HEAD
+=======
+    <ClInclude Include="Engine\Framework.h" />
+    <ClInclude Include="Engine\HundredBeast.h" />
+    <ClInclude Include="Application\PlayScene.h" />
+    <ClInclude Include="Application\UIManager.h" />
+    <ClInclude Include="Application\TitleScene.h" />
+    <ClInclude Include="Application\StageManager.h" />
+    <ClInclude Include="Engine\BsScene.h" />
+    <ClInclude Include="Engine\SceneManager.h" />
+>>>>>>> 2946a3d31c67610e9166e5449d1d31262fb90a39
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application\BillboardObject.cpp" />
@@ -366,6 +378,11 @@
     <ClCompile Include="Engine\light\Light.cpp" />
     <ClCompile Include="Engine\JsonLoader.cpp" />
     <ClCompile Include="Engine\fps.cpp" />
+<<<<<<< HEAD
+=======
+    <ClCompile Include="Engine\Framework.cpp" />
+    <ClCompile Include="Engine\HundredBeast.cpp" />
+>>>>>>> 2946a3d31c67610e9166e5449d1d31262fb90a39
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Engine\Math\Matrix4.cpp" />
     <ClCompile Include="Engine\object\Material.cpp" />
@@ -386,6 +403,14 @@
     <ClCompile Include="Engine\Math\Vector3.cpp" />
     <ClCompile Include="Engine\OBB.cpp" />
     <ClCompile Include="Engine\OBBCollision.cpp" />
+<<<<<<< HEAD
+=======
+    <ClCompile Include="Application\PlayScene.cpp" />
+    <ClCompile Include="Application\UIManager.cpp" />
+    <ClCompile Include="Application\TitleScene.cpp" />
+    <ClCompile Include="Application\StageManager.cpp" />
+    <ClCompile Include="Engine\SceneManager.cpp" />
+>>>>>>> 2946a3d31c67610e9166e5449d1d31262fb90a39
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="imgui\imgui.vcxproj">

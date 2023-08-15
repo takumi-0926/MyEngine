@@ -1,7 +1,4 @@
 #pragma once
-//#include <winnt.h>
-
-//#include<mmsystem.h>
 #include <windows.h>
 #pragma comment(lib,"winmm.lib")
 

@@ -13,7 +13,7 @@ public:
 	//namespace省略
 	//エイリアス
 	template <class T> using Comptr = Microsoft::WRL::ComPtr<T>;
-
+	
 private:
 
 	// 定数バッファ用データ構造体B0
@@ -68,7 +68,7 @@ private:
 	static Light* light;
 
 	static Camera* camera;
-	static Camera* depthCamera;;
+	static Camera* depthCamera;
 	// ビュー行列
 	static XMMATRIX matView;
 	// 射影行列
@@ -118,10 +118,12 @@ private:
 		//	0.1f, 1000.0f
 		//);
 	}
+
 public:
 	~Wrapper();
 	static Wrapper* GetInstance();
 	bool Init(HWND _hwnd, SIZE _ret);
+	void Finalize();
 
 	void PreRun();
 	void PreRunShadow();
@@ -180,7 +182,8 @@ public:
 	ComPtr<IDXGISwapChain4> SwapChain();
 	ComPtr<ID3D12GraphicsCommandList> CommandList();
 	ComPtr<ID3D12DescriptorHeap> GetDescHeap() { return _descHeap.Get(); }
-	Camera* Camera() { return camera; }
+	static Camera* GetCamera() { return camera; }
+	static Light* GetLight() { return light; }
 	static int lightNum;
 
 };

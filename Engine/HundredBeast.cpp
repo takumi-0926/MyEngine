@@ -6,40 +6,35 @@
 #include "2d/PostEffect.h"
 
 #include "Singleton_Heap.h"
-#include "Sprite\sprite.h"
+#include "Sprite/sprite.h"
 #include "object/object3D.h"
 #include "FBX/FbxLoader.h"
 #include "FBX/FbxObject3d.h"
 #include "ParticleManager.h"
-#include "gameManager.h"
+
+#include "TitleScene.h"
+#include "PlayScene.h"
+#include "UIManager.h"
+#include "StageManager.h"
 
 void HundredBeast::Initialize()
 {
 	//基底クラスの初期化
 	Framework::Initialize();
 
-	//ゲームシーン初期化
-	gameScene = new GameManager();
-	if (!gameScene->Initalize(dx12, Audio::GetInstance(), Input::GetInstance())) { assert(0); }
+	//シーン
+	BsScene* scene = new TitleScene();
+	sceneManager->SetNextScene(scene);
 
-	postEffect = new PostEffect();
-	postEffect->Initialize(Singleton_Heap::GetInstance()->GetDescHeap());
-
+	//UIスプライト
+	UIManager::GetInstance()->Initialize();
+	//ステージ
+	StageManager::GetInstance()->Initialize();
 }
 
 void HundredBeast::Finalize()
 {
 	Framework::Finalize();
-
-	//もうクラスは使わないので消去
-	app->Processing();
-
-	delete dx12;
-
-	FbxLoader::GetInstance()->Finalize();
-
-	delete postEffect;
-
 }
 
 void HundredBeast::Update()
@@ -48,41 +43,10 @@ void HundredBeast::Update()
 
 	Framework::Update();
 
-
-	Object3Ds::SetDx12(dx12);
-	gameScene->Update();
-
 	app->CalculationSleep();
 }
 
 void HundredBeast::Draw()
 {
-
-	//影
-	dx12->PreRunShadow();
-	gameScene->ShadowDraw();
-
-	//レンダーテクスチャに描画
-	postEffect->PreDrawScene(dx12->CommandList().Get());
-	gameScene->MainDraw();
-	postEffect->PostDrawScene(dx12->CommandList().Get());
-
-	dx12->PreRun();
-
-	//ポストエフェクトを描画
-	postEffect->Draw(dx12->CommandList().Get(), Singleton_Heap::GetInstance()->GetDescHeap());
-
-	//スプライト描画
-	gameScene->SubDraw();
-
-	ImGui::Render();
-	ID3D12DescriptorHeap* heaps[] = { Singleton_Heap::GetInstance()->GetDescHeap() };
-	dx12->CommandList()->SetDescriptorHeaps(
-		1,
-		heaps);
-	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), dx12->CommandList().Get());
-
-	dx12->PostRun();
-
-	app->CalculationSleep();
+	Framework::Draw();
 }

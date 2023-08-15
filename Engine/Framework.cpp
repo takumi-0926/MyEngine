@@ -13,6 +13,8 @@
 #include "FBX/FbxObject3d.h"
 #include "ParticleManager.h"
 
+#include "SceneManager.h"
+
 void Framework::Run()
 {
 	//ゲーム初期化
@@ -50,7 +52,7 @@ void Framework::Initialize()
 	//DirectX初期化
 	dx12 = new Wrapper();
 	dx12->Init(app->_hwnd(), app->GetWindowSize());
-
+	//入力初期化
 	Input::GetInstance()->Initalize(app);
 	//音声初期化
 	Audio::GetInstance()->Initalize();
@@ -92,10 +94,25 @@ void Framework::Initialize()
 
 	Light::StaticInitalize(Singleton_Heap::GetInstance()->GetDevice());
 
+	//ポストエフェクト
+	postEffect = new PostEffect();
+	postEffect->Initialize(Singleton_Heap::GetInstance()->GetDescHeap());
+
+	sceneManager = new SceneManager(dx12);
 }
 
 void Framework::Finalize()
 {
+	//もうクラスは使わないので消去
+	app->Processing();
+
+	delete sceneManager;
+
+	delete dx12;
+
+	FbxLoader::GetInstance()->Finalize();
+
+	delete postEffect;
 }
 
 void Framework::Update()
@@ -119,4 +136,38 @@ void Framework::Update()
 	ImGui::NewFrame();
 
 	Input::GetInstance()->Update();
+
+	sceneManager->Update();
+}
+
+void Framework::Draw()
+{
+	Object3Ds::SetDx12(dx12);
+
+	//影
+	dx12->PreRunShadow();
+	sceneManager->ShadowDraw();
+
+	//レンダーテクスチャに描画
+	postEffect->PreDrawScene(dx12->CommandList().Get());
+	sceneManager->Draw();
+	postEffect->PostDrawScene(dx12->CommandList().Get());
+
+	dx12->PreRun();
+
+	//ポストエフェクトを描画
+	postEffect->Draw(dx12->CommandList().Get(), Singleton_Heap::GetInstance()->GetDescHeap());
+
+	//スプライト描画
+
+	ImGui::Render();
+	ID3D12DescriptorHeap* heaps[] = { Singleton_Heap::GetInstance()->GetDescHeap() };
+	dx12->CommandList()->SetDescriptorHeaps(
+		1,
+		heaps);
+	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), dx12->CommandList().Get());
+
+	dx12->PostRun();
+
+	app->CalculationSleep();
 }

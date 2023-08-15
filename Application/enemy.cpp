@@ -452,6 +452,11 @@ void Enemy::Attack(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 					0.01f, 0.02f, 8, 4.0f, { 0.2f,0.2f,0.8f,1 }, 2);
 
 				ChangeAnimation(AttackType_Wolf::Type01_Walk);
+
+				if (attackHit) {
+					position -= XMFLOAT3(XMVector3Normalize(vectol).m128_f32) * 2;
+				}
+
 			}
 			else {
 				ChangeAnimation(AttackType_Wolf::Type02_JumpWait, true);
@@ -648,10 +653,13 @@ void Enemy::Damage()
 	model->ambient.x = 1.0f;
 	damageTime += 1.0f / 60.0f;
 	SetScale(XMFLOAT3(0.71f, 0.71f, 0.71f));
+	if (damageTime >= 0.1f) {
+		SetScale(XMFLOAT3(0.7f, 0.7f, 0.7f));
+
+	}
 	if (damageTime >= 0.2f) {
 		status.HP -= 1;
 		model->ambient.x = defalt_ambient[0].x;
-		SetScale(XMFLOAT3(0.7f, 0.7f, 0.7f));
 
 		damage = false;
 		damageTime = 0.0f;

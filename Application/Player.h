@@ -82,8 +82,18 @@ private:
 	void actionExecution(int num);
 	void moveUpdate();
 
+	/// <summary>
+	/// UŒ‚
+	/// </summary>
 	void Attack();
+	/// <summary>
+	/// ƒ_ƒ[ƒW
+	/// </summary>
 	void Damage();
+	/// <summary>
+	/// ‰ñ”ğ
+	/// </summary>
+	/// <param name="vec"></param>
 	void Avoid(const XMFLOAT3& vec);
 
 	/// <summary>

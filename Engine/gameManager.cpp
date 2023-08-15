@@ -18,7 +18,7 @@
 
 #include "Math/MyMath.h"
 
-std::thread th = {};
+//std::thread th = {};
 
 void GameManager::LoadModelResources()
 {
@@ -69,6 +69,7 @@ void GameManager::LoadSpriteResources()
 	if (!Sprite::loadTexture(16, L"Resources/weapon.png")) { assert(0); }
 	if (!Sprite::loadTexture(17, L"Resources/weaponSlot.png")) { assert(0); }
 	if (!Sprite::loadTexture(18, L"Resources/loading.dds")) { assert(0); }
+	if (!Sprite::loadTexture(19, L"Resources/controll.png")) { assert(0); }
 	//if (!BillboardObject::LoadTexture(0, L"Resources/GateUI_red.png")) { assert(0); }
 }
 
@@ -111,9 +112,9 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	titleCamera->SetTarget(XMFLOAT3(0, 30.0f, 0.0f));
 	titleCamera->Update();
 
-	Wrapper::SetCamera(titleCamera);
-	FbxObject3d::SetCamera(dx12->Camera());
-	Object3Ds::SetCamera(dx12->Camera());
+	Wrapper::GetInstance()->SetCamera(titleCamera);
+	FbxObject3d::SetCamera(dx12->GetCamera());
+	Object3Ds::SetCamera(dx12->GetCamera());
 
 	dx12->SceneUpdate();
 
@@ -130,7 +131,7 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	light->SetCircleShadowActive(1, true);
 	light->SetCircleShadowActive(2, true);
 	//ライトセット
-	Wrapper::SetLight(light);
+	Wrapper::GetInstance()->SetLight(light);
 
 	debugFilde = Object3Ds::Create(debugFildeModel);
 	debugCharacter = Object3Ds::Create(debugCharacterModel);
@@ -275,17 +276,20 @@ bool GameManager::Initalize(Wrapper* dx12, Audio* audio, Input* input)
 	int fontWidth = 64;
 	int fontHeight = 64;
 
-	float basePos = 360.0f;
+	float basePos = 680.0f;
 	float offset = 50.f;
 
 	for (int i = 0; i < 11; i++)
 	{
-		Now_Loading[i].reset(Sprite::Create(18, { 640.0f + offset * i ,basePos }));
+		Now_Loading[i].reset(Sprite::Create(18, { 740.0f + offset * i ,basePos }));
 		Now_Loading[i].get()->SetTextureRect({ float(fontWidth * i), 0 }, { float(fontWidth), float(fontHeight) });
 		Now_Loading[i].get()->SetSize({ float(fontWidth),float(fontHeight) });
 		Now_Loading[i].get()->SetAnchorPoint({ 0.5f,0.5f });
 		Now_Loading[i].get()->Update();
 	}
+	LoadControll.reset(Sprite::Create(19, { 640.0f,360.0f }));
+	LoadControll.get()->SetAnchorPoint({ 0.5f,0.5f });
+	LoadControll.get()->Update();
 
 	particlemanager->CreateParticle(30, XMFLOAT3(0, 0, 0), 0.01f, 0.01f, 12, 4.0f, { 0.2f,0.2f,0.8f,1 }, 1);
 
@@ -421,7 +425,7 @@ void GameManager::TitleUpdate()
 	if (fade->GetFadeIn()) {
 		fade->FadeIn();
 		if (!fade->GetFadeIn()) {
-			Wrapper::SetCamera(mainCamera);
+			Wrapper::GetInstance()->SetCamera(mainCamera);
 			fade->SetFadeIn(false);
 			fade->SetFadeOut(true);
 
@@ -599,7 +603,7 @@ void GameManager::GameUpdate() {
 					_target.y += cameraHeight / 3.0f;
 					setCamera->SetTarget(_target);
 					setCamera->Update();
-					Wrapper::SetCamera(setCamera);
+					Wrapper::GetInstance()->SetCamera(setCamera);
 					GameModeNum = GameMode::SET;
 				}
 
@@ -777,11 +781,11 @@ void GameManager::GameUpdate() {
 			_target -= direction * distanceFromPlayerToCamera;
 			_target.y += cameraHeight / 3.0f;
 			setCamera->SetTarget(_target);
-			Wrapper::SetCamera(setCamera);
+			Wrapper::GetInstance()->SetCamera(setCamera);
 
 			if (input->Trigger(DIK_F) || directInput->IsButtonPush(DirectInput::ButtonKind::ButtonX)) {
-				Wrapper::SetCamera(mainCamera);
-				FbxObject3d::SetCamera(dx12->Camera());
+				Wrapper::GetInstance()->SetCamera(mainCamera);
+				FbxObject3d::SetCamera(dx12->GetCamera());
 				GameModeNum = GameMode::NASI;
 			}
 		}
@@ -802,7 +806,7 @@ void GameManager::GameUpdate() {
 			//エンド→タイトル遷移
 			if (input->Trigger(DIK_SPACE) || directInput->IsButtonPush(DirectInput::ButtonKind::ButtonA)) {
 				SceneNum = TITLE;
-				Wrapper::SetCamera(titleCamera);
+				Wrapper::GetInstance()->SetCamera(titleCamera);
 				clear->SetClear(false);
 
 				GameModeNum = GameMode::START;
@@ -843,7 +847,7 @@ void GameManager::GameUpdate() {
 			//エンド→タイトル遷移
 			if (input->Trigger(DIK_SPACE) || directInput->IsButtonPush(DirectInput::ButtonKind::ButtonA)) {
 				SceneNum = TITLE;
-				Wrapper::SetCamera(titleCamera);
+				Wrapper::GetInstance()->SetCamera(titleCamera);
 				failed->SetFailed(false);
 
 				GameModeNum = GameMode::START;
@@ -882,8 +886,8 @@ void GameManager::GameUpdate() {
 		//更新処理(固有)
 		{
 			if (GameModeNum != GameMode::POSE) {
-				Object3Ds::SetCamera(dx12->Camera());
-				FbxObject3d::SetCamera(dx12->Camera());
+				Object3Ds::SetCamera(dx12->GetCamera());
+				FbxObject3d::SetCamera(dx12->GetCamera());
 
 				dx12->SceneUpdate();
 				for (int i = 0; i < 6; i++) {
@@ -979,13 +983,6 @@ void GameManager::PlayerUpdate()
 		_player->Update();
 	}
 
-	//武器の位置に当たり判定設置
-	weaponCollider.center = XMVectorSet(
-		_player->GetPos().x + vv0.m128_f32[0] * 2,
-		_player->GetPos().y + 20.0f,
-		_player->GetPos().z + vv0.m128_f32[2] * 2,
-		1);
-
 	//カメラワーク(追従)
 	{
 		//カメラとプレイヤーの距離を決定
@@ -1022,7 +1019,7 @@ void GameManager::PlayerUpdate()
 		_target = _player->GetPosition();
 		_target.y += cameraHeight;
 		mainCamera->SetTarget(_target);
-		Wrapper::SetCamera(mainCamera);
+		Wrapper::GetInstance()->SetCamera(mainCamera);
 
 		mainCamera->Update();
 	}
@@ -1256,6 +1253,7 @@ void GameManager::SubDraw()
 
 	//ローディング中
 	if (load) {
+		LoadControll.get()->Draw();
 		for (int i = 0; i < 11; i++)
 		{
 			Now_Loading[i].get()->Draw();
@@ -1325,41 +1323,41 @@ void GameManager::ShadowDraw(bool isShadow)
 
 void GameManager::loading() {
 
-	if (load) {
-		switch (_loadMode)
-		{
-		case LoadMode::No:
-			_loadMode = LoadMode::Start;
+	//if (load) {
+	//	switch (_loadMode)
+	//	{
+	//	case LoadMode::No:
+	//		_loadMode = LoadMode::Start;
 
-			break;
-			//何もない・・・
-		case LoadMode::Start:
-			//ローディング始め
-			th = std::thread([&] {asyncLoad(); });
-			_loadMode = LoadMode::Run;
-			break;
-		case LoadMode::Run:
-			//ローディング中にやりたいこと
+	//		break;
+	//		//何もない・・・
+	//	case LoadMode::Start:
+	//		//ローディング始め
+	//		th = std::thread([&] {asyncLoad(); });
+	//		_loadMode = LoadMode::Run;
+	//		break;
+	//	case LoadMode::Run:
+	//		//ローディング中にやりたいこと
 
-			//文字回転
-			for (int i = 0; i < 11; i++)
-			{
-				static float angle = 0.0f;
-				angle += 0.5f;
-				Now_Loading[i].get()->SetRot(angle);
-				Now_Loading[i].get()->Update();
-			}
+	//		//文字回転
+	//		for (int i = 0; i < 11; i++)
+	//		{
+	//			static float angle = 0.0f;
+	//			angle += 0.5f;
+	//			Now_Loading[i].get()->SetRot(angle);
+	//			Now_Loading[i].get()->Update();
+	//		}
 
-			break;
-		case LoadMode::End:
-			//ローディング終わり
-			th.join();
-			load = false;
+	//		break;
+	//	case LoadMode::End:
+	//		//ローディング終わり
+	//		th.join();
+	//		load = false;
 
-		default:
-			break;
-		}
-	}
+	//	default:
+	//		break;
+	//	}
+	//}
 }
 void GameManager::asyncLoad()
 {

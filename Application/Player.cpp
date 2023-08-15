@@ -266,7 +266,7 @@ void Player::Damage()
 		XMVECTOR _vec = twoPointVector(position, damageVec);
 		_vec = XMVector3Normalize(_vec);
 
-		position += XMFLOAT3(_vec.m128_f32);
+		position += XMFLOAT3(_vec.m128_f32) * 3;
 	}
 	else {
 		count = 10;

@@ -56,10 +56,10 @@ public:
 
 	Status status;//28
 	bool alive = false;	//生存判定
-	bool attack = false;
-	bool attackHit = false;
+	bool attack = false;//攻撃してるとき
+	bool attackHit = false;//攻撃が当たったとき
 	bool attackOnMove = false;
-	bool damage = false;
+	bool damage = false;//ダメージを受けたとき
 
 	int actionPattern = 0;//行動パターン
 	int attackPattern = 0;//攻撃パターン
