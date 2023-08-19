@@ -55,12 +55,13 @@ public:
 	XMVECTOR fallV;
 
 	Status status;//28
+	int nowMove = 0;
 	bool alive = false;	//生存判定
 	bool attack = false;//攻撃してるとき
 	bool attackHit = false;//攻撃が当たったとき
 	bool attackOnMove = false;
 	bool damage = false;//ダメージを受けたとき
-
+	bool down = false;//ダウン開始前の情報取得
 	int actionPattern = 0;//行動パターン
 	int attackPattern = 0;//攻撃パターン
 	float attackTime = 0.0f;
@@ -194,8 +195,8 @@ public:
 	/// <summary>
 	/// 被ダメージ時処理
 	/// </summary>
-	void Damage();
-
+	void Damage(XMFLOAT3& targetPosition);
+	void Down(XMFLOAT3& targetPosition);
 public:
 	inline void SetDamage(bool flag) { this->damage = flag; }
 	bool GetAlive() { return alive; }

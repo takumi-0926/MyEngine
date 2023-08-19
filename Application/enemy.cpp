@@ -11,7 +11,8 @@ enum MoveMode {
 	Move,
 	Attack,
 	Avoid,
-	Retreat
+	Retreat,
+	Down,
 };
 
 Enemy::Enemy()
@@ -646,10 +647,13 @@ void Enemy::Retreat()
 	}
 }
 
-void Enemy::Damage()
+void Enemy::Damage(XMFLOAT3& targetPosition)
 {
 	if (!damage) return;
+	vectol = objectVector(targetPosition, position);
+	vectol = Normalize(vectol);
 
+	position -= XMFLOAT3(vectol.m128_f32) * 3;
 	model->ambient.x = 1.0f;
 	damageTime += 1.0f / 60.0f;
 	SetScale(XMFLOAT3(0.71f, 0.71f, 0.71f));
@@ -670,6 +674,69 @@ void Enemy::Damage()
 		0.0001f, 0.05f, 5, 8.0f, { 1,0,0,1 });
 
 	if (status.HP <= 0) { actionPattern = MoveMode::Retreat; }
+	else if (status.HP % 5 == 0 && status.HP != 15) {
+		actionPattern = MoveMode::Down;
+	}
+}
+
+void Enemy::Down(XMFLOAT3& targetPosition)
+{
+	if (actionPattern != MoveMode::Down)return;
+
+	static XMVECTOR RightVec;
+	static float step;
+	static float time;
+	if (!down) {
+		//プレイヤーを向いたベクトルを取得
+		vectol = objectVector(targetPosition, position);
+		vectol = Normalize(vectol);
+
+		//ベクトルに垂直なベクトルを取得
+		RightVec = rightVec(vectol);
+
+		//情報取得完了
+		down = true;
+	}
+
+	if (step <= 1.0f) {
+
+		//プレイヤーに向いたベクトルから垂直なベクトルに正面を移動
+		XMVECTOR answer = moveVectortoVector(vectol, RightVec, step += 0.5f);
+
+		matRot = LookAtRotation(
+			VectorToXMFloat(Normalize(answer)),
+			XMFLOAT3(1.0f, 0.0f, 0.0f));
+	}
+	else {
+		time += fps;
+
+	}
+
+	//ダウン終わり
+	if (time >= 5.0f) {
+
+		static bool g;
+		static float s;
+		if (!g) {
+			vectol = objectVector(targetPosition, position);
+			g = true;
+		}
+
+		//プレイヤーに向いたベクトルから垂直なベクトルに正面を移動
+		XMVECTOR answer = moveVectortoVector(RightVec, vectol, s += 0.5f);
+
+		matRot = LookAtRotation(
+			VectorToXMFloat(Normalize(answer)),
+			XMFLOAT3(1.0f, 0.0f, 0.0f));
+
+		if (s >= 1.0f) {
+			actionPattern = MoveMode::Move;
+			down = false;
+			time = 0;
+			step = 0;
+			s = 0;
+		}
+	}
 }
 
 void Enemy::moveUpdate(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
@@ -681,7 +748,9 @@ void Enemy::moveUpdate(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 	//退却
 	Retreat();
 	//被ダメージ
-	Damage();
+	Damage(pPos);
+	//
+	Down(pPos);
 	//更新
 	Update();
 }

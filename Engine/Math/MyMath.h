@@ -119,6 +119,18 @@ inline XMFLOAT3 moveCamera(const XMFLOAT3 pos1, const XMFLOAT3 pos2, float pct)
 	return pos;
 }
 
+
+inline XMVECTOR moveVectortoVector(const XMVECTOR pos1, const XMVECTOR pos2, float pct)
+{
+	XMFLOAT3 answer{};
+	XMFLOAT3 pos1_ = XMFLOAT3(pos1.m128_f32);
+	XMFLOAT3 pos2_ = XMFLOAT3(pos2.m128_f32);
+
+	answer = pos1_ + ((pos2_ - pos1_) * pct);
+
+	return XMVECTOR{ answer.x,answer.y,answer.z,0 };
+}
+
 //距離
 inline float distance(XMFLOAT3 pos1, XMFLOAT3 pos2)
 {
@@ -201,5 +213,5 @@ inline XMVECTOR rightVec(XMVECTOR vec) {
 	//外積で垂直ベクトルを算出
 	Vector3 answer = vec_.cross(tmp);
 
-	return XMVECTOR{ answer.x, answer.y, answer.z, 0};
+	return XMVECTOR{ answer.x, answer.z, answer.y, 0 };
 }
