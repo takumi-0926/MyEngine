@@ -1,11 +1,14 @@
 //#pragma once
 #include "Sprite\sprite.h"
+
+const int RTV_NUM = 7;
+
 class PostEffect :
     public Sprite
 {
 private:
     //テクスチャバッファ
-    ComPtr<ID3D12Resource> texBuff;
+    ComPtr<ID3D12Resource> texBuff[RTV_NUM];
 
     //深度テクスチャバッファ
     ComPtr<ID3D12Resource> depthBuff;
