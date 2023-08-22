@@ -6,13 +6,15 @@
 
 #include "safeDelete.h"
 #include <Math/MyMath.h>
+#include "Easing.h"
+
+Easing ease;
 
 enum MoveMode {
 	Move,
 	Attack,
 	Avoid,
 	Retreat,
-	Down,
 };
 
 Enemy::Enemy()
@@ -538,6 +540,7 @@ void Enemy::JumpAttack(XMFLOAT3& targetPosition)
 		jump.p3 = Vector3(targetPosition.x, targetPosition.y, targetPosition.z);
 	}
 	static bool p = false;
+	static float time = 0;
 
 	if (attackTime >= 1.0f) {
 
@@ -564,20 +567,29 @@ void Enemy::JumpAttack(XMFLOAT3& targetPosition)
 		}
 
 		if (p) {
+			ChangeAnimation(AttackType_Wolf::Type02_JumpWait, true);
+
 			particle->CreateParticle(30,
 				XMFLOAT3(position),
 				0.01f, 0.1f, 64, 5.0f, { 0.2f,0.2f,0.8f,1 }, 1);
-			p = false;
+
+			rotation.y = 5.0f - ease.easeOut(0.0f, 5.0f, ease.timeRate += fps);
+
+			if (ease.timeRate >= 1.0f) { ease.timeRate = 1.0f; }
 		}
 
 		//移動処理移行時の初期化
 		if (attackTime >= 3.f) {
+			actionPattern = MoveMode::Move;
 			moveReset();
 			attackTime = 0.0f;
-			actionPattern = MoveMode::Move;
+			jumpTime = 0.0f;
+			rotation.y = 0;
 			attack = false;
 			attackHit = false;
-			jumpTime = 0.0f;
+			p = false;
+
+			ease.timeRate = 0;
 		}
 	}
 	else {
@@ -675,14 +687,11 @@ void Enemy::Damage(XMFLOAT3& targetPosition)
 
 	if (status.HP <= 0) { actionPattern = MoveMode::Retreat; }
 	else if (status.HP % 5 == 0 && status.HP != 15) {
-		actionPattern = MoveMode::Down;
 	}
 }
 
 void Enemy::Down(XMFLOAT3& targetPosition)
 {
-	if (actionPattern != MoveMode::Down)return;
-
 	static XMVECTOR RightVec;
 	static float step;
 	static float time;
@@ -705,7 +714,7 @@ void Enemy::Down(XMFLOAT3& targetPosition)
 
 		matRot = LookAtRotation(
 			VectorToXMFloat(Normalize(answer)),
-			XMFLOAT3(1.0f, 0.0f, 0.0f));
+			XMFLOAT3(0.0f, 1.0f, 0.0f));
 	}
 	else {
 		time += fps;
@@ -750,7 +759,7 @@ void Enemy::moveUpdate(XMFLOAT3 pPos, DefCannon* bPos[], XMFLOAT3 gPos)
 	//被ダメージ
 	Damage(pPos);
 	//
-	Down(pPos);
+	//Down(pPos);
 	//更新
 	Update();
 }
