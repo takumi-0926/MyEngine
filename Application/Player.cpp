@@ -5,6 +5,7 @@
 #include "Collision/CollisionManager.h"
 #include "Collision/CollisionAttribute.h"
 #include "Collision/SphereCollider.h"
+#include <2d/PostEffect.h>
 
 Player* Player::Create(FbxModel* model)
 {
@@ -267,10 +268,14 @@ void Player::Damage()
 		_vec = XMVector3Normalize(_vec);
 
 		position += XMFLOAT3(_vec.m128_f32) * 3;
+
+		PostEffect::mosaic = 1;
 	}
 	else {
 		count = 10;
 		damage = false;
+
+		PostEffect::mosaic = 0;
 	}
 }
 

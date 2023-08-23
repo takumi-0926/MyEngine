@@ -4,27 +4,29 @@ Texture2D<float4> tex : register(t0);  // 0番スロットに設定されたテ�
 SamplerState smp : register(s0);      // 0番スロットに設定されたサンプラー
 Texture2D<float> lightDepthTex : register(t1);
 
+struct PSOutput {
+	float4 target0 : SV_TARGET0;
+	float4 target1 : SV_TARGET1;
+	float4 target2 : SV_TARGET2;
+	float4 target3 : SV_TARGET3;
+	float4 target4 : SV_TARGET4;
+	float4 target5 : SV_TARGET5;
+	float4 target6 : SV_TARGET6;
+};
+
 float4 main(VSOutput input) : SV_TARGET
 {
+	PSOutput output;
+
 	float offset = 1.0f;
 	float3 light = normalize(float3(1, -1, 1));
 	float3 brightness = dot(-light, normalize(input.normal.xyz));
 	//テクスチャマッピング
 	float4 texcolor = tex.Sample(smp, input.uv);
 
-	//return float4(brightness.x + offset, brightness.y + offset, brightness.z + offset, 1) * texcolor;
-
-	//float3 light = normalize(float3(1,-1,1)); // 右下奥　向きのライト
-	//float light_diffuse = saturate(dot(-light, input.normal));
-	//float3 shade_color;
-	//shade_color = m_ambient;
-	//shade_color += m_diffuse * light_diffuse;
-	//float4 texcolor = tex.Sample(smp, input.uv);
-	//return float4(texcolor.rgb, texcolor.a * m_alpha);
-	//return float4(1, 1, 1, 1);
-
 	//光沢度
 	const float shininess = 4.0f;
+
 	//環境反射光
 	float3 ambient = m_ambient;
 	//シェーディングによる色
@@ -50,18 +52,6 @@ float4 main(VSOutput input) : SV_TARGET
 			shadowWeight = 0.5f;
 		}
 	}
-
-	float2 uv = input.uv.xy;
-	float fogWeight = 0.0f;
-
-	float constant_fog_scale = 1.0f;
-	float CONSTANT_FOG_ATTENUATION_RATE = 0.1f;
-
-	const float3 sgColor = shadecolor.rgb;
-	const float3 fogColor = 0.8f;
-
-	fogWeight += constant_fog_scale * max(0.0f, 1.0f - exp(-CONSTANT_FOG_ATTENUATION_RATE * input.svpos.z));
-	float4 outputfogcolor = float4(lerp(sgColor, fogColor, fogWeight),1);
 
 	//平行光源
 	for (int i = 0; i < DIRLIGHT_NUM; i++) {
@@ -130,9 +120,58 @@ float4 main(VSOutput input) : SV_TARGET
 	p = p * p;
 	float4 toonCol = tex.Sample(smp, float2(2.0f, 0.0f));
 
+	float _ThresHoldA = 0.5f;
+	float _ThresHoldB = 0.6f;
+	float4 lightColor = float4(texcolor.rgb, 1);
+	float4 darkColor = float4(texcolor.rgb, 1) * 0.2;
+
+	float intensity = saturate(dot(normalize(input.normal), eyedir));
+
+	//トゥーン
+	float4 toon = smoothstep(_ThresHoldA, _ThresHoldB, intensity) * lightColor
+		+ (1 - smoothstep(_ThresHoldA, _ThresHoldB, intensity)) * darkColor;
+
+	//ネガポジ反転
+	float4 NegColor = float4(1 - texcolor.r, 1 - texcolor.g, 1 - texcolor.b, 1);
+
+	//モザイク
+	float4 density = 50;
+	float4 MozColor = tex.Sample(smp, floor(input.uv * density) / density);
+
+	//RGBシフト
+	float shift = 0.05;
+	float r = tex.Sample(smp, input.uv + float2(-shift, 0)).r;
+	float g = tex.Sample(smp, input.uv + float2(0, 0)).g;
+	float b = tex.Sample(smp, input.uv + float2(shift, 0)).b;
+	float4 ShifColor = float4(r, g, b, 1);
+
+	//ディゾルブ
+	float Dissolve = 0.9;
+	float4 DissoColor = tex.Sample(smp, input.uv);
+	DissoColor.a = step(DissoColor.r, Dissolve);
+
 	//シェーディングによる色で描画
+	output.target0 =
+		float4((shadecolor.xyz * texcolor.xyz * shadowWeight),
+			(shadecolor.w * texcolor.w));//通常
+	output.target1 =
+		float4((toon.xyz * texcolor.xyz * shadowWeight),
+			(toon.w * texcolor.w));//トゥーン
+	output.target2 =
+		float4((NegColor.xyz * shadowWeight),
+			NegColor.w);//ネガポジ
+	output.target3 =
+		float4((MozColor.xyz * shadowWeight),
+			MozColor.w);//モザイク
+	output.target4 =
+		float4((ShifColor.xyz * shadowWeight),
+			ShifColor.w);//RGBシフト
+	output.target5 =
+		float4((DissoColor.xyz * shadowWeight),
+			DissoColor.w);//ディゾルブ
+	return output.target3;
 	//return shadecolor * texcolor/* * toonCol*/;
 	//return outputfogcolor * texcolor/* * toonCol*/;
-	return float4((shadecolor.xyz * texcolor.xyz * shadowWeight),(shadecolor.w * texcolor.w)) /* * toonCol*/;
+	//return float4((shadecolor.xyz * texcolor.xyz * shadowWeight),(shadecolor.w * texcolor.w)) /* * toonCol*/;
 
 }

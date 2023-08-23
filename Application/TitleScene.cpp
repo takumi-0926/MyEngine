@@ -1,6 +1,7 @@
 #include "TitleScene.h"
 #include "PlayScene.h"
 #include "SceneManager.h"
+#include "2d/PostEffect.h"
 
 #include <future>
 #include <Singleton_Heap.h>
@@ -108,17 +109,9 @@ void TitleScene::Update()
 
 	keyFlag = false;
 
-	////フェードイン
-	//if (UIManager::GetInstance()->GetFade()->GetFadeIn()) {
-	//	UIManager::GetInstance()->GetFade()->FadeIn();
-	//	if (!UIManager::GetInstance()->GetFade()->GetFadeIn()) {
-	//		Wrapper::SetCamera(mainCamera);
-	//		UIManager::GetInstance()->GetFade()->SetFadeIn(false);
-	//		UIManager::GetInstance()->GetFade()->SetFadeOut(true);
-
-	//		load = true;
-	//	}
-	//}
+	if (Input::GetInstance()->Trigger(DIK_S)) {
+		PostEffect::shift = true;
+	}
 }
 
 void TitleScene::Draw()
