@@ -6,6 +6,11 @@ const int RTV_NUM = 7;
 class PostEffect :
     public Sprite
 {
+    struct constBuff_B1 {
+        unsigned int shift;
+        unsigned int mosaic;
+    };
+
 private:
     //テクスチャバッファ
     ComPtr<ID3D12Resource> texBuff[RTV_NUM];
@@ -31,6 +36,8 @@ private:
 
     //クリアカラー
     static const float clearColor[4];
+
+    ComPtr<ID3D12Resource> constbuffB1;
 
 public:
     /// <summary>
@@ -65,5 +72,10 @@ public:
     /// 
     /// </summary>
     void CreateGraphicsPipeline();
+
+public:
+    static int shift;
+    static int mosaic;
+
 };
 

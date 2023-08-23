@@ -135,7 +135,12 @@ void Framework::Update()
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
 
+	//if (Input::GetInstance()->Trigger(DIK_S)) {
+	//	PostEffect::mosaic = 1;
+	//}
+
 	Input::GetInstance()->Update();
+
 
 	sceneManager->Update();
 }

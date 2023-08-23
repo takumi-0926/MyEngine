@@ -11,6 +11,8 @@ const float PostEffect::clearColor[4] = { 0.5f,0.5f,0.5f,0.5f };
 
 //頂点数
 const int VertNum = 4;
+int PostEffect::shift = 0;
+int PostEffect::mosaic = 0;
 
 PostEffect::PostEffect()
 	:Sprite(
@@ -83,6 +85,19 @@ void PostEffect::Initialize(ID3D12DescriptorHeap* heap)
 		nullptr,
 		IID_PPV_ARGS(constBuff.ReleaseAndGetAddressOf()));
 	assert(SUCCEEDED(result));
+
+	// 定数バッファの生成
+	CD3DX12_HEAP_PROPERTIES properties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+	CD3DX12_RESOURCE_DESC desc = CD3DX12_RESOURCE_DESC::Buffer((sizeof(constBuff_B1) + 0xff) & ~0xff);
+	result = device->CreateCommittedResource(
+		&properties, 	// アップロード可能
+		D3D12_HEAP_FLAG_NONE,
+		&desc,
+		D3D12_RESOURCE_STATE_GENERIC_READ,
+		nullptr,
+		IID_PPV_ARGS(constbuffB1.ReleaseAndGetAddressOf()));
+	assert(SUCCEEDED(result));
+
 	//
 	//	////定数バッファにデータを転送
 	//	//ConstBufferData* constMap = nullptr;
@@ -258,6 +273,14 @@ void PostEffect::Draw(ID3D12GraphicsCommandList* cmdList, ID3D12DescriptorHeap* 
 	constMap->color = this->color;
 	constBuff->Unmap(0, nullptr);
 
+	// 定数バッファへデータ転送(OBJ)
+	constBuff_B1* constMap_ = nullptr;
+	result = constbuffB1->Map(0, nullptr, (void**)&constMap_);
+	if (FAILED(result)) { assert(0); }
+	constMap_->shift = shift;
+	constMap_->mosaic = mosaic;
+	constbuffB1->Unmap(0, nullptr);
+
 	// パイプラインステートの設定
 	cmdList->SetPipelineState(pipelineState.Get());
 	// ルートシグネチャの設定
@@ -274,17 +297,18 @@ void PostEffect::Draw(ID3D12GraphicsCommandList* cmdList, ID3D12DescriptorHeap* 
 	cmdList->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
 	// 定数バッファビューをセット
 	cmdList->SetGraphicsRootConstantBufferView(0, this->constBuff->GetGPUVirtualAddress());
+	cmdList->SetGraphicsRootConstantBufferView(1, this->constbuffB1->GetGPUVirtualAddress());
 	// シェーダリソースビューをセット
 	//cmdList->SetGraphicsRootDescriptorTable(1, CD3DX12_GPU_DESCRIPTOR_HANDLE(spritecommon._descHeap->GetGPUDescriptorHandleForHeapStart(), this->texNumber, descriptorHandleIncrementSize));
 	auto handle = heap->GetGPUDescriptorHandleForHeapStart();
 	handle.ptr += device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) * 4;
 
-	cmdList->SetGraphicsRootDescriptorTable(1, handle);
+	cmdList->SetGraphicsRootDescriptorTable(2, handle);
 
 	handle.ptr += device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
 	cmdList->SetGraphicsRootDescriptorTable(
-		2, handle);
+		3, handle);
 
 	// デスクリプタヒープをセット
 	cmdList->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
@@ -504,10 +528,11 @@ void PostEffect::CreateGraphicsPipeline()
 	descRangeSRV[1].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 1); // t1 レジスタ
 
 	// ルートパラメータ
-	CD3DX12_ROOT_PARAMETER rootparams[3] = {};
+	CD3DX12_ROOT_PARAMETER rootparams[4] = {};
 	rootparams[0].InitAsConstantBufferView(0, 0, D3D12_SHADER_VISIBILITY_ALL);
-	rootparams[1].InitAsDescriptorTable(1, &descRangeSRV[0], D3D12_SHADER_VISIBILITY_ALL);
-	rootparams[2].InitAsDescriptorTable(1, &descRangeSRV[1], D3D12_SHADER_VISIBILITY_ALL);
+	rootparams[1].InitAsConstantBufferView(1, 0, D3D12_SHADER_VISIBILITY_ALL);
+	rootparams[2].InitAsDescriptorTable(1, &descRangeSRV[0], D3D12_SHADER_VISIBILITY_ALL);
+	rootparams[3].InitAsDescriptorTable(1, &descRangeSRV[1], D3D12_SHADER_VISIBILITY_ALL);
 
 	// スタティックサンプラー
 	CD3DX12_STATIC_SAMPLER_DESC samplerDesc = CD3DX12_STATIC_SAMPLER_DESC(0, D3D12_FILTER_MIN_MAG_MIP_POINT); // s0 レジスタ
