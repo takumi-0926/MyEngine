@@ -161,8 +161,8 @@ float4 main(VSOutput input) : SV_TARGET
 		float4((NegColor.xyz * shadowWeight),
 			NegColor.w);//ネガポジ
 	output.target3 =
-		float4((MozColor.xyz * shadowWeight),
-			MozColor.w);//モザイク
+		float4((shadecolor.xyz * MozColor.xyz * shadowWeight),
+			shadecolor.w * MozColor.w);//モザイク
 	output.target4 =
 		float4((ShifColor.xyz * shadowWeight),
 			ShifColor.w);//RGBシフト

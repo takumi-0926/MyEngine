@@ -200,9 +200,9 @@ void Player::Attack()
 
 	//1•bŠÔæs”»’è
 	if (atCombo) {
-		freamCount += 1.f / 60.f;
+		freamCount += fps;
 
-		if (freamCount >= 0.5f) {
+		if (freamCount >= 0.3f) {
 			combo = attackNum;
 			freamCount = 0.f;
 			atCombo = false;
